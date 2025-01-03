@@ -2,8 +2,6 @@
 
 #include "Event.h"
 
-#include <sstream>
-
 namespace Strype {
 
 	class WindowResizeEvent : public Event

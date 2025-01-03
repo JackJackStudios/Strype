@@ -1,7 +1,5 @@
 #pragma once
-
-#include <string>
-#include <functional>
+#include "stypch.h"
 
 #define BIT(x) (1 << x) 
 

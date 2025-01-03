@@ -1,3 +1,4 @@
+#include "stypch.h"
 #include "Strype/Core/Log.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>

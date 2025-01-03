@@ -1,4 +1,4 @@
-#include "Strype/Strype.h"
+#include "Strype.h"
 #include "Strype/Core/EntryPoint.h"
 
 class Sandbox : public Strype::Application

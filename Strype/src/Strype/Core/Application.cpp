@@ -1,3 +1,4 @@
+#include "stypch.h"
 #include "Application.h"
 
 namespace Strype {
