@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Strype/Core/PlatformDetection.h"
+
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -12,3 +14,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "Strype/Core/Log.h"
+
+#include "Strype/Core/Assert.h"
