@@ -5,6 +5,8 @@
 #include "Strype/Events/MouseEvent.h"
 #include "Strype/Events/KeyEvent.h"
 
+#include <glad/glad.h>
+
 namespace Strype {
 
 	static uint8_t s_GLFWWindowCount = 0;
@@ -33,6 +35,8 @@ namespace Strype {
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		++s_GLFWWindowCount;
 		glfwMakeContextCurrent(m_Window);
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		STY_CORE_ASSERT(status, "Failed to initialize Glad!");
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
 
