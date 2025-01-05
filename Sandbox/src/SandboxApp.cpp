@@ -9,10 +9,15 @@ public:
 	{
 	}
 
-	void OnUpdate() override
+	void OnUpdate(Strype::Timestep) override
 	{
-		if (Strype::Input::IsKeyPressed(Strype::Key::Tab))
-			STY_TRACE("Tab key is pressed (poll)!");
+	}
+
+	virtual void OnImGuiRender() override
+	{
+		ImGui::Begin("Test");
+		ImGui::Text("Hello World");
+		ImGui::End();
 	}
 
 	void OnEvent(Strype::Event& event) override
@@ -26,13 +31,13 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
-		PushOverlay(new Strype::ImGuiLayer());
 	}
 
 	~Sandbox()
 	{
 
 	}
+
 };
 
 Strype::Application* Strype::CreateApplication()

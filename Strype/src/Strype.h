@@ -9,3 +9,5 @@
 #include "Strype/Core/MouseCodes.h"
 
 #include "Strype/ImGui/ImGuiLayer.h"
+
+#include "imgui/imgui.h"

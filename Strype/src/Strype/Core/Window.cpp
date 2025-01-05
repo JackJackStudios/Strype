@@ -7,10 +7,10 @@
 
 namespace Strype
 {
-	Ref<Window> Window::Create(const WindowProps& props)
+	Scope<Window> Window::Create(const WindowProps& props)
 	{
 #ifdef STY_PLATFORM_WINDOWS
-		return CreateRef<GlfwWindow>(props);
+		return CreateScope<GlfwWindow>(props);
 #else
 		STY_CORE_ASSERT(false, "Unknown platform!");
 		return nullptr;

@@ -41,7 +41,7 @@ namespace Strype {
 
 		virtual void* GetNativeWindow() const = 0;
 
-		static Ref<Window> Create(const WindowProps& props = WindowProps());
+		static Scope<Window> Create(const WindowProps& props = WindowProps());
 	};
 
 }

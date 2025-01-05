@@ -2,6 +2,7 @@
 
 #include "Strype/Core/Base.h"
 #include "Strype/Events/Event.h"
+#include "Strype/Core/Timestep.h"
 
 namespace Strype {
 

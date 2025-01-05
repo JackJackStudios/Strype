@@ -14,6 +14,9 @@ namespace Strype {
 
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
+
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
@@ -63,6 +66,13 @@ namespace Strype {
 
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate(timestep);
+
+			m_ImGuiLayer->Begin();
+			{
+				for (Layer* layer : m_LayerStack)
+					layer->OnImGuiRender();
+			}
+			m_ImGuiLayer->End();
 
 			m_Window->OnUpdate();
 		}
