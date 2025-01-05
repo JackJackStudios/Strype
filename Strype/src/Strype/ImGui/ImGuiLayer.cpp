@@ -32,7 +32,7 @@ namespace Strype {
 
 		Application::Get().GetWindow();
 
-		ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), true);
+		ImGui_ImplGlfw_InitForOther((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow(), true);
 		ImGui_ImplOpenGL3_Init("#version 330");
 	}
 
