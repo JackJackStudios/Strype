@@ -1,11 +1,13 @@
 #include "stypch.h"
 
-#include "Base.h"
+#include "Strype/Core/Base.h"
 
-#include "Window.h"
+#include "Strype/Core/Window.h"
 #include "Strype/Core/LayerStack.h"
 #include "Strype/Events/Event.h"
 #include "Strype/Events/ApplicationEvent.h"
+
+#include "Strype/Core/Timestep.h"
 
 namespace Strype {
 
@@ -32,6 +34,7 @@ namespace Strype {
 
 		Ref<Window> m_Window;
 		bool m_Running = true;
+		float m_LastFrameTime = 0.0f;
 		LayerStack m_LayerStack;
 	private:
 		static Application* s_Instance;
