@@ -6,7 +6,7 @@ class Sandbox : public Strype::Application
 public:
 	Sandbox()
 	{
-
+		PushOverlay(new Strype::ImGuiLayer());
 	}
 
 	~Sandbox()
