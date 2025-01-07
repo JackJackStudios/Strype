@@ -1,6 +1,7 @@
 #include "stypch.h"
 #include "Application.h"
 
+//TEMP
 #include <GLFW/glfw3.h>
 
 namespace Strype {
@@ -40,11 +41,11 @@ namespace Strype {
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(STY_BIND_EVENT_FN(Application::OnWindowClose));
 
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
+		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
 		{
-			(*--it)->OnEvent(e);
 			if (e.Handled)
 				break;
+			(*it)->OnEvent(e);
 		}
 	}
 
