@@ -11,6 +11,15 @@ namespace Strype {
 		s_RenderAPI->Init(window);
 	}
 
+	void Renderer::Shutdown()
+	{
+	}
+
+	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+	{
+		s_RenderAPI->SetViewport(0, 0, width, height);
+	}
+
 	void Renderer::Clear()
 	{
 		s_RenderAPI->Clear();
