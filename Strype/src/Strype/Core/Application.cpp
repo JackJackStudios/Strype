@@ -1,6 +1,8 @@
 #include "stypch.h"
 #include "Application.h"
 
+#include "Strype/Renderer/Renderer.h"
+
 //TEMP
 #include <GLFW/glfw3.h>
 
@@ -62,8 +64,8 @@ namespace Strype {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			glClearColor(1, 0, 1, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			Strype::Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+			Strype::Renderer::Clear();
 
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate(timestep);
@@ -74,7 +76,7 @@ namespace Strype {
 					layer->OnImGuiRender();
 			}
 			m_ImGuiLayer->End();
-
+			
 			m_Window->OnUpdate();
 		}
 	}

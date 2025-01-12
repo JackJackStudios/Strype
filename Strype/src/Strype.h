@@ -10,4 +10,13 @@
 
 #include "Strype/ImGui/ImGuiLayer.h"
 
+#include "Strype/Renderer/Buffer.h"
+#include "Strype/Renderer/Renderer.h"
+#include "Strype/Renderer/Shader.h"
+#include "Strype/Renderer/VertexArray.h"
+
+#include "Strype/Renderer/CameraController.h"
+
 #include "imgui/imgui.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"

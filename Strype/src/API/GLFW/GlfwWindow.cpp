@@ -7,8 +7,6 @@
 
 #include "Strype/Renderer/Renderer.h"
 
-#include <glad/glad.h>
-
 namespace Strype {
 
 	static uint8_t s_GLFWWindowCount = 0;
