@@ -16,6 +16,8 @@
 #include "Strype/Renderer/Texture.h"
 #include "Strype/Renderer/VertexArray.h"
 
+#include "Strype/Core/Audio.h"
+
 #include "Strype/Renderer/CameraController.h"
 
 #include "imgui/imgui.h"

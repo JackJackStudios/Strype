@@ -17,6 +17,7 @@ namespace Strype {
 
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
+		Audio::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
@@ -25,6 +26,7 @@ namespace Strype {
 	Application::~Application()
 	{
 		Renderer::Shutdown();
+		Audio::Shutdown();
 	}
 
 	void Application::PushLayer(Layer* layer)
