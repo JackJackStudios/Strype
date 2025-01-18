@@ -21,6 +21,7 @@ namespace Strype {
 		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		bool IsVSync() const override;
+		void SetVisable(bool enabled) override;
 
 		virtual void* GetNativeWindow() const { return m_Window; }
 	private:

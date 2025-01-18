@@ -7,6 +7,10 @@ public:
 	ExampleLayer()
 		: Layer("Example"), m_CameraController(1280.0f / 720.0f)
 	{
+	}
+
+	void OnAttach()
+	{
 		m_SquareVA = Strype::VertexArray::Create();
 
 		float squareVertices[5 * 4] = {

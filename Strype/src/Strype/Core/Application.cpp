@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Strype/Renderer/Renderer.h"
+#include "Strype/Core/Audio.h"
 
 //TEMP
 #include <GLFW/glfw3.h>
@@ -17,7 +18,9 @@ namespace Strype {
 
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
+		
 		Audio::Init();
+		m_Window->SetVisable(true);
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);

@@ -32,6 +32,7 @@ namespace Strype {
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 
+		glfwWindowHint(GLFW_VISIBLE, false);
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		++s_GLFWWindowCount;
 
@@ -161,6 +162,14 @@ namespace Strype {
 	bool GlfwWindow::IsVSync() const
 	{
 		return m_Data.VSync;
+	}
+
+	void GlfwWindow::SetVisable(bool enabled)
+	{
+		if (enabled)
+			glfwShowWindow(m_Window);
+		else
+			glfwHideWindow(m_Window);
 	}
 
 }
