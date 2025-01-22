@@ -78,7 +78,8 @@ private:
 class Sandbox : public Strype::Application
 {
 public:
-	Sandbox()
+	Sandbox(const Strype::AppConfig& config)
+		: Strype::Application(config)
 	{
 		PushLayer(new ExampleLayer());
 	}
@@ -92,5 +93,8 @@ public:
 
 Strype::Application* Strype::CreateApplication()
 {
-	return new Sandbox();
+	AppConfig config;
+	config.DockspaceEnabled = true;
+
+	return new Sandbox(config);
 }

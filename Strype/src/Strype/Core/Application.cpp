@@ -11,7 +11,8 @@ namespace Strype {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application()
+	Application::Application(const AppConfig& config)
+		: m_Config(config)
 	{
 		STY_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
@@ -20,14 +21,17 @@ namespace Strype {
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
 		
 		Audio::Init();
-		m_Window->SetVisable(true);
 
-		m_ImGuiLayer = new ImGuiLayer();
+		m_ImGuiLayer = new ImGuiLayer(m_Config.DockspaceEnabled);
 		PushOverlay(m_ImGuiLayer);
+
+		m_Window->SetVisable(true);
 	}
 
 	Application::~Application()
 	{
+		m_Window->SetVisable(false);
+
 		Renderer::Shutdown();
 		Audio::Shutdown();
 	}

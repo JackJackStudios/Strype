@@ -11,7 +11,7 @@ namespace Strype {
 	class ImGuiLayer : public Layer
 	{
 	public:
-		ImGuiLayer();
+		ImGuiLayer(bool dockspace = false);
 		~ImGuiLayer() = default;
 
 		virtual void OnAttach() override;
@@ -24,6 +24,7 @@ namespace Strype {
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 	private:
 		bool m_BlockEvents = true;
+		bool m_Dockspace;
 	};
 
 }

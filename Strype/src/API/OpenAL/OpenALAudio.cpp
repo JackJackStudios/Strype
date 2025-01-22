@@ -44,8 +44,6 @@ namespace Strype {
 		alcDestroyContext(s_Data.m_Context);
 
 		alcCloseDevice(s_Data.m_Device);
-
-		STY_CORE_INFO("Shutting down OpenAL");
 	}
 
 	void Audio::SetListenerPos(glm::vec2 pos)
