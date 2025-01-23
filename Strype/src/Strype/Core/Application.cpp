@@ -17,6 +17,9 @@ namespace Strype {
 		STY_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
+		if (!m_Config.WorkingDir.empty())
+			std::filesystem::current_path(m_Config.WorkingDir);
+
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
 		

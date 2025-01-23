@@ -3,6 +3,7 @@
 #include "Strype/Renderer/RenderAPI.h"
 #include "Strype/Renderer/Shader.h"
 #include "Strype/Renderer/Camera.h"
+#include "Strype/Renderer/Texture.h"
 
 namespace Strype {
 
