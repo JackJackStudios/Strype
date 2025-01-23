@@ -94,7 +94,7 @@ public:
 Strype::Application* Strype::CreateApplication()
 {
 	AppConfig config;
-	config.DockspaceEnabled = true;
+	config.DockspaceEnabled = false;
 
 	return new Sandbox(config);
 }
