@@ -25,7 +25,7 @@ namespace Strype {
 		shader->SetMat4("u_Transform", transform);
 
 		vertexArray->Bind();
-		s_RenderAPI->DrawIndexed(vertexArray);
+		s_RenderAPI->DrawIndexed(vertexArray, 0);
 	}
 
 }
