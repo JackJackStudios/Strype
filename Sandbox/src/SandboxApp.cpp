@@ -11,31 +11,6 @@ public:
 
 	void OnAttach()
 	{
-		m_SquareVA = Strype::VertexArray::Create();
-
-		float squareVertices[5 * 4] = {
-			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
-		};
-
-		Strype::Ref<Strype::VertexBuffer> squareVB = Strype::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
-		squareVB->SetLayout({
-			{ Strype::ShaderDataType::Float3, "a_Position" },
-			{ Strype::ShaderDataType::Float2, "a_TexCoord" }	
-		});
-		m_SquareVA->AddVertexBuffer(squareVB); 
-
-		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		Strype::Ref<Strype::IndexBuffer> squareIB = Strype::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
-		m_SquareVA->SetIndexBuffer(squareIB);
-
-		m_Shader = Strype::Shader::Create("assets/shaders/BaseShader.glsl");
-		m_Texture = Strype::Texture::Create("assets/textures/Checkerboard.png");
-
-		m_Shader->Bind();
-		m_Shader->SetInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Strype::Timestep ts) override
@@ -45,11 +20,6 @@ public:
 
 		Strype::Renderer::BeginScene(m_CameraController.GetCamera());
 		{
-			m_Shader->Bind();
-			m_Shader->SetFloat3("u_Color", m_SquareColor);
-
-			m_Texture->Bind();
-			Strype::Renderer::Submit(m_Shader, m_SquareVA);
 		}
 		Strype::Renderer::EndScene();
 	}

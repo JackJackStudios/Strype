@@ -4,7 +4,6 @@
 namespace Strype {
 
 	Scope<RenderAPI> Renderer::s_RenderAPI = RenderAPI::Create();
-	Scope<Renderer::SceneData> Renderer::s_SceneData = CreateScope<Renderer::SceneData>();
 
 	struct QuadVertex
 	{

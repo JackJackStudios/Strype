@@ -17,15 +17,5 @@ namespace Strype {
 	{
 		s_RenderAPI->SetClearColor(color);
 	}
-	
-	void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
-	{
-		shader->Bind();
-		shader->SetMat4("u_ViewProjection", s_SceneData->Matrix);
-		shader->SetMat4("u_Transform", transform);
-
-		vertexArray->Bind();
-		s_RenderAPI->DrawIndexed(vertexArray, 0);
-	}
 
 }
