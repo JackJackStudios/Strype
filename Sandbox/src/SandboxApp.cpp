@@ -19,16 +19,19 @@ public:
 		m_CameraController.OnUpdate(ts);
 
 		Strype::Renderer::BeginScene(m_CameraController.GetCamera());
+		for (float y = -5.0f; y < 5.0f; y += 0.5f)
 		{
+			for (float x = -5.0f; x < 5.0f; x += 0.5f)
+			{
+				glm::vec4 colour = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
+				Strype::Renderer::DrawQuad({ x, y, 0.0f }, { 0.45f, 0.45f }, colour);
+			}
 		}
 		Strype::Renderer::EndScene();
 	}
 
 	virtual void OnImGuiRender() override
 	{
-		ImGui::Begin("Settings");
-		ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
-		ImGui::End();
 	}
 
 	void OnEvent(Strype::Event& e) override
@@ -37,12 +40,9 @@ public:
 	}
 
 private:
-	Strype::Ref<Strype::Shader> m_Shader;
-	Strype::Ref<Strype::VertexArray> m_SquareVA;
 	Strype::Ref<Strype::Texture> m_Texture;
 
 	Strype::CameraController m_CameraController;
-	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
 
 class Sandbox : public Strype::Application
