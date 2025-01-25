@@ -11,7 +11,7 @@
 namespace Strype {
 
 	ImGuiLayer::ImGuiLayer(bool dockspace)
-		: Layer("ImGuiLayer"), m_Dockspace(dockspace)
+		: m_Dockspace(dockspace)
 	{
 	}
 
