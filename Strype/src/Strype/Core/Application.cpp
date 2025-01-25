@@ -78,7 +78,7 @@ namespace Strype {
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			Strype::Renderer::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+			Strype::Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Strype::Renderer::Clear();
 
 			for (Layer* layer : m_LayerStack)

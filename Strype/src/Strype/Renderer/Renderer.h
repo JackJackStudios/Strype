@@ -14,7 +14,7 @@ namespace Strype {
 		static void Shutdown();
 		static void OnWindowResize(uint32_t width, uint32_t height);
 
-		static void SetClearColor(const glm::vec4& color);
+		static void SetClearColour(const glm::vec4& colour);
 		static void Clear();
 
 		static void BeginScene(Camera& camera);

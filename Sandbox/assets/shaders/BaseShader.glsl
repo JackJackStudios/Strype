@@ -22,6 +22,8 @@ void main()
 			
 layout(location = 0) out vec4 color;
 
+layout(location = 0) out vec4 colour;
+in vec4 v_Colour;
 in vec2 v_TexCoord;
 
 uniform vec3 u_Color;

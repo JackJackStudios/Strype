@@ -13,9 +13,9 @@ namespace Strype {
 		s_RenderAPI->Clear();
 	}
 
-	void Renderer::SetClearColor(const glm::vec4& color)
+	void Renderer::SetClearColour(const glm::vec4& colour)
 	{
-		s_RenderAPI->SetClearColor(color);
+		s_RenderAPI->SetClearColour(colour);
 	}
 
 }

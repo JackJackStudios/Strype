@@ -26,9 +26,9 @@ namespace Strype {
 		glViewport(x, y, width, height);
 	}
 
-	void OpenGLRenderAPI::SetClearColor(const glm::vec4& color)
+	void OpenGLRenderAPI::SetClearColour(const glm::vec4& colour)
 	{
-		glClearColor(color.r, color.g, color.b, color.a);
+		glClearColor(colour.r, colour.g, colour.b, colour.a);
 	}
 
 	void OpenGLRenderAPI::Clear()
