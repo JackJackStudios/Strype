@@ -12,7 +12,7 @@ namespace Strype {
 		glm::vec3 Position;
 		glm::vec4 Colour;
 		glm::vec2 TexCoord;
-		int TexIndex;
+		float TexIndex;
 	};
 
 	struct RendererData
@@ -50,7 +50,7 @@ namespace Strype {
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Colour" },
 			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Int, "a_TexIndex" },
+			{ ShaderDataType::Float, "a_TexIndex" },
 		});
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
@@ -87,7 +87,7 @@ namespace Strype {
 		s_Data.TextureShader = Shader::Create("assets/shaders/BaseShader.glsl");
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
-
+		
 		// Set all texture slots to 0
 		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 

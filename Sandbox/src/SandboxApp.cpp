@@ -11,6 +11,7 @@ public:
 
 	void OnAttach()
 	{
+		m_Texture = Strype::Texture::Create("assets/textures/Checkerboard.png");
 	}
 
 	void OnUpdate(Strype::Timestep ts) override
@@ -19,6 +20,9 @@ public:
 		m_CameraController.OnUpdate(ts);
 
 		Strype::Renderer::BeginScene(m_CameraController.GetCamera());
+
+		Strype::Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { 20.0f, 20.0f }, m_Texture);
+
 		for (float y = -5.0f; y < 5.0f; y += 0.5f)
 		{
 			for (float x = -5.0f; x < 5.0f; x += 0.5f)
@@ -27,6 +31,7 @@ public:
 				Strype::Renderer::DrawQuad({ x, y, 0.0f }, { 0.45f, 0.45f }, colour);
 			}
 		}
+		
 		Strype::Renderer::EndScene();
 	}
 
