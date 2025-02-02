@@ -9,7 +9,7 @@
 
 #include "Strype/Core/Timestep.h"
 
-#include "Strype/ImGui/ImGuiLayer.h"
+#include "API/ImGui/ImGuiLayer.h"
 
 int main(int argc, char** argv);
 

@@ -12,16 +12,16 @@ namespace Strype {
 		GlfwWindow(const WindowProps& props);
 		virtual ~GlfwWindow();
 
-		void OnUpdate() override;
-
-		inline unsigned int GetWidth() const override { return m_Data.Width; }
-		inline unsigned int GetHeight() const override { return m_Data.Height; }
-
-		// Window attributes
-		inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
-		void SetVSync(bool enabled) override;
-		bool IsVSync() const override;
-		void SetVisable(bool enabled) override;
+		virtual void OnUpdate() override;
+		
+		virtual inline unsigned int GetWidth() const override { return m_Data.Width; }
+		virtual inline unsigned int GetHeight() const override { return m_Data.Height; }
+		
+		virtual // Window attributes
+		virtual inline void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+		virtual void SetVSync(bool enabled) override;
+		virtual bool IsVSync() const override;
+		virtual void SetVisable(bool enabled) override;
 
 		virtual void* GetNativeWindow() const { return m_Window; }
 	private:

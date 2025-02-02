@@ -1,26 +1,19 @@
 #include "stypch.h"
-
 #include "API/OpenAL/OpenALSound.h"
 
 namespace Strype {
 
 	OpenALSound::OpenALSound(const std::string& filepath)
 	{
-		ALenum err, format;
-		ALuint buffer;
-		SNDFILE* sndfile;
-		SF_INFO sfinfo;
-		short* membuf;
-		sf_count_t num_frames;
-		ALsizei num_bytes;
 
-		sndfile = sf_open(filepath.c_str(), SFM_READ, &sfinfo);
+		SF_INFO sfinfo;
+		SNDFILE* sndfile = sf_open(filepath.c_str(), SFM_READ, &sfinfo);
 
 		STY_CORE_ASSERT(sndfile, "Could not open sound file");
 		STY_CORE_ASSERT((sfinfo.frames >= 1 && sfinfo.frames <= (sf_count_t)(INT_MAX / sizeof(short)) / sfinfo.channels), "Bad sample count in sound file");
 		STY_CORE_ASSERT(sfinfo.channels <= 4, "Unsupported channel count in sound file");
 
-		format = AL_NONE;
+		ALenum format = AL_NONE;
 		switch (sfinfo.channels)
 		{
 		case 1:
@@ -40,14 +33,14 @@ namespace Strype {
 			break;
 		}
 
-		membuf = static_cast<short*>(malloc((size_t)(sfinfo.frames * sfinfo.channels) * sizeof(short)));
+		short* membuf = static_cast<short*>(malloc((size_t)(sfinfo.frames * sfinfo.channels) * sizeof(short)));
 
-		num_frames = sf_readf_short(sndfile, membuf, sfinfo.frames);
-		num_bytes = (ALsizei)(num_frames * sfinfo.channels) * (ALsizei)sizeof(short);
+		sf_count_t num_frames = sf_readf_short(sndfile, membuf, sfinfo.frames);
+		ALsizei num_bytes = (ALsizei)(num_frames * sfinfo.channels) * (ALsizei)sizeof(short);
 
 		STY_CORE_ASSERT(num_frames >= 1, "Cannot read samples in sound file");
 
-		buffer = 0;
+		ALuint buffer = 0;
 		alGenBuffers(1, &buffer);
 		alBufferData(buffer, format, membuf, num_bytes, sfinfo.samplerate);
 

@@ -28,7 +28,7 @@ namespace Strype {
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour);
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
 
-		static RenderAPI::API GetAPI() { return RenderAPI::GetAPI(); }
+		static RenderAPI::API GetAPI() { return s_RenderAPI->GetAPI(); }
 	private:
 		static Scope<RenderAPI> s_RenderAPI;
 	private:
