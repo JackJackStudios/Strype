@@ -7,34 +7,23 @@ namespace Strype {
 	{
 	public:
 		ExampleLayer()
-			: m_CameraController(1280.0f / 720.0f)
 		{
 		}
 
 		void OnAttach()
 		{
+			m_Room = CreateRef<Room>();
+
 			m_Texture = Texture::Create("assets/textures/Checkerboard.png");
+
+			Object obj = m_Room->CreateObject();
+			obj.AddComponent<Transform>();
+			obj.AddComponent<SpriteRenderer>(m_Texture);
 		}
 
 		void OnUpdate(Timestep ts) override
 		{
-			// Update
-			m_CameraController.OnUpdate(ts);
-
-			Renderer::BeginScene(m_CameraController.GetCamera());
-
-			Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { 20.0f, 20.0f }, m_Texture);
-
-			for (float y = -5.0f; y < 5.0f; y += 0.5f)
-			{
-				for (float x = -5.0f; x < 5.0f; x += 0.5f)
-				{
-					glm::vec4 colour = { (x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.7f };
-					Renderer::DrawQuad({ x, y, 0.0f }, { 0.45f, 0.45f }, colour);
-				}
-			}
-
-			Renderer::EndScene();
+			m_Room->OnUpdate(ts);
 		}
 
 		virtual void OnImGuiRender() override
@@ -43,13 +32,13 @@ namespace Strype {
 
 		void OnEvent(Event& e) override
 		{
-			m_CameraController.OnEvent(e);
+			m_Room->OnEvent(e);
 		}
 
 	private:
 		Ref<Texture> m_Texture;
 
-		CameraController m_CameraController;
+		Ref<Room> m_Room;
 	};
 
 	class Sandbox : public Application

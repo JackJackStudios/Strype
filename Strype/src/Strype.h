@@ -17,6 +17,10 @@
 #include "Strype/Renderer/VertexArray.h"
 #include "Strype/Renderer/CameraController.h"
 
+#include "Strype/Room/Room.h"
+#include "Strype/Room/Object.h"
+#include "Strype/Room/Components.h"
+
 #include "Strype/Core/Audio.h"
 
 #include <imgui/imgui.h>
