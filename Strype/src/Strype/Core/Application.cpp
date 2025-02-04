@@ -35,6 +35,12 @@ namespace Strype {
 	{
 		m_Window->SetVisable(false);
 
+		for (Layer* layer : m_LayerStack)
+		{
+			layer->OnDetach();
+			delete layer;
+		}
+		
 		Renderer::Shutdown();
 		Audio::Shutdown();
 	}
