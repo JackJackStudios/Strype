@@ -93,7 +93,7 @@ namespace Strype {
 
 	bool Input::IsKeyOn(const KeyCode key)
 	{
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		GLFWwindow* window = Application::Get().GetWindow().GetNativeWindow();
 		int state = glfwGetKey(window, static_cast<int32_t>(key));
 		return state == GLFW_PRESS;
 	}
@@ -115,7 +115,7 @@ namespace Strype {
 
 	bool Input::IsMouseButtonOn(const MouseCode button)
 	{
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		GLFWwindow* window = Application::Get().GetWindow().GetNativeWindow();
 		int state = glfwGetMouseButton(window, static_cast<int32_t>(button));
 		return state == GLFW_PRESS;
 	}
@@ -137,7 +137,7 @@ namespace Strype {
 
 	glm::vec2 Input::GetMousePosition()
 	{
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		GLFWwindow* window = Application::Get().GetWindow().GetNativeWindow();
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 

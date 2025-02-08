@@ -14,11 +14,13 @@ namespace Strype {
 		std::string Title;
 		unsigned int Width;
 		unsigned int Height;
+		bool VSync;
 
 		WindowProps(const std::string& title = "Strype Engine",
 			unsigned int width = 1280,
-			unsigned int height = 720)
-			: Title(title), Width(width), Height(height)
+			unsigned int height = 720,
+			bool vsync = true)
+			: Title(title), Width(width), Height(height), VSync(vsync)
 		{
 		}
 	};
@@ -43,7 +45,7 @@ namespace Strype {
 		bool IsVSync() const;
 		void SetVisable(bool enabled);
 
-		void* GetNativeWindow() const { return m_Window; }
+		GLFWwindow* GetNativeWindow() const { return m_Window; }
 
 		static inline Scope<Window> Create(const WindowProps& props = WindowProps()) { return CreateScope<Window>(props); }
 	private:
