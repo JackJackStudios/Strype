@@ -137,11 +137,4 @@ namespace Strype {
 		Menu = 348
 	};
 
-	enum class KeyState
-	{
-		None = -1,
-		Pressed,
-		Held,
-		Released,
-	};
 }

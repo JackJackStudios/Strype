@@ -8,11 +8,26 @@
 
 namespace Strype {
 
+	enum class InputState
+	{
+		None = -1,
+		Pressed,
+		Held,
+		Released,
+	};
+
 	struct KeyData
 	{
 		KeyCode Key;
-		KeyState State = KeyState::None;
-		KeyState OldState = KeyState::None;
+		InputState State = InputState::None;
+		InputState OldState = InputState::None;
+	};
+
+	struct MouseData
+	{
+		MouseCode Button;
+		InputState State = InputState::None;
+		InputState OldState = InputState::None;
 	};
 
 	class Input
@@ -28,15 +43,23 @@ namespace Strype {
 		static bool IsKeyHeld(KeyCode key);
 		static bool IsKeyReleased(KeyCode key);
 
-		static bool IsMouseButtonPressed(MouseCode button); //GLFW
+		static bool IsMouseButtonOn(MouseCode button); //GLFW
+
+		static bool IsMouseButtonPressed(MouseCode button);
+		static bool IsMouseButtonHeld(MouseCode button);
+		static bool IsMouseButtonReleased(MouseCode button);
+
 		static glm::vec2 GetMousePosition(); //GLFW
 		static float GetMouseX(); //GLFW
 		static float GetMouseY(); //GLFW
 
-		static void UpdateKeyState(KeyCode key, KeyState newState);
+		static void UpdateKeyState(KeyCode key, InputState newState);
+		static void UpdateMouseState(MouseCode key, InputState newState);
+
 		static inline void SetEventCallback(const EventCallbackFn& callback) { s_EventCallback = callback; };
 	private:
 		inline static std::unordered_map<KeyCode, KeyData> s_KeyStates;
+		inline static std::unordered_map<MouseCode, MouseData> s_MouseStates;
 		inline static EventCallbackFn s_EventCallback;
 	};
 }

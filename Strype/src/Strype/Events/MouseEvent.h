@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Event.h"
+#include "Strype/Core/MouseCodes.h"
 
 namespace Strype {
 
@@ -51,42 +52,59 @@ namespace Strype {
 	class MouseButtonEvent : public Event
 	{
 	public:
-		inline int GetMouseButton() const { return m_Button; }
+		inline MouseCode GetMouseButton() const { return m_Button; }
 
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	protected:
-		MouseButtonEvent(int button)
+		MouseButtonEvent(MouseCode button)
 			: m_Button(button) {}
 
-		int m_Button;
+		MouseCode m_Button;
 	};
 
 	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonPressedEvent(int button)
+		MouseButtonPressedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonPressedEvent: " << m_Button;
+			ss << "MouseButtonPressedEvent: " << (uint16_t)m_Button;
 			return ss.str();
 		}
 
 		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
+	class MouseButtonHeldEvent : public MouseButtonEvent
+	{
+	public:
+		MouseButtonHeldEvent(MouseCode button)
+			: MouseButtonEvent(button) {
+		}
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "MouseButtonPressedEvent: " << (uint16_t)m_Button;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(MouseButtonHeld)
+	};
+
 	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseButtonReleasedEvent(int button)
+		MouseButtonReleasedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
 		std::string ToString() const override
 		{
 			std::stringstream ss;
-			ss << "MouseButtonReleasedEvent: " << m_Button;
+			ss << "MouseButtonReleasedEvent: " << (uint16_t)m_Button;
 			return ss.str();
 		}
 

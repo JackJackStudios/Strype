@@ -29,8 +29,6 @@ namespace Strype {
 
 		m_ImGuiLayer = new ImGuiLayer(m_Config.DockspaceEnabled);
 		PushOverlay(m_ImGuiLayer);
-
-		m_Window->SetVisable(true);
 	}
 
 	Application::~Application()
@@ -74,6 +72,8 @@ namespace Strype {
 
 	void Application::Run()
 	{
+		m_Window->SetVisable(true);
+
 		while (m_Running)
 		{
 			float time = (float)glfwGetTime();

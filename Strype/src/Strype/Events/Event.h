@@ -11,7 +11,7 @@ namespace Strype {
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
 		AppTick, AppUpdate, AppRender,
 		KeyPressed, KeyReleased, KeyHeld,
-		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
+		MouseButtonPressed, MouseButtonHeld, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
 
 	enum EventCategory

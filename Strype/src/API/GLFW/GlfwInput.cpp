@@ -13,7 +13,7 @@ namespace Strype {
 		return state == GLFW_PRESS;
 	}
 
-	bool Input::IsMouseButtonPressed(const MouseCode button)
+	bool Input::IsMouseButtonOn(const MouseCode button)
 	{
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		int state = glfwGetMouseButton(window, static_cast<int32_t>(button));
