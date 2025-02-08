@@ -13,23 +13,23 @@ namespace Strype {
 
 	void CameraController::OnUpdate(Timestep ts)
 	{
-		if (Input::IsKeyPressed(Key::A))
+		if (Input::IsKeyHeld(KeyCode::A))
 		{
 			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
-		else if (Input::IsKeyPressed(Key::D))
+		else if (Input::IsKeyHeld(KeyCode::D))
 		{
 			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
 
-		if (Input::IsKeyPressed(Key::W))
+		if (Input::IsKeyHeld(KeyCode::W))
 		{
 			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
-		else if (Input::IsKeyPressed(Key::S))
+		else if (Input::IsKeyHeld(KeyCode::S))
 		{
 			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
@@ -37,9 +37,9 @@ namespace Strype {
 
 		if (m_Rotation)
 		{
-			if (Input::IsKeyPressed(Key::Q))
+			if (Input::IsKeyHeld(KeyCode::Q))
 				m_CameraRotation += m_CameraRotationSpeed * ts;
-			if (Input::IsKeyPressed(Key::E))
+			if (Input::IsKeyHeld(KeyCode::E))
 				m_CameraRotation -= m_CameraRotationSpeed * ts;
 
 			if (m_CameraRotation > 180.0f)

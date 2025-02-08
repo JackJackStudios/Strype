@@ -24,6 +24,15 @@ namespace Strype {
 		void OnUpdate(Timestep ts) override
 		{
 			m_Room->OnUpdate(ts);
+
+			if (Input::IsKeyPressed(KeyCode::A))
+				STY_CORE_INFO("A key pressed!");
+			
+			if (Input::IsKeyHeld(KeyCode::A))
+				STY_CORE_INFO("A key held!");
+			
+			if (Input::IsKeyReleased(KeyCode::A))
+				STY_CORE_INFO("A key released!");
 		}
 
 		virtual void OnImGuiRender() override

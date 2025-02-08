@@ -3,6 +3,7 @@
 
 #include "Strype/Renderer/Renderer.h"
 #include "Strype/Core/Audio.h"
+#include "Strype/Core/Input.h"
 
 //TEMP
 #include <GLFW/glfw3.h>
@@ -23,6 +24,7 @@ namespace Strype {
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
 		
+		Input::SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
 		Audio::Init();
 
 		m_ImGuiLayer = new ImGuiLayer(m_Config.DockspaceEnabled);
@@ -34,12 +36,6 @@ namespace Strype {
 	Application::~Application()
 	{
 		m_Window->SetVisable(false);
-
-		for (Layer* layer : m_LayerStack)
-		{
-			layer->OnDetach();
-			delete layer;
-		}
 		
 		Renderer::Shutdown();
 		Audio::Shutdown();
@@ -98,6 +94,7 @@ namespace Strype {
 			m_ImGuiLayer->End();
 			
 			m_Window->OnUpdate();
+			Input::Update();
 		}
 	}
 

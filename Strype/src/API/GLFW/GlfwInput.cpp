@@ -6,7 +6,7 @@
 
 namespace Strype {
 
-	bool Input::IsKeyPressed(const KeyCode key)
+	bool Input::IsKeyOn(const KeyCode key)
 	{
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		int state = glfwGetKey(window, static_cast<int32_t>(key));
