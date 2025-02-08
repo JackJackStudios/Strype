@@ -1,8 +1,12 @@
 #include "stypch.h"
 #include "Strype/Core/Input.h"
 
+#include "Strype/Core/Application.h"
+
 #include "Strype/Events/KeyEvent.h"
 #include "Strype/Events/MouseEvent.h"
+
+#include <GLFW/glfw3.h>
 
 namespace Strype {
 
@@ -87,6 +91,13 @@ namespace Strype {
 		keyData.State = newState;
 	}
 
+	bool Input::IsKeyOn(const KeyCode key)
+	{
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		int state = glfwGetKey(window, static_cast<int32_t>(key));
+		return state == GLFW_PRESS;
+	}
+
 	bool Input::IsKeyPressed(const KeyCode key)
 	{
 		return s_KeyStates[key].State == InputState::Pressed;
@@ -102,6 +113,13 @@ namespace Strype {
 		return s_KeyStates[key].State == InputState::Released;
 	}
 
+	bool Input::IsMouseButtonOn(const MouseCode button)
+	{
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		int state = glfwGetMouseButton(window, static_cast<int32_t>(button));
+		return state == GLFW_PRESS;
+	}
+
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
 		return s_MouseStates[button].State == InputState::Released;
@@ -115,6 +133,25 @@ namespace Strype {
 	bool Input::IsMouseButtonReleased(MouseCode button)
 	{
 		return s_MouseStates[button].State == InputState::Released;
+	}
+
+	glm::vec2 Input::GetMousePosition()
+	{
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
+		return { (float)xpos, (float)ypos };
+	}
+
+	float Input::GetMouseX()
+	{
+		return GetMousePosition().x;
+	}
+
+	float Input::GetMouseY()
+	{
+		return GetMousePosition().y;
 	}
 
 }

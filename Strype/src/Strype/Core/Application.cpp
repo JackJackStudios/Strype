@@ -5,7 +5,6 @@
 #include "Strype/Core/Audio.h"
 #include "Strype/Core/Input.h"
 
-//TEMP
 #include <GLFW/glfw3.h>
 
 namespace Strype {

@@ -5,6 +5,8 @@
 #include "Strype/Core/Base.h"
 #include "Strype/Events/Event.h"
 
+#include <GLFW/glfw3.h>
+
 namespace Strype {
 
 	struct WindowProps
@@ -27,22 +29,36 @@ namespace Strype {
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
-		virtual ~Window() {}
+		Window(const WindowProps& props);
+		~Window();
 
-		virtual void OnUpdate() = 0;
+		void OnUpdate();
 
-		virtual unsigned int GetWidth() const = 0;
-		virtual unsigned int GetHeight() const = 0;
+		inline unsigned int GetWidth() const { return m_Data.Width; }
+		inline unsigned int GetHeight() const { return m_Data.Height; }
 
 		// Window attributes
-		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
-		virtual void SetVSync(bool enabled) = 0;
-		virtual bool IsVSync() const = 0;
-		virtual void SetVisable(bool enabled) = 0;
+		inline void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
+		void SetVSync(bool enabled);
+		bool IsVSync() const;
+		void SetVisable(bool enabled);
 
-		virtual void* GetNativeWindow() const = 0;
+		void* GetNativeWindow() const { return m_Window; }
 
-		static Scope<Window> Create(const WindowProps& props = WindowProps());
+		static inline Scope<Window> Create(const WindowProps& props = WindowProps()) { return CreateScope<Window>(props); }
+	private:
+		GLFWwindow* m_Window;
+
+		struct WindowData
+		{
+			std::string Title;
+			unsigned int Width, Height;
+			bool VSync;
+
+			EventCallbackFn EventCallback;
+		};
+
+		WindowData m_Data;
 	};
 
 }
