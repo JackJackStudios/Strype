@@ -4,57 +4,62 @@
 #include "Strype/Events/KeyEvent.h"
 
 namespace Strype {
-	 
-	std::unordered_map<KeyCode, KeyState> Input::m_KeyStates;
-	Input::EventCallbackFn Input::m_EventCallback;
 
 	void Input::Update()
 	{
-		for (const auto& [key, state] : m_KeyStates)
+		for (const auto& [key, data] : s_KeyStates)
 		{
-			if (state == KeyState::Pressed)
-				m_KeyStates[key] = KeyState::Held;
+			if (data.State == KeyState::Pressed)
+				UpdateKeyState(key, KeyState::Held);
 
-			if (state == KeyState::Released)
-				m_KeyStates[key] = KeyState::None;
+			if (data.State == KeyState::Released)
+				UpdateKeyState(key, KeyState::None);
 
-			if (state == KeyState::Held && !Input::IsKeyOn(key))
+			if (data.State == KeyState::Held && !Input::IsKeyOn(key))
 			{
 				KeyReleasedEvent event(key);
-				m_EventCallback(event);
+				s_EventCallback(event);
 
-				m_KeyStates[key] = KeyState::Released;
+				UpdateKeyState(key, KeyState::Released);
 			}
 
-			if (state == KeyState::None && Input::IsKeyOn(key))
+			if (data.State == KeyState::None && Input::IsKeyOn(key))
 			{
 				KeyPressedEvent event(key);
-				m_EventCallback(event);
+				s_EventCallback(event);
 
-				m_KeyStates[key] = KeyState::Pressed;
+				UpdateKeyState(key, KeyState::Pressed);
 			}
 
-			if (state == KeyState::Held)
+			if (data.State == KeyState::Held)
 			{
 				KeyHeldEvent event(key);
-				m_EventCallback(event);
+				s_EventCallback(event);
 			}
 		}
 	}
 
+	void Input::UpdateKeyState(KeyCode key, KeyState newState)
+	{
+		auto& keyData = s_KeyStates[key];
+		keyData.Key = key;
+		keyData.OldState = keyData.State;
+		keyData.State = newState;
+	}
+
 	bool Input::IsKeyPressed(const KeyCode key)
 	{
-		return m_KeyStates[key] == KeyState::Pressed;
+		return s_KeyStates[key].State == KeyState::Pressed;
 	}
 
 	bool Input::IsKeyHeld(const KeyCode key)
 	{
-		return m_KeyStates[key] == KeyState::Held;
+		return s_KeyStates[key].State == KeyState::Held;
 	}
 
 	bool Input::IsKeyReleased(const KeyCode key)
 	{
-		return m_KeyStates[key] == KeyState::Released;
+		return s_KeyStates[key].State == KeyState::Released;
 	}
 
 }

@@ -33,9 +33,10 @@ namespace Strype {
 		static float GetMouseX(); //GLFW
 		static float GetMouseY(); //GLFW
 
-		static inline void SetEventCallback(const EventCallbackFn& callback) { m_EventCallback = callback; };
+		static void UpdateKeyState(KeyCode key, KeyState newState);
+		static inline void SetEventCallback(const EventCallbackFn& callback) { s_EventCallback = callback; };
 	private:
-		static std::unordered_map<KeyCode, KeyState> m_KeyStates;
-		static EventCallbackFn m_EventCallback;
+		inline static std::unordered_map<KeyCode, KeyData> s_KeyStates;
+		inline static EventCallbackFn s_EventCallback;
 	};
 }
