@@ -34,6 +34,7 @@ namespace Strype {
 		static Application& Get() { return *s_Instance; }
 
 		const AppConfig& GetConfig() const { return m_Config; }
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
 		void OnEvent(Event& e);
 

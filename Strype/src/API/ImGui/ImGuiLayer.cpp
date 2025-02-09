@@ -13,10 +13,6 @@ namespace Strype {
 	ImGuiLayer::ImGuiLayer(bool dockspace)
 		: m_Dockspace(dockspace)
 	{
-	}
-
-	void ImGuiLayer::OnAttach()
-	{
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -38,7 +34,7 @@ namespace Strype {
 		ImGui_ImplOpenGL3_Init("#version 330");
 	}
 
-	void ImGuiLayer::OnDetach()
+	ImGuiLayer::~ImGuiLayer()
 	{
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();

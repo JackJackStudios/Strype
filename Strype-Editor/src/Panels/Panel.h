@@ -1,19 +1,19 @@
 #pragma once
 
-#include "Strype/Core/Base.h"
-#include "Strype/Events/Event.h"
-#include "Strype/Core/Timestep.h"
+#include <Strype.h>
 
 namespace Strype {
 
-	class Layer
+	class Panel
 	{
 	public:
-		virtual ~Layer() {}
+		virtual ~Panel() = default;
 
 		virtual void OnUpdate(Timestep ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
+
+		virtual const char* GetName() = 0;
 	};
 
 }
