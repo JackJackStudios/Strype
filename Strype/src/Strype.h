@@ -15,6 +15,7 @@
 #include "Strype/Renderer/Shader.h"
 #include "Strype/Renderer/Texture.h"
 #include "Strype/Renderer/VertexArray.h"
+#include "Strype/Renderer/Framebuffer.h"
 #include "Strype/Renderer/CameraController.h"
 
 #include "Strype/Room/Room.h"

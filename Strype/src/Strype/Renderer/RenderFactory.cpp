@@ -6,12 +6,14 @@
 #include "Strype/Renderer/Shader.h"
 #include "Strype/Renderer/Texture.h"
 #include "Strype/Renderer/VertexArray.h"
+#include "Strype/Renderer/Framebuffer.h"
 
 #include "API/OpenGL/OpenGLBuffer.h"
 #include "API/OpenGL/OpenGLRenderAPI.h"
 #include "API/OpenGL/OpenGLShader.h"
 #include "API/OpenGL/OpenGLTexture.h"
 #include "API/OpenGL/OpenGLVertexArray.h"
+#include "API/OpenGL/OpenGLFramebuffer.h"
 
 namespace Strype {
 
@@ -119,6 +121,18 @@ namespace Strype {
 		{
 		case RenderAPI::API::None:    STY_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
 		case RenderAPI::API::OpenGL:  return CreateRef<OpenGLVertexArray>();
+		}
+
+		STY_CORE_ASSERT(false, "Unknown RendererAPI!");
+		return nullptr;
+	}
+
+	Ref<Framebuffer> Framebuffer::Create(int width, int height)
+	{
+		switch (Renderer::GetAPI())
+		{
+		case RenderAPI::API::None:    STY_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
+		case RenderAPI::API::OpenGL:  return CreateRef<OpenGLFramebuffer>(width, height);
 		}
 
 		STY_CORE_ASSERT(false, "Unknown RendererAPI!");
