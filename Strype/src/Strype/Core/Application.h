@@ -8,6 +8,7 @@
 #include "Strype/Events/ApplicationEvent.h"
 
 #include "Strype/Core/Timestep.h"
+#include "Strype/Core/Project.h"
 
 #include "API/ImGui/ImGuiLayer.h"
 
