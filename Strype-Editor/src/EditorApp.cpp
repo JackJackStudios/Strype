@@ -1,76 +1,54 @@
 #include <Strype.h>
 #include <Strype/Core/EntryPoint.h>
 
-#include "Panels/Panel.h"
+#include "EditorCamera.h"
+#include "Panels/PanelManager.h"
+
+#include "Panels/SceneHierachyPanel.h"
 
 namespace Strype {
-
-	class TestPanel : public Panel
+	
+	class EditorLayer : public Layer
 	{
 	public:
-		TestPanel(const char* name)
-			: m_Name(name)
+		EditorLayer()
+			: m_EditorCamera(1280.0f / 720.0f)
 		{
-		}
+			m_Room = CreateRef<Room>();
 
-		void OnUpdate(Timestep ts) override
-		{
-		}
+			m_PanelManager.AddPanel<SceneHierachyPanel>();
 
-		void OnImGuiRender() override
-		{
-		}
+			Object obj = m_Room->CreateObject();
+			obj.AddComponent<TagComponent>("Test Entity");
+			obj.AddComponent<Transform>();
+			obj.AddComponent<SpriteRenderer>();
 
-		void OnEvent(Event& e) override
-		{
-		}
+			m_PanelManager.SetRoomContext(m_Room);
 
-	public:
-		const char* GetName() override { return m_Name; };
-		const char* m_Name;
-	};
-
-	class ExampleLayer : public Layer
-	{
-	public:
-		ExampleLayer()
-			: m_CameraController(1280.0f / 720.0f)
-		{
 			m_Framebuffer = Framebuffer::Create(1280, 720);
-
-			m_Panels.push_back(new TestPanel("Test Panel"));
 		}
 
-		~ExampleLayer()
+		~EditorLayer()
 		{
-			for (Panel* panel : m_Panels)
-				delete panel;
 		}
 
 		void OnUpdate(Timestep ts) override
 		{
-			m_CameraController.OnUpdate(ts);
-
-			for (Panel* panel : m_Panels)
-				panel->OnUpdate(ts);
+			m_EditorCamera.OnUpdate(ts);
 
 			if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 				(m_Framebuffer->GetWidth() != m_ViewportSize.x || m_Framebuffer->GetHeight() != m_ViewportSize.y))
 			{
 				m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-				m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+				m_EditorCamera.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			}
 
 			m_Framebuffer->Bind();
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
+			
+			m_Room->OnUpdate(ts, m_EditorCamera.GetCamera());
 
-			Renderer::BeginScene(m_CameraController.GetCamera());
-			{
-				Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
-			}
-
-			Renderer::EndScene();
 			m_Framebuffer->Unbind();
 		}
 
@@ -79,57 +57,47 @@ namespace Strype {
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 			ImGui::Begin("Viewport");
 
-			auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-			auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-			auto viewportOffset = ImGui::GetWindowPos();
+			Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
 
-			m_ViewportFocused = ImGui::IsWindowFocused();
-			m_ViewportHovered = ImGui::IsWindowHovered();
-
-			Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportHovered);
-
-			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+			ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+			m_ViewportSize = glm::vec2(viewportSize.x, viewportSize.y);
 
 			uint64_t textureID = m_Framebuffer->GetAttachmentID();
-			ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+			ImGui::Image(textureID, viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 			ImGui::End();
 			ImGui::PopStyleVar();
 
-			for (Panel* panel : m_Panels)
-			{
-				ImGui::Begin(panel->GetName());
-				panel->OnImGuiRender();
-				ImGui::End();
-			}
+			m_PanelManager.OnImGuiRender();
 		}
 
 		void OnEvent(Event& e) override
 		{
-			m_CameraController.OnEvent(e);
+			m_EditorCamera.OnEvent(e);
+
+			m_PanelManager.OnEvent(e);
 		}
 
 	private:
-		std::vector<Panel*> m_Panels;
-
 		Ref<Framebuffer> m_Framebuffer;
-		CameraController m_CameraController;
+		EditorCamera m_EditorCamera;
+		Ref<Room> m_Room;
+		
+		PanelManager m_PanelManager;
 
-		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 	};
 
-	class Sandbox : public Application
+	class Editor : public Application
 	{
 	public:
-		Sandbox(const AppConfig& config)
+		Editor(const AppConfig& config)
 			: Application(config)
 		{
-			PushLayer(new ExampleLayer());
+			PushLayer(new EditorLayer());
 		}
 
-		~Sandbox()
+		~Editor()
 		{
 
 		}
@@ -141,7 +109,7 @@ namespace Strype {
 		AppConfig config;
 		config.DockspaceEnabled = true;
 
-		return new Sandbox(config);
+		return new Editor(config);
 	}
 
 }

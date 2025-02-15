@@ -1,17 +1,17 @@
 #include "stypch.h"
-#include "Strype/Renderer/CameraController.h"
+#include "EditorCamera.h"
 
 #include "Strype/Core/Input.h"
 #include "Strype/Core/KeyCodes.h"
 
 namespace Strype {
 
-	CameraController::CameraController(float aspectRatio, bool rotation)
+	EditorCamera::EditorCamera(float aspectRatio, bool rotation)
 		: m_AspectRatio(aspectRatio), m_Camera(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel), m_Rotation(rotation)
 	{
 	}
 
-	void CameraController::OnUpdate(Timestep ts)
+	void EditorCamera::OnUpdate(Timestep ts)
 	{
 		if (Input::IsKeyHeld(KeyCode::A))
 		{
@@ -46,7 +46,7 @@ namespace Strype {
 				m_CameraRotation -= 360.0f;
 			else if (m_CameraRotation <= -180.0f)
 				m_CameraRotation += 360.0f;
-
+			
 			m_Camera.SetRotation(m_CameraRotation);
 		}
 
@@ -55,20 +55,20 @@ namespace Strype {
 		m_CameraTranslationSpeed = m_ZoomLevel;
 	}
 
-	void CameraController::OnEvent(Event& e)
+	void EditorCamera::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<MouseScrolledEvent>(STY_BIND_EVENT_FN(CameraController::OnMouseScrolled));
-		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(CameraController::OnWindowResized));
+		dispatcher.Dispatch<MouseScrolledEvent>(STY_BIND_EVENT_FN(EditorCamera::OnMouseScrolled));
+		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(EditorCamera::OnWindowResized));
 	}
 
-	void CameraController::OnResize(float width, float height)
+	void EditorCamera::OnResize(float width, float height)
 	{
 		m_AspectRatio = width / height;
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 	}
 
-	bool CameraController::OnMouseScrolled(MouseScrolledEvent& e)
+	bool EditorCamera::OnMouseScrolled(MouseScrolledEvent& e)
 	{
 		m_ZoomLevel -= e.GetYOffset() * 0.25f;
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
@@ -76,7 +76,7 @@ namespace Strype {
 		return false;
 	}
 
-	bool CameraController::OnWindowResized(WindowResizeEvent& e)
+	bool EditorCamera::OnWindowResized(WindowResizeEvent& e)
 	{
 		OnResize((float)e.GetWidth(), (float)e.GetHeight());
 		return false;

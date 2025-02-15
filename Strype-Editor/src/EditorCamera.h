@@ -8,10 +8,10 @@
 
 namespace Strype {
 
-	class CameraController
+	class EditorCamera
 	{
 	public:
-		CameraController(float aspectRatio, bool rotation = false);
+		EditorCamera(float aspectRatio, bool rotation = false);
 
 		void OnUpdate(Timestep ts);
 		void OnEvent(Event& e);

@@ -2,7 +2,7 @@
 
 #include "Strype/Events/Event.h"
 #include "Strype/Core/Timestep.h"
-#include "Strype/Renderer/CameraController.h"
+#include "Strype/Renderer/Camera.h"
 
 #include <entt/entt.hpp>
 
@@ -18,13 +18,12 @@ namespace Strype {
 
 		Object CreateObject();
 
-		void OnUpdate(Timestep ts);
-		void OnEvent(Event& e);
+		void OnUpdate(Timestep ts, Camera cam);
 	private:
 		entt::registry m_Registry;
-		CameraController m_CameraController;
 
 		friend class Object;
+		friend class SceneHierachyPanel;
 	};
 
 }

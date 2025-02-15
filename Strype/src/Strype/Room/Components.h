@@ -6,24 +6,38 @@
 
 namespace Strype {
 
+	struct TagComponent
+	{
+		std::string Tag;
+
+		TagComponent() = default;
+		TagComponent(const TagComponent&) = default;
+		TagComponent(const std::string& tag)
+			: Tag(tag) {
+		}
+	};
+
 	struct Transform
 	{
-		glm::vec2 Scale{ 1.0f };
 		glm::vec3 Position;
+		glm::vec2 Scale{ 1.0f };
 		float Rotation;
 
-		Transform() = default;
 		Transform(const Transform&) = default;
+		Transform()
+			: Position(0.0f), Rotation(0) {}
 		Transform(const glm::vec3& position, const glm::vec2& scale = glm::vec2(1.0f), float rotation = 0)
 			: Position(position), Scale(scale), Rotation(rotation) {}
 	};
 
 	struct SpriteRenderer
 	{
-		glm::vec4 Colour{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 Colour;
 		Ref<Texture> Texture;
 
 		SpriteRenderer(const SpriteRenderer&) = default;
+		SpriteRenderer()
+			: Colour(1.0f), Texture(nullptr) {}
 		SpriteRenderer(const Ref<Strype::Texture>& texture, const glm::vec4& colour = glm::vec4(1.0f))
 			: Texture(texture), Colour(colour)  {}
 	};

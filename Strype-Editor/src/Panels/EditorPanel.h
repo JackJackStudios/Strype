@@ -4,16 +4,14 @@
 
 namespace Strype {
 
-	class Panel
+	class EditorPanel
 	{
 	public:
-		virtual ~Panel() = default;
+		virtual ~EditorPanel() = default;
 
-		virtual void OnUpdate(Timestep ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
-
-		virtual const char* GetName() = 0;
+		virtual void SetRoomContext(const Ref<Room>& room) = 0;
 	};
 
 }

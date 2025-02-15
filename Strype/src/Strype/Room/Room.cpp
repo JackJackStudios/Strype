@@ -10,7 +10,6 @@
 namespace Strype {
 
 	Room::Room()
-		: m_CameraController(1280.0f / 720.0f)
 	{
 	}
 
@@ -24,20 +23,22 @@ namespace Strype {
 		return object;
 	}
 
-	void Room::OnUpdate(Timestep ts)
+	void Room::OnUpdate(Timestep ts, Camera cam)
 	{
-		m_CameraController.OnUpdate(ts);
-
-		Renderer::BeginScene(m_CameraController.GetCamera());
+		Renderer::BeginScene(cam);
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
-			Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Texture, sprite.Colour);
+			if (sprite.Texture.get() == nullptr)
+			{
+				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
+			}
+			else
+			{
+				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Texture, sprite.Colour);
+			}
 		});
 
 		Renderer::EndScene();
 	}
-	void Room::OnEvent(Event& e)
-	{
-		m_CameraController.OnEvent(e);
-	}
+
 }

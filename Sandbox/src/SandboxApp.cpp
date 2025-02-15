@@ -12,19 +12,10 @@ namespace Strype {
 
 		void OnAttach()
 		{
-			m_Room = CreateRef<Room>();
-
-			m_Texture = Texture::Create("assets/textures/Checkerboard.png");
-
-			Object obj = m_Room->CreateObject();
-			obj.AddComponent<Transform>();
-			obj.AddComponent<SpriteRenderer>(m_Texture);
 		}
 
 		void OnUpdate(Timestep ts) override
 		{
-			m_Room->OnUpdate(ts);
-
 			if (Input::IsKeyPressed(KeyCode::A))
 				STY_CORE_INFO("A key pressed!");
 			
@@ -41,13 +32,9 @@ namespace Strype {
 
 		void OnEvent(Event& e) override
 		{
-			m_Room->OnEvent(e);
 		}
 
 	private:
-		Ref<Texture> m_Texture;
-
-		Ref<Room> m_Room;
 	};
 
 	class Sandbox : public Application
