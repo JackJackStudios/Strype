@@ -15,18 +15,20 @@ namespace Strype {
 		TagComponent(const std::string& tag)
 			: Tag(tag) {
 		}
+
+		operator const char* () { return Tag.c_str();  }
 	};
 
 	struct Transform
 	{
-		glm::vec3 Position;
+		glm::vec2 Position;
 		glm::vec2 Scale{ 1.0f };
 		float Rotation;
 
 		Transform(const Transform&) = default;
 		Transform()
 			: Position(0.0f), Rotation(0) {}
-		Transform(const glm::vec3& position, const glm::vec2& scale = glm::vec2(1.0f), float rotation = 0)
+		Transform(const glm::vec2& position, const glm::vec2& scale = glm::vec2(1.0f), float rotation = 0)
 			: Position(position), Scale(scale), Rotation(rotation) {}
 	};
 

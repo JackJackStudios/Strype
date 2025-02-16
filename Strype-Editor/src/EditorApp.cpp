@@ -15,13 +15,19 @@ namespace Strype {
 			: m_EditorCamera(1280.0f / 720.0f)
 		{
 			m_Room = CreateRef<Room>();
+			m_Texture = Texture::Create("assets/textures/Checkerboard.png");
 
 			m_PanelManager.AddPanel<SceneHierachyPanel>();
 
 			Object obj = m_Room->CreateObject();
-			obj.AddComponent<TagComponent>("Test Entity");
+			obj.AddComponent<TagComponent>("White square");
 			obj.AddComponent<Transform>();
 			obj.AddComponent<SpriteRenderer>();
+
+			obj = m_Room->CreateObject();
+			obj.AddComponent<TagComponent>("Texture");
+			obj.AddComponent<Transform>(glm::vec3(1.5f, 0.0f, 0.0f));
+			obj.AddComponent<SpriteRenderer>(m_Texture);
 
 			m_PanelManager.SetRoomContext(m_Room);
 
@@ -82,6 +88,7 @@ namespace Strype {
 		Ref<Framebuffer> m_Framebuffer;
 		EditorCamera m_EditorCamera;
 		Ref<Room> m_Room;
+		Ref<Texture> m_Texture;
 		
 		PanelManager m_PanelManager;
 
