@@ -17,10 +17,16 @@ namespace Strype {
 	{
 	}
 
-	Object Room::CreateObject()
+	Object Room::CreateObject(std::string name)
 	{
 		Object object{ m_Registry.create(), this };
+		object.AddComponent<TagComponent>(name);
 		return object;
+	}
+
+	void Room::DestroyObject(Object entity)
+	{
+		m_Registry.destroy(entity);
 	}
 
 	void Room::OnUpdate(Timestep ts, Camera cam)

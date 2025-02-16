@@ -19,13 +19,11 @@ namespace Strype {
 
 			m_PanelManager.AddPanel<SceneHierachyPanel>();
 
-			Object obj = m_Room->CreateObject();
-			obj.AddComponent<TagComponent>("White square");
+			Object obj = m_Room->CreateObject("White square");
 			obj.AddComponent<Transform>();
 			obj.AddComponent<SpriteRenderer>();
 
-			obj = m_Room->CreateObject();
-			obj.AddComponent<TagComponent>("Texture");
+			obj = m_Room->CreateObject("Texture");
 			obj.AddComponent<Transform>(glm::vec3(1.5f, 0.0f, 0.0f));
 			obj.AddComponent<SpriteRenderer>(m_Texture);
 

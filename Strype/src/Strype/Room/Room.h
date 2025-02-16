@@ -16,7 +16,8 @@ namespace Strype {
 		Room();
 		~Room();
 
-		Object CreateObject();
+		Object CreateObject(std::string name = std::string());
+		void DestroyObject(Object entity);
 
 		void OnUpdate(Timestep ts, Camera cam);
 	private:

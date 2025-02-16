@@ -84,7 +84,7 @@ namespace Strype {
 				value = resetValue;
 			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
-			};
+		};
 
 		DrawButton("X", values.x, ImVec4{ 0.8f, 0.1f, 0.15f, 1.0f });
 		ImGui::SameLine();
@@ -110,14 +110,29 @@ namespace Strype {
 		if (m_ActiveScene)
 		{
 			m_ActiveScene->m_Registry.view<TagComponent>().each([&](auto entity, TagComponent& tag) {
-				
+
+				Object temp{ entity, m_ActiveScene.get() };
 				bool selected = m_Selection == entity;
+
 				if (ImGui::Selectable(tag, &selected))
-				{
-					Object temp{ entity, m_ActiveScene.get() };
 					m_Selection = temp;
+
+				if (ImGui::BeginPopupContextItem())
+				{
+					if (ImGui::MenuItem("Delete Entity"))
+						m_ActiveScene->DestroyObject(temp);
+
+					ImGui::EndPopup();
 				}
 			});
+
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::MenuItem("Create Entity"))
+					m_ActiveScene->CreateObject("Untitled");
+
+				ImGui::EndPopup();
+			}
 		}
 
 		ImGui::End();
