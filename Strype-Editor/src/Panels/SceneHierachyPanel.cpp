@@ -8,6 +8,18 @@ namespace Strype {
 	{
 	}
 
+	template<typename T>
+	static void AddComponentPopup(Object& selection, const std::string& entryName) {
+		if (!selection.HasComponent<T>())
+		{
+			if (ImGui::MenuItem(entryName.c_str()))
+			{
+				selection.AddComponent<T>();
+				ImGui::CloseCurrentPopup();
+			}
+		}
+	}
+
 	template<typename T, typename UIFunction>
 	static void DrawComponent(const std::string& name, Object entity, UIFunction uiFunction)
 	{
@@ -152,6 +164,22 @@ namespace Strype {
 					tag = std::string(buffer);
 				}
 			}
+
+			ImGui::SameLine();
+			ImGui::PushItemWidth(-1);
+
+			if (ImGui::Button("Add Component"))
+				ImGui::OpenPopup("AddComponent");
+
+			if (ImGui::BeginPopup("AddComponent"))
+			{
+				AddComponentPopup<Transform>(m_Selection, "Transform");
+				AddComponentPopup<SpriteRenderer>(m_Selection, "Sprite Renderer");
+
+				ImGui::EndPopup();
+			}
+
+			ImGui::PopItemWidth();
 
 			DrawComponent<Transform>("Transform", m_Selection, [](auto& component)
 			{
