@@ -12,7 +12,7 @@ namespace Strype {
 	{
 	public:
 		EditorLayer()
-			: m_EditorCamera(1280.0f / 720.0f)
+			: m_EditorCamera(1280.0f, 720.0f)
 		{
 			m_Room = CreateRef<Room>();
 			m_Texture = Texture::Create("assets/textures/Checkerboard.png");
