@@ -19,12 +19,14 @@ namespace Strype {
 		Object CreateObject(std::string name = std::string());
 		void DestroyObject(Object entity);
 
+		void Clear();
 		void OnUpdate(Timestep ts, Camera cam);
 	private:
 		entt::registry m_Registry;
 
 		friend class Object;
 		friend class SceneHierachyPanel;
+		friend class RoomSerializer;
 	};
 
 }

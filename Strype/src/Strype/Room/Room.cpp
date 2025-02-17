@@ -29,6 +29,11 @@ namespace Strype {
 		m_Registry.destroy(entity);
 	}
 
+	void Room::Clear()
+	{
+		m_Registry.clear();
+	}
+
 	void Room::OnUpdate(Timestep ts, Camera cam)
 	{
 		Renderer::BeginScene(cam);

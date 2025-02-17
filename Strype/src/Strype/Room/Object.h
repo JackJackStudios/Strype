@@ -43,6 +43,7 @@ namespace Strype {
 			m_Room->m_Registry.remove<T>(m_Handle);
 		}
 
+		operator uint32_t() const { return (uint32_t)m_Handle; }
 		operator entt::entity() const { return m_Handle; }
 		bool operator==(const entt::entity& other) { return m_Handle == other; }
 		operator bool() const { return m_Handle != entt::null; }

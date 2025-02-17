@@ -16,6 +16,7 @@ namespace Strype {
 			: Tag(tag) {
 		}
 
+		operator std::string () { return Tag; }
 		operator const char* () { return Tag.c_str();  }
 	};
 

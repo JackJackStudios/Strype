@@ -138,12 +138,15 @@ namespace Strype {
 				}
 			});
 
-			if (ImGui::BeginPopupContextWindow())
+			if (!ImGui::IsItemHovered())
 			{
-				if (ImGui::MenuItem("Create Entity"))
-					m_ActiveScene->CreateObject("Untitled");
+				if (ImGui::BeginPopupContextWindow())
+				{
+					if (ImGui::MenuItem("Create Entity"))
+						m_ActiveScene->CreateObject("Untitled");
 
-				ImGui::EndPopup();
+					ImGui::EndPopup();
+				}
 			}
 		}
 

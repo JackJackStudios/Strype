@@ -30,9 +30,7 @@ namespace Strype {
 				m_EditorCamera.OnResize(width, height);
 			});
 
-			Object obj = m_Room->CreateObject("White square");
-			obj.AddComponent<Transform>();
-			obj.AddComponent<SpriteRenderer>();
+			OpenRoom("assets/scenes/Example.sroom");
 		}
 
 		~EditorLayer()
@@ -56,7 +54,54 @@ namespace Strype {
 
 		void OnImGuiRender() override
 		{
+			if (ImGui::BeginMenuBar())
+			{
+				if (ImGui::BeginMenu("File"))
+				{
+					if (ImGui::MenuItem("New Scene", "Ctrl+N"))
+						NewRoom();
+
+					if (ImGui::MenuItem("Open Scene", "Ctrl+O"))
+						OpenRoom("assets/scenes/Example.sroom");
+
+					if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+						SaveRoom();
+
+					ImGui::Separator();
+
+					if (ImGui::MenuItem("Exit"))
+						Application::Get().Close();
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMenuBar();
+			}
+
+
 			m_PanelManager.OnImGuiRender();
+		}
+
+		void NewRoom()
+		{
+			m_Room = CreateRef<Room>();
+			m_PanelManager.SetRoomContext(m_Room);
+		}
+
+		void SaveRoom(const std::string& path = std::string())
+		{
+			//TODO: File dialog
+
+			RoomSerializer serializer(m_Room);
+			serializer.Serialize(path);
+		}
+
+		void OpenRoom(const std::string& path = std::string())
+		{
+			//TODO: File dialog
+
+			RoomSerializer serializer(m_Room);
+			serializer.Deserialize(path);
 		}
 
 		void OnEvent(Event& e) override

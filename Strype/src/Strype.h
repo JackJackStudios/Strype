@@ -20,6 +20,7 @@
 #include "Strype/Room/Room.h"
 #include "Strype/Room/Object.h"
 #include "Strype/Room/Components.h"
+#include "Strype/Room/RoomSerializer.h"
 
 #include "Strype/Core/Audio.h"
 
