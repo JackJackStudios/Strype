@@ -5,6 +5,7 @@
 #include "Panels/PanelManager.h"
 
 #include "Panels/SceneHierachyPanel.h"
+#include "Panels/ViewportPanel.h"
 
 namespace Strype {
 	
@@ -15,21 +16,23 @@ namespace Strype {
 			: m_EditorCamera(1280.0f, 720.0f)
 		{
 			m_Room = CreateRef<Room>();
-			m_Texture = Texture::Create("assets/textures/Checkerboard.png");
+
+			//Configure PanelManager
+			m_PanelManager.SetRoomContext(m_Room);
 
 			m_PanelManager.AddPanel<SceneHierachyPanel>();
+			m_ViewportPanel = m_PanelManager.AddPanel<ViewportPanel>();
+
+			m_ViewportPanel->SetDrawCallback(STY_BIND_EVENT_FN(EditorLayer::DrawViewport));
+			
+			m_ViewportPanel->SetResizedCallback([this](float width, float height)
+			{
+				m_EditorCamera.OnResize(width, height);
+			});
 
 			Object obj = m_Room->CreateObject("White square");
 			obj.AddComponent<Transform>();
 			obj.AddComponent<SpriteRenderer>();
-
-			obj = m_Room->CreateObject("Texture");
-			obj.AddComponent<Transform>(glm::vec3(1.5f, 0.0f, 0.0f));
-			obj.AddComponent<SpriteRenderer>(m_Texture);
-
-			m_PanelManager.SetRoomContext(m_Room);
-
-			m_Framebuffer = Framebuffer::Create(1280, 720);
 		}
 
 		~EditorLayer()
@@ -40,38 +43,19 @@ namespace Strype {
 		{
 			m_EditorCamera.OnUpdate(ts);
 
-			if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
-				(m_Framebuffer->GetWidth() != m_ViewportSize.x || m_Framebuffer->GetHeight() != m_ViewportSize.y))
-			{
-				m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-				m_EditorCamera.OnResize(m_ViewportSize.x, m_ViewportSize.y);
-			}
+			m_ViewportPanel->OnUpdate(ts);
+		}
 
-			m_Framebuffer->Bind();
+		void DrawViewport(Timestep ts)
+		{
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
-			
-			m_Room->OnUpdate(ts, m_EditorCamera.GetCamera());
 
-			m_Framebuffer->Unbind();
+			m_Room->OnUpdate(ts, m_EditorCamera.GetCamera());
 		}
 
 		void OnImGuiRender() override
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-			ImGui::Begin("Viewport");
-
-			Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
-
-			ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-			m_ViewportSize = glm::vec2(viewportSize.x, viewportSize.y);
-
-			uint64_t textureID = m_Framebuffer->GetAttachmentID();
-			ImGui::Image(textureID, viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-
-			ImGui::End();
-			ImGui::PopStyleVar();
-
 			m_PanelManager.OnImGuiRender();
 		}
 
@@ -83,14 +67,11 @@ namespace Strype {
 		}
 
 	private:
-		Ref<Framebuffer> m_Framebuffer;
 		EditorCamera m_EditorCamera;
 		Ref<Room> m_Room;
-		Ref<Texture> m_Texture;
 		
 		PanelManager m_PanelManager;
-
-		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		Ref<ViewportPanel> m_ViewportPanel;
 	};
 
 	class Editor : public Application

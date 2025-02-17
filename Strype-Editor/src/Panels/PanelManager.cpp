@@ -23,6 +23,8 @@ namespace Strype {
 	{
 		for (const Ref<EditorPanel>& panel : m_Panels)
 			panel->SetRoomContext(context);
+
+		m_ActiveRoom = context;
 	}
 
 }
