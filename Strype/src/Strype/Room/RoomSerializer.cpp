@@ -179,6 +179,9 @@ namespace Strype {
 	void RoomSerializer::Deserialize(const std::string& filepath)
 	{
 		std::ifstream fstream(filepath);
+
+		STY_CORE_ASSERT(fstream.is_open(), "Error opening file");
+
 		std::stringstream stream;
 		stream << fstream.rdbuf();
 

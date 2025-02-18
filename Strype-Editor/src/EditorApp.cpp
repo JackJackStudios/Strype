@@ -30,7 +30,7 @@ namespace Strype {
 				m_EditorCamera.OnResize(width, height);
 			});
 
-			OpenRoom("assets/scenes/Example.sroom");
+			OpenRoom();
 		}
 
 		~EditorLayer()
@@ -62,7 +62,7 @@ namespace Strype {
 						NewRoom();
 
 					if (ImGui::MenuItem("Open Scene", "Ctrl+O"))
-						OpenRoom("assets/scenes/Example.sroom");
+						OpenRoom();
 
 					if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
 						SaveRoom();
@@ -90,18 +90,24 @@ namespace Strype {
 
 		void SaveRoom(const std::string& path = std::string())
 		{
-			//TODO: File dialog
+			std::string dialog = path.empty() ? FileDialogs::SaveFile("Strype Room (*.sroom)\0*.sroom\0") : path;
 
-			RoomSerializer serializer(m_Room);
-			serializer.Serialize(path);
+			if (!dialog.empty())
+			{
+				RoomSerializer serializer(m_Room);
+				serializer.Serialize(dialog);
+			}
 		}
 
 		void OpenRoom(const std::string& path = std::string())
 		{
-			//TODO: File dialog
+			std::string dialog = path.empty() ? FileDialogs::OpenFile("Strype Room (*.sroom)\0*.sroom\0") : path;
 
-			RoomSerializer serializer(m_Room);
-			serializer.Deserialize(path);
+			if (!dialog.empty())
+			{
+				RoomSerializer serializer(m_Room);
+				serializer.Deserialize(dialog);
+			}
 		}
 
 		void OnEvent(Event& e) override

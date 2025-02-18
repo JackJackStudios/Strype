@@ -7,9 +7,16 @@
 
 #include "Strype/Renderer/Renderer.h"
 
+#include "Strype/Core/PlatformUtils.h"
+
 namespace Strype
 {
 	static uint8_t s_GLFWWindowCount = 0;
+	
+	float Time::GetTime()
+	{
+		return glfwGetTime();
+	}
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{

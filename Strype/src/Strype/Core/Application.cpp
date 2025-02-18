@@ -5,7 +5,7 @@
 #include "Strype/Core/Audio.h"
 #include "Strype/Core/Input.h"
 
-#include <GLFW/glfw3.h>
+#include "Strype/Core/PlatformUtils.h"
 
 namespace Strype {
 
@@ -73,7 +73,7 @@ namespace Strype {
 
 		while (m_Running)
 		{
-			float time = (float)glfwGetTime();
+			float time = Time::GetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 

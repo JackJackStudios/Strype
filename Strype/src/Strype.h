@@ -24,5 +24,7 @@
 
 #include "Strype/Core/Audio.h"
 
+#include "Strype/Core/PlatformUtils.h"
+
 #include <imgui/imgui.h>
 #include <glm/glm.hpp>
