@@ -69,13 +69,13 @@ namespace Strype {
         glDeleteTextures(1, &m_RendererID);
     }
 
-    void OpenGLTexture::SetData(void* data, uint32_t size)
+    void OpenGLTexture::SetData(const Buffer& data)
     {
         uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3;
-        STY_CORE_ASSERT(size == m_Width * m_Height * bpp, "Data must be entire texture!");
+        STY_CORE_ASSERT(data.Size == m_Width * m_Height * bpp, "Data must be entire texture!");
 
         glBindTexture(GL_TEXTURE_2D, m_RendererID);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data.Data);
         glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture
     }
 

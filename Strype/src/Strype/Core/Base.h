@@ -38,5 +38,6 @@ namespace Strype {
 
 }
 
+#include "Strype/Core/Buffer.h"
 #include "Strype/Core/Log.h"
 #include "Strype/Core/Assert.h"

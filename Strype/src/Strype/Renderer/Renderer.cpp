@@ -78,7 +78,7 @@ namespace Strype {
 
 		s_Data.WhiteTexture = Texture::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
-		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+		s_Data.WhiteTexture->SetData(Buffer(&whiteTextureData, sizeof(uint32_t)));
 
 		int32_t samplers[s_Data.MaxTextureSlots];
 		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
@@ -116,7 +116,7 @@ namespace Strype {
 	void Renderer::EndScene()
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
-		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+		s_Data.QuadVertexBuffer->SetData(Buffer(s_Data.QuadVertexBufferBase, dataSize));
 
 		Flush();
 	}

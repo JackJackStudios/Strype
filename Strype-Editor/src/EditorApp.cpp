@@ -58,13 +58,18 @@ namespace Strype {
 			{
 				if (ImGui::BeginMenu("File"))
 				{
+					if (ImGui::MenuItem("Open Project...", "Ctrl+O"))
+						OpenProject(FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0"));
+
+					if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S"))
+						SaveProject();
+
+					ImGui::Separator();
+
 					if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 						NewRoom();
 
-					if (ImGui::MenuItem("Open Scene", "Ctrl+O"))
-						OpenRoom();
-
-					if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+					if (ImGui::MenuItem("Save Scene As...", "Ctrl+S"))
 						SaveRoom();
 
 					ImGui::Separator();
@@ -111,6 +116,22 @@ namespace Strype {
 			}
 		}
 
+		void NewProject()
+		{
+			if (Project::GetActive())
+			{
+				SaveProject();
+
+				m_PanelManager.SetRoomContext(nullptr);
+				Project::SetActive(nullptr);
+			}
+
+			Ref<Project> project = CreateRef<Project>();
+			Project::SetActive(project);
+
+			NewRoom();
+		}
+
 		void SaveProject()
 		{
 			if (!Project::GetActive())
@@ -128,7 +149,6 @@ namespace Strype {
 				SaveProject();
 
 				m_PanelManager.SetRoomContext(nullptr);
-
 				Project::SetActive(nullptr);
 			}
 			
