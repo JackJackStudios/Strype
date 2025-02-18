@@ -159,7 +159,7 @@ namespace Strype {
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		out << YAML::Key << "Room" << YAML::Value << "Untitled";
+		out << YAML::Key << "Room" << YAML::Value << m_Room->GetName();
 		out << YAML::Key << "Objects" << YAML::Value << YAML::BeginSeq;
 
 		auto view = m_Room->m_Registry.view<entt::entity>();
@@ -190,10 +190,11 @@ namespace Strype {
 		STY_CORE_ASSERT(data["Room"], "'{0}' is not a valid Strype Room")
 		STY_CORE_ASSERT(data["Objects"], "'{0}' is not a valid Strype Room")
 
-		std::string sceneName = data["Room"].as<std::string>();
-		STY_CORE_TRACE("Deserializing room '{0}'", sceneName);
+		std::string roomName = data["Room"].as<std::string>();
+		STY_CORE_TRACE("Deserializing room '{0}'", roomName);
 		
 		m_Room->Clear();
+		m_Room->m_Name = roomName;
 
 		YAML::Node objects = data["Objects"];
 		for (auto obj : objects)

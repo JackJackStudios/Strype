@@ -21,8 +21,11 @@ namespace Strype {
 
 		void Clear();
 		void OnUpdate(Timestep ts, Camera cam);
+	
+		const std::string& GetName() const { return m_Name; }
 	private:
 		entt::registry m_Registry;
+		std::string m_Name = "Untitled";
 
 		friend class Object;
 		friend class SceneHierachyPanel;
