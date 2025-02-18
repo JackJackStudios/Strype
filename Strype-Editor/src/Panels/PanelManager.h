@@ -16,6 +16,7 @@ namespace Strype {
 		void OnEvent(Event& e);
 
 		void SetRoomContext(const Ref<Room>& context);
+		void OnProjectChanged();
 
 		template<typename TPanel, typename... TArgs>
 		Ref<TPanel> AddPanel(TArgs&&... args)

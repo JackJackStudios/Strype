@@ -27,4 +27,10 @@ namespace Strype {
 		m_ActiveRoom = context;
 	}
 
+	void PanelManager::OnProjectChanged()
+	{
+		for (const Ref<EditorPanel>& panel : m_Panels)
+			panel->OnProjectChanged();
+	}
+
 }

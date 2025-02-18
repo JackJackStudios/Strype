@@ -5,6 +5,7 @@
 #include "Panels/PanelManager.h"
 
 #include "Panels/SceneHierachyPanel.h"
+#include "Panels/ContentBrowserPanel.h"
 #include "Panels/ViewportPanel.h"
 
 namespace Strype {
@@ -21,6 +22,7 @@ namespace Strype {
 			m_PanelManager.SetRoomContext(m_Room);
 
 			m_PanelManager.AddPanel<SceneHierachyPanel>();
+			m_PanelManager.AddPanel<ContentBrowserPanel>();
 			m_ViewportPanel = m_PanelManager.AddPanel<ViewportPanel>();
 
 			m_ViewportPanel->SetDrawCallback(STY_BIND_EVENT_FN(EditorLayer::DrawViewport));
@@ -128,6 +130,7 @@ namespace Strype {
 
 			Ref<Project> project = CreateRef<Project>();
 			Project::SetActive(project);
+			m_PanelManager.OnProjectChanged();
 
 			NewRoom();
 		}
@@ -157,6 +160,7 @@ namespace Strype {
 			serializer.Deserialize(path);
 
 			Project::SetActive(project);
+			m_PanelManager.OnProjectChanged();
 
 			const std::string& startRoom = project->GetConfig().StartRoom;
 			if (!startRoom.empty())
