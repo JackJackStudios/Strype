@@ -91,12 +91,12 @@ namespace Strype {
 		return nullptr;
 	}
 
-	Ref<Texture> Texture::Create(uint32_t width, uint32_t height)
+	Ref<Texture> Texture::Create(uint32_t width, uint32_t height, uint16_t channels = 4)
 	{
 		switch (Renderer::GetAPI())
 		{
 		case RenderAPI::API::None:    STY_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-		case RenderAPI::API::OpenGL:  return CreateRef<OpenGLTexture>(width, height);
+		case RenderAPI::API::OpenGL:  return CreateRef<OpenGLTexture>(width, height, channels);
 		}
 
 		STY_CORE_ASSERT(false, "Unknown RendererAPI!");

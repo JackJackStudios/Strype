@@ -9,7 +9,7 @@ namespace Strype {
 	class OpenGLTexture : public Texture
 	{
 	public:
-		OpenGLTexture(uint32_t width, uint32_t height);
+		OpenGLTexture(uint32_t width, uint32_t height, uint16_t channels);
 		OpenGLTexture(const std::string& path);
 		virtual ~OpenGLTexture();
 

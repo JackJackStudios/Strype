@@ -5,11 +5,19 @@
 
 namespace Strype {
 
-    OpenGLTexture::OpenGLTexture(uint32_t width, uint32_t height)
+    OpenGLTexture::OpenGLTexture(uint32_t width, uint32_t height, uint16_t channels)
         : m_Width(width), m_Height(height)
     {
-        m_InternalFormat = GL_RGBA8;
-        m_DataFormat = GL_RGBA;
+        if (channels == 4)
+        {
+            m_InternalFormat = GL_RGBA8;
+            m_DataFormat = GL_RGBA;
+        }
+        else if (channels == 3)
+        {
+            m_InternalFormat = GL_RGB8;
+            m_DataFormat = GL_RGB;
+        }
 
         glGenTextures(1, &m_RendererID);
         glBindTexture(GL_TEXTURE_2D, m_RendererID);

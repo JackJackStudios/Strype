@@ -17,8 +17,8 @@ namespace Strype {
 		static void SetClearColour(const glm::vec4& colour);
 		static void Clear();
 
-		static void BeginScene(Camera& camera);
-		static void EndScene();
+		static void BeginRoom(Camera& camera);
+		static void EndRoom();
 		static void Flush();
 
 		// Primitives

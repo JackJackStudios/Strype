@@ -76,7 +76,7 @@ namespace Strype {
 		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
 		delete[] quadIndices;
 
-		s_Data.WhiteTexture = Texture::Create(1, 1);
+		s_Data.WhiteTexture = Texture::Create(1, 1, 4);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_Data.WhiteTexture->SetData(Buffer(&whiteTextureData, sizeof(uint32_t)));
 
@@ -102,7 +102,7 @@ namespace Strype {
 		delete[] s_Data.QuadVertexBufferBase;
 	}
 	
-	void Renderer::BeginScene(Camera& camera)
+	void Renderer::BeginRoom(Camera& camera)
 	{
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
@@ -113,7 +113,7 @@ namespace Strype {
 		s_Data.TextureSlotIndex = 1;
 	}
 
-	void Renderer::EndScene()
+	void Renderer::EndRoom()
 	{
 		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
 		s_Data.QuadVertexBuffer->SetData(Buffer(s_Data.QuadVertexBufferBase, dataSize));
@@ -135,7 +135,7 @@ namespace Strype {
 
 	void Renderer::FlushAndReset()
 	{
-		EndScene();
+		EndRoom();
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;

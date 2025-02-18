@@ -21,7 +21,7 @@ namespace Strype {
 
 		virtual bool operator==(const Texture& other) const = 0;
 
-		static Ref<Texture> Create(uint32_t width, uint32_t height);
+		static Ref<Texture> Create(uint32_t width, uint32_t height, uint16_t channels);
 		static Ref<Texture> Create(const std::string& path);
 	};
 
