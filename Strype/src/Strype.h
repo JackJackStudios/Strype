@@ -22,9 +22,12 @@
 #include "Strype/Room/Components.h"
 #include "Strype/Room/RoomSerializer.h"
 
+#include "Strype/Project/Project.h"
+#include "Strype/Project/ProjectSerializer.h"
+
 #include "Strype/Core/Audio.h"
 
-#include "Strype/Core/PlatformUtils.h"
+#include "Strype/Utils/PlatformUtils.h"
 
 #include <imgui/imgui.h>
 #include <glm/glm.hpp>

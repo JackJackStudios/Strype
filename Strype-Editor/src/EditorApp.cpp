@@ -30,7 +30,7 @@ namespace Strype {
 				m_EditorCamera.OnResize(width, height);
 			});
 
-			OpenRoom();
+			OpenProject(Application::Get().GetConfig().StartupProject);
 		}
 
 		~EditorLayer()
@@ -107,7 +107,40 @@ namespace Strype {
 			{
 				RoomSerializer serializer(m_Room);
 				serializer.Deserialize(dialog);
+				m_PanelManager.SetRoomContext(m_Room);
 			}
+		}
+
+		void SaveProject()
+		{
+			if (!Project::GetActive())
+				return;
+
+			Ref<Project> project = Project::GetActive();
+			ProjectSerializer serializer(project);
+			serializer.Serialize(project->GetConfig().ProjectDirectory + "/" + project->GetConfig().ProjectFileName);
+		}
+
+		void OpenProject(const std::filesystem::path& path)
+		{
+			if (Project::GetActive())
+			{
+				SaveProject();
+
+				m_PanelManager.SetRoomContext(nullptr);
+
+				Project::SetActive(nullptr);
+			}
+			
+			Ref<Project> project = CreateRef<Project>();
+			ProjectSerializer serializer(project);
+			serializer.Deserialize(path);
+
+			Project::SetActive(project);
+
+			const std::string& startRoom = project->GetConfig().StartRoom;
+			if (!startRoom.empty())
+				OpenRoom((Project::GetProjectDirectory() / startRoom).string());
 		}
 
 		void OnEvent(Event& e) override
@@ -144,7 +177,9 @@ namespace Strype {
 	Application* CreateApplication()
 	{
 		AppConfig config;
+		config.StartupFrames = 10;
 		config.DockspaceEnabled = true;
+		config.StartupProject = "C:/Users/Jack/Documents/JackJackStudios/Strype/ExampleProject/ExampleProject.sproj";
 
 		return new Editor(config);
 	}

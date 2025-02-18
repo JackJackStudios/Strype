@@ -7,7 +7,7 @@
 
 #include "Strype/Renderer/Renderer.h"
 
-#include "Strype/Core/PlatformUtils.h"
+#include "Strype/Utils/PlatformUtils.h"
 
 namespace Strype
 {

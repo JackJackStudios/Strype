@@ -1,5 +1,5 @@
 #include "stypch.h"
-#include "Strype/Core/PlatformUtils.h"
+#include "Strype/Utils/PlatformUtils.h"
 
 #include "Strype/Core/Application.h"
 

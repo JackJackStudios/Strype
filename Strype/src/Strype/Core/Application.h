@@ -18,7 +18,9 @@ namespace Strype {
 	struct AppConfig
 	{
 		std::string WorkingDir;
+		std::string StartupProject;
 		bool DockspaceEnabled;
+		int StartupFrames = 10;
 	};
 
 	class Application
@@ -52,6 +54,7 @@ namespace Strype {
 		bool m_Running = true;
 		bool m_Minimized = false;
 
+		int m_StartupFrames;
 		float m_LastFrameTime = 0.0f;
 		LayerStack m_LayerStack;
 	private:

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Room.h"
+#include "Project.h"
 
 namespace Strype {
 
-	class RoomSerializer
+	class ProjectSerializer
 	{
 	public:
-		RoomSerializer(const Ref<Room>& room);
+		ProjectSerializer(const Ref<Project>& project);
 
 		void Serialize(const std::filesystem::path& filepath);
 		void Deserialize(const std::filesystem::path& filepath);
 	private:
-		Ref<Room> m_Room;
+		Ref<Project> m_Project;
 	};
 
 }

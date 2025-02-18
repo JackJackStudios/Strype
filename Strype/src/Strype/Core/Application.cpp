@@ -5,7 +5,7 @@
 #include "Strype/Core/Audio.h"
 #include "Strype/Core/Input.h"
 
-#include "Strype/Core/PlatformUtils.h"
+#include "Strype/Utils/PlatformUtils.h"
 
 namespace Strype {
 
@@ -19,6 +19,7 @@ namespace Strype {
 
 		if (!m_Config.WorkingDir.empty())
 			std::filesystem::current_path(m_Config.WorkingDir);
+		m_StartupFrames = m_Config.StartupFrames;
 
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
@@ -69,8 +70,6 @@ namespace Strype {
 
 	void Application::Run()
 	{
-		m_Window->SetVisable(true);
-
 		while (m_Running)
 		{
 			float time = Time::GetTime();
@@ -92,6 +91,9 @@ namespace Strype {
 			
 			m_Window->OnUpdate();
 			Input::Update();
+
+			if (--m_StartupFrames == 0)
+				m_Window->SetVisable(true);
 		}
 	}
 
