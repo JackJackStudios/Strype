@@ -8,11 +8,14 @@ namespace Strype {
 		std::string Name;
 		std::string StartRoom;
 
-		//Note: Project directiory is folder .styproj is in to find assets etc.
+		//NOTE: Project directiory is folder .styproj is in to find assets etc.
 		//		Working directiory is for editor-only assets like BaseShader
 		std::string ProjectDirectory;
 		std::string ProjectFileName;
 	};
+
+	// Relative to working directory
+	const std::filesystem::path EMPTY_PROJECT = "EmptyProject/EmptyProject.sproj";
 
 	//Note: Project is not a Asset because it holds the AssetManager
 	class Project
@@ -25,6 +28,8 @@ namespace Strype {
 
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
+
+		static Ref<Project> New(const std::filesystem::path& path);
 
 		static const std::string& GetProjectName()
 		{

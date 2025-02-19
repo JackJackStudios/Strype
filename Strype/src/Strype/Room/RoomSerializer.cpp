@@ -61,7 +61,7 @@ namespace Strype {
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap;
-		out << YAML::Key << "Room" << YAML::Value << m_Room->GetName();
+		out << YAML::Key << "Room" << YAML::Value << YAML::BeginMap;
 		out << YAML::Key << "Objects" << YAML::Value << YAML::BeginSeq;
 
 		auto view = m_Room->m_Registry.view<entt::entity>();
@@ -87,16 +87,15 @@ namespace Strype {
 		std::stringstream stream;
 		stream << fstream.rdbuf();
 
-		YAML::Node data = YAML::Load(stream.str());
+		YAML::Node data = YAML::Load(stream.str())["Room"];
 
-		STY_CORE_ASSERT(data["Room"], "Could not load room")
+		STY_CORE_ASSERT(data, "Could not load room")
 		STY_CORE_ASSERT(data["Objects"], "Could not load room")
 
-		std::string roomName = data["Room"].as<std::string>();
-		STY_CORE_TRACE("Deserializing room '{0}'", roomName);
+		STY_CORE_TRACE("Deserializing room '{0}'", filepath.stem().string());
 		
 		m_Room->Clear();
-		m_Room->m_Name = roomName;
+		m_Room->m_Name = filepath.stem().string();
 
 		YAML::Node objects = data["Objects"];
 		for (auto obj : objects)

@@ -76,7 +76,7 @@ namespace Strype {
 		const std::vector<std::filesystem::path>& GetPaths() const { return m_Paths; }
 
 		EVENT_CLASS_TYPE(WindowDrop)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
 		std::vector<std::filesystem::path> m_Paths;
 	};

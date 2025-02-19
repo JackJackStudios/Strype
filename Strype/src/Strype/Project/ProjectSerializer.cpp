@@ -17,7 +17,6 @@ namespace Strype {
 		out << YAML::Key << "Project" << YAML::Value;
 		out << YAML::BeginMap;
 		{
-			out << YAML::Key << "Name" << YAML::Value << m_Project->m_Config.Name;
 			out << YAML::Key << "StartRoom" << YAML::Value << m_Project->m_Config.StartRoom;
 		}
 		out << YAML::EndMap;
@@ -40,17 +39,14 @@ namespace Strype {
 		YAML::Node root = data["Project"];
 
 		STY_CORE_ASSERT(root, "Could not open project");
-		STY_CORE_ASSERT(root["Name"], "Could not open project");
 
-		STY_CORE_TRACE("Deserializing project '{0}'", root["Name"].as<std::string>());
+		STY_CORE_TRACE("Deserializing project '{0}'", filepath.stem().string());
 
 		ProjectConfig& config = m_Project->m_Config;
-		config.Name = root["Name"].as<std::string>();
+		config.Name = filepath.stem().string();
 		config.StartRoom = root["StartRoom"].as<std::string>();
-
-		std::filesystem::path projectPath = filepath;
-		config.ProjectFileName = projectPath.filename().string();
-		config.ProjectDirectory = projectPath.parent_path().string();
+		config.ProjectDirectory = filepath.parent_path().string();
+		config.ProjectFileName = filepath.filename().string();
 	}
 
 }

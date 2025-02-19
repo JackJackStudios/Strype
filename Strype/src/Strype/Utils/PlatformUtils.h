@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string>
-
 namespace Strype {
 
 	class FileDialogs
 	{
 	public:
-		static std::string OpenFile(const char* filter);
-		static std::string SaveFile(const char* filter);
+		static std::filesystem::path OpenFile(const char* filter);
+		static std::filesystem::path SaveFile(const char* filter);
+			   
+		static std::filesystem::path OpenFolder();
 	};
 
 	class Time

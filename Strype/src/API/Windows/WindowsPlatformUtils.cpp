@@ -9,10 +9,11 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <commdlg.h>
+#include <shobjidl.h> 
 
 namespace Strype {
 
-	std::string FileDialogs::OpenFile(const char* filter)
+	std::filesystem::path FileDialogs::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -29,12 +30,12 @@ namespace Strype {
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 		if (GetOpenFileNameA(&ofn) == TRUE)
-			return ofn.lpstrFile;
+			return std::filesystem::path(ofn.lpstrFile);
 
-		return std::string();
+		return std::filesystem::path();
 	}
 
-	std::string FileDialogs::SaveFile(const char* filter)
+	std::filesystem::path FileDialogs::SaveFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -54,9 +55,47 @@ namespace Strype {
 		ofn.lpstrDefExt = strchr(filter, '\0') + 1;
 
 		if (GetSaveFileNameA(&ofn) == TRUE)
-			return ofn.lpstrFile;
+			return std::filesystem::path(ofn.lpstrFile);
 
-		return std::string();
+		return std::filesystem::path();
+	}
+
+	std::filesystem::path FileDialogs::OpenFolder()
+	{
+		HRESULT hr;
+		IFileDialog* pFileDialog = nullptr;
+
+		hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&pFileDialog));
+		if (FAILED(hr))
+			return std::filesystem::path();
+
+		DWORD dwOptions;
+		pFileDialog->GetOptions(&dwOptions);
+		pFileDialog->SetOptions(dwOptions | FOS_PICKFOLDERS);
+
+		hr = pFileDialog->Show(nullptr);
+		if (SUCCEEDED(hr))
+		{
+			IShellItem* pItem = nullptr;
+			hr = pFileDialog->GetResult(&pItem);
+			if (SUCCEEDED(hr))
+			{
+				PWSTR pszFilePath = nullptr;
+				hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+
+				if (SUCCEEDED(hr))
+				{
+					std::filesystem::path folderPath = pszFilePath;
+					CoTaskMemFree(pszFilePath);
+					pItem->Release();
+					pFileDialog->Release();
+					return folderPath;
+				}
+				pItem->Release();
+			}
+		}
+		pFileDialog->Release();
+		return std::filesystem::path();
 	}
 
 }

@@ -60,19 +60,22 @@ namespace Strype {
 			{
 				if (ImGui::BeginMenu("File"))
 				{
+					if (ImGui::MenuItem("New Project"))
+						NewProject();
+
 					if (ImGui::MenuItem("Open Project...", "Ctrl+O"))
-						OpenProject(FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0"));
+						OpenProject();
 
 					if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S"))
 						SaveProject();
 
 					ImGui::Separator();
 
-					if (ImGui::MenuItem("New Scene", "Ctrl+N"))
+					if (ImGui::MenuItem("New Room", "Ctrl+N"))
 						NewRoom();
 
-					if (ImGui::MenuItem("Save Scene As...", "Ctrl+S"))
-						SaveRoom();
+					if (ImGui::MenuItem("Save Room As...", "Ctrl+S"))
+						SaveRoomAs();
 
 					ImGui::Separator();
 
@@ -95,9 +98,9 @@ namespace Strype {
 			m_PanelManager.SetRoomContext(m_Room);
 		}
 
-		void SaveRoom(const std::string& path = std::string())
+		void SaveRoomAs(const std::filesystem::path& path = std::filesystem::path())
 		{
-			std::string dialog = path.empty() ? FileDialogs::SaveFile("Strype Room (*.sroom)\0*.sroom\0") : path;
+			std::filesystem::path dialog = path.empty() ? FileDialogs::SaveFile("Strype Room (*.sroom)\0*.sroom\0") : path;
 
 			if (!dialog.empty())
 			{
@@ -106,16 +109,16 @@ namespace Strype {
 			}
 		}
 
-		void OpenRoom(const std::string& path = std::string())
+		void OpenRoom(const std::filesystem::path& path = std::filesystem::path())
 		{
-			std::string dialog = path.empty() ? FileDialogs::OpenFile("Strype Room (*.sroom)\0*.sroom\0") : path;
+			std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Room (*.sroom)\0*.sroom\0") : path;
 
-			if (!dialog.empty())
-			{
-				RoomSerializer serializer(m_Room);
-				serializer.Deserialize(dialog);
-				m_PanelManager.SetRoomContext(m_Room);
-			}
+			if (dialog.empty())
+				return; // User click off of file dialog
+
+			RoomSerializer serializer(m_Room);
+			serializer.Deserialize(dialog);
+			m_PanelManager.SetRoomContext(m_Room);
 		}
 
 		void NewProject()
@@ -128,11 +131,16 @@ namespace Strype {
 				Project::SetActive(nullptr);
 			}
 
-			Ref<Project> project = CreateRef<Project>();
+			// NOTE: This function will copy a template project into
+			//       the new directory. This is because a Project cannot exist
+			//       without a folder or default room (you must deserialize the room yourself)
+			Ref<Project> project = Project::New(FileDialogs::OpenFolder());
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
 
-			NewRoom();
+			const std::string& startRoom = project->GetConfig().StartRoom;
+			if (!startRoom.empty())
+				OpenRoom((Project::GetProjectDirectory() / startRoom).string());
 		}
 
 		void SaveProject()
@@ -145,8 +153,13 @@ namespace Strype {
 			serializer.Serialize(project->GetConfig().ProjectDirectory + "/" + project->GetConfig().ProjectFileName);
 		}
 
-		void OpenProject(const std::filesystem::path& path)
+		void OpenProject(const std::filesystem::path& path = std::filesystem::path())
 		{
+			std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0") : path;
+
+			if (dialog.empty())
+				return; // User click off of file dialog
+
 			if (Project::GetActive())
 			{
 				SaveProject();
@@ -157,7 +170,7 @@ namespace Strype {
 			
 			Ref<Project> project = CreateRef<Project>();
 			ProjectSerializer serializer(project);
-			serializer.Deserialize(path);
+			serializer.Deserialize(dialog);
 
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
@@ -167,10 +180,23 @@ namespace Strype {
 				OpenRoom((Project::GetProjectDirectory() / startRoom).string());
 		}
 
+		bool OnWindowDrop(WindowDropEvent& e)
+		{
+			const std::filesystem::path& path = e.GetPaths()[0];
+			std::string ext = path.extension().string();
+
+			if (ext == ".sproj")
+				OpenProject(path);
+
+			return false;
+		}
+
 		void OnEvent(Event& e) override
 		{
-			m_EditorCamera.OnEvent(e);
+			EventDispatcher dispatcher(e);
+			dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorLayer::OnWindowDrop));
 
+			m_EditorCamera.OnEvent(e);
 			m_PanelManager.OnEvent(e);
 		}
 
