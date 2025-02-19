@@ -2,6 +2,7 @@
 #include "AssetImporter.h"
 
 #include "TextureImporter.h"
+#include "RoomImporter.h"
 
 namespace Strype {
 
@@ -11,7 +12,8 @@ namespace Strype {
 
 	using AssetImportFunc = std::function<Ref<Asset>(AssetHandle, const AssetMetadata&)>;
 	static std::map<AssetType, AssetImportFunc> s_AssetImportFunctions = {
-		{ AssetType::Texture, TextureImporter::ImportTexture }
+		{ AssetType::Texture, TextureImporter::ImportTexture },
+		{ AssetType::Room, RoomImporter::ImportRoom },
 	};
 
 	Ref<Asset> AssetImporter::ImportAsset(AssetHandle handle, const AssetMetadata& metadata)

@@ -4,13 +4,15 @@
 #include "Strype/Core/Timestep.h"
 #include "Strype/Renderer/Camera.h"
 
+#include "Strype/Asset/Asset.h"
+
 #include <entt/entt.hpp>
 
 namespace Strype {
 
 	class Object;
 
-	class Room
+	class Room : public Asset
 	{
 	public:
 		Room();
@@ -21,8 +23,10 @@ namespace Strype {
 
 		void Clear();
 		void OnUpdate(Timestep ts, Camera cam);
-	
+
 		const std::string& GetName() const { return m_Name; }
+
+		virtual AssetType GetType() const override { return AssetType::Room; }
 	private:
 		entt::registry m_Registry;
 		std::string m_Name = "Untitled";
