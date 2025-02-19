@@ -6,10 +6,6 @@
 
 namespace Strype {
 
-	/// <summary>
-	/// TODO: Asset manager, static interfase in Project e.g Project::GetAsset()
-	/// </summary>
-
 	using AssetImportFunc = std::function<Ref<Asset>(AssetHandle, const AssetMetadata&)>;
 	static std::map<AssetType, AssetImportFunc> s_AssetImportFunctions = {
 		{ AssetType::Texture, TextureImporter::ImportTexture },
