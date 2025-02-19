@@ -33,6 +33,8 @@ namespace Strype {
 			});
 
 			OpenProject(Application::Get().GetConfig().StartupProject);
+
+			Project::GetActive()->GetAssetManager()->ImportAsset("sSellChest.png");
 		}
 
 		~EditorLayer()
@@ -50,6 +52,17 @@ namespace Strype {
 		{
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
+
+			Renderer::BeginRoom(m_EditorCamera.GetCamera());
+
+			const auto& assetRegistry = Project::GetActive()->GetAssetManager()->GetAssetRegistry();
+			for (const auto& [handle, metadata] : assetRegistry)
+			{
+				STY_CORE_INFO("Name: {0}, ID: {1}", metadata.FilePath.string(), (uint64_t)handle);
+				Ref<Texture> asset = std::static_pointer_cast<Texture>(Project::GetActive()->GetAssetManager()->GetAsset(handle));
+
+				Renderer::DrawRotatedQuad({ 0.0f, 0.0f }, { 64.0f, 64.0f }, 0.0f, asset);
+			}
 
 			m_Room->OnUpdate(ts, m_EditorCamera.GetCamera());
 		}
@@ -150,7 +163,7 @@ namespace Strype {
 
 			Ref<Project> project = Project::GetActive();
 			ProjectSerializer serializer(project);
-			serializer.Serialize(project->GetConfig().ProjectDirectory + "/" + project->GetConfig().ProjectFileName);
+			serializer.Serialize(project->GetConfig().ProjectDirectory / project->GetConfig().ProjectFileName);
 		}
 
 		void OpenProject(const std::filesystem::path& path = std::filesystem::path())

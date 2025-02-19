@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Strype/Asset/AssetManager.h"
+
 namespace Strype {
 
 	struct ProjectConfig
@@ -10,7 +12,7 @@ namespace Strype {
 
 		//NOTE: Project directiory is folder .styproj is in to find assets etc.
 		//		Working directiory is for editor-only assets like BaseShader
-		std::string ProjectDirectory;
+		std::filesystem::path ProjectDirectory;
 		std::string ProjectFileName;
 	};
 
@@ -25,6 +27,8 @@ namespace Strype {
 		~Project();
 
 		const ProjectConfig& GetConfig() const { return m_Config; }
+
+		Ref<AssetManager> GetAssetManager() { return m_AssetManager; }
 
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
@@ -41,7 +45,7 @@ namespace Strype {
 			return s_ActiveProject->GetConfig().ProjectDirectory;
 		}
 	private:
-		//TODO: Asset Manager
+		Ref<AssetManager> m_AssetManager;
 
 		ProjectConfig m_Config;
 		inline static Ref<Project> s_ActiveProject;
