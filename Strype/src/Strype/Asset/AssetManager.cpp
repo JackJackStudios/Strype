@@ -7,20 +7,14 @@
 #include <yaml-cpp/yaml.h>
 
 namespace Strype {
-	
-	namespace Utils {
 
-		static AssetType GetAssetTypeFromFileExtension(const std::filesystem::path& extension)
-		{
-			if (s_AssetExtensionMap.find(extension) == s_AssetExtensionMap.end())
-			{
-				STY_CORE_WARN("Could not find AssetType for {0}", extension.string());
-				return AssetType::None;
-			}
+	AssetManager::AssetManager()
+	{
+		ReloadAssets();
+	}
 
-			return s_AssetExtensionMap.at(extension);
-		}
-
+	AssetManager::~AssetManager()
+	{
 	}
 
 	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
@@ -70,7 +64,7 @@ namespace Strype {
 	{
 		AssetHandle handle;
 		AssetMetadata metadata;
-		metadata.FilePath = filepath;
+		metadata.FilePath = std::filesystem::relative(filepath, Project::GetProjectDirectory());
 		metadata.Type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
 		STY_CORE_ASSERT(metadata.Type != AssetType::None, "Could not import Asset");
@@ -98,6 +92,22 @@ namespace Strype {
 	const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
 	{
 		return GetMetadata(handle).FilePath;
+	}
+
+	void AssetManager::ReloadAssets()
+	{
+		ProcessDirectory(Project::GetProjectDirectory());
+	}
+
+	void AssetManager::ProcessDirectory(const std::filesystem::path& path)
+	{
+		for (auto& entry : std::filesystem::directory_iterator(path))
+		{
+			if (entry.is_directory())
+				ProcessDirectory(entry.path());
+			else if (s_AssetExtensionMap.find(entry.path().extension()) != s_AssetExtensionMap.end())
+				ImportAsset(entry.path());
+		}
 	}
 
 }

@@ -5,11 +5,26 @@
 namespace Strype {
 
 	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
-		{ ".sroom", AssetType::Room },
+		//TODO: Add Room back
 		{ ".png", AssetType::Texture },
 		{ ".jpg", AssetType::Texture },
 		{ ".jpeg", AssetType::Texture }
 	};
+
+	namespace Utils {
+
+		static AssetType GetAssetTypeFromFileExtension(const std::filesystem::path& extension)
+		{
+			if (s_AssetExtensionMap.find(extension) == s_AssetExtensionMap.end())
+			{
+				STY_CORE_WARN("Could not find AssetType for {0}", extension.string());
+				return AssetType::None;
+			}
+
+			return s_AssetExtensionMap.at(extension);
+		}
+
+	}
 
 	using AssetRegistry = std::map<AssetHandle, AssetMetadata>;
 	using AssetMap = std::map<AssetHandle, Ref<Asset>>;
@@ -17,6 +32,9 @@ namespace Strype {
 	class AssetManager
 	{
 	public:
+		AssetManager();
+		~AssetManager();
+
 		Ref<Asset> GetAsset(AssetHandle handle);
 
 		bool IsAssetHandleValid(AssetHandle handle) const;
@@ -24,12 +42,15 @@ namespace Strype {
 		AssetType GetAssetType(AssetHandle handle) const;
 
 		void ImportAsset(const std::filesystem::path& filepath);
+		void ReloadAssets();
 
 		const AssetMetadata& GetMetadata(AssetHandle handle) const;
 		const std::filesystem::path& GetFilePath(AssetHandle handle) const;
 
 		const AssetRegistry& GetAssetRegistry() const { return m_AssetRegistry; }
 	private:
+		void ProcessDirectory(const std::filesystem::path& path);
+
 		AssetRegistry m_AssetRegistry;
 		AssetMap m_LoadedAssets;
 	};

@@ -52,7 +52,7 @@ namespace Strype {
 		s_ActiveProject = project;
 
 		Ref<AssetManager> assetManager = CreateRef<AssetManager>();
-		s_ActiveProject->m_AssetManager = assetManager;
+		s_AssetManager = assetManager;
 	}
 
 }

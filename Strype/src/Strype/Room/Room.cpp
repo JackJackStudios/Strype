@@ -36,6 +36,7 @@ namespace Strype {
 
 	void Room::OnUpdate(Timestep ts, Camera cam)
 	{
+		Renderer::BeginRoom(cam);
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
 			if (sprite.Texture.get() == nullptr)

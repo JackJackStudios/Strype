@@ -28,7 +28,7 @@ namespace Strype {
 
 		const ProjectConfig& GetConfig() const { return m_Config; }
 
-		Ref<AssetManager> GetAssetManager() { return m_AssetManager; }
+		static Ref<AssetManager> GetAssetManager() { return s_AssetManager; }
 
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
@@ -44,8 +44,41 @@ namespace Strype {
 		{
 			return s_ActiveProject->GetConfig().ProjectDirectory;
 		}
+
+		template<typename T>
+		static Ref<T> GetAsset(AssetHandle handle)
+		{
+			Ref<AssetManager> assetManager = Project::GetAssetManager();
+			return std::static_pointer_cast<T>(assetManager);
+		}
+
+		static bool IsAssetHandleValid(AssetHandle handle)
+		{
+			return Project::GetAssetManager()->IsAssetHandleValid(handle);
+		}
+
+		static bool IsAssetLoaded(AssetHandle handle)
+		{
+			return Project::GetAssetManager()->IsAssetLoaded(handle);
+		}
+
+		static AssetType GetAssetType(AssetHandle handle)
+		{
+			return Project::GetAssetManager()->GetAssetType(handle);
+		}
+
+		static const AssetMetadata& GetMetadata(AssetHandle handle)
+		{
+			return Project::GetAssetManager()->GetMetadata(handle);
+		}
+
+		static const std::filesystem::path& GetFilePath(AssetHandle handle)
+		{
+			return Project::GetAssetManager()->GetFilePath(handle);
+		}
+
 	private:
-		Ref<AssetManager> m_AssetManager;
+		inline static Ref<AssetManager> s_AssetManager;
 
 		ProjectConfig m_Config;
 		inline static Ref<Project> s_ActiveProject;

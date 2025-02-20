@@ -22,7 +22,7 @@ namespace Strype {
 			m_PanelManager.SetRoomContext(m_Room);
 
 			m_PanelManager.AddPanel<SceneHierachyPanel>();
-			m_PanelManager.AddPanel<ContentBrowserPanel>();
+			m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
 			m_ViewportPanel = m_PanelManager.AddPanel<ViewportPanel>();
 
 			m_ViewportPanel->SetDrawCallback(STY_BIND_EVENT_FN(EditorLayer::DrawViewport));
@@ -33,8 +33,6 @@ namespace Strype {
 			});
 
 			OpenProject(Application::Get().GetConfig().StartupProject);
-
-			Project::GetActive()->GetAssetManager()->ImportAsset("sSellChest.png");
 		}
 
 		~EditorLayer()
@@ -52,17 +50,6 @@ namespace Strype {
 		{
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
-
-			Renderer::BeginRoom(m_EditorCamera.GetCamera());
-
-			const auto& assetRegistry = Project::GetActive()->GetAssetManager()->GetAssetRegistry();
-			for (const auto& [handle, metadata] : assetRegistry)
-			{
-				STY_CORE_INFO("Name: {0}, ID: {1}", metadata.FilePath.string(), (uint64_t)handle);
-				Ref<Texture> asset = std::static_pointer_cast<Texture>(Project::GetActive()->GetAssetManager()->GetAsset(handle));
-
-				Renderer::DrawRotatedQuad({ 0.0f, 0.0f }, { 64.0f, 64.0f }, 0.0f, asset);
-			}
 
 			m_Room->OnUpdate(ts, m_EditorCamera.GetCamera());
 		}
@@ -188,9 +175,9 @@ namespace Strype {
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
 
-			const std::string& startRoom = project->GetConfig().StartRoom;
-			if (!startRoom.empty())
-				OpenRoom((Project::GetProjectDirectory() / startRoom).string());
+			//const std::string& startRoom = project->GetConfig().StartRoom;
+			//if (!startRoom.empty())
+			//	OpenRoom((Project::GetProjectDirectory() / startRoom).string());
 		}
 
 		bool OnWindowDrop(WindowDropEvent& e)
@@ -219,6 +206,7 @@ namespace Strype {
 		
 		PanelManager m_PanelManager;
 		Ref<ViewportPanel> m_ViewportPanel;
+		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
 	};
 
 	class Editor : public Application
