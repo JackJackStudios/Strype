@@ -56,7 +56,10 @@ namespace Strype {
 				}
 				else if (AssetType type = Utils::GetAssetTypeFromFileExtension(path.extension()); m_ItemClicksCallbacks.find(type) != m_ItemClicksCallbacks.end())
 				{
-					m_ItemClicksCallbacks[type](path);
+					AssetMetadata metadata;
+					metadata.FilePath = path;
+					metadata.Handle = node.Handle;
+					m_ItemClicksCallbacks[type](metadata);
 				}
 			}
 
@@ -108,7 +111,11 @@ namespace Strype {
 				node.Nodes.emplace_back(relativePath, &node, assetRegistry.at(relativePath));
 			}
 		}
-	}
 
+		std::stable_partition(node.Nodes.begin(), node.Nodes.end(), [this](const TreeNode& node) 
+		{
+			return std::filesystem::is_directory(Project::GetProjectDirectory() / node.Path);
+		});
+	}
 
 }

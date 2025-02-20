@@ -22,6 +22,7 @@ namespace Strype {
 
 	struct AssetMetadata
 	{
+		AssetHandle Handle;
 		AssetType Type = AssetType::None;
 		std::filesystem::path FilePath;
 

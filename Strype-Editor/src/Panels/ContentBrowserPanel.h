@@ -17,7 +17,7 @@ namespace Strype {
 			: Path(path), Parent(parent), Handle(handle) {}
 	};
 
-	using ItemClickCallbackFunc = std::function<void(const std::filesystem::path&)>;
+	using ItemClickCallbackFunc = std::function<void(const AssetMetadata&)>;
 
 	class ContentBrowserPanel : public EditorPanel
 	{
@@ -28,6 +28,7 @@ namespace Strype {
 		virtual void OnProjectChanged() { RefreshAssetTree(); }
 
 		void SetItemClickCallback(AssetType type, ItemClickCallbackFunc func) { m_ItemClicksCallbacks[type] = func; }
+	private:
 		void FillTreeNode(TreeNode& node, std::unordered_map<std::filesystem::path, AssetHandle>& assetRegistry);
 		void RefreshAssetTree();
 	private:

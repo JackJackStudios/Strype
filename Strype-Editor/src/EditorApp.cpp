@@ -32,6 +32,11 @@ namespace Strype {
 				m_EditorCamera.OnResize(width, height);
 			});
 
+			m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata) 
+			{
+				OpenRoom(metadata);
+			});
+
 			OpenProject(Application::Get().GetConfig().StartupProject);
 		}
 
@@ -74,8 +79,8 @@ namespace Strype {
 					if (ImGui::MenuItem("New Room", "Ctrl+N"))
 						NewRoom();
 
-					if (ImGui::MenuItem("Save Room As...", "Ctrl+S"))
-						SaveRoomAs();
+					if (ImGui::MenuItem("Save Room", "Ctrl+S"))
+						SaveRoom();
 
 					ImGui::Separator();
 
@@ -96,6 +101,17 @@ namespace Strype {
 		{
 			m_Room = CreateRef<Room>();
 			m_PanelManager.SetRoomContext(m_Room);
+			m_RoomFilePath = std::string();
+		}
+
+		void SaveRoom()
+		{
+			RoomSerializer serializer(m_Room);
+
+			if (!m_RoomFilePath.empty())
+				serializer.Serialize(m_RoomFilePath);
+			else
+				SaveRoomAs();
 		}
 
 		void SaveRoomAs(const std::filesystem::path& path = std::filesystem::path())
@@ -106,41 +122,42 @@ namespace Strype {
 			{
 				RoomSerializer serializer(m_Room);
 				serializer.Serialize(dialog);
+				m_RoomFilePath = dialog;
 			}
 		}
 
-		void OpenRoom(const std::filesystem::path& path = std::filesystem::path())
+		void OpenRoom(const AssetMetadata& metadata)
 		{
-			std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Room (*.sroom)\0*.sroom\0") : path;
-
-			if (dialog.empty())
-				return; // User click off of file dialog
-
-			RoomSerializer serializer(m_Room);
-			serializer.Deserialize(dialog);
+			m_Room = Project::GetAsset<Room>(metadata.Handle);
 			m_PanelManager.SetRoomContext(m_Room);
+			m_RoomFilePath = Project::GetFilePath(metadata.Handle);
+		}
+
+		void OpenRoom(const std::filesystem::path& path)
+		{
+			const AssetMetadata& metadata = Project::GetMetadata(Project::GetHandle(path));
+			OpenRoom(metadata);
 		}
 
 		void NewProject()
 		{
 			if (Project::GetActive())
-			{
 				SaveProject();
 
-				m_PanelManager.SetRoomContext(nullptr);
-				Project::SetActive(nullptr);
-			}
+			std::filesystem::path path = FileDialogs::OpenFolder();
+			if (path.empty())
+				return;
 
 			// NOTE: This function will copy a template project into
 			//       the new directory. This is because a Project cannot exist
 			//       without a folder or default room (you must deserialize the room yourself)
-			Ref<Project> project = Project::New(FileDialogs::OpenFolder());
+			Ref<Project> project = Project::New(path);
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
 
 			const std::string& startRoom = project->GetConfig().StartRoom;
 			if (!startRoom.empty())
-				OpenRoom((Project::GetProjectDirectory() / startRoom).string());
+				OpenRoom(Project::GetProjectDirectory() / startRoom);
 		}
 
 		void SaveProject()
@@ -161,12 +178,7 @@ namespace Strype {
 				return; // User click off of file dialog
 
 			if (Project::GetActive())
-			{
 				SaveProject();
-
-				m_PanelManager.SetRoomContext(nullptr);
-				Project::SetActive(nullptr);
-			}
 			
 			Ref<Project> project = CreateRef<Project>();
 			ProjectSerializer serializer(project);
@@ -175,9 +187,9 @@ namespace Strype {
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
 
-			//const std::string& startRoom = project->GetConfig().StartRoom;
-			//if (!startRoom.empty())
-			//	OpenRoom((Project::GetProjectDirectory() / startRoom).string());
+			const std::string& startRoom = project->GetConfig().StartRoom;
+			if (!startRoom.empty())
+				OpenRoom(Project::GetProjectDirectory() / startRoom);
 		}
 
 		bool OnWindowDrop(WindowDropEvent& e)
@@ -201,6 +213,8 @@ namespace Strype {
 		}
 
 	private:
+		std::filesystem::path m_RoomFilePath;
+
 		EditorCamera m_EditorCamera;
 		Ref<Room> m_Room;
 		

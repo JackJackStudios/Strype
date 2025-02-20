@@ -5,7 +5,7 @@
 namespace Strype {
 
 	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
-		//TODO: Add Room back
+		{ ".sroom", AssetType::Room },
 		{ ".png", AssetType::Texture },
 		{ ".jpg", AssetType::Texture },
 		{ ".jpeg", AssetType::Texture }
@@ -25,7 +25,8 @@ namespace Strype {
 		}
 
 	}
-
+	
+	using AssetFileSystem = std::map<std::filesystem::path, AssetHandle>;
 	using AssetRegistry = std::map<AssetHandle, AssetMetadata>;
 	using AssetMap = std::map<AssetHandle, Ref<Asset>>;
 
@@ -47,10 +48,13 @@ namespace Strype {
 		const AssetMetadata& GetMetadata(AssetHandle handle) const;
 		const std::filesystem::path& GetFilePath(AssetHandle handle) const;
 
+		const AssetHandle GetHandle(const std::filesystem::path& path) const;
+
 		const AssetRegistry& GetAssetRegistry() const { return m_AssetRegistry; }
 	private:
 		void ProcessDirectory(const std::filesystem::path& path);
 
+		AssetFileSystem m_LoadedFiles;
 		AssetRegistry m_AssetRegistry;
 		AssetMap m_LoadedAssets;
 	};

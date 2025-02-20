@@ -64,6 +64,7 @@ namespace Strype {
 	{
 		AssetHandle handle;
 		AssetMetadata metadata;
+		metadata.Handle = handle;
 		metadata.FilePath = std::filesystem::relative(filepath, Project::GetProjectDirectory());
 		metadata.Type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
@@ -75,6 +76,7 @@ namespace Strype {
 		{
 			asset->Handle = handle;
 			m_LoadedAssets[handle] = asset;
+			m_LoadedFiles[filepath] = handle;
 			m_AssetRegistry[handle] = metadata;
 		}
 	}
@@ -92,6 +94,16 @@ namespace Strype {
 	const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
 	{
 		return GetMetadata(handle).FilePath;
+	}
+
+	const AssetHandle AssetManager::GetHandle(const std::filesystem::path& path) const
+	{
+		static AssetHandle s_NullHandle = 0;
+		auto it = m_LoadedFiles.find(path);
+		if (it == m_LoadedFiles.end())
+			return s_NullHandle;
+
+		return it->second;
 	}
 
 	void AssetManager::ReloadAssets()
