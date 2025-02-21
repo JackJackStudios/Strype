@@ -29,7 +29,7 @@ namespace Strype {
 
 		void SetItemClickCallback(AssetType type, ItemClickCallbackFunc func) { m_ItemClicksCallbacks[type] = func; }
 	private:
-		void FillTreeNode(TreeNode& node, std::unordered_map<std::filesystem::path, AssetHandle>& assetRegistry);
+		void FillTreeNode(TreeNode& node);
 		void RefreshAssetTree();
 	private:
 		Ref<Room> m_ActiveScene;

@@ -190,9 +190,41 @@ namespace Strype {
 				DrawVec2Control("Scale", component.Scale, 1.0f);
 			});
 
-			DrawComponent<SpriteRenderer>("Sprite Renderer", m_Selection, [](SpriteRenderer& component)
+			DrawComponent<SpriteRenderer>("Sprite Renderer", m_Selection, [this](SpriteRenderer& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Colour));
+
+				ImGui::Text("Texture");
+				ImGui::SameLine();
+
+				if (!component.Texture)
+				{
+					ImGui::Button("<empty>");
+				}
+				else
+				{
+					std::string id = (std::string("##") + m_Selection.GetComponent<TagComponent>().Tag + "Sprite Renderer");
+					ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Texture>(component.Texture)->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
+
+					if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
+					{
+						component.Texture = 0;
+					}
+				}
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						AssetHandle handle = *(AssetHandle*)payload->Data;
+
+						if (Project::GetAssetType(handle) == AssetType::Texture)
+							component.Texture = handle;
+						else
+							STY_CORE_WARN("Wrong asset type!");
+					}
+					ImGui::EndDragDropTarget();
+				}
 			});
 		}
 

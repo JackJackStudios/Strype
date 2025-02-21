@@ -52,14 +52,14 @@ namespace Strype {
 			return std::static_pointer_cast<T>(assetManager->GetAsset(handle));
 		}
 
-		static bool IsAssetHandleValid(AssetHandle handle)
-		{
-			return Project::GetAssetManager()->IsAssetHandleValid(handle);
-		}
-
 		static bool IsAssetLoaded(AssetHandle handle)
 		{
 			return Project::GetAssetManager()->IsAssetLoaded(handle);
+		}
+
+		static AssetHandle ImportAsset(const std::filesystem::path& path)
+		{
+			return Project::GetAssetManager()->ImportAsset(path);
 		}
 
 		static AssetType GetAssetType(AssetHandle handle)
@@ -72,7 +72,7 @@ namespace Strype {
 			return Project::GetAssetManager()->GetMetadata(handle);
 		}
 
-		static const AssetHandle GetHandle(const std::filesystem::path& path)
+		static const AssetHandle GetAssetHandle(const std::filesystem::path& path)
 		{
 			return Project::GetAssetManager()->GetHandle(path);
 		}

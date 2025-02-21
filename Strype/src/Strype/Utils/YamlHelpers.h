@@ -77,6 +77,23 @@ namespace YAML {
 		}
 	};
 
+	template<>
+	struct convert<std::filesystem::path> {
+		static Node encode(const std::filesystem::path& rhs) {
+			Node node;
+			node = rhs.string();
+			return node;
+		}
+
+		static bool decode(const Node& node, std::filesystem::path& rhs) {
+			if (!node.IsScalar()) {
+				return false;
+			}
+			rhs = node.as<std::string>();
+			return true;
+		}
+	};
+
 }
 
 namespace Strype {
@@ -100,6 +117,11 @@ namespace Strype {
 	{
 		out << YAML::Flow;
 		out << YAML::BeginSeq << v.x << v.y << v.z << v.w << YAML::EndSeq;
+		return out;
+	}
+
+	inline YAML::Emitter& operator<<(YAML::Emitter& out, const std::filesystem::path& path) {
+		out << path.string();
 		return out;
 	}
 

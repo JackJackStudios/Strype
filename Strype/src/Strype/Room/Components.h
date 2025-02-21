@@ -36,12 +36,12 @@ namespace Strype {
 	struct SpriteRenderer
 	{
 		glm::vec4 Colour;
-		Ref<Texture> Texture;
+		AssetHandle Texture;
 
 		SpriteRenderer(const SpriteRenderer&) = default;
 		SpriteRenderer()
-			: Colour(1.0f), Texture(nullptr) {}
-		SpriteRenderer(const Ref<Strype::Texture>& texture, const glm::vec4& colour = glm::vec4(1.0f))
+			: Colour(1.0f), Texture(0) {}
+		SpriteRenderer(AssetHandle texture, const glm::vec4& colour = glm::vec4(1.0f))
 			: Texture(texture), Colour(colour)  {}
 	};
 

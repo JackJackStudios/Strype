@@ -53,6 +53,7 @@ namespace Strype {
 
 		Ref<AssetManager> assetManager = CreateRef<AssetManager>();
 		s_AssetManager = assetManager;
+		s_AssetManager->ReloadAssets(); // <- This must not happen in constructor
 	}
 
 }

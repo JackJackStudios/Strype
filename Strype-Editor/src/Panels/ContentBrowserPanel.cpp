@@ -44,9 +44,34 @@ namespace Strype {
 			std::string name = path.filename().string();
 			AssetHandle handle = node.Handle;
 			bool isDirectory = std::filesystem::is_directory(m_CurrentDirectory->Path / path);
-			Ref<Texture> icon = isDirectory ? m_DirectoryIcon : m_FileIcon;
 
+			Ref<Texture> icon;
+			if (isDirectory)
+			{
+				icon = m_DirectoryIcon;
+			}
+			else
+			{
+				switch (Project::GetAssetType(handle))
+				{
+				case AssetType::Texture:
+					icon = Project::GetAsset<Texture>(handle);
+					break;
+
+				default:
+					icon = m_FileIcon;
+					break;
+				}
+			}
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::ImageButton((std::string("##") + name).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+
+			if (ImGui::BeginDragDropSource())
+			{
+				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", &node.Handle, sizeof(AssetHandle));
+				ImGui::EndDragDropSource();
+			}
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
@@ -63,6 +88,8 @@ namespace Strype {
 				}
 			}
 
+			ImGui::PopStyleColor();
+
 			ImGui::TextWrapped(name.c_str());
 
 			ImGui::NextColumn();
@@ -74,21 +101,13 @@ namespace Strype {
 
 	void ContentBrowserPanel::RefreshAssetTree()
 	{
-		// Flip values of the Asset Registy so AssetHandle can be
-		// associated with TreeNodes
-		std::unordered_map<std::filesystem::path, AssetHandle> assetRegistry;
-
-		for (const auto& [handle, metadata] : Project::GetAssetManager()->GetAssetRegistry())
-			assetRegistry[metadata.FilePath] = handle;
-
 		m_RootDirectory = TreeNode(Project::GetProjectDirectory(), nullptr);
 		m_CurrentDirectory = &m_RootDirectory;
-
-		// Recersivly set AssetHandles to TreeNodes
-		FillTreeNode(m_RootDirectory, assetRegistry);
+		
+		FillTreeNode(m_RootDirectory);
 	}
 
-	void ContentBrowserPanel::FillTreeNode(TreeNode& node, std::unordered_map<std::filesystem::path, AssetHandle>& assetRegistry)
+	void ContentBrowserPanel::FillTreeNode(TreeNode& node)
 	{
 		if (!Utils::NumOfFileOrDirs(node.Path))
 			return;
@@ -104,11 +123,11 @@ namespace Strype {
 			if (isDirectory)
 			{
 				node.Nodes.emplace_back(entry.path(), &node);
-				FillTreeNode(node.Nodes.back(), assetRegistry);
+				FillTreeNode(node.Nodes.back());
 			}
 			else
 			{
-				node.Nodes.emplace_back(relativePath, &node, assetRegistry.at(relativePath));
+				node.Nodes.emplace_back(relativePath, &node, Project::GetAssetHandle(relativePath));
 			}
 		}
 

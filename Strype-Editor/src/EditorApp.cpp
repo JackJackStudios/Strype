@@ -109,7 +109,7 @@ namespace Strype {
 			RoomSerializer serializer(m_Room);
 
 			if (!m_RoomFilePath.empty())
-				serializer.Serialize(m_RoomFilePath);
+				serializer.Serialize(Project::GetProjectDirectory() / m_RoomFilePath);
 			else
 				SaveRoomAs();
 		}
@@ -135,7 +135,7 @@ namespace Strype {
 
 		void OpenRoom(const std::filesystem::path& path)
 		{
-			const AssetMetadata& metadata = Project::GetMetadata(Project::GetHandle(path));
+			const AssetMetadata& metadata = Project::GetMetadata(Project::GetAssetHandle(path));
 			OpenRoom(metadata);
 		}
 
@@ -189,7 +189,7 @@ namespace Strype {
 
 			const std::string& startRoom = project->GetConfig().StartRoom;
 			if (!startRoom.empty())
-				OpenRoom(Project::GetProjectDirectory() / startRoom);
+				OpenRoom(startRoom);
 		}
 
 		bool OnWindowDrop(WindowDropEvent& e)

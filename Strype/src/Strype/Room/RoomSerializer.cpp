@@ -4,8 +4,10 @@
 #include "Object.h"
 #include "Components.h"
 
-#include <fstream>
 #include "Strype/Utils/YamlHelpers.h"
+#include "Strype/Project/Project.h"
+
+#include <fstream>
 
 namespace Strype {
 
@@ -50,6 +52,7 @@ namespace Strype {
 
 			SpriteRenderer& s = obj.GetComponent<SpriteRenderer>();
 			out << YAML::Key << "Colour" << YAML::Value << s.Colour;
+			out << YAML::Key << "TexturePath" << YAML::Value << (s.Texture ? Project::GetFilePath(s.Texture) : "");
 
 			out << YAML::EndMap;
 		}
@@ -125,6 +128,14 @@ namespace Strype {
 			{
 				SpriteRenderer& src = newobj.AddComponent<SpriteRenderer>();
 				src.Colour = sprite["Colour"].as<glm::vec4>();
+
+				const std::filesystem::path& path = sprite["TexturePath"].as<std::filesystem::path>();
+
+				if (!path.empty())
+				{
+					AssetHandle handle = Project::ImportAsset(path);
+					src.Texture = handle;
+				}
 			}
 		}
 	}

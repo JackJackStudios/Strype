@@ -4,6 +4,7 @@
 #include "Strype/Renderer/Renderer.h"
 #include "Strype/Room/Object.h"
 #include "Strype/Room/Components.h"
+#include "Strype/Project/Project.h"
 
 #include <glm/glm.hpp>
 
@@ -39,13 +40,13 @@ namespace Strype {
 		Renderer::BeginRoom(cam);
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
-			if (sprite.Texture.get() == nullptr)
+			if (sprite.Texture)
 			{
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
+				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, Project::GetAsset<Texture>(sprite.Texture), sprite.Colour);
 			}
 			else
 			{
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Texture, sprite.Colour);
+				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
 			}
 		});
 

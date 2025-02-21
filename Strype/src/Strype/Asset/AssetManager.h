@@ -34,25 +34,23 @@ namespace Strype {
 	{
 	public:
 		AssetManager();
-		~AssetManager();
+		~AssetManager() = default;
 
 		Ref<Asset> GetAsset(AssetHandle handle);
 
-		bool IsAssetHandleValid(AssetHandle handle) const;
 		bool IsAssetLoaded(AssetHandle handle) const;
-		AssetType GetAssetType(AssetHandle handle) const;
+		bool IsAssetLoaded(std::filesystem::path filepath) const;
 
-		void ImportAsset(const std::filesystem::path& filepath);
+		AssetHandle ImportAsset(const std::filesystem::path& filepath);
 		void ReloadAssets();
 
 		const AssetMetadata& GetMetadata(AssetHandle handle) const;
 		const std::filesystem::path& GetFilePath(AssetHandle handle) const;
+		const AssetType GetAssetType(AssetHandle handle) const;
 
-		const AssetHandle GetHandle(const std::filesystem::path& path) const;
-
-		const AssetRegistry& GetAssetRegistry() const { return m_AssetRegistry; }
+		AssetHandle GetHandle(const std::filesystem::path& path) const;
 	private:
-		void ProcessDirectory(const std::filesystem::path& path);
+		void LoadDirectory(const std::filesystem::path& path);
 
 		AssetFileSystem m_LoadedFiles;
 		AssetRegistry m_AssetRegistry;
