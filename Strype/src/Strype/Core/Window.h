@@ -6,6 +6,7 @@
 #include "Strype/Events/Event.h"
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 namespace Strype {
 
@@ -38,6 +39,7 @@ namespace Strype {
 
 		inline unsigned int GetWidth() const { return m_Data.Width; }
 		inline unsigned int GetHeight() const { return m_Data.Height; }
+		glm::vec2 GetPosition() const;
 
 		// Window attributes
 		inline void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }

@@ -6,7 +6,6 @@
 
 #include "Panels/SceneHierachyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
-#include "Panels/ViewportPanel.h"
 
 namespace Strype {
 	
@@ -14,23 +13,16 @@ namespace Strype {
 	{
 	public:
 		EditorLayer()
-			: m_EditorCamera(1280.0f, 720.0f)
 		{
 			m_Room = CreateRef<Room>();
+			m_EditorCamera = CreateRef<EditorCamera>(1280.0f, 720.0f);
+			m_Framebuffer = Framebuffer::Create(1280, 720);
 
 			//Configure PanelManager
 			m_PanelManager.SetRoomContext(m_Room);
 
 			m_PanelManager.AddPanel<SceneHierachyPanel>();
 			m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
-			m_ViewportPanel = m_PanelManager.AddPanel<ViewportPanel>();
-
-			m_ViewportPanel->SetDrawCallback(STY_BIND_EVENT_FN(EditorLayer::DrawViewport));
-			
-			m_ViewportPanel->SetResizedCallback([this](float width, float height)
-			{
-				m_EditorCamera.OnResize(width, height);
-			});
 
 			m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata) 
 			{
@@ -46,17 +38,21 @@ namespace Strype {
 
 		void OnUpdate(Timestep ts) override
 		{
-			m_EditorCamera.OnUpdate(ts);
+			m_EditorCamera->OnUpdate(ts);
 
-			m_ViewportPanel->OnUpdate(ts);
-		}
+			if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
+				(m_Framebuffer->GetWidth() != m_ViewportSize.x || m_Framebuffer->GetHeight() != m_ViewportSize.y))
+			{
+				m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+				m_EditorCamera->OnResize(m_ViewportSize.x, m_ViewportSize.y);
+			}
 
-		void DrawViewport(Timestep ts)
-		{
+			m_Framebuffer->Bind();
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
 
-			m_Room->OnUpdate(ts, m_EditorCamera.GetCamera());
+			m_Room->OnUpdate(ts, m_EditorCamera->GetCamera());
+			m_Framebuffer->Unbind();
 		}
 
 		void OnImGuiRender() override
@@ -93,6 +89,36 @@ namespace Strype {
 				ImGui::EndMenuBar();
 			}
 
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+			ImGui::Begin("Viewport");
+
+			Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
+
+			ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+			m_ViewportSize = glm::vec2(viewportSize.x, viewportSize.y);
+
+			ImGui::Image(m_Framebuffer->GetAttachmentID(), viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					AssetHandle handle = *(AssetHandle*)payload->Data;
+
+					if (Project::GetAssetType(handle) == AssetType::Room)
+						OpenRoom(Project::GetMetadata(handle));
+					else if (Project::GetAssetType(handle) == AssetType::Texture)
+					{
+						Object obj = m_Room->CreateObject(Project::GetMetadata(handle).FilePath.stem().string());
+						obj.AddComponent<Transform>(m_EditorCamera->GetPosition());
+						obj.AddComponent<SpriteRenderer>(handle);
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			ImGui::End();
+			ImGui::PopStyleVar();
 
 			m_PanelManager.OnImGuiRender();
 		}
@@ -208,19 +234,21 @@ namespace Strype {
 			EventDispatcher dispatcher(e);
 			dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorLayer::OnWindowDrop));
 
-			m_EditorCamera.OnEvent(e);
+			m_EditorCamera->OnEvent(e);
 			m_PanelManager.OnEvent(e);
 		}
 
 	private:
 		std::filesystem::path m_RoomFilePath;
 
-		EditorCamera m_EditorCamera;
+		Ref<Framebuffer> m_Framebuffer;
+		Ref<EditorCamera> m_EditorCamera;
 		Ref<Room> m_Room;
 		
 		PanelManager m_PanelManager;
-		Ref<ViewportPanel> m_ViewportPanel;
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
+
+		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 	};
 
 	class Editor : public Application

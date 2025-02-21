@@ -9,6 +9,8 @@ namespace Strype {
 	EditorCamera::EditorCamera(float width, float height)
 		: m_AspectRatio(width / height), m_Camera(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel)
 	{
+		m_Width = width;
+		m_Height = height;
 	}
 
 	void EditorCamera::OnUpdate(Timestep ts)
@@ -45,6 +47,9 @@ namespace Strype {
 
 	void EditorCamera::OnResize(float width, float height)
 	{
+		m_Width = width;
+		m_Height = height;
+
 		m_AspectRatio = width / height;
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 	}

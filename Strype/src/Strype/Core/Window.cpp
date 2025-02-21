@@ -113,6 +113,15 @@ namespace Strype
 		glfwSwapBuffers(m_Window);
 	}
 
+	glm::vec2 Window::GetPosition() const
+	{
+		int x;
+		int y;
+		glfwGetWindowPos(m_Window, &x, &y);
+
+		return glm::vec2(x, y);
+	}
+
 	void Window::SetVSync(bool enabled)
 	{
 		if (enabled)
