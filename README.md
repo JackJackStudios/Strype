@@ -1,7 +1,5 @@
 # Strype
 
-Hazel is primarily an early-stage interactive application and rendering engine for Windows. Currently not much is implemented, however (almost) everything inside this repository is being created within YouTube videos, found at [thecherno.com/engine](https://thecherno.com/engine). 
-
 Strype is a early-stage game engine built for pixel art, super quick rendering and fast iteration speed. We aim eventually to have support for Vulkan, Asesprite intergation and multiplayer games
 
 ***
