@@ -1,0 +1,13 @@
+[submodule "Libraries/GLFW"]
+	path = Libraries/GLFW
+	url = https://github.com/glfw/glfw.git
+[submodule "Libraries/spdlog"]
+	path = Libraries/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "Libraries/yaml-cpp"]
+	path = Libraries/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "Libraries/imgui"]
+	path = Libraries/imgui
+	url = https://github.com/ocornut/imgui.git/
+	branch = docking

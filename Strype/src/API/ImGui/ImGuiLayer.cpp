@@ -4,9 +4,9 @@
 #include "Strype/Core/Application.h"
 
 #include <GLFW/glfw3.h>
-#include <imgui/imgui.h>
-#include <imgui/backends/imgui_impl_glfw.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 
 namespace Strype {
 
@@ -14,7 +14,6 @@ namespace Strype {
 		: m_Dockspace(dockspace)
 	{
 		// Setup Dear ImGui context
-		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;

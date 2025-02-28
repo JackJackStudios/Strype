@@ -1,4 +1,8 @@
-Libraries/
+Libraries/include/
+Libraries/lib/
+
+bin/
+bin-int/
 
 x64/
 x32/

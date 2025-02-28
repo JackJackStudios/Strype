@@ -33,5 +33,5 @@
 
 #include "Strype/Utils/PlatformUtils.h"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 #include <glm/glm.hpp>
