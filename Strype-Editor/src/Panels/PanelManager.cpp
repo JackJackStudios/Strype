@@ -2,6 +2,14 @@
 
 namespace Strype {
 
+	PanelManager::PanelManager()
+	{
+		m_Inspector = AddPanel<InspectorPanel>();
+
+		for (const Ref<EditorPanel>& panel : m_Panels)
+			panel->SetInspector(m_Inspector);
+	}
+
 	PanelManager::~PanelManager()
 	{
 		m_Panels.clear();

@@ -20,23 +20,31 @@ namespace Strype {
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Content Browser");
-
-		if (m_CurrentDirectory->Parent != nullptr)
-		{
-			if (ImGui::Button("<-"))
-				m_CurrentDirectory = m_CurrentDirectory->Parent;
-		}
-
+		
 		float padding = 16.0f;
 		float thumbnailSize = 90.0f;
 		float cellSize = thumbnailSize + padding;
-
+		
 		float panelWidth = ImGui::GetContentRegionAvail().x;
 		int columnCount = (int)(panelWidth / cellSize);
 		if (columnCount < 1)
 			columnCount = 1;
+		
+		ImGui::Columns(columnCount + 1, 0, false);
 
-		ImGui::Columns(columnCount, 0, false);
+		if (m_CurrentDirectory->Parent != nullptr)
+		{
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			ImGui::ImageButton("<-", (ImTextureID)m_DirectoryIcon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			ImGui::PopStyleColor();
+			
+			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				m_CurrentDirectory = m_CurrentDirectory->Parent;
+
+			ImGui::TextWrapped("../");
+
+			ImGui::NextColumn();
+		}
 
 		for (TreeNode& node : m_CurrentDirectory->Nodes)
 		{
@@ -44,7 +52,7 @@ namespace Strype {
 			std::string name = path.filename().string();
 			AssetHandle handle = node.Handle;
 			bool isDirectory = std::filesystem::is_directory(m_CurrentDirectory->Path / path);
-
+		
 			Ref<Texture> icon;
 			if (isDirectory)
 			{
@@ -57,22 +65,22 @@ namespace Strype {
 				case AssetType::Texture:
 					icon = Project::GetAsset<Texture>(handle);
 					break;
-
+		
 				default:
 					icon = m_FileIcon;
 					break;
 				}
 			}
-
+		
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::ImageButton((std::string("##") + name).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
-
+		
 			if (ImGui::BeginDragDropSource())
 			{
 				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", &node.Handle, sizeof(AssetHandle));
 				ImGui::EndDragDropSource();
 			}
-
+		
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (isDirectory)
@@ -87,14 +95,14 @@ namespace Strype {
 					m_ItemClicksCallbacks[type](metadata);
 				}
 			}
-
+		
 			ImGui::PopStyleColor();
-
+		
 			ImGui::TextWrapped(name.c_str());
-
+		
 			ImGui::NextColumn();
 		}
-
+		
 		ImGui::Columns(1);
 		ImGui::End();
 	}
@@ -109,10 +117,10 @@ namespace Strype {
 
 	void ContentBrowserPanel::FillTreeNode(TreeNode& node)
 	{
-		if (!Utils::NumOfFileOrDirs(node.Path))
+		if (!Utils::NumOfFileOrDirs(Project::GetProjectDirectory() / node.Path))
 			return;
 
-		for (const auto& entry : std::filesystem::directory_iterator(node.Path))
+		for (const auto& entry : std::filesystem::directory_iterator(Project::GetProjectDirectory() / node.Path))
 		{
 			std::filesystem::path relativePath = std::filesystem::relative(entry.path(), m_RootDirectory.Path);
 			bool isDirectory = entry.is_directory();
@@ -122,7 +130,7 @@ namespace Strype {
 
 			if (isDirectory)
 			{
-				node.Nodes.emplace_back(entry.path(), &node);
+				node.Nodes.emplace_back(relativePath, &node);
 				FillTreeNode(node.Nodes.back());
 			}
 			else

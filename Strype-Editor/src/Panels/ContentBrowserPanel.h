@@ -32,7 +32,6 @@ namespace Strype {
 		void FillTreeNode(TreeNode& node);
 		void RefreshAssetTree();
 	private:
-		Ref<Room> m_ActiveScene;
 		std::unordered_map<AssetType, ItemClickCallbackFunc> m_ItemClicksCallbacks;
 		
 		TreeNode m_RootDirectory;

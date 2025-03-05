@@ -9,26 +9,26 @@ namespace Strype {
 	}
 
 	template<typename T>
-	static void AddComponentPopup(Object& selection, const std::string& entryName) {
-		if (!selection.HasComponent<T>())
+	static void AddComponentPopup(Object* selection, const std::string& entryName) {
+		if (!selection->HasComponent<T>())
 		{
 			if (ImGui::MenuItem(entryName.c_str()))
 			{
-				selection.AddComponent<T>();
+				selection->AddComponent<T>();
 				ImGui::CloseCurrentPopup();
 			}
 		}
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const std::string& name, Object entity, UIFunction uiFunction)
+	static void DrawComponent(const std::string& name, Object* entity, UIFunction uiFunction)
 	{
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
 			ImGuiTreeNodeFlags_FramePadding;
-		if (entity.HasComponent<T>())
+		if (entity->HasComponent<T>())
 		{
-			auto& component = entity.GetComponent<T>();
+			auto& component = entity->GetComponent<T>();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
@@ -56,12 +56,12 @@ namespace Strype {
 
 			if (open)
 			{
-				uiFunction(component);
+				uiFunction(entity, component);
 				ImGui::TreePop();
 			}
 
 			if (removeComponent)
-				entity.RemoveComponent<T>();
+				entity->RemoveComponent<T>();
 		}
 	}
 
@@ -152,45 +152,50 @@ namespace Strype {
 
 		ImGui::End();
 
-		ImGui::Begin("Inspector");
-
 		if (m_Selection)
 		{
-			if (m_Selection.HasComponent<TagComponent>())
+			m_Inspector->SetSelected<Object>(&m_Selection);
+			m_Inspector->AddType<Object>(STY_BIND_EVENT_FN(SceneHierachyPanel::OnInspectorRender));	
+		}
+	}
+
+	void SceneHierachyPanel::OnInspectorRender(Object* select)
+	{
+		if (select->HasComponent<TagComponent>())
+		{
+			TagComponent& tag = select->GetComponent<TagComponent>();
+
+			char buffer[256];
+			strncpy(buffer, tag, sizeof(buffer));
+			if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
 			{
-				TagComponent& tag = m_Selection.GetComponent<TagComponent>();
-				
-				char buffer[256];
-				strncpy(buffer, tag, sizeof(buffer));
-				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-				{
-					tag = std::string(buffer);
-				}
+				tag = std::string(buffer);
 			}
+		}
 
-			ImGui::SameLine();
-			ImGui::PushItemWidth(-1);
+		ImGui::SameLine();
+		ImGui::PushItemWidth(-1);
 
-			if (ImGui::Button("Add Component"))
-				ImGui::OpenPopup("AddComponent");
+		if (ImGui::Button("Add Component"))
+			ImGui::OpenPopup("AddComponent");
 
-			if (ImGui::BeginPopup("AddComponent"))
-			{
-				AddComponentPopup<Transform>(m_Selection, "Transform");
-				AddComponentPopup<SpriteRenderer>(m_Selection, "Sprite Renderer");
+		if (ImGui::BeginPopup("AddComponent"))
+		{
+			AddComponentPopup<Transform>(select, "Transform");
+			AddComponentPopup<SpriteRenderer>(select, "Sprite Renderer");
 
-				ImGui::EndPopup();
-			}
+			ImGui::EndPopup();
+		}
 
-			ImGui::PopItemWidth();
+		ImGui::PopItemWidth();
 
-			DrawComponent<Transform>("Transform", m_Selection, [](auto& component)
+		DrawComponent<Transform>("Transform", select, [](Object* select, Transform& component)
 			{
 				DrawVec2Control("Position", component.Position);
 				DrawVec2Control("Scale", component.Scale, 1.0f);
 			});
 
-			DrawComponent<SpriteRenderer>("Sprite Renderer", m_Selection, [this](SpriteRenderer& component)
+		DrawComponent<SpriteRenderer>("Sprite Renderer", select, [](Object* select, SpriteRenderer& component)
 			{
 				ImGui::ColorEdit4("Color", glm::value_ptr(component.Colour));
 
@@ -203,7 +208,7 @@ namespace Strype {
 				}
 				else
 				{
-					std::string id = (std::string("##") + m_Selection.GetComponent<TagComponent>().Tag + "Sprite Renderer");
+					std::string id = (std::string("##") + select->GetComponent<TagComponent>().Tag + "Sprite Renderer");
 					ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Texture>(component.Texture)->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
 
 					if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
@@ -226,9 +231,6 @@ namespace Strype {
 					ImGui::EndDragDropTarget();
 				}
 			});
-		}
-
-		ImGui::End();
 	}
 
 }

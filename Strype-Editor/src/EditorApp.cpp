@@ -17,7 +17,7 @@ namespace Strype {
 			m_Room = CreateRef<Room>();
 			m_EditorCamera = CreateRef<EditorCamera>(1280.0f, 720.0f);
 			m_Framebuffer = Framebuffer::Create(1280, 720);
-
+			
 			//Configure PanelManager
 			m_PanelManager.SetRoomContext(m_Room);
 
