@@ -28,10 +28,10 @@ namespace Strype {
 		virtual void OnProjectChanged() { RefreshAssetTree(); }
 
 		void SetItemClickCallback(AssetType type, ItemClickCallbackFunc func) { m_ItemClicksCallbacks[type] = func; }
-	private:
-		void FillTreeNode(TreeNode& node);
 		void RefreshAssetTree();
 	private:
+		void FillTreeNode(TreeNode& node);
+
 		std::unordered_map<AssetType, ItemClickCallbackFunc> m_ItemClicksCallbacks;
 		
 		TreeNode m_RootDirectory;

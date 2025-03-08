@@ -22,7 +22,8 @@ namespace Strype {
 
 		virtual bool operator==(const Texture& other) const = 0;
 
-		virtual AssetType GetType() const override { return AssetType::Texture; }
+		static AssetType GetStaticType() { return AssetType::Texture; }
+		virtual AssetType GetType() const override { return GetStaticType(); }
 
 		static Ref<Texture> Create(uint32_t width, uint32_t height, uint16_t channels);
 		static Ref<Texture> Create(const std::string& path);

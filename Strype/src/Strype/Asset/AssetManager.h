@@ -5,6 +5,7 @@
 namespace Strype {
 
 	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
+		{ ".sprefab", AssetType::Prefab },
 		{ ".sroom", AssetType::Room },
 		{ ".png", AssetType::Texture },
 		{ ".jpg", AssetType::Texture },

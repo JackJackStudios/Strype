@@ -8,6 +8,7 @@ namespace Strype::Utils {
 		switch (type)
 		{
 		case AssetType::None:    return "AssetType::None";
+		case AssetType::Prefab:  return "AssetType::Prefab";
 		case AssetType::Room:    return "AssetType::Room";
 		case AssetType::Texture: return "AssetType::Texture";
 		}
@@ -18,6 +19,7 @@ namespace Strype::Utils {
 	AssetType AssetTypeFromString(std::string_view assetType)
 	{
 		if (assetType == "AssetType::None")    return AssetType::None;
+		if (assetType == "AssetType::Prefab")  return AssetType::Prefab;
 		if (assetType == "AssetType::Room")    return AssetType::Room;
 		if (assetType == "AssetType::Texture") return AssetType::Texture;
 

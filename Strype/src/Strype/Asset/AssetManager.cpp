@@ -63,7 +63,7 @@ namespace Strype {
 		AssetHandle handle;
 		AssetMetadata metadata;
 		metadata.Handle = handle;
-		metadata.FilePath = filepath;
+		metadata.FilePath = filepath.is_absolute() ? std::filesystem::relative(filepath, Project::GetProjectDirectory()) : filepath;
 		metadata.Type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
 		STY_CORE_ASSERT(metadata.Type != AssetType::None, "Could not import Asset");
@@ -79,7 +79,7 @@ namespace Strype {
 		}
 		else
 		{
-			STY_CORE_ERROR("Asset import failed '{0}'", filepath.string());
+			STY_CORE_ERROR("Asset import failed '{0}'", metadata.FilePath.string());
 		}
 
 		return handle;

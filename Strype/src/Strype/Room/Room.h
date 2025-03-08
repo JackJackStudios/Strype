@@ -18,7 +18,7 @@ namespace Strype {
 		Room();
 		~Room();
 
-		Object CreateObject(std::string name = std::string());
+		Object CreateObject(std::string name = std::string(), glm::vec3 position = glm::vec3());
 		void DestroyObject(Object entity);
 
 		void Clear();
@@ -26,14 +26,28 @@ namespace Strype {
 
 		const std::string& GetName() const { return m_Name; }
 
-		virtual AssetType GetType() const override { return AssetType::Room; }
+		static AssetType GetStaticType() { return AssetType::Room; }
+		virtual AssetType GetType() const override { return GetStaticType(); }
+
+		template<typename TComponent>
+		void CopyComponentIfExists(entt::entity dst, entt::registry& dstRegistry, entt::entity src)
+		{
+			if (m_Registry.all_of<TComponent>(src))
+			{
+				auto& srcComponent = m_Registry.get<TComponent>(src);
+				dstRegistry.emplace_or_replace<TComponent>(dst, srcComponent);
+			}
+		}
 	private:
 		entt::registry m_Registry;
 		std::string m_Name = "Untitled";
 
 		friend class Object;
+		friend class Prefab;
 		friend class SceneHierachyPanel;
 		friend class RoomSerializer;
 	};
+
+	static Ref<Room> s_PrefabRoom = CreateRef<Room>();
 
 }

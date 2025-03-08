@@ -116,7 +116,7 @@ namespace Strype {
 			YAML::Node transform = obj["Transform"];
 			if (transform)
 			{
-				Transform& tc = newobj.AddComponent<Transform>();
+				Transform& tc = newobj.GetComponent<Transform>();
 
 				tc.Position = transform["Position"].as<glm::vec2>();
 				tc.Scale = transform["Scale"].as<glm::vec2>();

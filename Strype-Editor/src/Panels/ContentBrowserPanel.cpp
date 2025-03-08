@@ -103,6 +103,14 @@ namespace Strype {
 			ImGui::NextColumn();
 		}
 		
+		if (ImGui::BeginPopupContextWindow())
+		{
+			ImGui::MenuItem("New Room");
+			ImGui::MenuItem("New Prefab");
+
+			ImGui::EndPopup();
+		}
+
 		ImGui::Columns(1);
 		ImGui::End();
 	}

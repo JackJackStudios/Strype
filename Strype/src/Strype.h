@@ -21,6 +21,7 @@
 #include "Strype/Room/Object.h"
 #include "Strype/Room/Components.h"
 #include "Strype/Room/RoomSerializer.h"
+#include "Strype/Room/PrefabSerializer.h"
 
 #include "Strype/Asset/Asset.h"
 #include "Strype/Asset/AssetManager.h"

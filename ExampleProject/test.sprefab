@@ -1,0 +1,4 @@
+Prefab:
+  SpriteRenderer:
+    Colour: [1, 1, 1, 1]
+    TexturePath: sSellChest.png

@@ -7,8 +7,66 @@
 #include "Panels/SceneHierachyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Strype {
 	
+	template<typename T>
+	static void AddComponentPopup(Prefab* selection, const std::string& entryName) {
+		if (!selection->HasComponent<T>())
+		{
+			if (ImGui::MenuItem(entryName.c_str()))
+			{
+				selection->AddComponent<T>();
+				ImGui::CloseCurrentPopup();
+			}
+		}
+	}
+
+	template<typename T, typename UIFunction>
+	static void DrawComponent(const std::string& name, Prefab* entity, UIFunction uiFunction)
+	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
+			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
+			ImGuiTreeNodeFlags_FramePadding;
+		if (entity->HasComponent<T>())
+		{
+			auto& component = entity->GetComponent<T>();
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
+			bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(typeid(T).hash_code()), treeNodeFlags, "%s", name.c_str());
+			ImGui::PopStyleVar();
+
+			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
+
+			std::string popupID = "ComponentSettings_" + std::to_string(typeid(T).hash_code());
+			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
+			{
+				ImGui::OpenPopup(popupID.c_str());
+			}
+
+			bool removeComponent = false;
+			if (ImGui::BeginPopup(popupID.c_str()))
+			{
+				if (ImGui::MenuItem("Remove component"))
+					removeComponent = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open)
+			{
+				uiFunction(entity, component);
+				ImGui::TreePop();
+			}
+
+			if (removeComponent)
+				entity->RemoveComponent<T>();
+		}
+	}
+
 	class EditorLayer : public Layer
 	{
 	public:
@@ -28,6 +86,13 @@ namespace Strype {
 			{
 				OpenRoom(metadata);
 			});
+
+			m_ContentBrowserPanel->SetItemClickCallback(AssetType::Prefab, [this](const AssetMetadata& metadata)
+			{
+				m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Prefab>(metadata.Handle).get());
+			});
+
+			m_PanelManager.GetInspector()->AddType<Prefab>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
 			OpenProject(Application::Get().GetConfig().StartupProject);
 		}
@@ -107,6 +172,8 @@ namespace Strype {
 
 					if (Project::GetAssetType(handle) == AssetType::Room)
 						OpenRoom(Project::GetMetadata(handle));
+					else if (Project::GetAssetType(handle) == AssetType::Prefab)
+						Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
 					else if (Project::GetAssetType(handle) == AssetType::Texture)
 					{
 						Object obj = m_Room->CreateObject(Project::GetMetadata(handle).FilePath.stem().string());
@@ -149,6 +216,9 @@ namespace Strype {
 				RoomSerializer serializer(m_Room);
 				serializer.Serialize(dialog);
 				m_RoomFilePath = dialog;
+
+				Project::ImportAsset(dialog);
+				m_ContentBrowserPanel->RefreshAssetTree();
 			}
 		}
 
@@ -216,6 +286,56 @@ namespace Strype {
 			const std::string& startRoom = project->GetConfig().StartRoom;
 			if (!startRoom.empty())
 				OpenRoom(startRoom);
+		}
+
+		void OnInspectorRender(Prefab* prefab)
+		{
+			if (ImGui::BeginPopupContextWindow())
+			{
+				AddComponentPopup<Transform>(prefab, "Transform");
+				AddComponentPopup<SpriteRenderer>(prefab, "Sprite Renderer");
+
+				ImGui::EndPopup();
+			}
+
+			DrawComponent<SpriteRenderer>("Sprite Renderer", prefab, [](Prefab* select, SpriteRenderer& component)
+			{
+				ImGui::Text("Colour");
+				ImGui::SameLine();
+				ImGui::ColorEdit4("##Color", glm::value_ptr(component.Colour));
+
+				ImGui::Text("Texture");
+				ImGui::SameLine();
+
+				if (!component.Texture)
+				{
+					ImGui::Button("<empty>");
+				}
+				else
+				{
+					std::string id = (std::string("##") + select->GetComponent<TagComponent>().Tag + "Sprite Renderer");
+					ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Texture>(component.Texture)->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
+
+					if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
+					{
+						component.Texture = 0;
+					}
+				}
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						AssetHandle handle = *(AssetHandle*)payload->Data;
+
+						if (Project::GetAssetType(handle) == AssetType::Texture)
+							component.Texture = handle;
+						else
+							STY_CORE_WARN("Wrong asset type!");
+					}
+					ImGui::EndDragDropTarget();
+				}
+			});
 		}
 
 		bool OnWindowDrop(WindowDropEvent& e)

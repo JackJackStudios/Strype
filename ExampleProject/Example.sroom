@@ -1,32 +1,12 @@
 Room:
   Objects:
-    - Object: 2
+    - Object: 0
       TagComponent:
-        Tag: Eye-1
+        Tag: test
       Transform:
-        Position: [-1.1, 0]
+        Position: [0, 0]
         Scale: [1, 1]
         Rotation: 0
       SpriteRenderer:
         Colour: [1, 1, 1, 1]
         TexturePath: sSellChest.png
-    - Object: 1
-      TagComponent:
-        Tag: Mouth
-      Transform:
-        Position: [0.3, -3.2]
-        Scale: [5, 1]
-        Rotation: 0
-      SpriteRenderer:
-        Colour: [1, 1, 1, 1]
-        TexturePath: ""
-    - Object: 0
-      TagComponent:
-        Tag: Eye-2
-      Transform:
-        Position: [1.9, 0]
-        Scale: [1, 1]
-        Rotation: 0
-      SpriteRenderer:
-        Colour: [1, 1, 1, 1]
-        TexturePath: ""
