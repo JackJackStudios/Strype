@@ -40,7 +40,7 @@ namespace Strype {
 		Ref<Asset> GetAsset(AssetHandle handle);
 
 		bool IsAssetLoaded(AssetHandle handle) const;
-		bool IsAssetLoaded(std::filesystem::path filepath) const;
+		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
 
 		AssetHandle ImportAsset(const std::filesystem::path& filepath);
 		void ReloadAssets();

@@ -6,6 +6,15 @@
 
 namespace Strype {
 
+	namespace Utils {
+
+		std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
+		{
+			return filepath.is_absolute() ? std::filesystem::relative(filepath, Project::GetProjectDirectory()) : filepath;
+		}
+
+	}
+
 	AssetManager::AssetManager()
 	{
 	}
@@ -38,9 +47,9 @@ namespace Strype {
 		return m_LoadedAssets.find(handle) != m_LoadedAssets.end();
 	}
 
-	bool AssetManager::IsAssetLoaded(std::filesystem::path filepath) const
+	bool AssetManager::IsAssetLoaded(const std::filesystem::path& filepath) const
 	{
-		return m_LoadedFiles.find(filepath) != m_LoadedFiles.end();
+		return m_LoadedFiles.find(Utils::ToAssetSysPath(filepath)) != m_LoadedFiles.end();
 	}
 
 	const AssetType AssetManager::GetAssetType(AssetHandle handle) const
@@ -55,7 +64,7 @@ namespace Strype {
 
 	AssetHandle AssetManager::GetHandle(const std::filesystem::path& path) const
 	{
-		return m_LoadedFiles.at(path);
+		return m_LoadedFiles.at(Utils::ToAssetSysPath(path));
 	}
 
 	AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)
@@ -63,7 +72,7 @@ namespace Strype {
 		AssetHandle handle;
 		AssetMetadata metadata;
 		metadata.Handle = handle;
-		metadata.FilePath = filepath.is_absolute() ? std::filesystem::relative(filepath, Project::GetProjectDirectory()) : filepath;
+		metadata.FilePath = Utils::ToAssetSysPath(filepath);
 		metadata.Type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
 		STY_CORE_ASSERT(metadata.Type != AssetType::None, "Could not import Asset");
