@@ -5,15 +5,15 @@
 
 namespace Strype {
 
-	Ref<Texture>TextureImporter::ImportTexture(AssetHandle handle, const AssetMetadata& metadata)
+	Ref<Sprite> TextureImporter::ImportTexture(AssetHandle handle, const AssetMetadata& metadata)
 	{
 		return LoadTexture(Project::GetProjectDirectory() / metadata.FilePath);
 	}
 
-	Ref<Texture>TextureImporter::LoadTexture(const std::filesystem::path& path)
+	Ref<Sprite> TextureImporter::LoadTexture(const std::filesystem::path& path)
 	{
 		//TODO: Move stbi_load to this file
-		return Texture::Create(path.string());
+		return CreateRef<Sprite>(path);
 	}
 
 }

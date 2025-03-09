@@ -13,8 +13,8 @@ namespace Strype {
 
 	ContentBrowserPanel::ContentBrowserPanel()
 	{
-		m_DirectoryIcon = Texture::Create("assets/icons/DirectoryIcon.png");
-		m_FileIcon = Texture::Create("assets/icons/FileIcon.png");
+		m_DirectoryIcon = AGI::Texture::Create("assets/icons/DirectoryIcon.png");
+		m_FileIcon = AGI::Texture::Create("assets/icons/FileIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -53,7 +53,7 @@ namespace Strype {
 			AssetHandle handle = node.Handle;
 			bool isDirectory = std::filesystem::is_directory(m_CurrentDirectory->Path / path);
 		
-			Ref<Texture> icon;
+			Ref<AGI::Texture> icon;
 			if (isDirectory)
 			{
 				icon = m_DirectoryIcon;
@@ -63,7 +63,7 @@ namespace Strype {
 				switch (Project::GetAssetType(handle))
 				{
 				case AssetType::Texture:
-					icon = Project::GetAsset<Texture>(handle);
+					icon = Project::GetAsset<Sprite>(handle)->Texture;
 					break;
 		
 				default:

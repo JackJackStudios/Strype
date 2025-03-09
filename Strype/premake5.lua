@@ -27,6 +27,7 @@ project "Strype"
         "src",
         "%{wks.location}/Libraries/yaml-cpp/include",
         "%{wks.location}/Libraries/GLFW/include",
+        "%{wks.location}/Libraries/agi/src",
         "%{wks.location}/Libraries/imgui/",
         
         "%{wks.location}/Libraries/include",
@@ -42,6 +43,7 @@ project "Strype"
         "GLFW",
         "ImGui",
         "yaml-cpp",
+        "agi",
 
         "opengl32.lib"
     }

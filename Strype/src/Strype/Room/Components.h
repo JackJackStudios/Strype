@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Strype/Renderer/Texture.h"
+#include <agi.h>
 
 #include <glm/glm.hpp>
 

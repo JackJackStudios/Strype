@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Asset.h"
+#include "Strype/Renderer/Sprite.h"
 
-#include "Strype/Renderer/Texture.h"
+#include "Asset.h"
 
 namespace Strype {
 
 	class TextureImporter
 	{
 	public:
-		static Ref<Texture> ImportTexture(AssetHandle handle, const AssetMetadata& metadata);
-
-		static Ref<Texture> LoadTexture(const std::filesystem::path& path);
+		static Ref<Sprite> ImportTexture(AssetHandle handle, const AssetMetadata& metadata);
+		
+		static Ref<Sprite> LoadTexture(const std::filesystem::path& path);
 	};
 
 }

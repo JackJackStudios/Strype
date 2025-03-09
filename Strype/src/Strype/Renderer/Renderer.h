@@ -1,16 +1,15 @@
 #pragma once
 
-#include "Strype/Renderer/RenderAPI.h"
-#include "Strype/Renderer/Shader.h"
-#include "Strype/Renderer/Camera.h"
-#include "Strype/Renderer/Texture.h"
+#include <agi.h>
+
+#include "Camera.h"
 
 namespace Strype {
 
 	class Renderer
 	{
 	public:
-		static void Init(void* window);
+		static void Init();
 		static void Shutdown();
 		static void OnWindowResize(uint32_t width, uint32_t height);
 
@@ -25,18 +24,16 @@ namespace Strype {
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour);
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour);
 
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
-		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
+		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
 
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour);
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour);
 
-		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
-		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
-
-		static RenderAPI::API GetAPI() { return s_RenderAPI->GetAPI(); }
+		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
+		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
 	private:
-		static Scope<RenderAPI> s_RenderAPI;
+		static Scope<AGI::RenderAPI> s_RenderAPI;
 	private:
 		static void FlushAndReset();
 	};

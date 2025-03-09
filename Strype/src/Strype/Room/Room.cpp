@@ -2,6 +2,8 @@
 #include "Room.h"
 
 #include "Strype/Renderer/Renderer.h"
+#include "Strype/Renderer/Sprite.h"
+
 #include "Strype/Room/Object.h"
 #include "Strype/Room/Components.h"
 #include "Strype/Project/Project.h"
@@ -43,7 +45,7 @@ namespace Strype {
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
 			if (sprite.Texture)
 			{
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, Project::GetAsset<Texture>(sprite.Texture), sprite.Colour);
+				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, Project::GetAsset<Sprite>(sprite.Texture)->Texture, sprite.Colour);
 			}
 			else
 			{

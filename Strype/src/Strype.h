@@ -10,12 +10,8 @@
 
 #include "API/ImGui/ImGuiLayer.h"
 
-#include "Strype/Renderer/Buffer.h"
 #include "Strype/Renderer/Renderer.h"
-#include "Strype/Renderer/Shader.h"
-#include "Strype/Renderer/Texture.h"
-#include "Strype/Renderer/VertexArray.h"
-#include "Strype/Renderer/Framebuffer.h"
+#include "Strype/Renderer/Sprite.h"
 
 #include "Strype/Room/Room.h"
 #include "Strype/Room/Object.h"
@@ -36,3 +32,5 @@
 
 #include <imgui.h>
 #include <glm/glm.hpp>
+
+#include <agi.h>

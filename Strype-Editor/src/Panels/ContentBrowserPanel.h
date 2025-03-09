@@ -37,8 +37,8 @@ namespace Strype {
 		TreeNode m_RootDirectory;
 		TreeNode* m_CurrentDirectory;
 
-		Ref<Texture> m_DirectoryIcon;
-		Ref<Texture> m_FileIcon;
+		Ref<AGI::Texture> m_DirectoryIcon;
+		Ref<AGI::Texture> m_FileIcon;
 	};
 
 }

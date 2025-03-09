@@ -18,6 +18,7 @@ project "Strype-Editor"
 		"%{wks.location}/Strype/src",
 		"%{wks.location}/Libraries/include",
 
+		"%{wks.location}/Libraries/agi/src",
 		"%{wks.location}/Libraries/GLFW/include",
 		"%{wks.location}/Libraries/imgui",
 	}

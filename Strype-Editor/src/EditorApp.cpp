@@ -74,7 +74,7 @@ namespace Strype {
 		{
 			m_Room = CreateRef<Room>();
 			m_EditorCamera = CreateRef<EditorCamera>(1280.0f, 720.0f);
-			m_Framebuffer = Framebuffer::Create(1280, 720);
+			m_Framebuffer = AGI::Framebuffer::Create(1280, 720);
 			
 			//Configure PanelManager
 			m_PanelManager.SetRoomContext(m_Room);
@@ -253,7 +253,7 @@ namespace Strype {
 
 			const std::string& startRoom = project->GetConfig().StartRoom;
 			if (!startRoom.empty())
-				OpenRoom(Project::GetProjectDirectory() / startRoom);
+				OpenRoom(startRoom);
 		}
 
 		void SaveProject()
@@ -314,7 +314,7 @@ namespace Strype {
 				else
 				{
 					std::string id = (std::string("##") + select->GetComponent<TagComponent>().Tag + "Sprite Renderer");
-					ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Texture>(component.Texture)->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
+					ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Sprite>(component.Texture)->Texture->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
 
 					if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
 					{
@@ -361,7 +361,7 @@ namespace Strype {
 	private:
 		std::filesystem::path m_RoomFilePath;
 
-		Ref<Framebuffer> m_Framebuffer;
+		Ref<AGI::Framebuffer> m_Framebuffer;
 		Ref<EditorCamera> m_EditorCamera;
 		Ref<Room> m_Room;
 		

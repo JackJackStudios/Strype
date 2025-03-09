@@ -24,7 +24,7 @@ namespace Strype {
 		DrawQuad({ position.x, position.y, 0.0f }, size, colour);
 	}
 
-	void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture>& texture, const glm::vec4& tintColour)
+	void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tintColour);
 	}
@@ -34,7 +34,7 @@ namespace Strype {
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, colour);
 	}
 
-	void Renderer::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture>& texture, const glm::vec4& tintColour)
+	void Renderer::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tintColour);
 	}
