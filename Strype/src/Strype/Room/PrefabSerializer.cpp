@@ -22,30 +22,6 @@ namespace Strype {
 		{
 			out << YAML::Key << "Prefab" << YAML::Value << YAML::BeginMap;
 
-			if (m_Prefab->HasComponent<TagComponent>())
-			{
-				out << YAML::Key << "TagComponent" << YAML::Value;
-				out << YAML::BeginMap;
-
-				std::string tag = m_Prefab->GetComponent<TagComponent>();
-				out << YAML::Key << "Tag" << YAML::Value << tag;
-
-				out << YAML::EndMap;
-			}
-
-			if (m_Prefab->HasComponent<Transform>())
-			{
-				out << YAML::Key << "Transform" << YAML::Value;
-				out << YAML::BeginMap;
-
-				Transform& t = m_Prefab->GetComponent<Transform>();
-				out << YAML::Key << "Position" << YAML::Value << t.Position;
-				out << YAML::Key << "Scale" << YAML::Value << t.Scale;
-				out << YAML::Key << "Rotation" << YAML::Value << t.Rotation;
-
-				out << YAML::EndMap;
-			}
-
 			if (m_Prefab->HasComponent<SpriteRenderer>())
 			{
 				out << YAML::Key << "SpriteRenderer" << YAML::Value;

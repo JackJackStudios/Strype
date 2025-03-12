@@ -11,7 +11,6 @@ namespace Strype {
 	{
 		Object newobj = targetroom->CreateObject();
 
-		COPY_COMPONENTS(TagComponent);
 		COPY_COMPONENTS(Transform);
 		COPY_COMPONENTS(SpriteRenderer);
 

@@ -2,6 +2,7 @@
 #include "RoomSerializer.h"
 
 #include "Object.h"
+#include "Prefab.h"
 #include "Components.h"
 
 #include "Strype/Utils/YamlHelpers.h"
@@ -21,13 +22,13 @@ namespace Strype {
 		out << YAML::BeginMap;
 		out << YAML::Key << "Object" << YAML::Value << (uint32_t)obj;
 
-		if (obj.HasComponent<TagComponent>())
+		if (obj.HasComponent<PrefabComponent>())
 		{
-			out << YAML::Key << "TagComponent";
+			out << YAML::Key << "PrefabComponent";
 			out << YAML::BeginMap;
 
-			std::string tag = obj.GetComponent<TagComponent>();
-			out << YAML::Key << "Tag" << YAML::Value << tag;
+			PrefabComponent& p = obj.GetComponent<PrefabComponent>();
+			out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(p.Handle);
 
 			out << YAML::EndMap;
 		}
@@ -41,18 +42,6 @@ namespace Strype {
 			out << YAML::Key << "Position" << YAML::Value << t.Position;
 			out << YAML::Key << "Scale" << YAML::Value << t.Scale;
 			out << YAML::Key << "Rotation" << YAML::Value << t.Rotation;
-
-			out << YAML::EndMap;
-		}
-
-		if (obj.HasComponent<SpriteRenderer>())
-		{
-			out << YAML::Key << "SpriteRenderer";
-			out << YAML::BeginMap;
-
-			SpriteRenderer& s = obj.GetComponent<SpriteRenderer>();
-			out << YAML::Key << "Colour" << YAML::Value << s.Colour;
-			out << YAML::Key << "TexturePath" << YAML::Value << (s.Texture ? Project::GetFilePath(s.Texture) : "");
 
 			out << YAML::EndMap;
 		}
@@ -105,36 +94,27 @@ namespace Strype {
 		{
 			uint32_t id = obj["Object"].as<uint32_t>();
 
-			STY_CORE_ASSERT(obj["TagComponent"], "Object ({0}) is not a valid Strype Object", id);
+			STY_CORE_ASSERT(obj["PrefabComponent"], "Object ({0}) is not a valid Strype Object", id);
 
-			std::string name = obj["TagComponent"]["Tag"].as<std::string>();
+			STY_CORE_TRACE("Deserialized object with entt ID ({0})", id);
 
-			STY_CORE_TRACE("Deserialized object with entt ID ({0}), name ({1})", id, name);
+			YAML::Node prefab = obj["PrefabComponent"];
+			const std::filesystem::path& path = prefab["PrefabPath"].as<std::filesystem::path>();
 
-			Object newobj = m_Room->CreateObject(name);
-
-			YAML::Node transform = obj["Transform"];
-			if (transform)
+			if (!path.empty())
 			{
-				Transform& tc = newobj.GetComponent<Transform>();
+				AssetHandle handle = Project::ImportAsset(path);
+				Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
+				newobj.AddComponent<PrefabComponent>(handle);
 
-				tc.Position = transform["Position"].as<glm::vec2>();
-				tc.Scale = transform["Scale"].as<glm::vec2>();
-				tc.Rotation = transform["Rotation"].as<float>();
-			}
-			
-			YAML::Node sprite = obj["SpriteRenderer"];
-			if (sprite)
-			{
-				SpriteRenderer& src = newobj.AddComponent<SpriteRenderer>();
-				src.Colour = sprite["Colour"].as<glm::vec4>();
-
-				const std::filesystem::path& path = sprite["TexturePath"].as<std::filesystem::path>();
-
-				if (!path.empty())
+				YAML::Node transform = obj["Transform"];
+				if (transform)
 				{
-					AssetHandle handle = Project::ImportAsset(path);
-					src.Texture = handle;
+					Transform& tc = newobj.GetComponent<Transform>();
+
+					tc.Position = transform["Position"].as<glm::vec2>();
+					tc.Scale = transform["Scale"].as<glm::vec2>();
+					tc.Rotation = transform["Rotation"].as<float>();
 				}
 			}
 		}

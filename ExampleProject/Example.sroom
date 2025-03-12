@@ -1,12 +1,9 @@
 Room:
   Objects:
     - Object: 0
-      TagComponent:
-        Tag: test
+      PrefabComponent:
+        PrefabPath: test.sprefab
       Transform:
-        Position: [0, 0]
+        Position: [0.9, 0]
         Scale: [1, 1]
         Rotation: 0
-      SpriteRenderer:
-        Colour: [1, 1, 1, 1]
-        TexturePath: sSellChest.png

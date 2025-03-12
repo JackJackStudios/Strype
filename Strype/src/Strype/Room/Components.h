@@ -6,18 +6,14 @@
 
 namespace Strype {
 
-	struct TagComponent
+	struct PrefabComponent
 	{
-		std::string Tag;
+		AssetHandle Handle;
 
-		TagComponent() = default;
-		TagComponent(const TagComponent&) = default;
-		TagComponent(const std::string& tag)
-			: Tag(tag) {
-		}
-
-		operator std::string () { return Tag; }
-		operator const char* () { return Tag.c_str();  }
+		PrefabComponent() = default;
+		PrefabComponent(const PrefabComponent&) = default;
+		PrefabComponent(AssetHandle handle)
+			: Handle(handle) {}
 	};
 
 	struct Transform

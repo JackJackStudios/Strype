@@ -80,12 +80,12 @@ namespace Strype {
 		{
 			bool popupOpen = false;
 
-			m_ActiveScene->m_Registry.view<TagComponent>().each([&](auto entity, TagComponent& tag) {
+			m_ActiveScene->m_Registry.view<PrefabComponent>().each([&](auto entity, PrefabComponent& prefab) {
 
 				Object temp{ entity, m_ActiveScene.get() };
 				bool selected = m_Selection == entity;
 
-				if (ImGui::Selectable(std::format("{0}##{1}", tag.Tag, (uint32_t)temp).c_str(), &selected))
+				if (ImGui::Selectable(std::format("{0}##{1}", Project::GetFilePath(prefab.Handle).stem().string(), (uint32_t)temp).c_str(), &selected))
 				{
 					m_Selection = temp;
 					m_Inspector->SetSelected(&m_Selection);

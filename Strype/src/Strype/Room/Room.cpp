@@ -23,7 +23,6 @@ namespace Strype {
 	Object Room::CreateObject(std::string name, glm::vec3 position)
 	{
 		Object object{ m_Registry.create(), this };
-		object.AddComponent<TagComponent>(name);
 		object.AddComponent<Transform>(position);
 		return object;
 	}

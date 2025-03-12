@@ -173,7 +173,10 @@ namespace Strype {
 					if (Project::GetAssetType(handle) == AssetType::Room)
 						OpenRoom(Project::GetMetadata(handle));
 					else if (Project::GetAssetType(handle) == AssetType::Prefab)
-						Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
+					{
+						Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
+						newobj.AddComponent<PrefabComponent>(handle);
+					}
 					else if (Project::GetAssetType(handle) == AssetType::Texture)
 					{
 						Object obj = m_Room->CreateObject(Project::GetMetadata(handle).FilePath.stem().string());
@@ -313,7 +316,7 @@ namespace Strype {
 				}
 				else
 				{
-					std::string id = (std::string("##") + select->GetComponent<TagComponent>().Tag + "Sprite Renderer");
+					std::string id = std::format("##{0}{1}", (uint32_t)select->GetObject(), "Sprite Renderer");
 					ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Sprite>(component.Texture)->Texture->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
 
 					if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
