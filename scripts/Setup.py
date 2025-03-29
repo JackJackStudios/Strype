@@ -1,4 +1,3 @@
-
 import os
 import subprocess
 import shutil
@@ -15,9 +14,7 @@ for file in os.listdir(lib_path):
         copy_folder = file_path[:file_path.find("_")] + "/" 
         shutil.copy2(file_path, copy_folder + "premake5.lua")
 
-subprocess.call([os.path.abspath("./scripts/build.bat"), "nopause"])
-
-print("Setup completed!")
+subprocess.call([os.path.abspath("./Libraries/premake/premake5.exe"), "--verbose", "vs2022"])
 
 for file in os.listdir(lib_path):
     if file.endswith(".lua"):
