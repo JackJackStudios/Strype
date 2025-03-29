@@ -11,3 +11,6 @@
 [submodule "Libraries/agi"]
 	path = Libraries/agi
 	url = https://github.com/JackKnox/agi
+[submodule "Libraries/Coral"]
+	path = Libraries/Coral
+	url = https://github.com/StudioCherno/Coral

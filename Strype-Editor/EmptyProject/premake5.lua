@@ -1,0 +1,49 @@
+FileVersion = 1.2
+
+StrypeDirectory = os.getenv("STRYPE_DIR")
+include (path.join(StrypeDirectory, "Libraries", "Coral", "Premake", "CSExtensions.lua"))
+
+workspace "Sandbox"
+	startproject "Sandbox"
+	configurations { "Debug", "Release", "Dist" }
+
+	project "Sandbox"
+		location ".strype/"
+		kind "SharedLib"
+		language "C#"
+		dotnetframework "net8.0"
+
+		targetname "Sandbox"
+		targetdir ("%{prj.location}/Binaries")
+		objdir ("%{prj.location}/Intermediates")
+
+		propertytags {
+			{ "AppendTargetFrameworkToOutputPath", "false" },
+			{ "Nullable", "enable" },
+		}
+
+		files  {
+			"**.cs", 
+		}
+
+		links {
+			"%{StrypeDirectory}/Strype-Editor/DotNet/Strype-ScriptCore.dll",
+			"%{StrypeDirectory}/Strype-Editor/DotNet/Coral.Managed.dll",
+		}	
+
+		filter "configurations:Debug"
+			optimize "Off"
+			symbols "Default"
+
+		filter "configurations:Release"
+			optimize "On"
+			symbols "Default"
+
+		filter "configurations:Dist"
+			optimize "Full"
+			symbols "Off"
+
+	group "Strype"
+		include (path.join(StrypeDirectory, "Libraries", "Coral", "Coral.Managed"))
+		include (path.join(StrypeDirectory, "Strype-ScriptCore"))
+	group ""

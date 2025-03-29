@@ -3,6 +3,8 @@ project "Strype"
 	language "C++"
 	cppdialect "C++20"
 	staticruntime "off"
+      
+    dependson { "Coral.Managed", "Strype-ScriptCore" }
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -29,14 +31,14 @@ project "Strype"
         "%{wks.location}/Libraries/GLFW/include",
         "%{wks.location}/Libraries/agi/src",
         "%{wks.location}/Libraries/imgui/",
-        
+        "%{wks.location}/Libraries/Coral/Coral.Native/Include",
+
         "%{wks.location}/Libraries/include",
     }
 
     links
     {
         "%{wks.location}/Libraries/lib/spdlogd.lib",
-        "%{wks.location}/Libraries/lib/glad.lib",
         "%{wks.location}/Libraries/lib/OpenAL32.lib",
         "%{wks.location}/Libraries/lib/sndfile.lib",
         
