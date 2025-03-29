@@ -35,33 +35,6 @@ namespace Strype {
 			EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class AppTickEvent : public Event
-	{
-	public:
-		AppTickEvent() {}
-
-		EVENT_CLASS_TYPE(AppTick)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
-	};
-
-	class AppUpdateEvent : public Event
-	{
-	public:
-		AppUpdateEvent() {}
-
-		EVENT_CLASS_TYPE(AppUpdate)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
-	};
-
-	class AppRenderEvent : public Event
-	{
-	public:
-		AppRenderEvent() {}
-
-		EVENT_CLASS_TYPE(AppRender)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
-	};
-
 	class WindowDropEvent : public Event
 	{
 	public:
@@ -80,4 +53,23 @@ namespace Strype {
 	private:
 		std::vector<std::filesystem::path> m_Paths;
 	};
+
+	class AssetImportedEvent : public Event
+	{
+	public:
+		AssetImportedEvent() {}
+		
+		EVENT_CLASS_TYPE(AssetImported)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	};
+
+	class AssetChangedEvent : public Event
+	{
+	public:
+		AssetChangedEvent() {}
+
+		EVENT_CLASS_TYPE(AssetChanged)
+			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	};
+
 }

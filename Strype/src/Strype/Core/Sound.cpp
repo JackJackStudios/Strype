@@ -1,13 +1,17 @@
 #include "stypch.h"
-#include "API/OpenAL/OpenALSound.h"
+#include "Audio.h"
+
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL\alext.h>
+#include <sndfile/sndfile.h>
 
 namespace Strype {
 
-	OpenALSound::OpenALSound(const std::string& filepath)
+	Sound::Sound(const std::filesystem::path& filepath)
 	{
-
 		SF_INFO sfinfo;
-		SNDFILE* sndfile = sf_open(filepath.c_str(), SFM_READ, &sfinfo);
+		SNDFILE* sndfile = sf_open(filepath.string().c_str(), SFM_READ, &sfinfo);
 
 		STY_CORE_ASSERT(sndfile, "Could not open sound file");
 		STY_CORE_ASSERT((sfinfo.frames >= 1 && sfinfo.frames <= (sf_count_t)(INT_MAX / sizeof(short)) / sfinfo.channels), "Bad sample count in sound file");
@@ -47,12 +51,12 @@ namespace Strype {
 		free(membuf);
 		sf_close(sndfile);
 
-		STY_CORE_ASSERT(!alGetError(), "OpenAL could not read sound file");
+		STY_CORE_ASSERT(!alGetError(), " could not read sound file");
 
 		m_RendererID = buffer;
 	}
 
-	OpenALSound::~OpenALSound()
+	Sound::~Sound()
 	{
 		alDeleteBuffers(1, &m_RendererID);
 	}

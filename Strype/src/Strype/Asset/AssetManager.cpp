@@ -2,10 +2,13 @@
 #include "AssetManager.h"
 
 #include "Strype/Project/Project.h"
-#include "AssetImporter.h"
+
+#include "TextureImporter.h"
+#include "PrefabImporter.h"
+#include "RoomImporter.h"
 
 namespace Strype {
-
+	
 	namespace Utils {
 
 		std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
@@ -14,6 +17,13 @@ namespace Strype {
 		}
 
 	}
+
+	using AssetImportFunc = std::function<Ref<Asset>(AssetHandle, const AssetMetadata&)>;
+	static std::map<AssetType, AssetImportFunc> s_AssetImportFunctions = {
+		{ AssetType::Texture, TextureImporter::ImportTexture },
+		{ AssetType::Prefab, PrefabImporter::ImportPrefab },
+		{ AssetType::Room, RoomImporter::ImportRoom },
+	};
 
 	AssetManager::AssetManager()
 	{
@@ -34,7 +44,7 @@ namespace Strype {
 		else
 		{
 			const AssetMetadata& metadata = GetMetadata(handle);
-			asset = AssetImporter::ImportAsset(handle, metadata);
+			asset = ImportAsset(handle, metadata);
 
 			m_LoadedAssets[handle] = asset;
 		}
@@ -69,6 +79,8 @@ namespace Strype {
 
 	AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)
 	{
+		if (IsAssetLoaded(Utils::ToAssetSysPath(filepath))) return GetHandle(Utils::ToAssetSysPath(filepath));
+
 		AssetHandle handle;
 		AssetMetadata metadata;
 		metadata.Handle = handle;
@@ -77,7 +89,7 @@ namespace Strype {
 
 		STY_CORE_ASSERT(metadata.Type != AssetType::None, "Could not import Asset");
 
-		Ref<Asset> asset = AssetImporter::ImportAsset(handle, metadata);
+		Ref<Asset> asset = ImportAsset(handle, metadata);
 
 		if (asset)
 		{
@@ -92,6 +104,17 @@ namespace Strype {
 		}
 
 		return handle;
+	}
+
+	Ref<Asset> AssetManager::ImportAsset(AssetHandle handle, const AssetMetadata& metadata)
+	{
+		if (s_AssetImportFunctions.find(metadata.Type) == s_AssetImportFunctions.end())
+		{
+			STY_CORE_ERROR("No importer available for asset type: {}", (uint16_t)metadata.Type);
+			return nullptr;
+		}
+
+		return s_AssetImportFunctions.at(metadata.Type)(handle, metadata);
 	}
 
 	const AssetMetadata& AssetManager::GetMetadata(AssetHandle handle) const

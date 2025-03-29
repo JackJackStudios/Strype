@@ -43,6 +43,7 @@ namespace Strype {
 		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
 
 		AssetHandle ImportAsset(const std::filesystem::path& filepath);
+		Ref<Asset> ImportAsset(AssetHandle handle, const AssetMetadata& metadata);
 		void ReloadAssets();
 
 		const AssetMetadata& GetMetadata(AssetHandle handle) const;

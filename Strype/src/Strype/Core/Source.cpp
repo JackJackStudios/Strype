@@ -1,15 +1,18 @@
 #include "stypch.h"
-#include "API/OpenAL/OpenALSource.h"
+#include "Audio.h"
+
+#include <AL/al.h>
+#include <AL/alc.h>
 
 namespace Strype {
-	
-	OpenALSource::OpenALSource()
+
+	Source::Source()
 	{
 		alGenSources(1, &m_RendererID);
 		alSourcei(m_RendererID, AL_BUFFER, m_BoundBuffer);
 	}
 
-	void OpenALSource::Play(Ref<Sound> sound)
+	void Source::Play(Ref<Sound> sound)
 	{
 		ALuint buffer = (ALuint)sound->GetNative();
 
@@ -22,27 +25,27 @@ namespace Strype {
 		alSourcePlay(m_RendererID);
 	}
 
-	OpenALSource::~OpenALSource()
+	Source::~Source()
 	{
 		alDeleteSources(1, &m_RendererID);
 	}
 
-	void OpenALSource::SetGain(float vol)
+	void Source::SetGain(float vol)
 	{
 		alSourcef(m_RendererID, AL_GAIN, vol);
 	}
 
-	void OpenALSource::SetLoop(bool loop)
+	void Source::SetLoop(bool loop)
 	{
 		alSourcei(m_RendererID, AL_LOOPING, loop);
 	}
 
-	void OpenALSource::SetPitch(float pitch)
+	void Source::SetPitch(float pitch)
 	{
 		alSourcef(m_RendererID, AL_PITCH, pitch);
 	}
 
-	void OpenALSource::SetPos(glm::vec2 pos)
+	void Source::SetPos(glm::vec2 pos)
 	{
 		alSource3f(m_RendererID, AL_POSITION, pos.x, pos.y, 0.0f);
 	}

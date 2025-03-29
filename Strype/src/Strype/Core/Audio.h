@@ -10,32 +10,37 @@ namespace Strype {
 		static void Init();
 		static void Shutdown();
 
-		static void SetListenerPos(glm::vec2 pos);
+		static void SetListenerPos(const glm::vec2& pos);
 	};
 
 	class Sound
 	{
 	public:
-		virtual ~Sound() = default;
+		Sound(const std::filesystem::path& filepath);
+		~Sound();
 
-		virtual void* GetNative() const = 0;
-		static Ref<Sound> Create(const std::string& filepath);
+		uint32_t GetNative() const { return m_RendererID; }
+	private:
+		uint32_t m_RendererID = 0;
 	};
 
 	class Source
 	{
 	public:
-		virtual ~Source() = default;
+		Source();
+		~Source();
 
-		virtual void SetGain(float vol) = 0;
-		virtual void SetLoop(bool loop) = 0;
-		virtual void SetPitch(float pitch) = 0;
-		virtual void SetPos(glm::vec2 pos) = 0;
+		void SetGain(float vol);
+		void SetLoop(bool loop);
+		void SetPitch(float pitch);
+		void SetPos(glm::vec2 pos);
 
-		virtual void Play(Ref<Sound> sound) = 0;
+		void Play(Ref<Sound> sound);
 
-		virtual void* GetNative() const = 0;
-		static Ref<Source> Create();
+		uint32_t GetNative() const { return m_RendererID; }
+	private:
+		uint32_t m_RendererID = 0;
+		uint32_t m_BoundBuffer = 0;
 	};
 
 }

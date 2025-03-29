@@ -8,8 +8,8 @@ namespace Strype {
 	enum class EventType
 	{
 		None = 0,
-		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved, WindowDrop,
-		AppTick, AppUpdate, AppRender,
+		AssetImported, AssetChanged,
+		WindowClose, WindowResize, WindowMoved, WindowDrop,
 		KeyPressed, KeyReleased, KeyHeld,
 		MouseButtonPressed, MouseButtonHeld, MouseButtonReleased, MouseMoved, MouseScrolled
 	};
