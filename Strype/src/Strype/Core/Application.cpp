@@ -5,6 +5,8 @@
 #include "Strype/Core/Audio.h"
 #include "Strype/Core/Input.h"
 
+#include "Strype/Script/ScriptEngine.h"
+
 #include "Strype/Utils/PlatformUtils.h"
 
 namespace Strype {
@@ -27,6 +29,8 @@ namespace Strype {
 		Input::SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
 		Audio::Init();
 
+		ScriptEngine::Initialize();
+
 		m_ImGuiLayer = new ImGuiLayer(m_Config.DockspaceEnabled);
 		PushOverlay(m_ImGuiLayer);
 	}
@@ -34,7 +38,9 @@ namespace Strype {
 	Application::~Application()
 	{
 		m_Window->SetVisable(false);
-		
+
+		ScriptEngine::Shutdown();
+
 		Renderer::Shutdown();
 		Audio::Shutdown();
 	}

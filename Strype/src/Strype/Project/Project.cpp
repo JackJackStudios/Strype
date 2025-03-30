@@ -2,8 +2,51 @@
 #include "Project.h"
 
 #include "Strype/Project/ProjectSerializer.h"
+#include "Strype/Script/ScriptEngine.h"
 
 namespace Strype {
+
+	namespace Utils {
+
+		static void ReplaceKeyWord(std::string& str, const std::string& keyword, const std::string& replace)
+		{
+			size_t pos = 0;
+			while ((pos = str.find(keyword, pos)) != std::string::npos)
+			{
+				str.replace(pos, keyword.length(), replace);
+				pos += replace.length();
+			}
+		}
+
+		static std::string ReadFile(const std::filesystem::path& filepath)
+		{
+			std::string result;
+			std::ifstream in(filepath, std::ios::in | std::ios::binary);
+			if (in)
+			{
+				in.seekg(0, std::ios::end);
+				size_t size = in.tellg();
+				if (size != -1)
+				{
+					result.resize(size);
+					in.seekg(0, std::ios::beg);
+					in.read(&result[0], size);
+					in.close();
+				}
+				else
+				{
+					STY_CORE_ERROR("Could not read from file '{0}'", filepath.string());
+				}
+			}
+			else
+			{
+				STY_CORE_ERROR("Could not open file '{0}'", filepath.string());
+			}
+
+			return result;
+		}
+
+	}
 
 	Project::Project()
 	{
@@ -31,6 +74,24 @@ namespace Strype {
 			}
 		}
 
+		// Copy premake5.lua file to new project
+		std::string content = Utils::ReadFile("assets/defaults/premake5.lua");
+		Utils::ReplaceKeyWord(content, "{0}", path.filename().string());
+
+		std::ofstream out((path / "premake5.lua").string(), std::ios::out | std::ios::binary);
+		out << content;
+		out.close();
+
+		// Build C# project
+		std::filesystem::path workingdir = std::filesystem::current_path();
+		std::filesystem::copy_file("assets/defaults/Build.bat", path / "Build.bat", std::filesystem::copy_options::overwrite_existing);
+
+		std::filesystem::current_path(path);
+		system("Build.bat");
+		std::filesystem::current_path(workingdir);
+
+		std::filesystem::remove(path / "Build.bat");
+
 		//Change empty project to fit new project name
 		std::string projName = path.filename().string();
 		std::filesystem::rename(path / EMPTY_PROJECT.filename(), path / (path.filename().string() + ".sproj"));
@@ -47,9 +108,14 @@ namespace Strype {
 	{
 		if (s_ActiveProject)
 		{
+			s_ScriptEngine.reset();
+			s_AssetManager.reset();
 		}
 
 		s_ActiveProject = project;
+
+		Ref<ScriptEngine> scriptEngine = CreateRef<ScriptEngine>(project);
+		s_ScriptEngine = scriptEngine;
 
 		Ref<AssetManager> assetManager = CreateRef<AssetManager>();
 		s_AssetManager = assetManager;

@@ -4,6 +4,8 @@
 
 namespace Strype {
 
+	class ScriptEngine;
+
 	struct ProjectConfig
 	{
 		//Serializated fields
@@ -84,6 +86,7 @@ namespace Strype {
 
 	private:
 		inline static Ref<AssetManager> s_AssetManager;
+		inline static Ref<ScriptEngine> s_ScriptEngine;
 
 		ProjectConfig m_Config;
 		inline static Ref<Project> s_ActiveProject;

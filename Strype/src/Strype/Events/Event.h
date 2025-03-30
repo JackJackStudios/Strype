@@ -1,8 +1,6 @@
 #pragma once
 #include "stypch.h"
 
-#define BIT(x) (1 << x) 
-
 namespace Strype {
 
 	enum class EventType
