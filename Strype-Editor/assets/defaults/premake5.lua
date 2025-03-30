@@ -3,17 +3,16 @@ FileVersion = 1.2
 StrypeDirectory = os.getenv("STRYPE_DIR")
 include (path.join(StrypeDirectory, "Libraries", "Coral", "Premake", "CSExtensions.lua"))
 
-workspace "Sandbox"
-	startproject "Sandbox"
+workspace "{0}"
+	startproject "{0}"
 	configurations { "Debug", "Release", "Dist" }
 
-	project "Sandbox"
-		location ".strype/"
+	project "{0}"
 		kind "SharedLib"
 		language "C#"
 		dotnetframework "net8.0"
 
-		targetname "Sandbox"
+		targetname "{0}"
 		targetdir ("%{prj.location}/Binaries")
 		objdir ("%{prj.location}/Intermediates")
 

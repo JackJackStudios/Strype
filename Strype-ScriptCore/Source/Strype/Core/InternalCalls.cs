@@ -24,12 +24,63 @@ namespace Strype
 		#region Transform
 
 		internal static delegate* unmanaged<Transform*, Transform*, Transform*, void> TransformMultiply_Native;
-		
-		#endregion
 
-		#region Noise
+        #endregion
 
-		internal static delegate* unmanaged<int, IntPtr> Noise_Constructor;
+        #region Object
+
+        internal static delegate* unmanaged<ulong, ReflectionType, void> Object_CreateComponent;
+        internal static delegate* unmanaged<ulong, ReflectionType, bool> Object_HasComponent;
+        internal static delegate* unmanaged<ulong, ReflectionType, bool> Object_RemoveComponent;
+
+        #endregion
+
+        #region Room
+
+        internal static delegate* unmanaged<NativeString, ulong> Room_FindObjectByTag;
+        internal static delegate* unmanaged<ulong, bool> Room_IsObjectValid;
+        internal static delegate* unmanaged<NativeString, ulong> Room_CreateObject;
+        internal static delegate* unmanaged<ulong, void> Room_DestroyObject;
+
+        internal static delegate* unmanaged<NativeArray<ulong>> Room_GetObjects;
+
+        #endregion
+
+        #region Entity
+
+        internal static delegate* unmanaged<ulong, ReflectionType, void> Entity_CreateComponent;
+        internal static delegate* unmanaged<ulong, ReflectionType, bool> Entity_HasComponent;
+        internal static delegate* unmanaged<ulong, ReflectionType, bool> Entity_RemoveComponent;
+
+        #endregion
+
+        #region TagComponent
+
+        internal static delegate* unmanaged<ulong, NativeString> TagComponent_GetTag;
+        internal static delegate* unmanaged<ulong, NativeString, void> TagComponent_SetTag;
+
+        #endregion
+
+        #region TransformComponent
+
+        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_GetPosition;
+        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_SetPosition;
+        internal static delegate* unmanaged<ulong, float*, void> TransformComponent_GetRotation;
+        internal static delegate* unmanaged<ulong, float*, void> TransformComponent_SetRotation;
+        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_GetScale;
+        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_SetScale;
+
+        #endregion
+
+        #region ScriptComponent
+
+        internal static delegate* unmanaged<ulong, NativeInstance<object>> ScriptComponent_GetInstance;
+
+        #endregion
+
+        #region Noise
+
+        internal static delegate* unmanaged<int, IntPtr> Noise_Constructor;
 		internal static delegate* unmanaged<IntPtr, void> Noise_Destructor;
 		internal static delegate* unmanaged<IntPtr, float> Noise_GetFrequency;
 		internal static delegate* unmanaged<IntPtr, float, void> Noise_SetFrequency;
