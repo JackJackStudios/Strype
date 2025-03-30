@@ -1,9 +1,9 @@
 [submodule "Libraries/yaml-cpp"]
 	path = Libraries/yaml-cpp
-	url = https://github.com/jbeder/yaml-cpp.git
+	url = https://github.com/jbeder/yaml-cpp
 [submodule "Libraries/imgui"]
 	path = Libraries/imgui
-	url = https://github.com/ocornut/imgui.git/
+	url = https://github.com/ocornut/imgui
 	branch = docking
 [submodule "Libraries/glfw"]
 	path = Libraries/glfw
@@ -13,4 +13,4 @@
 	url = https://github.com/JackKnox/agi
 [submodule "Libraries/Coral"]
 	path = Libraries/Coral
-	url = https://github.com/StudioCherno/Coral
+	url = https://github.com/JackKnox/Coral
