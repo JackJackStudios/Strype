@@ -4,7 +4,7 @@ import shutil
 os.chdir("./../")
 
 FILE_EXTENSIONS = {".sln", ".vcxproj", ".vcxproj.filters", ".vcxproj.user"}
-DIRS_TO_REMOVE = {"bin", "bin-int", "obj"}
+DIRS_TO_REMOVE = {"bin", "bin-int", "obj", "Build"} 
 
 def remove_files(root_dir):
     for folder, _, files in os.walk(root_dir):
