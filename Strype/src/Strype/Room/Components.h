@@ -1,7 +1,9 @@
 #pragma once
 
-#include <agi.h>
+#include "Strype/Script/ScriptEngine.h"
+#include "Strype/Script/CSharpObject.h"
 
+#include <agi.h>
 #include <glm/glm.hpp>
 
 namespace Strype {
@@ -27,6 +29,12 @@ namespace Strype {
 			: Position(0.0f), Scale(1.0f), Rotation(0) {}
 		Transform(const glm::vec2& position, const glm::vec2& scale = glm::vec2(1.0f), float rotation = 0)
 			: Position(position), Scale(scale), Rotation(rotation) {}
+	};
+
+	struct ScriptComponent
+	{
+		ScriptID ClassID;
+		CSharpObject Instance;
 	};
 
 	struct SpriteRenderer

@@ -7,3 +7,6 @@ Room:
         Position: [0.9, 0]
         Scale: [1, 1]
         Rotation: 0
+      ScriptComponent:
+        ClassName: ExampleProject.TestEntity
+        

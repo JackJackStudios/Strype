@@ -34,6 +34,17 @@ namespace Strype {
 				out << YAML::EndMap;
 			}
 
+			if (m_Prefab->HasComponent<ScriptComponent>())
+			{
+				out << YAML::Key << "ScriptComponent" << YAML::Value;
+				out << YAML::BeginMap;
+
+				ScriptComponent& sc = m_Prefab->GetComponent<ScriptComponent>();
+				out << YAML::Key << "ClassName" << YAML::Value << Project::GetScriptEngine()->GetScriptName(sc.ClassID);
+
+				out << YAML::EndMap;
+			}
+
 			out << YAML::EndMap;
 		}
 		out << YAML::EndMap;
@@ -56,7 +67,7 @@ namespace Strype {
 
 		STY_CORE_TRACE("Deserializing prefab '{0}'", filepath.stem().string());
 
-		Object newobj = s_PrefabRoom->CreateObject(filepath.stem().string());
+		Object newobj = s_PrefabRoom->CreateObject();
 			
 		YAML::Node sprite = data["SpriteRenderer"];
 		if (sprite)
@@ -71,6 +82,13 @@ namespace Strype {
 				AssetHandle handle = Project::ImportAsset(path);
 				src.Texture = handle;
 			}
+		}
+
+		YAML::Node script = data["ScriptComponent"];
+		if (script)
+		{
+			ScriptComponent& sc = newobj.AddComponent<ScriptComponent>();
+			sc.ClassID = Project::GetScriptEngine()->GetIDByName(script["ClassName"].as<std::string>());
 		}
 
 		m_Prefab->SetObject(newobj);

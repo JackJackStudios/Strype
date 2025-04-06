@@ -2,3 +2,5 @@ Prefab:
   SpriteRenderer:
     Colour: [1, 1, 1, 1]
     TexturePath: sSellChest.png
+  ScriptComponent:
+    ClassName: ExampleProject.TestEntity
