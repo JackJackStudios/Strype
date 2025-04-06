@@ -22,8 +22,8 @@ namespace Strype {
 		void Clear() { m_Registry.clear(); }
 
 		void OnUpdateEditor(Timestep ts, Camera& cam);
+		void OnUpdateRuntime(Timestep ts, Camera& cam);
 
-		void OnUpdateRuntime(Timestep ts);
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 

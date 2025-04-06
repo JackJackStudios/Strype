@@ -53,6 +53,12 @@ namespace Strype {
 			result.m_Handle = &handle;
 			return result;
 		}
+
+		void DestroyInstance(CSharpObject& instance)
+		{
+			instance.m_Handle->Destroy();
+			instance.m_Handle = nullptr;
+		}
 	private:
 		void BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly);
 	private:

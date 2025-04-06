@@ -118,7 +118,7 @@ namespace Strype {
 
 			if (m_RuntimePlayed)
 			{
-				m_Room->OnUpdateRuntime(ts);
+				m_Room->OnUpdateRuntime(ts, m_EditorCamera->GetCamera());
 			}
 			else
 			{
@@ -379,6 +379,11 @@ namespace Strype {
 				if (ImGui::Button(scriptName))
 				{
 					ImGui::OpenPopup("Script search");
+				}
+
+				if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
+				{
+					component.ClassID = 0;
 				}
 
 				if (ImGui::BeginPopup("Script search"))
