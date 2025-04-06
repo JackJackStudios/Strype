@@ -116,7 +116,15 @@ namespace Strype {
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
 
-			m_Room->OnUpdate(ts, m_EditorCamera->GetCamera());
+			if (m_RuntimePlayed)
+			{
+				m_Room->OnUpdateRuntime(ts);
+			}
+			else
+			{
+				m_Room->OnUpdateEditor(ts, m_EditorCamera->GetCamera());
+			}
+
 			m_Framebuffer->Unbind();
 		}
 
@@ -151,6 +159,23 @@ namespace Strype {
 					ImGui::EndMenu();
 				}
 
+				if (ImGui::BeginMenu("Runtime"))
+				{
+					if (ImGui::MenuItem("Start Runtime", ""))
+					{
+						m_RuntimePlayed = true;
+						m_Room->OnRuntimeStart();
+					}
+
+					if (ImGui::MenuItem("Stop Runtime", ""))
+					{
+						m_RuntimePlayed = false;
+						m_Room->OnRuntimeStop();
+					}
+
+					ImGui::EndMenu();
+				}
+
 				ImGui::EndMenuBar();
 			}
 
@@ -179,7 +204,7 @@ namespace Strype {
 					}
 					else if (Project::GetAssetType(handle) == AssetType::Texture)
 					{
-						Object obj = m_Room->CreateObject(Project::GetMetadata(handle).FilePath.stem().string());
+						Object obj = m_Room->CreateObject();
 						obj.AddComponent<Transform>(m_EditorCamera->GetPosition());
 						obj.AddComponent<SpriteRenderer>(handle);
 					}
@@ -283,6 +308,8 @@ namespace Strype {
 			ProjectSerializer serializer(project);
 			serializer.Deserialize(dialog);
 
+			ScriptEngine::BuildProject(project);
+
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
 
@@ -295,8 +322,8 @@ namespace Strype {
 		{
 			if (ImGui::BeginPopupContextWindow())
 			{
-				AddComponentPopup<Transform>(prefab, "Transform");
 				AddComponentPopup<SpriteRenderer>(prefab, "Sprite Renderer");
+				AddComponentPopup<ScriptComponent>(prefab, "Script Component");
 
 				ImGui::EndPopup();
 			}
@@ -339,6 +366,37 @@ namespace Strype {
 					ImGui::EndDragDropTarget();
 				}
 			});
+
+			DrawComponent<ScriptComponent>("Script Component", prefab, [](Prefab* select, ScriptComponent& component)
+			{
+				auto& scriptEngine = Project::GetScriptEngine();
+
+				ImGui::Text("Script Class");
+				ImGui::SameLine();
+
+				const char* scriptName = scriptEngine->IsValidScript(component.ClassID) ? scriptEngine->GetScriptName(component.ClassID).c_str() : "None";
+
+				if (ImGui::Button(scriptName))
+				{
+					ImGui::OpenPopup("Script search");
+				}
+
+				if (ImGui::BeginPopup("Script search"))
+				{
+					for (const auto& [id, metadata] : scriptEngine->GetAllScripts())
+					{
+						const auto& scriptName = metadata.FullName;
+
+						bool selected = component.ClassID == id;
+						if (ImGui::Selectable(scriptName.c_str(), selected))
+						{
+							component.ClassID = id;
+						}
+					}
+
+					ImGui::EndPopup();
+				}
+			});
 		}
 
 		bool OnWindowDrop(WindowDropEvent& e)
@@ -372,6 +430,7 @@ namespace Strype {
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
 
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		bool m_RuntimePlayed = false;
 	};
 
 	class Editor : public Application

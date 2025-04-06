@@ -31,6 +31,7 @@ namespace Strype {
 		const ProjectConfig& GetConfig() const { return m_Config; }
 
 		static Ref<AssetManager> GetAssetManager() { return s_AssetManager; }
+		static Ref<ScriptEngine>& GetScriptEngine() { return s_ScriptEngine; }
 
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);

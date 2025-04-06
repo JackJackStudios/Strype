@@ -15,14 +15,17 @@ namespace Strype {
 	class Room : public Asset
 	{
 	public:
-		Room();
-		~Room();
+		Room() = default;
 
-		Object CreateObject(std::string name = std::string(), glm::vec3 position = glm::vec3());
+		Object CreateObject(glm::vec3 position = glm::vec3());
 		void DestroyObject(Object entity);
+		void Clear() { m_Registry.clear(); }
 
-		void Clear();
-		void OnUpdate(Timestep ts, Camera cam);
+		void OnUpdateEditor(Timestep ts, Camera& cam);
+
+		void OnUpdateRuntime(Timestep ts);
+		void OnRuntimeStart();
+		void OnRuntimeStop();
 
 		const std::string& GetName() const { return m_Name; }
 

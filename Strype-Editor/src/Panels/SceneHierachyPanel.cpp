@@ -78,8 +78,6 @@ namespace Strype {
 
 		if (m_ActiveScene)
 		{
-			bool popupOpen = false;
-
 			m_ActiveScene->m_Registry.view<PrefabComponent>().each([&](auto entity, PrefabComponent& prefab) {
 
 				Object temp{ entity, m_ActiveScene.get() };
@@ -99,21 +97,9 @@ namespace Strype {
 						m_Inspector->SetSelected<void>(nullptr);
 					}
 
-					popupOpen = true;
 					ImGui::EndPopup();
 				}
 			});
-
-			if (!popupOpen)
-			{
-				if (ImGui::BeginPopupContextWindow())
-				{
-					if (ImGui::MenuItem("Create Entity"))
-						m_ActiveScene->CreateObject("Untitled");
-			
-					ImGui::EndPopup();
-				}
-			}
 		}
 
 		ImGui::End();

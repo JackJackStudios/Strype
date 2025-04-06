@@ -5,6 +5,7 @@
 #include "Strype/Core/Log.h"
 
 #include "Strype/Core/Input.h"
+#include "Strype/Core/Audio.h"
 #include "Strype/Core/KeyCodes.h"
 #include "Strype/Core/MouseCodes.h"
 
@@ -26,11 +27,10 @@
 #include "Strype/Project/Project.h"
 #include "Strype/Project/ProjectSerializer.h"
 
-#include "Strype/Core/Audio.h"
+#include "Strype/Script/ScriptEngine.h"
 
 #include "Strype/Utils/PlatformUtils.h"
 
 #include <imgui.h>
 #include <glm/glm.hpp>
-
 #include <agi.h>

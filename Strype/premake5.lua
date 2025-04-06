@@ -46,9 +46,13 @@ project "Strype"
         "ImGui",
         "yaml-cpp",
         "agi",
+        "Coral.Native",
 
         "opengl32.lib"
     }
+
+    
+    postbuildcommands { '{COPYFILE} "%{wks.location}/Libraries/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/Strype-Editor/DotNet/Coral.Managed.runtimeconfig.json"' }
 
     filter "configurations:Debug"
         defines "STY_DEBUG"
@@ -59,3 +63,4 @@ project "Strype"
         defines "STY_RELEASE"
         runtime "Release"
         symbols "on"
+        

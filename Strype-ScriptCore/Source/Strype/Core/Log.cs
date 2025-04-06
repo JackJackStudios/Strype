@@ -5,7 +5,6 @@
 		internal enum LogLevel
 		{
 			Trace = 1 << 0,
-			Debug = 1 << 1,
 			Info = 1 << 2,
 			Warn = 1 << 3,
 			Error = 1 << 4,
@@ -15,11 +14,6 @@
 		public static void Trace(string format, params object[] parameters)
 		{
 			unsafe { InternalCalls.Log_LogMessage(LogLevel.Trace, FormatUtils.Format(format, parameters)); }
-		}
-
-		public static void Debug(string format, params object[] parameters)
-		{
-			unsafe { InternalCalls.Log_LogMessage(LogLevel.Debug, FormatUtils.Format(format, parameters)); }
 		}
 
 		public static void Info(string format, params object[] parameters)
@@ -45,11 +39,6 @@
 		public static void Trace(object value)
 		{
 			unsafe { InternalCalls.Log_LogMessage(LogLevel.Trace, FormatUtils.Format(value)); }
-		}
-
-		public static void Debug(object value)
-		{
-			unsafe { InternalCalls.Log_LogMessage(LogLevel.Debug, FormatUtils.Format(value)); }
 		}
 
 		public static void Info(object value)

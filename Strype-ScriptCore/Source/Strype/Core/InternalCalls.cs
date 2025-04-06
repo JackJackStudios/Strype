@@ -46,14 +46,6 @@ namespace Strype
 
         #endregion
 
-        #region Entity
-
-        internal static delegate* unmanaged<ulong, ReflectionType, void> Entity_CreateComponent;
-        internal static delegate* unmanaged<ulong, ReflectionType, bool> Entity_HasComponent;
-        internal static delegate* unmanaged<ulong, ReflectionType, bool> Entity_RemoveComponent;
-
-        #endregion
-
         #region TagComponent
 
         internal static delegate* unmanaged<ulong, NativeString> TagComponent_GetTag;

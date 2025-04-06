@@ -91,6 +91,7 @@ namespace Strype {
 		std::filesystem::current_path(workingdir);
 
 		std::filesystem::remove(path / "Build.bat");
+		std::filesystem::remove(path / "premake5.lua");
 
 		//Change empty project to fit new project name
 		std::string projName = path.filename().string();

@@ -12,32 +12,7 @@
 
 namespace Strype {
 
-	Room::Room()
-	{
-	}
-
-	Room::~Room()
-	{
-	}
-
-	Object Room::CreateObject(std::string name, glm::vec3 position)
-	{
-		Object object{ m_Registry.create(), this };
-		object.AddComponent<Transform>(position);
-		return object;
-	}
-
-	void Room::DestroyObject(Object entity)
-	{
-		m_Registry.destroy(entity);
-	}
-
-	void Room::Clear()
-	{
-		m_Registry.clear();
-	}
-
-	void Room::OnUpdate(Timestep ts, Camera cam)
+	void Room::OnUpdateEditor(Timestep ts, Camera& cam)
 	{
 		Renderer::BeginRoom(cam);
 
@@ -53,6 +28,30 @@ namespace Strype {
 		});
 
 		Renderer::EndRoom();
+	}
+
+	void Room::OnUpdateRuntime(Timestep ts)
+	{
+	}
+
+	void Room::OnRuntimeStart()
+	{
+	}
+
+	void Room::OnRuntimeStop()
+	{
+	}
+
+	Object Room::CreateObject(glm::vec3 position)
+	{
+		Object object{ m_Registry.create(), this };
+		object.AddComponent<Transform>(position);
+		return object;
+	}
+
+	void Room::DestroyObject(Object entity)
+	{
+		m_Registry.destroy(entity);
 	}
 
 }
