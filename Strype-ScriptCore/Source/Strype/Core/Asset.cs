@@ -34,10 +34,5 @@ namespace Strype
 		}
 
 		public override int GetHashCode() => Handle.GetHashCode();
-
-		public bool IsValid() => Handle.IsValid();
-
-		public static bool IsValid(Asset<T>? asset) => asset != null && asset.IsValid();
-		public static implicit operator bool(Asset<T>? asset) => IsValid(asset);
 	}
 }

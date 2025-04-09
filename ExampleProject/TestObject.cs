@@ -11,7 +11,7 @@ namespace ExampleProject
 
         protected override void OnUpdate(float ts)
         {
-
+            Log.Info("Hello C#");
         }
     }
 }

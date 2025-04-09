@@ -19,7 +19,7 @@ namespace Strype
         }
 
         public readonly ulong ID;
-        public string Tag => GetComponent<TagComponent>()?.Tag ?? "";
+
         public TransformComponent Transform
         {
             get
@@ -51,8 +51,6 @@ namespace Strype
 
         protected virtual void OnCreate() { }
         protected virtual void OnUpdate(float ts) { }
-        protected virtual void OnLateUpdate(float ts) { }
-        protected virtual void OnPhysicsUpdate(float ts) { }
         protected virtual void OnDestroy() { }
 
         public T? CreateComponent<T>() where T : Component, new()
@@ -107,34 +105,6 @@ namespace Strype
                 m_ComponentCache.Remove(componentType);
 
             return removed;
-        }
-
-        /// <summary>
-        /// Checks if this entity is a script entity of type T
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>True if this entity is a script entity of type T</returns>
-        public bool Is<T>() where T : Object
-        {
-            var sc = GetComponent<ScriptComponent>();
-            if (sc == null)
-                return false;
-
-            if (sc.Instance.Get() == null)
-                return false;
-
-            return sc.Instance.Get() is T;
-        }
-
-        /// <summary>
-        /// Returns the script instance as type T if this entity is of the given type, otherwise null
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public T? As<T>() where T : Object
-        {
-            var sc = GetComponent<ScriptComponent>();
-            return sc?.Instance.Get() as T;
         }
 
         // Destroys the calling Object

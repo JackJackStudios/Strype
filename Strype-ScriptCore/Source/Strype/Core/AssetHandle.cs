@@ -13,16 +13,6 @@ namespace Strype
 
 		public AssetHandle(ulong handle) { m_Handle = handle; }
 
-		public bool IsValid()
-		{
-			unsafe { return InternalCalls.AssetHandle_IsValid(this); }
-		}
-
-		public static implicit operator bool(AssetHandle assetHandle)
-		{
-			unsafe { return InternalCalls.AssetHandle_IsValid(assetHandle); }
-		}
-
 		public override string ToString() => m_Handle.ToString();
 		public override int GetHashCode() => m_Handle.GetHashCode();
 

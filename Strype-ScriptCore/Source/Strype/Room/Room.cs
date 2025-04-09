@@ -18,50 +18,14 @@ namespace Strype
 
             unsafe
             {
-                if (!InternalCalls.Room_IsObjectValid(entity.ID))
-                    return;
-
                 // Remove this entity from the cache if it's been indexed either with the ID or Tag hash code
-                if (!s_ObjectCache.Remove(entity.ID))
-                    s_ObjectCache.Remove((ulong)entity.Tag.GetHashCode());
+                s_ObjectCache.Remove(entity.ID);
 
                 InternalCalls.Room_DestroyObject(entity.ID);
             }
         }
 
         private static Dictionary<ulong, Object?> s_ObjectCache = new Dictionary<ulong, Object?>(50);
-
-        public static Object? FindObjectByTag(string tag)
-        {
-            ulong hashCode = (ulong)tag.GetHashCode();
-
-            Object? result = null;
-
-            unsafe
-            {
-                if (s_ObjectCache.ContainsKey(hashCode) && s_ObjectCache[hashCode] != null)
-                {
-                    result = s_ObjectCache[hashCode];
-
-                    if (!InternalCalls.Room_IsObjectValid(result!.ID))
-                    {
-                        s_ObjectCache.Remove(hashCode);
-                        result = null;
-                    }
-                }
-
-                if (result == null)
-                {
-                    ulong entityID = InternalCalls.Room_FindObjectByTag(tag);
-                    var newObject = entityID != 0 ? new Object(entityID) : null;
-                    s_ObjectCache[hashCode] = newObject;
-
-                    result = newObject;
-                }
-            }
-
-            return result;
-        }
 
         public static Object? FindObjectByID(ulong entityID)
         {
@@ -87,30 +51,6 @@ namespace Strype
             var newObject = new Object(entityID);
             s_ObjectCache[entityID] = newObject;
             return newObject;
-        }
-
-        public static Object[] GetEntities()
-        {
-            Object[] entities;
-
-            unsafe
-            {
-                using var entityIDs = InternalCalls.Room_GetObjects();
-                entities = new Object[entityIDs.Length];
-                for (int i = 0; i < entityIDs.Length; i++)
-                {
-                    entities[i] = new Object(entityIDs[i]);
-                }
-            }
-
-            return entities;
-        }
-
-        private static void OnObjectDestroyed(Object entity)
-        {
-            // Remove this entity from the cache if it's been indexed either with the ID or Tag hash code
-            if (!s_ObjectCache.Remove(entity.ID))
-                s_ObjectCache.Remove((ulong)entity.Tag.GetHashCode());
         }
 
     }

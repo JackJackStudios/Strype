@@ -52,7 +52,7 @@ namespace Strype {
 			{
 				script.Instance.Invoke<float>("OnUpdate", ts);
 			}
-			else
+			else if (script.ClassID != 0)
 			{
 				STY_CORE_ERROR("Object '{}' has invalid script!", (uint32_t)entity);
 			}

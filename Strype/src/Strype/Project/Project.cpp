@@ -84,13 +84,11 @@ namespace Strype {
 
 		// Build C# project
 		std::filesystem::path workingdir = std::filesystem::current_path();
-		std::filesystem::copy_file("assets/defaults/Build.bat", path / "Build.bat", std::filesystem::copy_options::overwrite_existing);
 
 		std::filesystem::current_path(path);
-		system("Build.bat");
+		system("%STRYPE_DIR%/Libraries/premake/premake5.exe --verbose vs2022 >nul 2>&1");
 		std::filesystem::current_path(workingdir);
 
-		std::filesystem::remove(path / "Build.bat");
 		std::filesystem::remove(path / "premake5.lua");
 
 		//Change empty project to fit new project name
@@ -111,6 +109,7 @@ namespace Strype {
 		{
 			s_ScriptEngine.reset();
 			s_AssetManager.reset();
+			s_ActiveRoom.reset();
 		}
 
 		s_ActiveProject = project;

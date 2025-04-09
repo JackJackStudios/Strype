@@ -5,6 +5,7 @@
 namespace Strype {
 
 	class ScriptEngine;
+	class Room;
 
 	struct ProjectConfig
 	{
@@ -32,6 +33,9 @@ namespace Strype {
 
 		static Ref<AssetManager> GetAssetManager() { return s_AssetManager; }
 		static Ref<ScriptEngine>& GetScriptEngine() { return s_ScriptEngine; }
+		static Ref<Room>& GetActiveRoom() { return s_ActiveRoom; }
+
+		static void SetActiveRoom(const Ref<Room>& room) { s_ActiveRoom = room; }
 
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
@@ -88,6 +92,7 @@ namespace Strype {
 	private:
 		inline static Ref<AssetManager> s_AssetManager;
 		inline static Ref<ScriptEngine> s_ScriptEngine;
+		inline static Ref<Room> s_ActiveRoom;
 
 		ProjectConfig m_Config;
 		inline static Ref<Project> s_ActiveProject;

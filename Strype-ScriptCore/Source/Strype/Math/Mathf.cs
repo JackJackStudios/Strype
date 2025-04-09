@@ -75,8 +75,6 @@ namespace Strype
 
 		public static float Distance(float p1, float p2) => Abs(p1 - p2);
 
-		public static float PerlinNoise(float v0, float v1) => Noise.Perlin(v0, v1);
-
 		public static int CeilToInt(float value) => (int)Math.Ceiling(value);
 		public static int FloorToInt(float value) => (int)Math.Floor(value);
 		

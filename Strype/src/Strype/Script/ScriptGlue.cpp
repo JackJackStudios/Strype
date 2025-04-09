@@ -1,7 +1,11 @@
 #include "stypch.h"
 #include "ScriptGlue.h"
 
+#include "Strype/Room/Room.h"
 #include "Strype/Room/Object.h"
+#include "Strype/Room/Components.h"
+
+#include "Strype/Project/Project.h"
 
 #define STY_ADD_INTERNAL_CALL(icall) coreAssembly.AddInternalCall("Strype.InternalCalls", #icall, (void*)InternalCalls::icall)
 
@@ -49,6 +53,7 @@ namespace Strype {
 
 	void ScriptGlue::RegisterComponentTypes(Coral::ManagedAssembly& coreAssembly)
 	{
+		RegisterManagedComponent<Transform>(coreAssembly);
 	}
 
 	void ScriptGlue::RegisterInternalCalls(Coral::ManagedAssembly& coreAssembly)

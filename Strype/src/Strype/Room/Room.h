@@ -27,8 +27,6 @@ namespace Strype {
 		void OnRuntimeStart();
 		void OnRuntimeStop();
 
-		const std::string& GetName() const { return m_Name; }
-
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 
@@ -43,7 +41,6 @@ namespace Strype {
 		}
 	private:
 		entt::registry m_Registry;
-		std::string m_Name = "Untitled";
 
 		friend class Object;
 		friend class Prefab;

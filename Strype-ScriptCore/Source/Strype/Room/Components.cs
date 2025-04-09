@@ -8,26 +8,6 @@ namespace Strype
         public Object Object { get; internal set; }
     }
 
-    public class TagComponent : Component
-    {
-        public string? Tag
-        {
-            get { unsafe { return InternalCalls.TagComponent_GetTag(Object.ID); } }
-            set { unsafe { InternalCalls.TagComponent_SetTag(Object.ID, value); } }
-        }
-    }
-
-    public class ScriptComponent : Component
-    {
-        public NativeInstance<object> Instance
-        {
-            get
-            {
-                unsafe { return InternalCalls.ScriptComponent_GetInstance(Object.ID); }
-            }
-        }
-    }
-
     public class TransformComponent : Component
     {
         public Vector2 Position
