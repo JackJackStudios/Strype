@@ -7,6 +7,8 @@ lib_path = "Libraries/"
 os.chdir('./../')
 
 subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
+subprocess.call(["setx", "STRYPE_DIR", os.getcwd()])
+os.environ['STRYPE_DIR'] = os.getcwd()
 
 for file in os.listdir(lib_path):
     if file.endswith(".lua"):
