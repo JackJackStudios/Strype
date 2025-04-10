@@ -21,6 +21,8 @@ namespace Strype {
 		void DestroyObject(Object entity);
 		void Clear() { m_Registry.clear(); }
 
+		bool ObjectExists(entt::entity obj) { return m_Registry.valid(obj); }
+
 		void OnUpdateEditor(Timestep ts, Camera& cam);
 		void OnUpdateRuntime(Timestep ts, Camera& cam);
 
@@ -29,6 +31,33 @@ namespace Strype {
 
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
+
+		template<typename T, typename... Args>
+		T& AddComponent(entt::entity handle, Args&&... args)
+		{
+			STY_CORE_ASSERT(!HasComponent<T>(), "Object already has component!");
+			return m_Registry.emplace<T>(handle, std::forward<Args>(args)...);
+		}
+
+		template<typename T>
+		T& GetComponent(entt::entity handle)
+		{
+			STY_CORE_ASSERT(HasComponent<T>(), "Object does not have component!");
+			return m_Registry.get<T>(handle);
+		}
+
+		template<typename T>
+		bool HasComponent(entt::entity handle)
+		{
+			return m_Registry.all_of<T>(handle);
+		}
+
+		template<typename T>
+		void RemoveComponent(entt::entity handle)
+		{
+			STY_CORE_ASSERT(HasComponent<T>(), "Object does not have component!");
+			m_Registry.remove<T>(handle);
+		}
 
 		template<typename TComponent>
 		void CopyComponentIfExists(entt::entity dst, entt::registry& dstRegistry, entt::entity src)

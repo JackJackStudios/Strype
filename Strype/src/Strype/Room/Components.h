@@ -24,9 +24,8 @@ namespace Strype {
 		glm::vec2 Scale;
 		float Rotation;
 
+		Transform() = default;
 		Transform(const Transform&) = default;
-		Transform()
-			: Position(0.0f), Scale(1.0f), Rotation(0) {}
 		Transform(const glm::vec2& position, const glm::vec2& scale = glm::vec2(1.0f), float rotation = 0)
 			: Position(position), Scale(scale), Rotation(rotation) {}
 	};
@@ -42,9 +41,8 @@ namespace Strype {
 		glm::vec4 Colour;
 		AssetHandle Texture;
 
+		SpriteRenderer() = default;
 		SpriteRenderer(const SpriteRenderer&) = default;
-		SpriteRenderer()
-			: Colour(1.0f), Texture(0) {}
 		SpriteRenderer(AssetHandle texture, const glm::vec4& colour = glm::vec4(1.0f))
 			: Texture(texture), Colour(colour)  {}
 	};

@@ -35,7 +35,7 @@ namespace Strype
                 {
                     var entity = s_ObjectCache[entityID];
 
-                    if (!InternalCalls.Room_IsObjectValid(entity!.ID))
+                    if (!InternalCalls.Room_ObjectExists(entity!.ID))
                     {
                         s_ObjectCache.Remove(entityID);
                         entity = null;
@@ -44,7 +44,7 @@ namespace Strype
                     return entity;
                 }
 
-                if (!InternalCalls.Room_IsObjectValid(entityID))
+                if (!InternalCalls.Room_ObjectExists(entityID))
                     return null;
             }
 

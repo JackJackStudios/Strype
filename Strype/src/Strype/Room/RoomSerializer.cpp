@@ -87,7 +87,6 @@ namespace Strype {
 		STY_CORE_TRACE("Deserializing room '{0}'", filepath.stem().string());
 		
 		m_Room->Clear();
-		m_Room->m_Name = filepath.stem().string();
 
 		YAML::Node objects = data["Objects"];
 		for (auto obj : objects)

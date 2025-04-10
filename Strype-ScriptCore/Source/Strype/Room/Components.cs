@@ -8,20 +8,20 @@ namespace Strype
         public Object Object { get; internal set; }
     }
 
-    public class TransformComponent : Component
+    public class Transform : Component
     {
         public Vector2 Position
         {
             get
             {
                 Vector2 result;
-                unsafe { InternalCalls.TransformComponent_GetPosition(Object.ID, &result); }
+                unsafe { InternalCalls.Transform_GetPosition(Object.ID, &result); }
                 return result;
             }
 
             set
             {
-                unsafe { InternalCalls.TransformComponent_SetPosition(Object.ID, &value); }
+                unsafe { InternalCalls.Transform_SetPosition(Object.ID, &value); }
             }
         }
 
@@ -30,13 +30,13 @@ namespace Strype
             get
             {
                 float result;
-                unsafe { InternalCalls.TransformComponent_GetRotation(Object.ID, &result); }
+                unsafe { InternalCalls.Transform_GetRotation(Object.ID, &result); }
                 return result;
             }
 
             set
             {
-                unsafe { InternalCalls.TransformComponent_SetRotation(Object.ID, &value); }
+                unsafe { InternalCalls.Transform_SetRotation(Object.ID, &value); }
             }
         }
 
@@ -45,13 +45,13 @@ namespace Strype
             get
             {
                 Vector2 result;
-                unsafe { InternalCalls.TransformComponent_GetScale(Object.ID, &result); }
+                unsafe { InternalCalls.Transform_GetScale(Object.ID, &result); }
                 return result;
             }
 
             set
             {
-                unsafe { InternalCalls.TransformComponent_SetScale(Object.ID, &value); }
+                unsafe { InternalCalls.Transform_SetScale(Object.ID, &value); }
             }
         }
     }

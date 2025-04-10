@@ -9,16 +9,16 @@ namespace Strype
         internal static delegate* unmanaged<ulong, ReflectionType, bool> Object_HasComponent;
         internal static delegate* unmanaged<ulong, ReflectionType, bool> Object_RemoveComponent;
 
-        internal static delegate* unmanaged<ulong, bool> Room_IsObjectValid;
+        internal static delegate* unmanaged<ulong, bool> Room_ObjectExists;
         internal static delegate* unmanaged<NativeString, ulong> Room_CreateObject;
         internal static delegate* unmanaged<ulong, void> Room_DestroyObject;
 
-        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_GetPosition;
-        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_SetPosition;
-        internal static delegate* unmanaged<ulong, float*, void> TransformComponent_GetRotation;
-        internal static delegate* unmanaged<ulong, float*, void> TransformComponent_SetRotation;
-        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_GetScale;
-        internal static delegate* unmanaged<ulong, Vector2*, void> TransformComponent_SetScale;
+        internal static delegate* unmanaged<ulong, Vector2*, void> Transform_GetPosition;
+        internal static delegate* unmanaged<ulong, Vector2*, void> Transform_SetPosition;
+        internal static delegate* unmanaged<ulong, float*, void> Transform_GetRotation;
+        internal static delegate* unmanaged<ulong, float*, void> Transform_SetRotation;
+        internal static delegate* unmanaged<ulong, Vector2*, void> Transform_GetScale;
+        internal static delegate* unmanaged<ulong, Vector2*, void> Transform_SetScale;
 
 		internal static delegate* unmanaged<KeyCode, Bool32> Input_IsKeyPressed;
 		internal static delegate* unmanaged<KeyCode, Bool32> Input_IsKeyHeld;

@@ -254,6 +254,7 @@ namespace Strype {
 		{
 			m_Room = Project::GetAsset<Room>(metadata.Handle);
 			m_PanelManager.SetRoomContext(m_Room);
+			Project::SetActiveRoom(m_Room);
 			m_RoomFilePath = Project::GetFilePath(metadata.Handle);
 		}
 

@@ -9,7 +9,7 @@ namespace Strype
     public class Object : IEquatable<Object>
     {
         private Dictionary<Type, Component> m_ComponentCache = new Dictionary<Type, Component>();
-        private TransformComponent m_TransformComponent;
+        private Transform m_TransformComponent;
 
         protected Object() { ID = 0; }
 
@@ -20,12 +20,12 @@ namespace Strype
 
         public readonly ulong ID;
 
-        public TransformComponent Transform
+        public Transform Transform
         {
             get
             {
                 if (m_TransformComponent == null)
-                    m_TransformComponent = GetComponent<TransformComponent>();
+                    m_TransformComponent = GetComponent<Transform>();
 
                 return m_TransformComponent;
             }
@@ -111,12 +111,6 @@ namespace Strype
         public void Destroy() => Room.DestroyObject(this);
         public void Destroy(Object other) => Room.DestroyObject(other);
 
-        private void OnDestroyInternal()
-        {
-            OnDestroy();
-            m_ComponentCache.Clear();
-        }
-
         public override bool Equals(object? obj) => obj is Object other && Equals(other);
 
         // NOTE(Peter): Implemented according to Microsofts official documentation:
@@ -132,20 +126,10 @@ namespace Strype
             return ID == other.ID;
         }
 
-        private static bool IsValid(Object? entity)
-        {
-            if (entity is null)
-                return false;
-
-            unsafe { return InternalCalls.Room_IsObjectValid(entity.ID); }
-        }
-
         public override int GetHashCode() => (int)ID;
 
         public static bool operator ==(Object? entityA, Object? entityB) => entityA is null ? entityB is null : entityA.Equals(entityB);
         public static bool operator !=(Object? entityA, Object? entityB) => !(entityA == entityB);
-
-        public static implicit operator bool(Object entity) => IsValid(entity);
 
     }
 }
