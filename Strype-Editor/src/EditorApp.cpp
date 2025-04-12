@@ -99,6 +99,7 @@ namespace Strype {
 
 		~EditorLayer()
 		{
+			Project::SetActive(nullptr); //Auto saves
 		}
 
 		void OnUpdate(Timestep ts) override
@@ -277,9 +278,7 @@ namespace Strype {
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
 
-			const std::string& startRoom = project->GetConfig().StartRoom;
-			if (!startRoom.empty())
-				OpenRoom(startRoom);
+			OpenRoom(project->GetStartRoom());
 		}
 
 		void SaveProject()
@@ -287,9 +286,9 @@ namespace Strype {
 			if (!Project::GetActive())
 				return;
 
-			Ref<Project> project = Project::GetActive();
-			ProjectSerializer serializer(project);
-			serializer.Serialize(project->GetConfig().ProjectDirectory / project->GetConfig().ProjectFileName);
+			ProjectSerializer serializer(Project::GetActive());
+			serializer.Serialize(Project::GetProjectDirectory() / (Project::GetProjectName() + ".sproj"));
+			Project::SaveAllAssets();
 		}
 
 		void OpenProject(const std::filesystem::path& path = std::filesystem::path())

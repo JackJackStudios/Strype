@@ -31,6 +31,14 @@ namespace Strype {
 		LoadDirectory(Project::GetProjectDirectory());
 	}
 
+	void AssetManager::SaveAllAssets()
+	{
+		for (const auto& [path, handle] : m_LoadedFiles)
+		{
+			SaveAsset(handle, Project::GetProjectDirectory() / path);
+		}
+	}
+
 	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
 	{
 		Ref<Asset> asset;

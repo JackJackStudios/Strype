@@ -47,6 +47,11 @@ namespace Strype {
 			return s_ActiveProject->GetConfig().Name;
 		}
 
+		static const std::string& GetStartRoom()
+		{
+			return s_ActiveProject->GetConfig().StartRoom;
+		}
+
 		static std::filesystem::path GetProjectDirectory()
 		{
 			return s_ActiveProject->GetConfig().ProjectDirectory;
@@ -87,6 +92,16 @@ namespace Strype {
 		static const std::filesystem::path& GetFilePath(AssetHandle handle)
 		{
 			return Project::GetAssetManager()->GetFilePath(handle);
+		}
+
+		static void SaveAllAssets()
+		{
+			Project::GetAssetManager()->SaveAllAssets();
+		}
+
+		static void SaveAsset(AssetHandle handle, const std::filesystem::path& path)
+		{
+			Project::GetAssetManager()->SaveAsset(handle, path);
 		}
 
 	private:

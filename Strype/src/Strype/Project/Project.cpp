@@ -107,19 +107,23 @@ namespace Strype {
 	{
 		if (s_ActiveProject)
 		{
+			s_AssetManager->SaveAllAssets();
+
 			s_ScriptEngine.reset();
 			s_AssetManager.reset();
 			s_ActiveRoom.reset();
 		}
 
 		s_ActiveProject = project;
+		if (s_ActiveProject)
+		{
+			Ref<ScriptEngine> scriptEngine = CreateRef<ScriptEngine>(project);
+			s_ScriptEngine = scriptEngine;
 
-		Ref<ScriptEngine> scriptEngine = CreateRef<ScriptEngine>(project);
-		s_ScriptEngine = scriptEngine;
-
-		Ref<AssetManager> assetManager = CreateRef<AssetManager>();
-		s_AssetManager = assetManager;
-		s_AssetManager->ReloadAssets(); // <- This must not happen in constructor
+			Ref<AssetManager> assetManager = CreateRef<AssetManager>();
+			s_AssetManager = assetManager;
+			s_AssetManager->ReloadAssets(); // <- This must not happen in constructor
+		}
 	}
 
 }
