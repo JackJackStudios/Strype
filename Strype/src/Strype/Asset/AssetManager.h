@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Asset.h"
+#include "AssetSerializer.h"
 
 namespace Strype {
 
@@ -51,12 +52,16 @@ namespace Strype {
 		const AssetType GetAssetType(AssetHandle handle) const;
 
 		AssetHandle GetHandle(const std::filesystem::path& path) const;
+
+		void SaveAsset(AssetHandle handle, const std::filesystem::path& path);
 	private:
 		void LoadDirectory(const std::filesystem::path& path);
 
 		AssetFileSystem m_LoadedFiles;
 		AssetRegistry m_AssetRegistry;
 		AssetMap m_LoadedAssets;
+
+		std::unordered_map<AssetType, Scope<AssetSerializer>> m_Serializers;
 	};
 
 }

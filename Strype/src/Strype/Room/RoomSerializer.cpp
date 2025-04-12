@@ -12,11 +12,6 @@
 
 namespace Strype {
 
-	RoomSerializer::RoomSerializer(const Ref<Room>& room)
-		: m_Room(room)
-	{
-	}
-
 	static void SerializeObject(Object obj, YAML::Emitter& out)
 	{
 		out << YAML::BeginMap;
@@ -49,31 +44,35 @@ namespace Strype {
 		out << YAML::EndMap;
 	}
 
-	void RoomSerializer::Serialize(const std::filesystem::path& filepath)
+	void RoomSerializer::SaveAsset(Ref<Asset> asset, const std::filesystem::path& path)
 	{
+		//HACK: Assume asset is prefab 
+		Room* room = (Room*)asset.get();
+
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		out << YAML::Key << "Room" << YAML::Value << YAML::BeginMap;
 		out << YAML::Key << "Objects" << YAML::Value << YAML::BeginSeq;
 
-		auto view = m_Room->m_Registry.view<entt::entity>();
+		auto view = room->m_Registry.view<entt::entity>();
 		for (entt::entity id : view)
 		{
-			Object obj{ id, m_Room.get() };
+			Object obj{ id, room };
 
 			SerializeObject(obj, out);
 		}
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
-		std::ofstream fout(filepath);
+		std::ofstream fout(path);
 		fout << out.c_str();
 	}
 
-	void RoomSerializer::Deserialize(const std::filesystem::path& filepath)
+	Ref<Asset> RoomSerializer::LoadAsset(const std::filesystem::path& path)
 	{
-		std::ifstream fstream(filepath);
+		Ref<Room> room = CreateRef<Room>();
 
+		std::ifstream fstream(path);
 		STY_CORE_ASSERT(fstream.is_open(), "Error opening file");
 
 		std::stringstream stream;
@@ -84,9 +83,9 @@ namespace Strype {
 		STY_CORE_ASSERT(data, "Could not load room")
 		STY_CORE_ASSERT(data["Objects"], "Could not load room")
 
-		STY_CORE_TRACE("Deserializing room '{0}'", filepath.stem().string());
+		STY_CORE_TRACE("Deserializing room '{0}'", path.stem().string());
 		
-		m_Room->Clear();
+		room->Clear();
 
 		YAML::Node objects = data["Objects"];
 		for (auto obj : objects)
@@ -103,7 +102,7 @@ namespace Strype {
 			if (!path.empty())
 			{
 				AssetHandle handle = Project::ImportAsset(path);
-				Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
+				Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), room);
 				newobj.AddComponent<PrefabComponent>(handle);
 
 				YAML::Node transform = obj["Transform"];
@@ -117,6 +116,8 @@ namespace Strype {
 				}
 			}
 		}
+	
+		return room;
 	}
 
 }

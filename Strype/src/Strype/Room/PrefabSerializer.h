@@ -1,18 +1,17 @@
 #pragma once
 
+#include "Strype/Asset/AssetSerializer.h"
+
 #include "Prefab.h"
 
 namespace Strype {
 
-	class PrefabSerializer
+	class PrefabSerializer: public AssetSerializer
 	{
 	public:
-		PrefabSerializer(const Ref<Prefab>& prefab);
-
-		void Serialize(const std::filesystem::path& filepath);
-		void Deserialize(const std::filesystem::path& filepath);
-	private:
-		Ref<Prefab> m_Prefab;
+		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
+		
+		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path);
 	};
 
 }

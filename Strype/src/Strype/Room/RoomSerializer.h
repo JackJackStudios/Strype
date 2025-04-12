@@ -1,18 +1,17 @@
 #pragma once
 
+#include "Strype/Asset/AssetSerializer.h"
+
 #include "Room.h"
 
 namespace Strype {
 
-	class RoomSerializer
+	class RoomSerializer : public AssetSerializer
 	{
 	public:
-		RoomSerializer(const Ref<Room>& room);
+		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
 
-		void Serialize(const std::filesystem::path& filepath);
-		void Deserialize(const std::filesystem::path& filepath);
-	private:
-		Ref<Room> m_Room;
+		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path);
 	};
 
 }

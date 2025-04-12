@@ -22,7 +22,6 @@
 
 #include "Strype/Asset/Asset.h"
 #include "Strype/Asset/AssetManager.h"
-#include "Strype/Asset/TextureImporter.h"
 
 #include "Strype/Project/Project.h"
 #include "Strype/Project/ProjectSerializer.h"

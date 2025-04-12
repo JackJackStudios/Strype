@@ -227,10 +227,8 @@ namespace Strype {
 
 		void SaveRoom()
 		{
-			RoomSerializer serializer(m_Room);
-
 			if (!m_RoomFilePath.empty())
-				serializer.Serialize(Project::GetProjectDirectory() / m_RoomFilePath);
+				Project::SaveAsset(m_Room->Handle, Project::GetProjectDirectory() / m_RoomFilePath);
 			else
 				SaveRoomAs();
 		}
@@ -241,8 +239,7 @@ namespace Strype {
 
 			if (!dialog.empty())
 			{
-				RoomSerializer serializer(m_Room);
-				serializer.Serialize(dialog);
+				Project::SaveAsset(m_Room->Handle, dialog);
 				m_RoomFilePath = dialog;
 
 				Project::ImportAsset(dialog);

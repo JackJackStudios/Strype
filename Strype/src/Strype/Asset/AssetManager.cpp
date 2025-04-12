@@ -3,12 +3,12 @@
 
 #include "Strype/Project/Project.h"
 
-#include "TextureImporter.h"
-#include "PrefabImporter.h"
-#include "RoomImporter.h"
+#include "TextureSerializer.h"
+#include "Strype/Room/PrefabSerializer.h"
+#include "Strype/Room/RoomSerializer.h"
 
 namespace Strype {
-	
+
 	namespace Utils {
 
 		std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
@@ -18,15 +18,12 @@ namespace Strype {
 
 	}
 
-	using AssetImportFunc = std::function<Ref<Asset>(AssetHandle, const AssetMetadata&)>;
-	static std::map<AssetType, AssetImportFunc> s_AssetImportFunctions = {
-		{ AssetType::Texture, TextureImporter::ImportTexture },
-		{ AssetType::Prefab, PrefabImporter::ImportPrefab },
-		{ AssetType::Room, RoomImporter::ImportRoom },
-	};
-
 	AssetManager::AssetManager()
 	{
+		m_Serializers.clear();
+		m_Serializers[AssetType::Prefab] = CreateScope<PrefabSerializer>();
+		m_Serializers[AssetType::Texture] = CreateScope<TextureSerializer>();
+		m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
 	}
 	
 	void AssetManager::ReloadAssets()
@@ -77,6 +74,11 @@ namespace Strype {
 		return m_LoadedFiles.at(Utils::ToAssetSysPath(path));
 	}
 
+	void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& path)
+	{
+		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), path);
+	}
+
 	AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)
 	{
 		if (IsAssetLoaded(Utils::ToAssetSysPath(filepath))) return GetHandle(Utils::ToAssetSysPath(filepath));
@@ -108,13 +110,13 @@ namespace Strype {
 
 	Ref<Asset> AssetManager::ImportAsset(AssetHandle handle, const AssetMetadata& metadata)
 	{
-		if (s_AssetImportFunctions.find(metadata.Type) == s_AssetImportFunctions.end())
+		if (m_Serializers.find(metadata.Type) == m_Serializers.end())
 		{
-			STY_CORE_ERROR("No importer available for asset type: {}", (uint16_t)metadata.Type);
+			STY_CORE_ERROR("No serializer available for asset type: {}", (uint16_t)metadata.Type);
 			return nullptr;
 		}
 
-		return s_AssetImportFunctions.at(metadata.Type)(handle, metadata);
+		return m_Serializers.at(metadata.Type)->LoadAsset(Project::GetProjectDirectory() / metadata.FilePath);
 	}
 
 	const AssetMetadata& AssetManager::GetMetadata(AssetHandle handle) const
