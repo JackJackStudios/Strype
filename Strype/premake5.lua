@@ -50,17 +50,6 @@ project "Strype"
 
         "opengl32.lib"
     }
-
     
     postbuildcommands { '{COPYFILE} "%{wks.location}/Libraries/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/Strype-Editor/DotNet/Coral.Managed.runtimeconfig.json"' }
-
-    filter "configurations:Debug"
-        defines "STY_DEBUG"
-        runtime "Debug"
-        symbols "on"
-
-    filter "configurations:Release"
-        defines "STY_RELEASE"
-        runtime "Release"
-        symbols "on"
         

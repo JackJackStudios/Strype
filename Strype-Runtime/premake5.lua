@@ -1,4 +1,4 @@
-project "Strype-Editor"
+project "Strype-Runtime"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"

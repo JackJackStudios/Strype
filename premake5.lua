@@ -19,19 +19,23 @@ workspace "Strype"
 	filter "configurations:Debug"
 		optimize "Off"
 		symbols "On"
+		defines "STY_DEBUG"
 
 	filter "configurations:Release"
 		optimize "On"
 		symbols "Default"
+		defines "STY_RELEASE"
 
 	filter "configurations:Dist"
 		optimize "Full"
 		symbols "Off"
+		defines "STY_DIST"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}"
 
 include "Strype"
 include "Strype-Editor"
+include "Strype-Runtime"
 include "Strype-ScriptCore"
 
 group "Dependencies"
