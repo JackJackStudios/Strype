@@ -2,6 +2,7 @@
 
 #include "Strype/Events/Event.h"
 #include "Strype/Core/Timestep.h"
+#include "Strype/Events/ApplicationEvent.h"
 #include "Strype/Renderer/Camera.h"
 
 #include "Strype/Asset/Asset.h"
@@ -23,8 +24,7 @@ namespace Strype {
 
 		bool ObjectExists(entt::entity obj) { return m_Registry.valid(obj); }
 
-		void OnUpdateEditor(Timestep ts, Camera& cam);
-		void OnUpdateRuntime(Timestep ts, Camera& cam);
+		void OnUpdate(Timestep ts, Camera& cam, bool isRuntime);
 
 		void OnRuntimeStart();
 		void OnRuntimeStop();
@@ -60,12 +60,12 @@ namespace Strype {
 		}
 
 		template<typename TComponent>
-		void CopyComponentIfExists(entt::entity dst, entt::registry& dstRegistry, entt::entity src)
+		static void CopyComponentIfExists(entt::entity src, entt::registry& srcreg, entt::entity dest, entt::registry& destreg)
 		{
-			if (m_Registry.all_of<TComponent>(src))
+			if (srcreg.all_of<TComponent>(src))
 			{
-				auto& srcComponent = m_Registry.get<TComponent>(src);
-				dstRegistry.emplace_or_replace<TComponent>(dst, srcComponent);
+				auto& srcComponent = srcreg.get<TComponent>(src);
+				destreg.emplace_or_replace<TComponent>(dest, srcComponent);
 			}
 		}
 	private:

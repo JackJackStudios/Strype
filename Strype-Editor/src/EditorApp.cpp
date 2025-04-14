@@ -24,14 +24,17 @@ namespace Strype {
 	}
 
 	template<typename T, typename UIFunction>
-	static void DrawComponent(const std::string& name, Prefab* entity, UIFunction uiFunction)
+	static bool DrawComponent(const std::string& name, Prefab* entity, UIFunction uiFunction)
 	{
+		bool changed = false;
+
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
 			ImGuiTreeNodeFlags_FramePadding;
 		if (entity->HasComponent<T>())
 		{
-			auto& component = entity->GetComponent<T>();
+			T& component = entity->GetComponent<T>();
+			T oldComponent = entity->GetComponent<T>();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
@@ -59,12 +62,22 @@ namespace Strype {
 			if (open)
 			{
 				uiFunction(entity, component);
+
+				//HACK: This function fails if component contains pointers
+				if (std::memcmp(&component, &oldComponent, sizeof(T)) != 0)
+					changed = true;
+
 				ImGui::TreePop();
 			}
 
 			if (removeComponent)
+			{
 				entity->RemoveComponent<T>();
+				changed = true;
+			}
 		}
+
+		return changed;
 	}
 
 	class EditorLayer : public Layer
@@ -94,12 +107,12 @@ namespace Strype {
 
 			m_PanelManager.GetInspector()->AddType<Prefab>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-			OpenProject(Application::Get().GetConfig().StartupProject);
+			OpenProject("C:/Users/Jack/Documents/JackJackStudios/Strype/ExampleProject/ExampleProject.sproj");
 		}
 
 		~EditorLayer()
 		{
-			Project::SetActive(nullptr); //Auto saves
+			SaveProject();
 		}
 
 		void OnUpdate(Timestep ts) override
@@ -117,14 +130,7 @@ namespace Strype {
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			Renderer::Clear();
 
-			if (m_RuntimePlayed)
-			{
-				m_Room->OnUpdateRuntime(ts, m_EditorCamera->GetCamera());
-			}
-			else
-			{
-				m_Room->OnUpdateEditor(ts, m_EditorCamera->GetCamera());
-			}
+			m_Room->OnUpdate(ts, m_EditorCamera->GetCamera(), m_RuntimePlayed);
 
 			m_Framebuffer->Unbind();
 		}
@@ -202,6 +208,7 @@ namespace Strype {
 					{
 						Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
 						newobj.AddComponent<PrefabComponent>(handle);
+						Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
 					}
 					else if (Project::GetAssetType(handle) == AssetType::Texture)
 					{
@@ -283,9 +290,6 @@ namespace Strype {
 
 		void SaveProject()
 		{
-			if (!Project::GetActive())
-				return;
-
 			ProjectSerializer serializer(Project::GetActive());
 			serializer.Serialize(Project::GetProjectDirectory() / (Project::GetProjectName() + ".sproj"));
 			Project::SaveAllAssets();
@@ -310,13 +314,14 @@ namespace Strype {
 			Project::SetActive(project);
 			m_PanelManager.OnProjectChanged();
 
-			const std::string& startRoom = project->GetConfig().StartRoom;
-			if (!startRoom.empty())
-				OpenRoom(startRoom);
+			OpenRoom(project->GetStartRoom());
+
 		}
 
 		void OnInspectorRender(Prefab* prefab)
 		{
+			bool changed = false;
+
 			if (ImGui::BeginPopupContextWindow())
 			{
 				AddComponentPopup<SpriteRenderer>(prefab, "Sprite Renderer");
@@ -325,7 +330,7 @@ namespace Strype {
 				ImGui::EndPopup();
 			}
 
-			DrawComponent<SpriteRenderer>("Sprite Renderer", prefab, [](Prefab* select, SpriteRenderer& component)
+			changed |= DrawComponent<SpriteRenderer>("Sprite Renderer", prefab, [](Prefab* select, SpriteRenderer& component)
 			{
 				ImGui::Text("Colour");
 				ImGui::SameLine();
@@ -364,7 +369,7 @@ namespace Strype {
 				}
 			});
 
-			DrawComponent<ScriptComponent>("Script Component", prefab, [](Prefab* select, ScriptComponent& component)
+			changed |= DrawComponent<ScriptComponent>("Script Component", prefab, [](Prefab* select, ScriptComponent& component)
 			{
 				auto& scriptEngine = Project::GetScriptEngine();
 
@@ -389,8 +394,7 @@ namespace Strype {
 					{
 						const auto& scriptName = metadata.FullName;
 
-						bool selected = component.ClassID == id;
-						if (ImGui::Selectable(scriptName.c_str(), selected))
+						if (ImGui::Selectable(scriptName.c_str(), scriptName == scriptEngine->GetScriptName(component.ClassID)))
 						{
 							component.ClassID = id;
 						}
@@ -399,6 +403,14 @@ namespace Strype {
 					ImGui::EndPopup();
 				}
 			});
+
+			if (changed)
+			{
+				for (const auto& obj : prefab->GetConnectedObjects())
+				{
+					Object::CopyInto(prefab->GetObject(), obj);
+				}
+			}
 		}
 
 		bool OnWindowDrop(WindowDropEvent& e)
@@ -456,7 +468,6 @@ namespace Strype {
 		AppConfig config;
 		config.StartupFrames = 10;
 		config.DockspaceEnabled = true;
-		config.StartupProject = "C:/Users/Jack/Documents/JackJackStudios/Strype/ExampleProject/ExampleProject.sproj";
 
 		return new Editor(config);
 	}

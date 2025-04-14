@@ -14,6 +14,9 @@ namespace Strype {
 		{
 		}
 
+		void ConnectObject(Object obj) { m_ConnectedObjects.emplace_back(obj); }
+		std::vector<Object>& GetConnectedObjects() { return m_ConnectedObjects; }
+
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) { return m_Object.AddComponent<T>(std::forward<Args>(args)...); }
 
@@ -33,6 +36,8 @@ namespace Strype {
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	private:
 		Object m_Object;
+
+		std::vector<Object> m_ConnectedObjects;
 	};
 
 }

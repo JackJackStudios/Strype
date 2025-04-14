@@ -3,7 +3,7 @@
 
 #include "Components.h"
 
-#define COPY_COMPONENTS(component) src.m_Room->CopyComponentIfExists<component>(newobj, targetroom->m_Registry, src)
+#define COPY_COMPONENTS(component) Room::CopyComponentIfExists<component>(src.m_Handle, src.m_Room->m_Registry, dest.m_Handle, dest.m_Room->m_Registry)
 
 namespace Strype {
 
@@ -11,11 +11,16 @@ namespace Strype {
 	{
 		Object newobj = targetroom->CreateObject();
 
+		CopyInto(src, newobj);
+
+		return newobj;
+	}
+
+	void Object::CopyInto(Object src, Object dest)
+	{
 		COPY_COMPONENTS(Transform);
 		COPY_COMPONENTS(SpriteRenderer);
 		COPY_COMPONENTS(ScriptComponent);
-
-		return newobj;
 	}
 
 }

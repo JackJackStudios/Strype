@@ -38,7 +38,7 @@ namespace Strype {
 
 	struct SpriteRenderer
 	{
-		glm::vec4 Colour;
+		glm::vec4 Colour{ 1.0f, 1.0f, 1.0f, 1.0f };
 		AssetHandle Texture;
 
 		SpriteRenderer() = default;

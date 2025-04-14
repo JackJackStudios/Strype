@@ -105,6 +105,8 @@ namespace Strype {
 				Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), room);
 				newobj.AddComponent<PrefabComponent>(handle);
 
+				Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
+
 				YAML::Node transform = obj["Transform"];
 				if (transform)
 				{

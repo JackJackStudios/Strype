@@ -2,6 +2,8 @@
 
 #include "Event.h"
 
+#include "Strype/Asset/Asset.h"
+
 namespace Strype {
 
 	class WindowResizeEvent : public Event
@@ -52,24 +54,6 @@ namespace Strype {
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
 		std::vector<std::filesystem::path> m_Paths;
-	};
-
-	class AssetImportedEvent : public Event
-	{
-	public:
-		AssetImportedEvent() {}
-		
-		EVENT_CLASS_TYPE(AssetImported)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
-	};
-
-	class AssetChangedEvent : public Event
-	{
-	public:
-		AssetChangedEvent() {}
-
-		EVENT_CLASS_TYPE(AssetChanged)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 }

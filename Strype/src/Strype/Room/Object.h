@@ -44,6 +44,7 @@ namespace Strype {
 		}
 
 		static Object Copy(Object src, Ref<Room> targetroom);
+		static void CopyInto(Object src, Object dest);
 
 		operator uint32_t() const { return (uint32_t)m_Handle; }
 		operator entt::entity() const { return m_Handle; }
@@ -54,6 +55,8 @@ namespace Strype {
 	private:
 		entt::entity m_Handle{ entt::null };
 		Room* m_Room = nullptr;
+
+		friend class Room;
 	};
 
 }

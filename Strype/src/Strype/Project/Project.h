@@ -69,6 +69,11 @@ namespace Strype {
 			return Project::GetAssetManager()->IsAssetLoaded(handle);
 		}
 
+		static bool IsAssetLoaded(const std::filesystem::path& path)
+		{
+			return Project::GetAssetManager()->IsAssetLoaded(path);
+		}
+
 		static AssetHandle ImportAsset(const std::filesystem::path& path)
 		{
 			return Project::GetAssetManager()->ImportAsset(path);

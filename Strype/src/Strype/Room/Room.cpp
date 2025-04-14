@@ -12,7 +12,7 @@
 
 namespace Strype {
 
-	void Room::OnUpdateEditor(Timestep ts, Camera& cam)
+	void Room::OnUpdate(Timestep ts, Camera& cam, bool isRuntime)
 	{
 		Renderer::BeginRoom(cam);
 
@@ -25,38 +25,23 @@ namespace Strype {
 			{
 				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
 			}
-		});
+			});
 
-		Renderer::EndRoom();
-	}
+		if (isRuntime)
+		{
+			auto& scriptEngine = Project::GetScriptEngine();
 
-	void Room::OnUpdateRuntime(Timestep ts, Camera& cam)
-	{
-		Renderer::BeginRoom(cam);
-
-		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
-			if (sprite.Texture)
-			{
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, Project::GetAsset<Sprite>(sprite.Texture)->Texture, sprite.Colour);
-			}
-			else
-			{
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
-			}
-		});
-
-		auto& scriptEngine = Project::GetScriptEngine();
-
-		m_Registry.view<ScriptComponent>().each([&](auto entity, ScriptComponent& script) {
-			if (scriptEngine->IsValidScript(script.ClassID) && script.Instance.IsValid())
-			{
-				script.Instance.Invoke<float>("OnUpdate", ts);
-			}
-			else if (script.ClassID != 0)
-			{
-				STY_CORE_ERROR("Object '{}' has invalid script!", (uint32_t)entity);
-			}
-		});
+			m_Registry.view<ScriptComponent>().each([&](auto entity, ScriptComponent& script) {
+				if (scriptEngine->IsValidScript(script.ClassID) && script.Instance.IsValid())
+				{
+					script.Instance.Invoke<float>("OnUpdate", ts);
+				}
+				else if (script.ClassID != 0)
+				{
+					STY_CORE_ERROR("Object '{}' has invalid script!", (uint32_t)entity);
+				}
+			});
+		}
 
 		Renderer::EndRoom();
 	}
