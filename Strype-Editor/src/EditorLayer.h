@@ -88,6 +88,9 @@ namespace Strype {
 		void OnUpdate(Timestep ts) override;
 		void OnImGuiRender() override;
 
+		void OnEvent(Event& e) override;
+		bool OnWindowDrop(WindowDropEvent& e);
+
 		void NewRoom();
 		void SaveRoom();
 		void SaveRoomAs(const std::filesystem::path& path = std::filesystem::path());
@@ -99,12 +102,8 @@ namespace Strype {
 		void SaveProject();
 
 		void OpenProject(const std::filesystem::path& path = std::filesystem::path());
-		
-		void OnEvent(Event& e) override;
-		bool OnWindowDrop(WindowDropEvent& e);
 
 		void OnInspectorRender(Prefab* prefab);
-
 	private:
 		std::filesystem::path m_RoomFilePath;
 

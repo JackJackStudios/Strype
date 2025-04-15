@@ -18,7 +18,6 @@ namespace Strype {
 
 	void Object::CopyInto(Object src, Object dest)
 	{
-		COPY_COMPONENTS(Transform);
 		COPY_COMPONENTS(SpriteRenderer);
 		COPY_COMPONENTS(ScriptComponent);
 	}
