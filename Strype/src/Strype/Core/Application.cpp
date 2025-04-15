@@ -38,6 +38,7 @@ namespace Strype {
 	Application::~Application()
 	{
 		m_Window->SetVisable(false);
+		m_LayerStack.DestroyLayers();
 
 		ScriptEngine::Shutdown();
 

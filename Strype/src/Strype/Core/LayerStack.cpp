@@ -3,11 +3,7 @@
 
 namespace Strype {
 
-	LayerStack::LayerStack()
-	{
-	}
-
-	LayerStack::~LayerStack()
+	void LayerStack::DestroyLayers()
 	{
 		for (Layer* layer : m_Layers)
 			delete layer;

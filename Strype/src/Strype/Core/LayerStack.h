@@ -8,8 +8,7 @@ namespace Strype {
 	class LayerStack
 	{
 	public:
-		LayerStack();
-		~LayerStack();
+		void DestroyLayers();
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
