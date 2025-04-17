@@ -6,7 +6,6 @@ namespace Strype {
 	EditorLayer::EditorLayer()
 	{
 		m_Room = CreateRef<Room>();
-		m_EditorCamera = CreateRef<EditorCamera>(1280.0f, 720.0f);
 		m_Framebuffer = AGI::Framebuffer::Create(1280, 720);
 
 		//Configure PanelManager
@@ -14,7 +13,6 @@ namespace Strype {
 
 		m_PanelManager.AddPanel<SceneHierachyPanel>();
 		m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
-		m_RuntimePanel = m_PanelManager.AddPanel<RuntimePanel>();
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata)
 		{
@@ -38,20 +36,18 @@ namespace Strype {
 
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
-		m_EditorCamera->OnUpdate(ts);
-
 		if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(m_Framebuffer->GetWidth() != m_ViewportSize.x || m_Framebuffer->GetHeight() != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_EditorCamera->OnResize(m_ViewportSize.x, m_ViewportSize.y);
+			m_Room->OnResize(m_ViewportSize);
 		}
 
 		m_Framebuffer->Bind();
 		Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 		Renderer::Clear();
 
-		m_Room->OnUpdate(ts, m_EditorCamera->GetCamera());
+		m_Room->OnUpdate(ts);
 
 		m_Framebuffer->Unbind();
 
@@ -88,7 +84,7 @@ namespace Strype {
 					case AssetType::Texture:
 					{
 						Object obj = m_Room->CreateObject();
-						obj.AddComponent<Transform>(m_EditorCamera->GetPosition());
+						obj.AddComponent<Transform>(m_Room->GetCamera().Position);
 						obj.AddComponent<SpriteRenderer>(handle);
 						break;
 					}
@@ -248,7 +244,6 @@ namespace Strype {
 
 	void EditorLayer::OnEvent(Event& e)
 	{
-		m_EditorCamera->OnEvent(e);
 		m_PanelManager.OnEvent(e);
 	}
 
@@ -278,10 +273,12 @@ namespace Strype {
 			if (ImGui::BeginMenu("Runtime"))
 			{
 				if (ImGui::MenuItem("Start Runtime", ""))
-					m_RuntimePanel->StartRuntime();
-
+					m_RuntimePanel = m_PanelManager.AddPanel<RuntimePanel>(m_Room);
+				
 				if (ImGui::MenuItem("Stop Runtime", ""))
-					m_RuntimePanel->StopRuntime();
+				{
+					m_PanelManager.RemovePanel(m_RuntimePanel);
+				}
 
 				ImGui::EndMenu();
 			}

@@ -2,51 +2,42 @@
 
 namespace Strype {
 
-	RuntimePanel::RuntimePanel()
+	RuntimePanel::RuntimePanel(Ref<Room>& room)
 	{
-		m_RuntimeRoom = CreateRef<Room>();
-		m_Camera = CreateRef<EditorCamera>(1280.0f, 720.0f);
+		m_Room = CreateRef<Room>();
 		m_Framebuffer = AGI::Framebuffer::Create(1280, 720);
+
+		m_Room->Clear();
+		room->CopyTo(m_Room);
+
+		m_Room->StartRuntime();
 	}
 
-	void RuntimePanel::StartRuntime()
+	RuntimePanel::~RuntimePanel()
 	{
-		m_RuntimeRoom->Clear();
-		m_EditorRoom->CopyTo(m_RuntimeRoom);
-
-		m_RuntimeRoom->StartRuntime();
-	}
-
-	void RuntimePanel::StopRuntime()
-	{
-		m_RuntimeRoom->StopRuntime();
+		m_Room->StopRuntime();
 	}
 
 	void RuntimePanel::OnUpdate(Timestep ts)
 	{
-		m_Camera->OnUpdate(ts);
-
 		if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(m_Framebuffer->GetWidth() != m_ViewportSize.x || m_Framebuffer->GetHeight() != m_ViewportSize.y))
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_Camera->OnResize(m_ViewportSize.x, m_ViewportSize.y);
+			m_Room->OnResize(m_ViewportSize);
 		}
 
 		m_Framebuffer->Bind();
 		Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 		Renderer::Clear();
 
-		m_RuntimeRoom->OnUpdate(ts, m_Camera->GetCamera());
+		m_Room->OnUpdate(ts);
 
 		m_Framebuffer->Unbind();
 	}
 
 	void RuntimePanel::OnImGuiRender()
 	{
-		if (!m_RuntimeRoom->IsRuntime())
-			return;
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Game");
 

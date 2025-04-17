@@ -32,6 +32,12 @@ namespace Strype {
 			return temp;
 		}
 
+		template<typename TPanel>
+		void RemovePanel(Ref<TPanel> panel)
+		{
+			m_Panels.erase(std::remove(m_Panels.begin(), m_Panels.end(), panel), m_Panels.end());
+		}
+
 	private:
 		std::vector<Ref<EditorPanel>> m_Panels;
 		Ref<InspectorPanel> m_Inspector;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "EditorCamera.h"
 #include "Panels/PanelManager.h"
 
 #include "Panels/ContentBrowserPanel.h"
@@ -102,7 +101,6 @@ namespace Strype {
 
 		void UI_RoomPanel();
 	private:
-		Ref<EditorCamera> m_EditorCamera;
 		Ref<AGI::Framebuffer> m_Framebuffer;
 		Ref<Room> m_Room;
 

@@ -7,27 +7,52 @@
 #include "Strype/Room/Object.h"
 #include "Strype/Room/Components.h"
 #include "Strype/Project/Project.h"
+#include "Strype/Core/Input.h"
 
 #include <glm/glm.hpp>
 
 namespace Strype {
-
-	void Room::OnUpdate(Timestep ts, Camera& cam)
+	
+	Room::Room()
+		: m_Camera({ 1280.0f, 720.0f })
 	{
-		Renderer::BeginRoom(cam);
+	}
+
+	void Room::OnUpdate(Timestep ts)
+	{
+		Renderer::BeginRoom(m_Camera);
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
-			if (sprite.Texture)
-			{
+			if (Project::IsAssetLoaded(sprite.Texture))
 				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, Project::GetAsset<Sprite>(sprite.Texture)->Texture, sprite.Colour);
-			}
 			else
-			{
 				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
-			}
-			});
+		});
 
-		if (m_IsRuntime)
+		if (m_RoomState == RoomState::Editor)
+		{
+			if (Input::IsKeyHeld(KeyCode::A))
+			{
+				m_Camera.Position.x -= m_CameraSpeed * ts;
+			}
+			else if (Input::IsKeyHeld(KeyCode::D))
+			{
+				m_Camera.Position.x += m_CameraSpeed * ts;
+			}
+
+			if (Input::IsKeyHeld(KeyCode::W))
+			{
+				m_Camera.Position.y += m_CameraSpeed * ts;
+			}
+			else if (Input::IsKeyHeld(KeyCode::S))
+			{
+				m_Camera.Position.y -= m_CameraSpeed * ts;
+			}
+
+			m_Camera.UpdateMatrix();
+		}
+
+		if (m_RoomState == RoomState::Runtime)
 		{
 			auto& scriptEngine = Project::GetScriptEngine();
 
@@ -48,9 +73,9 @@ namespace Strype {
 
 	void Room::StartRuntime()
 	{
-		if (m_IsRuntime)
+		if (m_RoomState == RoomState::Runtime)
 		{
-			STY_CORE_WARN("Cannot start room ({}) twice!", (uint64_t)Handle);
+			STY_CORE_WARN("Cannot start room ({}) twice!", Project::GetFilePath(Handle).filename().string());
 			return;
 		}
 
@@ -70,14 +95,14 @@ namespace Strype {
 			}
 		});
 
-		m_IsRuntime = true;
+		m_RoomState = RoomState::Runtime;
 	}
 
 	void Room::StopRuntime()
 	{
-		if (!m_IsRuntime)
+		if (m_RoomState == RoomState::Editor)
 		{
-			STY_CORE_WARN("Cannot stop room ({}) twice", (uint64_t)Handle);
+			STY_CORE_WARN("Cannot stop room ({}) twice", Project::GetFilePath(Handle).filename().string());
 			return;
 		}
 
@@ -88,7 +113,7 @@ namespace Strype {
 			scriptEngine->DestroyInstance(script.Instance);
 		});
 
-		m_IsRuntime = false;
+		m_RoomState = RoomState::Editor;
 	}
 
 	void Room::CopyTo(Ref<Room>& room)
@@ -113,6 +138,11 @@ namespace Strype {
 	void Room::DestroyObject(Object entity)
 	{
 		m_Registry.destroy(entity);
+	}
+
+	void Room::OnResize(const glm::vec2& size)
+	{
+		m_Camera.SetProjection(size);
 	}
 
 }

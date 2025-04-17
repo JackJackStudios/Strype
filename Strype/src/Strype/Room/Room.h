@@ -13,22 +13,33 @@ namespace Strype {
 
 	class Object;
 
+	enum class RoomState
+	{
+		Editor,
+		Runtime,
+		Paused
+	};
+
 	class Room : public Asset
 	{
 	public:
+		Room();
+
 		Object CreateObject(glm::vec3 position = glm::vec3());
 		void DestroyObject(Object entity);
 		void Clear() { m_Registry.clear(); }
 
 		bool ObjectExists(entt::entity obj) { return m_Registry.valid(obj); }
 
-		void OnUpdate(Timestep ts, Camera& cam);
+		void OnUpdate(Timestep ts);
+		void OnResize(const glm::vec2& dims);
 
 		void StartRuntime();
 		void StopRuntime();
 
 		void CopyTo(Ref<Room>& room);
-		bool IsRuntime() const { return m_IsRuntime; }
+		RoomState GetState() const { return m_RoomState; }
+		Camera& GetCamera() { return m_Camera; }
 
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
@@ -71,7 +82,11 @@ namespace Strype {
 		}
 	private:
 		entt::registry m_Registry;
-		bool m_IsRuntime;
+		RoomState m_RoomState = RoomState::Editor;
+
+		Camera m_Camera;
+
+		float m_CameraSpeed = 5.0f;
 
 		friend class Object;
 		friend class Prefab;
