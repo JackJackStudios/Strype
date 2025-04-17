@@ -15,6 +15,12 @@ namespace Strype {
 		m_Panels.clear();
 	}
 
+	void PanelManager::OnUpdate(Timestep ts)
+	{
+		for (const Ref<EditorPanel>& panel : m_Panels)
+			panel->OnUpdate(ts);
+	}
+
 	void PanelManager::OnImGuiRender()
 	{
 		for (const Ref<EditorPanel>& panel : m_Panels)

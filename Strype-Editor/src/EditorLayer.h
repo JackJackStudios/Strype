@@ -3,8 +3,9 @@
 #include "EditorCamera.h"
 #include "Panels/PanelManager.h"
 
-#include "Panels/SceneHierachyPanel.h"
 #include "Panels/ContentBrowserPanel.h"
+#include "Panels/SceneHierachyPanel.h"
+#include "Panels/RuntimePanel.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -89,33 +90,27 @@ namespace Strype {
 		void OnImGuiRender() override;
 
 		void OnEvent(Event& e) override;
-		bool OnWindowDrop(WindowDropEvent& e);
 
-		void NewRoom();
-		void SaveRoom();
-		void SaveRoomAs(const std::filesystem::path& path = std::filesystem::path());
-
-		void OpenRoom(const AssetMetadata& metadata);
+		//void NewRoom();
 		void OpenRoom(const std::filesystem::path& path);
 
 		void NewProject();
+		void OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
 		void SaveProject();
 
-		void OpenProject(const std::filesystem::path& path = std::filesystem::path());
-
 		void OnInspectorRender(Prefab* prefab);
-	private:
-		std::filesystem::path m_RoomFilePath;
 
-		Ref<AGI::Framebuffer> m_Framebuffer;
+		void UI_RoomPanel();
+	private:
 		Ref<EditorCamera> m_EditorCamera;
+		Ref<AGI::Framebuffer> m_Framebuffer;
 		Ref<Room> m_Room;
 
 		PanelManager m_PanelManager;
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
+		Ref<RuntimePanel> m_RuntimePanel;
 
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
-		bool m_RuntimePlayed = false;
 	};
 
 }

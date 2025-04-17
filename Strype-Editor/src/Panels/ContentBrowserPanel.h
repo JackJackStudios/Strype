@@ -39,6 +39,7 @@ namespace Strype {
 
 		Ref<AGI::Texture> m_DirectoryIcon;
 		Ref<AGI::Texture> m_FileIcon;
+		Ref<AGI::Texture> m_RoomIcon;
 	};
 
 }

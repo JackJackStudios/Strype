@@ -15,6 +15,7 @@ namespace Strype {
 	{
 		m_DirectoryIcon = AGI::Texture::Create("assets/icons/DirectoryIcon.png");
 		m_FileIcon = AGI::Texture::Create("assets/icons/FileIcon.png");
+		m_RoomIcon = AGI::Texture::Create("assets/icons/RoomIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -62,13 +63,31 @@ namespace Strype {
 			{
 				switch (Project::GetAssetType(handle))
 				{
-				case AssetType::Texture:
-					icon = Project::GetAsset<Sprite>(handle)->Texture;
-					break;
-		
-				default:
-					icon = m_FileIcon;
-					break;
+					case AssetType::Texture:
+					{
+						icon = Project::GetAsset<Sprite>(handle)->Texture;
+						break;
+					}
+					case AssetType::Prefab:
+					{
+						Ref<Prefab> prefab = Project::GetAsset<Prefab>(handle);
+
+						if (SpriteRenderer* spr = prefab->GetObject().TryGetComponent<SpriteRenderer>())
+						{
+							icon = Project::GetAsset<Sprite>(spr->Texture)->Texture;
+						}
+						break;
+					}
+					case AssetType::Room:
+					{
+						icon = m_RoomIcon;
+						break;
+					}
+					default:
+					{
+						icon = m_FileIcon;
+						break;
+					}
 				}
 			}
 		
@@ -138,8 +157,11 @@ namespace Strype {
 
 			if (isDirectory)
 			{
-				node.Nodes.emplace_back(relativePath, &node);
-				FillTreeNode(node.Nodes.back());
+				if (entry.path().filename() != "strype")
+				{
+					node.Nodes.emplace_back(relativePath, &node);
+					FillTreeNode(node.Nodes.back());
+				}
 			}
 			else
 			{

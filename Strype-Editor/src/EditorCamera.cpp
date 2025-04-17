@@ -32,17 +32,25 @@ namespace Strype {
 		{
 			m_CameraPosition.y -= m_CameraSpeed * ts;
 		}
-		
-		m_Camera.SetPosition(m_CameraPosition);
 
-		m_CameraSpeed = m_ZoomLevel;
+		m_Camera.SetPosition(m_CameraPosition);
 	}
 
 	void EditorCamera::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<MouseScrolledEvent>(STY_BIND_EVENT_FN(EditorCamera::OnMouseScrolled));
-		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(EditorCamera::OnWindowResized));
+	}
+
+	bool EditorCamera::OnMouseScrolled(MouseScrolledEvent& e)
+	{
+		if (!Input::IsKeyHeld(KeyCode::LeftControl))
+			return false;
+
+		m_ZoomLevel -= e.GetYOffset() * 0.25f;
+		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
+		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
+		return false;
 	}
 
 	void EditorCamera::OnResize(float width, float height)
@@ -52,20 +60,6 @@ namespace Strype {
 
 		m_AspectRatio = width / height;
 		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
-	}
-
-	bool EditorCamera::OnMouseScrolled(MouseScrolledEvent& e)
-	{
-		m_ZoomLevel -= e.GetYOffset() * 0.25f;
-		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
-		m_Camera.SetProjection(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
-		return false;
-	}
-
-	bool EditorCamera::OnWindowResized(WindowResizeEvent& e)
-	{
-		OnResize((float)e.GetWidth(), (float)e.GetHeight());
-		return false;
 	}
 
 }

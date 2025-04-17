@@ -1,5 +1,6 @@
 #include "EditorLayer.h"
 
+
 namespace Strype {
 
 	EditorLayer::EditorLayer()
@@ -13,20 +14,21 @@ namespace Strype {
 
 		m_PanelManager.AddPanel<SceneHierachyPanel>();
 		m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
+		m_RuntimePanel = m_PanelManager.AddPanel<RuntimePanel>();
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata)
-			{
-				OpenRoom(metadata);
-			});
+		{
+			OpenRoom(metadata.FilePath);
+		});
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Prefab, [this](const AssetMetadata& metadata)
-			{
-				m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Prefab>(metadata.Handle).get());
-			});
+		{
+			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Prefab>(metadata.Handle).get());
+		});
 
 		m_PanelManager.GetInspector()->AddType<Prefab>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-		OpenProject("C:/Users/Jack/Documents/JackJackStudios/Strype/ExampleProject/ExampleProject.sproj");
+		OpenProject(false);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -49,64 +51,17 @@ namespace Strype {
 		Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 		Renderer::Clear();
 
-		m_Room->OnUpdate(ts, m_EditorCamera->GetCamera(), m_RuntimePlayed);
+		m_Room->OnUpdate(ts, m_EditorCamera->GetCamera());
 
 		m_Framebuffer->Unbind();
+
+		m_PanelManager.OnUpdate(ts);
 	}
 
-	void EditorLayer::OnImGuiRender()
+	void EditorLayer::UI_RoomPanel()
 	{
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("New Project"))
-					NewProject();
-
-				if (ImGui::MenuItem("Open Project...", "Ctrl+O"))
-					OpenProject();
-
-				if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S"))
-					SaveProject();
-
-				ImGui::Separator();
-
-				if (ImGui::MenuItem("New Room", "Ctrl+N"))
-					NewRoom();
-
-				if (ImGui::MenuItem("Save Room", "Ctrl+S"))
-					SaveRoom();
-
-				ImGui::Separator();
-
-				if (ImGui::MenuItem("Exit"))
-					Application::Get().Close();
-
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Runtime"))
-			{
-				if (ImGui::MenuItem("Start Runtime", ""))
-				{
-					m_RuntimePlayed = true;
-					m_Room->OnRuntimeStart();
-				}
-
-				if (ImGui::MenuItem("Stop Runtime", ""))
-				{
-					m_RuntimePlayed = false;
-					m_Room->OnRuntimeStop();
-				}
-
-				ImGui::EndMenu();
-			}
-
-			ImGui::EndMenuBar();
-		}
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
+		ImGui::Begin((Project::GetFilePath(m_Room->Handle).filename().string() + "##Room").c_str());
 
 		Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
 
@@ -121,19 +76,22 @@ namespace Strype {
 			{
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
-				if (Project::GetAssetType(handle) == AssetType::Room)
-					OpenRoom(Project::GetMetadata(handle));
-				else if (Project::GetAssetType(handle) == AssetType::Prefab)
+				switch (Project::GetAssetType(handle))
 				{
-					Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
-					newobj.AddComponent<PrefabComponent>(handle);
-					Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
-				}
-				else if (Project::GetAssetType(handle) == AssetType::Texture)
-				{
-					Object obj = m_Room->CreateObject();
-					obj.AddComponent<Transform>(m_EditorCamera->GetPosition());
-					obj.AddComponent<SpriteRenderer>(handle);
+					case AssetType::Prefab:
+					{
+						Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
+						newobj.AddComponent<PrefabComponent>(handle);
+						Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
+						break;
+					}
+					case AssetType::Texture:
+					{
+						Object obj = m_Room->CreateObject();
+						obj.AddComponent<Transform>(m_EditorCamera->GetPosition());
+						obj.AddComponent<SpriteRenderer>(handle);
+						break;
+					}
 				}
 			}
 			ImGui::EndDragDropTarget();
@@ -141,70 +99,25 @@ namespace Strype {
 
 		ImGui::End();
 		ImGui::PopStyleVar();
-
-		m_PanelManager.OnImGuiRender();
-	}
-
-	void EditorLayer::NewRoom()
-	{
-		m_Room = CreateRef<Room>();
-		m_PanelManager.SetRoomContext(m_Room);
-		m_RoomFilePath = std::string();
-	}
-
-	void EditorLayer::SaveRoom()
-	{
-		if (!m_RoomFilePath.empty())
-			Project::SaveAsset(m_Room->Handle, Project::GetProjectDirectory() / m_RoomFilePath);
-		else
-			SaveRoomAs();
-	}
-
-	void EditorLayer::SaveRoomAs(const std::filesystem::path& path)
-	{
-		std::filesystem::path dialog = path.empty() ? FileDialogs::SaveFile("Strype Room (*.sroom)\0*.sroom\0") : path;
-
-		if (!dialog.empty())
-		{
-			Project::SaveAsset(m_Room->Handle, dialog);
-			m_RoomFilePath = dialog;
-
-			Project::ImportAsset(dialog);
-			m_ContentBrowserPanel->RefreshAssetTree();
-		}
-	}
-
-	void EditorLayer::OpenRoom(const AssetMetadata& metadata)
-	{
-		m_Room = Project::GetAsset<Room>(metadata.Handle);
-		m_PanelManager.SetRoomContext(m_Room);
-		Project::SetActiveRoom(m_Room);
-		m_RoomFilePath = Project::GetFilePath(metadata.Handle);
 	}
 
 	void EditorLayer::OpenRoom(const std::filesystem::path& path)
 	{
-		const AssetMetadata& metadata = Project::GetMetadata(Project::GetAssetHandle(path));
-		OpenRoom(metadata);
+		m_Room = Project::GetAsset<Room>(Project::GetAssetHandle(path));
+		m_PanelManager.SetRoomContext(m_Room);
 	}
 
 	void EditorLayer::NewProject()
 	{
-		if (Project::GetActive())
-			SaveProject();
-
 		std::filesystem::path path = FileDialogs::OpenFolder();
 		if (path.empty())
 			return;
 
 		// NOTE: This function will copy a template project into
 		//       the new directory. This is because a Project cannot exist
-		//       without a folder or default room (you must deserialize the room yourself)
-		Ref<Project> project = Project::New(path);
-		Project::SetActive(project);
-		m_PanelManager.OnProjectChanged();
-
-		OpenRoom(project->GetStartRoom());
+		//       without a folder or default room (you must deserialize the project yourself)
+		Project::GenerateNew(path);
+		OpenProject(true, path / (path.filename().string() + ".sproj"));
 	}
 
 	void EditorLayer::SaveProject()
@@ -214,7 +127,7 @@ namespace Strype {
 		Project::SaveAllAssets();
 	}
 
-	void EditorLayer::OpenProject(const std::filesystem::path& path)
+	void EditorLayer::OpenProject(bool buildProject, const std::filesystem::path& path)
 	{
 		std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0") : path;
 
@@ -228,7 +141,8 @@ namespace Strype {
 		ProjectSerializer serializer(project);
 		serializer.Deserialize(dialog);
 
-		ScriptEngine::BuildProject(project);
+		if (buildProject)
+			ScriptEngine::BuildProject(project);
 
 		Project::SetActive(project);
 		m_PanelManager.OnProjectChanged();
@@ -250,78 +164,78 @@ namespace Strype {
 		}
 
 		changed |= DrawComponent<SpriteRenderer>("Sprite Renderer", prefab, [](Prefab* select, SpriteRenderer& component)
+		{
+			ImGui::Text("Colour");
+			ImGui::SameLine();
+			ImGui::ColorEdit4("##Color", glm::value_ptr(component.Colour));
+
+			ImGui::Text("Texture");
+			ImGui::SameLine();
+
+			if (!component.Texture)
 			{
-				ImGui::Text("Colour");
-				ImGui::SameLine();
-				ImGui::ColorEdit4("##Color", glm::value_ptr(component.Colour));
-
-				ImGui::Text("Texture");
-				ImGui::SameLine();
-
-				if (!component.Texture)
-				{
-					ImGui::Button("<empty>");
-				}
-				else
-				{
-					std::string id = std::format("##{0}{1}", (uint32_t)select->GetObject(), "Sprite Renderer");
-					ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Sprite>(component.Texture)->Texture->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
-
-					if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
-					{
-						component.Texture = 0;
-					}
-				}
-
-				if (ImGui::BeginDragDropTarget())
-				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-					{
-						AssetHandle handle = *(AssetHandle*)payload->Data;
-
-						if (Project::GetAssetType(handle) == AssetType::Texture)
-							component.Texture = handle;
-						else
-							STY_CORE_WARN("Wrong asset type!");
-					}
-					ImGui::EndDragDropTarget();
-				}
-			});
-
-		changed |= DrawComponent<ScriptComponent>("Script Component", prefab, [](Prefab* select, ScriptComponent& component)
+				ImGui::Button("<empty>");
+			}
+			else
 			{
-				auto& scriptEngine = Project::GetScriptEngine();
-
-				ImGui::Text("Script Class");
-				ImGui::SameLine();
-
-				const char* scriptName = scriptEngine->IsValidScript(component.ClassID) ? scriptEngine->GetScriptName(component.ClassID).c_str() : "None";
-
-				if (ImGui::Button(scriptName))
-				{
-					ImGui::OpenPopup("Script search");
-				}
+				std::string id = std::format("##{0}{1}", (uint32_t)select->GetObject(), "Sprite Renderer");
+				ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Sprite>(component.Texture)->Texture->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
 
 				if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
 				{
-					component.ClassID = 0;
+					component.Texture = 0;
 				}
+			}
 
-				if (ImGui::BeginPopup("Script search"))
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
-					for (const auto& [id, metadata] : scriptEngine->GetAllScripts())
-					{
-						const auto& scriptName = metadata.FullName;
+					AssetHandle handle = *(AssetHandle*)payload->Data;
 
-						if (ImGui::Selectable(scriptName.c_str(), scriptName == scriptEngine->GetScriptName(component.ClassID)))
-						{
-							component.ClassID = id;
-						}
-					}
-
-					ImGui::EndPopup();
+					if (Project::GetAssetType(handle) == AssetType::Texture)
+						component.Texture = handle;
+					else
+						STY_CORE_WARN("Wrong asset type!");
 				}
-			});
+				ImGui::EndDragDropTarget();
+			}
+		});
+
+		changed |= DrawComponent<ScriptComponent>("Script Component", prefab, [](Prefab* select, ScriptComponent& component)
+		{
+			auto& scriptEngine = Project::GetScriptEngine();
+
+			ImGui::Text("Script Class");
+			ImGui::SameLine();
+
+			const char* scriptName = scriptEngine->IsValidScript(component.ClassID) ? scriptEngine->GetScriptName(component.ClassID).c_str() : "None";
+
+			if (ImGui::Button(scriptName))
+			{
+				ImGui::OpenPopup("Script search");
+			}
+
+			if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
+			{
+				component.ClassID = 0;
+			}
+
+			if (ImGui::BeginPopup("Script search"))
+			{
+				for (const auto& [id, metadata] : scriptEngine->GetAllScripts())
+				{
+					const auto& scriptName = metadata.FullName;
+
+					if (ImGui::Selectable(scriptName.c_str(), scriptName == scriptEngine->GetScriptName(component.ClassID)))
+					{
+						component.ClassID = id;
+					}
+				}
+
+				ImGui::EndPopup();
+			}
+		});
 
 		if (changed)
 		{
@@ -332,24 +246,52 @@ namespace Strype {
 		}
 	}
 
-	bool EditorLayer::OnWindowDrop(WindowDropEvent& e)
-	{
-		const std::filesystem::path& path = e.GetPaths()[0];
-		std::string ext = path.extension().string();
-
-		if (ext == ".sproj")
-			OpenProject(path);
-
-		return false;
-	}
-
 	void EditorLayer::OnEvent(Event& e)
 	{
-		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorLayer::OnWindowDrop));
-
 		m_EditorCamera->OnEvent(e);
 		m_PanelManager.OnEvent(e);
+	}
+
+	void EditorLayer::OnImGuiRender()
+	{
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("New Project"))
+					NewProject();
+
+				if (ImGui::MenuItem("Open Project...", "Ctrl+O"))
+					OpenProject(false);
+
+				if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S"))
+					SaveProject();
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Exit"))
+					Application::Get().Close();
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Runtime"))
+			{
+				if (ImGui::MenuItem("Start Runtime", ""))
+					m_RuntimePanel->StartRuntime();
+
+				if (ImGui::MenuItem("Stop Runtime", ""))
+					m_RuntimePanel->StopRuntime();
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
+		}
+
+		UI_RoomPanel();
+
+		m_PanelManager.OnImGuiRender();
 	}
 
 }

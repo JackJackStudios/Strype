@@ -16,18 +16,19 @@ namespace Strype {
 	class Room : public Asset
 	{
 	public:
-		Room() = default;
-
 		Object CreateObject(glm::vec3 position = glm::vec3());
 		void DestroyObject(Object entity);
 		void Clear() { m_Registry.clear(); }
 
 		bool ObjectExists(entt::entity obj) { return m_Registry.valid(obj); }
 
-		void OnUpdate(Timestep ts, Camera& cam, bool isRuntime);
+		void OnUpdate(Timestep ts, Camera& cam);
 
-		void OnRuntimeStart();
-		void OnRuntimeStop();
+		void StartRuntime();
+		void StopRuntime();
+
+		void CopyTo(Ref<Room>& room);
+		bool IsRuntime() const { return m_IsRuntime; }
 
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
@@ -60,7 +61,7 @@ namespace Strype {
 		}
 
 		template<typename TComponent>
-		static void CopyComponentIfExists(entt::entity src, entt::registry& srcreg, entt::entity dest, entt::registry& destreg)
+		static void CopyComponent(entt::entity src, entt::registry& srcreg, entt::entity dest, entt::registry& destreg)
 		{
 			if (srcreg.all_of<TComponent>(src))
 			{
@@ -70,6 +71,7 @@ namespace Strype {
 		}
 	private:
 		entt::registry m_Registry;
+		bool m_IsRuntime;
 
 		friend class Object;
 		friend class Prefab;

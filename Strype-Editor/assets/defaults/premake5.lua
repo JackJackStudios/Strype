@@ -4,6 +4,7 @@ StrypeDirectory = os.getenv("STRYPE_DIR")
 include (path.join(StrypeDirectory, "Libraries", "Coral", "Premake", "CSExtensions.lua"))
 
 workspace "{0}"
+	location "strype/"
 	startproject "{0}"
 	configurations { "Debug", "Release", "Dist" }
 

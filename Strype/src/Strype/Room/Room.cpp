@@ -12,7 +12,7 @@
 
 namespace Strype {
 
-	void Room::OnUpdate(Timestep ts, Camera& cam, bool isRuntime)
+	void Room::OnUpdate(Timestep ts, Camera& cam)
 	{
 		Renderer::BeginRoom(cam);
 
@@ -27,7 +27,7 @@ namespace Strype {
 			}
 			});
 
-		if (isRuntime)
+		if (m_IsRuntime)
 		{
 			auto& scriptEngine = Project::GetScriptEngine();
 
@@ -46,8 +46,16 @@ namespace Strype {
 		Renderer::EndRoom();
 	}
 
-	void Room::OnRuntimeStart()
+	void Room::StartRuntime()
 	{
+		if (m_IsRuntime)
+		{
+			STY_CORE_WARN("Cannot start room ({}) twice!", (uint64_t)Handle);
+			return;
+		}
+
+		Project::SetActiveRoom(Project::GetAsset<Room>(Handle));
+
 		auto& scriptEngine = Project::GetScriptEngine();
 
 		m_Registry.view<ScriptComponent>().each([&](auto entity, ScriptComponent& script) {
@@ -61,16 +69,38 @@ namespace Strype {
 				STY_CORE_WARN("Object '{}' has an invalid script id ({})", (uint32_t)entity, (uint64_t)script.ClassID);
 			}
 		});
+
+		m_IsRuntime = true;
 	}
 
-	void Room::OnRuntimeStop()
+	void Room::StopRuntime()
 	{
+		if (!m_IsRuntime)
+		{
+			STY_CORE_WARN("Cannot stop room ({}) twice", (uint64_t)Handle);
+			return;
+		}
+
 		auto& scriptEngine = Project::GetScriptEngine();
 
 		m_Registry.view<ScriptComponent>().each([&](auto entity, ScriptComponent& script) {
 			script.Instance.Invoke("OnDestroy");
 			scriptEngine->DestroyInstance(script.Instance);
 		});
+
+		m_IsRuntime = false;
+	}
+
+	void Room::CopyTo(Ref<Room>& room)
+	{
+		room->Handle = Handle;
+
+		for (auto entity : m_Registry.storage<entt::entity>())
+		{
+			Object temp{ entity, this };
+
+			Object::CopyInto(temp, room->CreateObject());
+		}
 	}
 
 	Object Room::CreateObject(glm::vec3 position)

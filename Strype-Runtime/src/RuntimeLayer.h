@@ -15,8 +15,6 @@ namespace Strype {
 		~RuntimeLayer();
 
 		void OnUpdate(Timestep ts) override;
-		void OnImGuiRender() override;
-		void OnEvent(Event& e) override;
 
 		void OpenProject(const std::filesystem::path& path);
 	private:

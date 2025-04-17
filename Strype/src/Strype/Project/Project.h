@@ -40,7 +40,7 @@ namespace Strype {
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
 
-		static Ref<Project> New(const std::filesystem::path& path);
+		static void GenerateNew(const std::filesystem::path& path);
 
 		static const std::string& GetProjectName()
 		{
@@ -104,9 +104,9 @@ namespace Strype {
 			Project::GetAssetManager()->SaveAllAssets();
 		}
 
-		static void SaveAsset(AssetHandle handle, const std::filesystem::path& path)
+		static void SaveAsset(AssetHandle handle, const std::filesystem::path& path = std::filesystem::path())
 		{
-			Project::GetAssetManager()->SaveAsset(handle, path);
+			Project::GetAssetManager()->SaveAsset(handle, path.empty() ? Project::GetFilePath(handle) : path);
 		}
 
 	private:

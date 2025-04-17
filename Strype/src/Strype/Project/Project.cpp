@@ -56,7 +56,7 @@ namespace Strype {
 	{
 	}
 
-	Ref<Project> Project::New(const std::filesystem::path& path)
+	void Project::GenerateNew(const std::filesystem::path& path)
 	{
 		// Copy empty project
 		std::filesystem::path templateDir = EMPTY_PROJECT.parent_path();
@@ -94,13 +94,6 @@ namespace Strype {
 		//Change empty project to fit new project name
 		std::string projName = path.filename().string();
 		std::filesystem::rename(path / EMPTY_PROJECT.filename(), path / (path.filename().string() + ".sproj"));
-
-		// Load files into memory
-		Ref<Project> project = CreateRef<Project>();
-		ProjectSerializer serializer(project);
-		serializer.Deserialize(path / (projName + ".sproj"));
-
-		return project;
 	}
 
 	void Project::SetActive(Ref<Project> project)

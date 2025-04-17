@@ -26,7 +26,7 @@ namespace Strype {
 			STY_CORE_WARN("{}", std::string(message));
 			break;
 		case Coral::MessageLevel::Error:
-			STY_CORE_ERROR("Coral Error: {}", std::string(message));
+			STY_CORE_ERROR("{}", std::string(message));
 			break;
 		}
 	}
@@ -42,7 +42,7 @@ namespace Strype {
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.csproj\" -property:Configuration={} -t:restore,build >nul 2>&1", filepath.string(), msBuildPath.string(), name, STY_BUILD_CONFIG_NAME);
+		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.csproj\" -property:Configuration={} -t:restore,build >nul 2>&1", (filepath / "strype").string(), msBuildPath.string(), name, STY_BUILD_CONFIG_NAME);
 		system(command.c_str());
 	}
 
@@ -50,7 +50,7 @@ namespace Strype {
 	{
 		m_AppAssembly.reset();
 
-		auto filepath = proj->GetProjectDirectory() / "Binaries" / (proj->GetProjectName() + ".dll");
+		auto filepath = proj->GetProjectDirectory() / "strype" / "Binaries" / (proj->GetProjectName() + ".dll");
 
 		m_AppAssembly = std::make_unique<Coral::ManagedAssembly>(std::move(s_LoadContext->LoadAssembly(filepath.string())));
 

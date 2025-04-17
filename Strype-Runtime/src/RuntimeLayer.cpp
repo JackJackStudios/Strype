@@ -4,26 +4,18 @@ namespace Strype {
 
 	RuntimeLayer::RuntimeLayer()
 	{
-		OpenProject("C:/Users/Jack/Documents/JackJackStudios/Strype/ExampleProject/ExampleProject.sproj");
-		m_Room->OnRuntimeStart();
+		OpenProject(FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0"));
+		m_Room->StartRuntime();
 	}
 
 	RuntimeLayer::~RuntimeLayer()
 	{
-		m_Room->OnRuntimeStop();
+		m_Room->StopRuntime();
 	}
 
 	void RuntimeLayer::OnUpdate(Timestep ts)
 	{
-		m_Room->OnUpdate(ts, m_RuntimeCamera, true);
-	}
-
-	void RuntimeLayer::OnImGuiRender()
-	{
-	}
-
-	void RuntimeLayer::OnEvent(Event& e)
-	{
+		m_Room->OnUpdate(ts, m_RuntimeCamera);
 	}
 
 	void RuntimeLayer::OpenProject(const std::filesystem::path& path)
@@ -35,7 +27,6 @@ namespace Strype {
 		Project::SetActive(project);
 
 		m_Room = Project::GetAsset<Room>(Project::GetAssetHandle(project->GetStartRoom()));
-		Project::SetActiveRoom(m_Room);
 
 	}
 

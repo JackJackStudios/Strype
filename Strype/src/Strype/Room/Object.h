@@ -37,6 +37,12 @@ namespace Strype {
 		}
 
 		template<typename T>
+		T* TryGetComponent()
+		{
+			return HasComponent<T>() ? &GetComponent<T>() : nullptr;
+		}
+
+		template<typename T>
 		void RemoveComponent()
 		{
 			STY_CORE_ASSERT(HasComponent<T>(), "Object does not have component!");

@@ -15,6 +15,7 @@ project "Strype-Editor"
 
     includedirs
 	{
+        "src",
 		"%{wks.location}/Strype/src",
 		"%{wks.location}/Libraries/include",
 

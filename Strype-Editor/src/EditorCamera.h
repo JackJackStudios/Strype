@@ -21,14 +21,10 @@ namespace Strype {
 		const Camera& GetCamera() const { return m_Camera; }
 		glm::vec2 GetPosition() const { return m_CameraPosition; }
 
-		float GetZoomLevel() const { return m_ZoomLevel; }
-		void SetZoomLevel(float level) { m_ZoomLevel = level; }
-
 		float GetWidth() const { return m_Width; }
 		float GetHeight() const { return m_Height; }
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& e);
-		bool OnWindowResized(WindowResizeEvent& e);
 	private:
 		float m_Width;
 		float m_Height;
