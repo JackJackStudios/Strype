@@ -14,3 +14,6 @@
 [submodule "Libraries/Coral"]
 	path = Libraries/Coral
 	url = https://github.com/JackKnox/Coral
+[submodule "Libraries/box2d"]
+	path = Libraries/box2d
+	url = https://github.com/erincatto/box2d
