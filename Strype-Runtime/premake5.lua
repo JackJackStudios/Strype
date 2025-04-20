@@ -22,6 +22,7 @@ project "Strype-Runtime"
 		"%{wks.location}/Libraries/GLFW/include",
 		"%{wks.location}/Libraries/imgui",
         "%{wks.location}/Libraries/Coral/Coral.Native/Include",
+        "%{wks.location}/Libraries/box2d/include",
 	}
 
 	links

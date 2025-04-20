@@ -1,8 +1,7 @@
-project "yaml-cpp"
+project "Box2D"
 	kind "StaticLib"
-	language "C++"
-	cppdialect "C++17"
-	systemversion "latest"
+	language "C"
+	cdialect "C11"
 	staticruntime "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -11,20 +10,12 @@ project "yaml-cpp"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp",
-		
+		"src/**.c",
 		"include/**.h"
 	}
 
 	includedirs
 	{
-		"include"
+		"include",
+		"src"
 	}
-
-	defines
-	{
-		"YAML_CPP_STATIC_DEFINE"
-	}
-
-	filter "system:linux"
-		pic "On"

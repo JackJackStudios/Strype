@@ -4,11 +4,11 @@ StrypeDirectory = os.getenv("STRYPE_DIR")
 include (path.join(StrypeDirectory, "Libraries", "Coral", "Premake", "CSExtensions.lua"))
 
 workspace "{0}"
-	location "strype/"
 	startproject "{0}"
 	configurations { "Debug", "Release", "Dist" }
 
 	project "{0}"
+		location "strype/"
 		kind "SharedLib"
 		language "C#"
 		dotnetframework "net8.0"

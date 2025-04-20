@@ -21,7 +21,7 @@ project "Strype"
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"YAML_CPP_STATIC_DEFINE"
+		"YAML_CPP_STATIC_DEFINE",
 	}
 
     includedirs
@@ -32,6 +32,7 @@ project "Strype"
         "%{wks.location}/Libraries/agi/src",
         "%{wks.location}/Libraries/imgui/",
         "%{wks.location}/Libraries/Coral/Coral.Native/Include",
+        "%{wks.location}/Libraries/box2d/include",
 
         "%{wks.location}/Libraries/include",
     }
@@ -47,6 +48,7 @@ project "Strype"
         "yaml-cpp",
         "agi",
         "Coral.Native",
+        "Box2D",
 
         "opengl32.lib"
     }
