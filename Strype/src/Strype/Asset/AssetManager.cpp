@@ -84,7 +84,7 @@ namespace Strype {
 
 	void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& path)
 	{
-		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / path);
+		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), path);
 	}
 
 	AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)
