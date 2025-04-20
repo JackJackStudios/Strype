@@ -25,7 +25,7 @@ namespace Strype {
 	public:
 		Room();
 
-		Object CreateObject(glm::vec3 position = glm::vec3());
+		Object CreateObject();
 		void DestroyObject(Object entity);
 		void Clear() { m_Registry.clear(); }
 

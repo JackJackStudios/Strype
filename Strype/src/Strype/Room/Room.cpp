@@ -128,10 +128,9 @@ namespace Strype {
 		}
 	}
 
-	Object Room::CreateObject(glm::vec3 position)
+	Object Room::CreateObject()
 	{
 		Object object{ m_Registry.create(), this };
-		object.AddComponent<Transform>(position);
 		return object;
 	}
 
