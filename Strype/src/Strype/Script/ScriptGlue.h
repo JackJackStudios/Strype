@@ -55,7 +55,6 @@ namespace Strype {
 			Info = BIT(2),
 			Warn = BIT(3),
 			Error = BIT(4),
-			Critical = BIT(5)
 		};
 		
 		void Object_CreateComponent(uint32_t id, Coral::ReflectionType componentType);

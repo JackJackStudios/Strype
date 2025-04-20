@@ -18,15 +18,21 @@ namespace Strype {
 		logSinks[0]->set_pattern("%^[%T] %n: %v%$");
 		logSinks[1]->set_pattern("[%T] [%l] %n: %v");
 
+#ifdef STY_DEBUG
+		spdlog::level::level_enum loglevel = spdlog::level::trace;
+#else
+		spdlog::level::level_enum loglevel = spdlog::level::info;
+#endif
+
 		s_CoreLogger = std::make_shared<spdlog::logger>("STRYPE", begin(logSinks), end(logSinks));
 		spdlog::register_logger(s_CoreLogger);
-		s_CoreLogger->set_level(spdlog::level::trace);
-		s_CoreLogger->flush_on(spdlog::level::trace);
+		s_CoreLogger->set_level(loglevel);
+		s_CoreLogger->flush_on(loglevel);
 
 		s_ClientLogger = std::make_shared<spdlog::logger>("APP", begin(logSinks), end(logSinks));
 		spdlog::register_logger(s_ClientLogger);
-		s_ClientLogger->set_level(spdlog::level::trace);
-		s_ClientLogger->flush_on(spdlog::level::trace);
+		s_ClientLogger->set_level(loglevel);
+		s_ClientLogger->flush_on(loglevel);
 	}
 
 }

@@ -185,9 +185,6 @@ namespace Strype {
 			case LogLevel::Error:
 				STY_ERROR(message);
 				break;
-			case LogLevel::Critical:
-				STY_CRITICAL(message);
-				break;
 			}
 			Coral::String::Free(fmt);
 		}

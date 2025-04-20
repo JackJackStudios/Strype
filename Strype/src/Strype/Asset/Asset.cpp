@@ -10,7 +10,8 @@ namespace Strype::Utils {
 		case AssetType::None:    return "AssetType::None";
 		case AssetType::Prefab:  return "AssetType::Prefab";
 		case AssetType::Room:    return "AssetType::Room";
-		case AssetType::Texture: return "AssetType::Texture";
+		case AssetType::Sprite: return "AssetType::Sprite";
+		case AssetType::AudioFile: return "AssetType::AudioFile";
 		}
 
 		return "AssetType::<Invalid>";
@@ -21,7 +22,8 @@ namespace Strype::Utils {
 		if (assetType == "AssetType::None")    return AssetType::None;
 		if (assetType == "AssetType::Prefab")  return AssetType::Prefab;
 		if (assetType == "AssetType::Room")    return AssetType::Room;
-		if (assetType == "AssetType::Texture") return AssetType::Texture;
+		if (assetType == "AssetType::Sprite") return AssetType::Sprite;
+		if (assetType == "AssetType::AudioFile") return AssetType::AudioFile;
 
 		return AssetType::None;
 	}

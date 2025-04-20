@@ -8,9 +8,10 @@ namespace Strype {
 	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
 		{ ".sprefab", AssetType::Prefab },
 		{ ".sroom", AssetType::Room },
-		{ ".png", AssetType::Texture },
-		{ ".jpg", AssetType::Texture },
-		{ ".jpeg", AssetType::Texture }
+		{ ".wav", AssetType::AudioFile },
+		{ ".png", AssetType::Sprite },
+		{ ".jpg", AssetType::Sprite },
+		{ ".jpeg", AssetType::Sprite }
 	};
 
 	namespace Utils {
@@ -19,7 +20,7 @@ namespace Strype {
 		{
 			if (s_AssetExtensionMap.find(extension) == s_AssetExtensionMap.end())
 			{
-				STY_CORE_WARN("Could not find AssetType for {0}", extension.string());
+				STY_CORE_WARN("Could not find AssetType for \"{}\" ", extension.string());
 				return AssetType::None;
 			}
 

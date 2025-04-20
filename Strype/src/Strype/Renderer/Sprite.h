@@ -12,7 +12,7 @@ namespace Strype {
 		Sprite(Ref<AGI::Texture> texture);
 		Sprite(const std::filesystem::path& filepath);
 
-		static AssetType GetStaticType() { return AssetType::Texture; }
+		static AssetType GetStaticType() { return AssetType::Sprite; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	public:
 		Ref<AGI::Texture> Texture;

@@ -1,5 +1,5 @@
 #include "stypch.h"
-#include "Strype/Core/Audio.h"
+#include "Strype/Audio/Audio.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -17,14 +17,14 @@ namespace Strype {
 	void Audio::Init()
 	{
 		s_Data.m_Device = alcOpenDevice(nullptr);
-		STY_CORE_ASSERT(s_Data.m_Device, "Could not find audio device");
+		STY_CORE_VERIFY(s_Data.m_Device, "Could not find audio device");
 
 		s_Data.m_Context = alcCreateContext(s_Data.m_Device, nullptr);
-		STY_CORE_ASSERT(s_Data.m_Context, "Could not create  context");
+		STY_CORE_VERIFY(s_Data.m_Context, "Could not create  context");
 
-		STY_CORE_ASSERT(alcMakeContextCurrent(s_Data.m_Context), "Could not load  context")
+		STY_CORE_VERIFY(alcMakeContextCurrent(s_Data.m_Context), "Could not load audio context")
 
-			const ALCchar* extensions = alcGetString(s_Data.m_Device, ALC_EXTENSIONS);
+		const ALCchar* extensions = alcGetString(s_Data.m_Device, ALC_EXTENSIONS);
 		const ALCchar* device = nullptr;
 
 		if (alcIsExtensionPresent(s_Data.m_Device, "ALC_ENUMERATE_ALL_EXT"))

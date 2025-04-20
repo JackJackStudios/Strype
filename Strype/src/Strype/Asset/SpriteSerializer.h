@@ -7,7 +7,7 @@
 
 namespace Strype {
 
-	class TextureSerializer : public AssetSerializer
+	class SpriteSerializer : public AssetSerializer
 	{
 	public:
 		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path)

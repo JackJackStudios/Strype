@@ -19,14 +19,14 @@ namespace Strype {
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
 		{
-			STY_CORE_ASSERT(!HasComponent<T>(), "Object already has component!");
+			STY_CORE_VERIFY(!HasComponent<T>(), "Object already has component!");
 			return m_Room->m_Registry.emplace<T>(m_Handle, std::forward<Args>(args)...);
 		}
 
 		template<typename T>
 		T& GetComponent()
 		{
-			STY_CORE_ASSERT(HasComponent<T>(), "Object does not have component!");
+			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
 			return m_Room->m_Registry.get<T>(m_Handle);
 		}
 
@@ -45,7 +45,7 @@ namespace Strype {
 		template<typename T>
 		void RemoveComponent()
 		{
-			STY_CORE_ASSERT(HasComponent<T>(), "Object does not have component!");
+			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
 			m_Room->m_Registry.remove<T>(m_Handle);
 		}
 

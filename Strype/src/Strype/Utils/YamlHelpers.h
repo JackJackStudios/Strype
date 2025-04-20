@@ -111,7 +111,7 @@ namespace Strype {
 			case BodyType::Kinematic: return "Kinematic";
 			}
 
-			STY_CORE_ASSERT(false, "Unknown body type");
+			STY_CORE_VERIFY(false, "Unknown body type");
 			return {};
 		}
 
@@ -121,7 +121,7 @@ namespace Strype {
 			if (bodyTypeString == "Dynamic")   return BodyType::Dynamic;
 			if (bodyTypeString == "Kinematic") return BodyType::Kinematic;
 
-			STY_CORE_ASSERT(false, "Unknown body type");
+			STY_CORE_VERIFY(false, "Unknown body type");
 			return BodyType::Static;
 		}
 

@@ -67,15 +67,13 @@ namespace Strype {
 		Ref<Prefab> prefab = CreateRef<Prefab>();
 
 		std::ifstream fstream(path);
-		STY_CORE_ASSERT(fstream.is_open(), "Error opening file");
+		STY_CORE_VERIFY(fstream.is_open(), "Error opening file");
 
 		std::stringstream stream;
 		stream << fstream.rdbuf();
 
 		YAML::Node data = YAML::Load(stream.str())["Prefab"];
-		STY_CORE_ASSERT(data, "Could not load prefab")
-
-		STY_CORE_TRACE("Deserializing prefab '{0}'", path.stem().string());
+		STY_CORE_VERIFY(data, "Could not load prefab")
 
 		Object newobj = s_PrefabRoom->CreateObject();
 			

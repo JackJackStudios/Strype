@@ -3,9 +3,10 @@
 
 #include "Strype/Project/Project.h"
 
-#include "TextureSerializer.h"
+#include "SpriteSerializer.h"
 #include "Strype/Room/PrefabSerializer.h"
 #include "Strype/Room/RoomSerializer.h"
+#include "Strype/Audio/AudioFileSerializer.h"
 
 namespace Strype {
 
@@ -22,8 +23,9 @@ namespace Strype {
 	{
 		m_Serializers.clear();
 		m_Serializers[AssetType::Prefab] = CreateScope<PrefabSerializer>();
-		m_Serializers[AssetType::Texture] = CreateScope<TextureSerializer>();
+		m_Serializers[AssetType::Sprite] = CreateScope<SpriteSerializer>();
 		m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
+		m_Serializers[AssetType::AudioFile] = CreateScope<AudioFileSerializer>();
 	}
 	
 	void AssetManager::ReloadAssets()
@@ -34,9 +36,7 @@ namespace Strype {
 	void AssetManager::SaveAllAssets()
 	{
 		for (const auto& [path, handle] : m_LoadedFiles)
-		{
 			SaveAsset(handle, Project::GetProjectDirectory() / path);
-		}
 	}
 
 	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
@@ -79,6 +79,12 @@ namespace Strype {
 
 	AssetHandle AssetManager::GetHandle(const std::filesystem::path& path) const
 	{
+		if (m_LoadedFiles.find(Utils::ToAssetSysPath(path)) == m_LoadedFiles.end())
+		{
+			STY_CORE_WARN("Could not find AssetHandle for \"{}\" ", Utils::ToAssetSysPath(path).string());
+			return 0;
+		}
+
 		return m_LoadedFiles.at(Utils::ToAssetSysPath(path));
 	}
 
@@ -97,7 +103,11 @@ namespace Strype {
 		metadata.FilePath = Utils::ToAssetSysPath(filepath);
 		metadata.Type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
-		STY_CORE_ASSERT(metadata.Type != AssetType::None, "Could not import Asset");
+		if (metadata.Type == AssetType::None)
+		{
+			STY_CORE_WARN("Could not import Asset \"{}\" ", filepath.string());
+			return 0;
+		}
 
 		Ref<Asset> asset = ImportAsset(handle, metadata);
 
@@ -110,7 +120,7 @@ namespace Strype {
 		}
 		else
 		{
-			STY_CORE_ERROR("Asset import failed '{0}'", metadata.FilePath.string());
+			STY_CORE_WARN("Asset import failed \"{}\" ", metadata.FilePath.string());
 		}
 
 		return handle;
@@ -120,15 +130,23 @@ namespace Strype {
 	{
 		if (m_Serializers.find(metadata.Type) == m_Serializers.end())
 		{
-			STY_CORE_ERROR("No serializer available for asset type: {}", (uint16_t)metadata.Type);
+			STY_CORE_WARN("No serializer available for Type: {}", Utils::AssetTypeToString(metadata.Type));
 			return nullptr;
 		}
+
+		STY_CORE_TRACE("Deserializing asset \"{}\" ", metadata.FilePath.string());
 
 		return m_Serializers.at(metadata.Type)->LoadAsset(Project::GetProjectDirectory() / metadata.FilePath);
 	}
 
 	const AssetMetadata& AssetManager::GetMetadata(AssetHandle handle) const
 	{
+		if (m_AssetRegistry.find(handle) == m_AssetRegistry.end())
+		{
+			STY_CORE_WARN("Could not find AssetMetadata for {}", (uint64_t)handle);
+			return {};
+		}
+
 		return m_AssetRegistry.at(handle);
 	}
 

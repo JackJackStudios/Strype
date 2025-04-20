@@ -30,7 +30,7 @@ namespace Strype {
 	{
 		std::ifstream fstream(filepath);
 
-		STY_CORE_ASSERT(fstream.is_open(), "Error opening file");
+		STY_CORE_VERIFY(fstream.is_open(), "Error opening file");
 
 		std::stringstream stream;
 		stream << fstream.rdbuf();
@@ -38,7 +38,7 @@ namespace Strype {
 		YAML::Node data = YAML::Load(stream.str());
 		YAML::Node root = data["Project"];
 
-		STY_CORE_ASSERT(root, "Could not open project");
+		STY_CORE_VERIFY(root, "Could not open project");
 
 		STY_CORE_TRACE("Deserializing project '{0}'", filepath.stem().string());
 

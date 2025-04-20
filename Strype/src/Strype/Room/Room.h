@@ -48,14 +48,14 @@ namespace Strype {
 		template<typename T, typename... Args>
 		T& AddComponent(entt::entity handle, Args&&... args)
 		{
-			STY_CORE_ASSERT(!HasComponent<T>(), "Object already has component!");
+			STY_CORE_VERIFY(!HasComponent<T>(), "Object already has component!");
 			return m_Registry.emplace<T>(handle, std::forward<Args>(args)...);
 		}
 
 		template<typename T>
 		T& GetComponent(entt::entity handle)
 		{
-			STY_CORE_ASSERT(HasComponent<T>(), "Object does not have component!");
+			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
 			return m_Registry.get<T>(handle);
 		}
 
@@ -68,7 +68,7 @@ namespace Strype {
 		template<typename T>
 		void RemoveComponent(entt::entity handle)
 		{
-			STY_CORE_ASSERT(HasComponent<T>(), "Object does not have component!");
+			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
 			m_Registry.remove<T>(handle);
 		}
 

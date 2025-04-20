@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Strype/Asset/Asset.h"
+
 namespace Strype {
 
 	class Audio
@@ -13,11 +15,14 @@ namespace Strype {
 		static void SetListenerPos(const glm::vec2& pos);
 	};
 
-	class Sound
+	class AudioFile : public Asset
 	{
 	public:
-		Sound(const std::filesystem::path& filepath);
-		~Sound();
+		AudioFile(const std::filesystem::path& filepath);
+		~AudioFile();
+
+		static AssetType GetStaticType() { return AssetType::AudioFile; }
+		virtual AssetType GetType() const override { return GetStaticType(); }
 
 		uint32_t GetNative() const { return m_RendererID; }
 	private:
@@ -33,9 +38,9 @@ namespace Strype {
 		void SetGain(float vol);
 		void SetLoop(bool loop);
 		void SetPitch(float pitch);
-		void SetPos(glm::vec2 pos);
+		void SetPos(const glm::vec2& pos);
 
-		void Play(Ref<Sound> sound);
+		void Play(const Ref<AudioFile>& sound);
 
 		uint32_t GetNative() const { return m_RendererID; }
 	private:

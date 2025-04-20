@@ -10,8 +10,9 @@ namespace Strype {
 	{
 		None = 0,
 		Prefab,
-		Texture,
+		Sprite,
 		Room,
+		AudioFile,
 	};
 
 	namespace Utils {

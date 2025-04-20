@@ -12,7 +12,7 @@ namespace Strype {
 		alSourcei(m_RendererID, AL_BUFFER, m_BoundBuffer);
 	}
 
-	void Source::Play(Ref<Sound> sound)
+	void Source::Play(const Ref<AudioFile>& sound)
 	{
 		ALuint buffer = (ALuint)sound->GetNative();
 
@@ -45,7 +45,7 @@ namespace Strype {
 		alSourcef(m_RendererID, AL_PITCH, pitch);
 	}
 
-	void Source::SetPos(glm::vec2 pos)
+	void Source::SetPos(const glm::vec2& pos)
 	{
 		alSource3f(m_RendererID, AL_POSITION, pos.x, pos.y, 0.0f);
 	}

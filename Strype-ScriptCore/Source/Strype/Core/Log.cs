@@ -8,7 +8,6 @@
 			Info = 1 << 2,
 			Warn = 1 << 3,
 			Error = 1 << 4,
-			Critical = 1 << 5
 		}
 
 		public static void Trace(string format, params object[] parameters)
@@ -31,11 +30,6 @@
 			unsafe { InternalCalls.Log_LogMessage(LogLevel.Error, FormatUtils.Format(format, parameters)); }
 		}
 
-		public static void Critical(string format, params object[] parameters)
-		{
-			unsafe { InternalCalls.Log_LogMessage(LogLevel.Critical, FormatUtils.Format(format, parameters)); }
-		}
-
 		public static void Trace(object value)
 		{
 			unsafe { InternalCalls.Log_LogMessage(LogLevel.Trace, FormatUtils.Format(value)); }
@@ -56,9 +50,5 @@
 			unsafe { InternalCalls.Log_LogMessage(LogLevel.Error, FormatUtils.Format(value)); }
 		}
 
-		public static void Critical(object value)
-		{
-			unsafe { InternalCalls.Log_LogMessage(LogLevel.Critical, FormatUtils.Format(value)); }
-		}
 	}
 }

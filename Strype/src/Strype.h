@@ -5,7 +5,7 @@
 #include "Strype/Core/Log.h"
 
 #include "Strype/Core/Input.h"
-#include "Strype/Core/Audio.h"
+#include "Strype/Audio/Audio.h"
 #include "Strype/Core/KeyCodes.h"
 #include "Strype/Core/MouseCodes.h"
 

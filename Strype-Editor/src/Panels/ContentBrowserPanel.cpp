@@ -16,6 +16,7 @@ namespace Strype {
 		m_DirectoryIcon = AGI::Texture::Create("assets/icons/DirectoryIcon.png");
 		m_FileIcon = AGI::Texture::Create("assets/icons/FileIcon.png");
 		m_RoomIcon = AGI::Texture::Create("assets/icons/RoomIcon.png");
+		m_AudioFileIcon = AGI::Texture::Create("assets/icons/AudioFileIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -63,7 +64,7 @@ namespace Strype {
 			{
 				switch (Project::GetAssetType(handle))
 				{
-					case AssetType::Texture:
+					case AssetType::Sprite:
 					{
 						icon = Project::GetAsset<Sprite>(handle)->Texture;
 						break;
@@ -81,6 +82,11 @@ namespace Strype {
 					case AssetType::Room:
 					{
 						icon = m_RoomIcon;
+						break;
+					}
+					case AssetType::AudioFile:
+					{
+						icon = m_AudioFileIcon;
 						break;
 					}
 					default:

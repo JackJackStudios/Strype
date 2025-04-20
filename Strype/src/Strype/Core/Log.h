@@ -24,12 +24,10 @@ namespace Strype {
 #define STY_CORE_TRACE(...)    ::Strype::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define STY_CORE_INFO(...)     ::Strype::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define STY_CORE_WARN(...)     ::Strype::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define STY_CORE_ERROR(...)    ::Strype::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define STY_CORE_CRITICAL(...) ::Strype::Log::GetCoreLogger()->critical(__VA_ARGS__)
+#define STY_CORE_ERROR(...)    ::Strype::Log::GetCoreLogger()->error(__VA_ARGS__); __debugbreak()
 								 
 // Client log macros			 
 #define STY_TRACE(...)         ::Strype::Log::GetClientLogger()->trace(__VA_ARGS__)
 #define STY_INFO(...)          ::Strype::Log::GetClientLogger()->info(__VA_ARGS__)
 #define STY_WARN(...)          ::Strype::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define STY_ERROR(...)         ::Strype::Log::GetClientLogger()->error(__VA_ARGS__)
-#define STY_CRITICAL(...)      ::Strype::Log::GetClientLogger()->critical(__VA_ARGS__)

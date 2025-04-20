@@ -81,7 +81,7 @@ namespace Strype {
 						Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
 						break;
 					}
-					case AssetType::Texture:
+					case AssetType::Sprite:
 					{
 						Object obj = m_Room->CreateObject();
 						obj.AddComponent<Transform>(m_Room->GetCamera().Position);
@@ -144,7 +144,6 @@ namespace Strype {
 		m_PanelManager.OnProjectChanged();
 
 		OpenRoom(project->GetStartRoom());
-
 	}
 
 	void EditorLayer::OnInspectorRender(Prefab* prefab)
@@ -190,7 +189,7 @@ namespace Strype {
 				{
 					AssetHandle handle = *(AssetHandle*)payload->Data;
 
-					if (Project::GetAssetType(handle) == AssetType::Texture)
+					if (Project::GetAssetType(handle) == AssetType::Sprite)
 						component.Texture = handle;
 					else
 						STY_CORE_WARN("Wrong asset type!");

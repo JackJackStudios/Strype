@@ -73,18 +73,16 @@ namespace Strype {
 		Ref<Room> room = CreateRef<Room>();
 
 		std::ifstream fstream(path);
-		STY_CORE_ASSERT(fstream.is_open(), "Error opening file");
+		STY_CORE_VERIFY(fstream.is_open(), "Error opening file");
 
 		std::stringstream stream;
 		stream << fstream.rdbuf();
 
 		YAML::Node data = YAML::Load(stream.str())["Room"];
 
-		STY_CORE_ASSERT(data, "Could not load room")
-		STY_CORE_ASSERT(data["Objects"], "Could not load room")
+		STY_CORE_VERIFY(data, "Could not load room")
+		STY_CORE_VERIFY(data["Objects"], "Could not load room")
 
-		STY_CORE_TRACE("Deserializing room '{0}'", path.stem().string());
-		
 		room->Clear();
 
 		YAML::Node objects = data["Objects"];
@@ -92,10 +90,8 @@ namespace Strype {
 		{
 			uint32_t id = obj["Object"].as<uint32_t>();
 
-			STY_CORE_ASSERT(obj["PrefabComponent"], "Object ({0}) is not a valid Strype Object", id);
-
-			STY_CORE_TRACE("Deserialized object with entt ID ({0})", id);
-
+			STY_CORE_VERIFY(obj["PrefabComponent"], "Object ({0}) is not a valid Strype Object", id);
+			
 			YAML::Node prefab = obj["PrefabComponent"];
 			const std::filesystem::path& path = prefab["PrefabPath"].as<std::filesystem::path>();
 

@@ -14,7 +14,6 @@
 #include <unordered_set>
 
 #include "Strype/Core/Log.h"
-#include "Strype/Core/Assert.h"
 #include "Strype/Core/Base.h"
 #include "Strype/Core/PlatformDetection.h"
 #include "Strype/Core/Hash.h"

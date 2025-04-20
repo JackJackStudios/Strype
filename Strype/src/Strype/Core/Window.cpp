@@ -30,12 +30,12 @@ namespace Strype
 		m_Data.Height = props.Height;
 		m_Data.VSync = props.VSync;
 
-		STY_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
+		STY_CORE_INFO("Creating window \"{}\" ({}, {})", props.Title, props.Width, props.Height);
 
 		if (s_GLFWWindowCount == 0)
 		{
 			int success = glfwInit();
-			STY_CORE_ASSERT(success, "Could not intialize GLFW!");
+			STY_CORE_VERIFY(success, "Could not intialize GLFW!");
 
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}

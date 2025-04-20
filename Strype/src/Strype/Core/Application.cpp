@@ -2,7 +2,7 @@
 #include "Application.h"
 
 #include "Strype/Renderer/Renderer.h"
-#include "Strype/Core/Audio.h"
+#include "Strype/Audio/Audio.h"
 #include "Strype/Core/Input.h"
 
 #include "Strype/Script/ScriptEngine.h"
@@ -16,7 +16,7 @@ namespace Strype {
 	Application::Application(const AppConfig& config)
 		: m_Config(config)
 	{
-		STY_CORE_ASSERT(!s_Instance, "Application already exists!");
+		STY_CORE_VERIFY(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
 		if (!m_Config.WorkingDir.empty())
