@@ -69,16 +69,6 @@ namespace Strype {
 						icon = Project::GetAsset<Sprite>(handle)->Texture;
 						break;
 					}
-					case AssetType::Prefab:
-					{
-						Ref<Prefab> prefab = Project::GetAsset<Prefab>(handle);
-
-						if (SpriteRenderer* spr = prefab->GetObject().TryGetComponent<SpriteRenderer>())
-						{
-							icon = Project::GetAsset<Sprite>(spr->Texture)->Texture;
-						}
-						break;
-					}
 					case AssetType::Room:
 					{
 						icon = m_RoomIcon;

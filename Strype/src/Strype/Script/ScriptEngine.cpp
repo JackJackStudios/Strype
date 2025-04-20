@@ -90,7 +90,7 @@ namespace Strype {
 
 		Coral::HostSettings settings =
 		{
-			.CoralDirectory = (std::filesystem::current_path() / "DotNet").string(),
+			.CoralDirectory = (std::filesystem::current_path() / "master" / "DotNet").string(),
 			.MessageCallback = OnCoralMessage,
 			.ExceptionCallback = OnCSharpException
 		};
@@ -101,7 +101,7 @@ namespace Strype {
 		{
 			s_LoadContext = std::make_unique<Coral::AssemblyLoadContext>(std::move(s_Host->CreateAssemblyLoadContext("StrypeLoadContext")));
 
-			auto scriptCorePath = (std::filesystem::current_path() / "DotNet" / "Strype-ScriptCore.dll").string();
+			auto scriptCorePath = (std::filesystem::current_path() / "master" / "DotNet" / "Strype-ScriptCore.dll").string();
 			s_CoreAssembly = CreateRef<Coral::ManagedAssembly>(s_LoadContext->LoadAssembly(scriptCorePath));
 
 			ScriptGlue::RegisterGlue(*s_CoreAssembly);

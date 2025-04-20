@@ -161,12 +161,7 @@ namespace Strype {
 
 		changed |= DrawComponent<SpriteRenderer>("Sprite Renderer", prefab, [](Prefab* select, SpriteRenderer& component)
 		{
-			ImGui::Text("Colour");
-			ImGui::SameLine();
-			ImGui::ColorEdit4("##Color", glm::value_ptr(component.Colour));
-
-			ImGui::Text("Texture");
-			ImGui::SameLine();
+			ImGui::ColorEdit4("Color", glm::value_ptr(component.Colour));
 
 			if (!component.Texture)
 			{
@@ -181,6 +176,9 @@ namespace Strype {
 				{
 					component.Texture = 0;
 				}
+
+				ImGui::SameLine();
+				ImGui::Text("Texture");
 			}
 
 			if (ImGui::BeginDragDropTarget())
@@ -202,9 +200,6 @@ namespace Strype {
 		{
 			auto& scriptEngine = Project::GetScriptEngine();
 
-			ImGui::Text("Script Class");
-			ImGui::SameLine();
-
 			const char* scriptName = scriptEngine->IsValidScript(component.ClassID) ? scriptEngine->GetScriptName(component.ClassID).c_str() : "None";
 
 			if (ImGui::Button(scriptName))
@@ -216,6 +211,9 @@ namespace Strype {
 			{
 				component.ClassID = 0;
 			}
+
+			ImGui::SameLine();
+			ImGui::Text("Script Class");
 
 			if (ImGui::BeginPopup("Script search"))
 			{
@@ -237,6 +235,7 @@ namespace Strype {
 		{
 			const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
 			const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
+
 			if (ImGui::BeginCombo("Body Type", currentBodyTypeString))
 			{
 				for (int i = 0; i < 3; i++)

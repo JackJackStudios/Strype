@@ -24,6 +24,9 @@ project "Strype-Editor"
 		"%{wks.location}/Libraries/imgui",
         "%{wks.location}/Libraries/Coral/Coral.Native/Include",
         "%{wks.location}/Libraries/box2d/include",
+        "%{wks.location}/Libraries/spdlog/include",
+        "%{wks.location}/Libraries/glm",
+        "%{wks.location}/Libraries/entt/src",
 	}
 
 	links

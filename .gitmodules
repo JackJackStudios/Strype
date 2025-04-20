@@ -17,3 +17,12 @@
 [submodule "Libraries/box2d"]
 	path = Libraries/box2d
 	url = https://github.com/erincatto/box2d
+[submodule "Libraries/entt"]
+	path = Libraries/entt
+	url = https://github.com/skypjack/entt
+[submodule "Libraries/glm"]
+	path = Libraries/glm
+	url = https://github.com/icaven/glm
+[submodule "Libraries/spdlog"]
+	path = Libraries/spdlog
+	url = https://github.com/gabime/spdlog

@@ -33,15 +33,18 @@ project "Strype"
         "%{wks.location}/Libraries/imgui/",
         "%{wks.location}/Libraries/Coral/Coral.Native/Include",
         "%{wks.location}/Libraries/box2d/include",
+        "%{wks.location}/Libraries/spdlog/include",
+        "%{wks.location}/Libraries/glm",
+        "%{wks.location}/Libraries/entt/src",
 
         "%{wks.location}/Libraries/include",
     }
 
     links
     {
-        "%{wks.location}/Libraries/lib/spdlogd.lib",
         "%{wks.location}/Libraries/lib/OpenAL32.lib",
         "%{wks.location}/Libraries/lib/sndfile.lib",
+        "%{wks.location}/Libraries/lib/spdlog.lib",
         
         "GLFW",
         "ImGui",
@@ -49,9 +52,12 @@ project "Strype"
         "agi",
         "Coral.Native",
         "Box2D",
+        "spdlog",
 
         "opengl32.lib"
     }
     
-    postbuildcommands { '{COPYFILE} "%{wks.location}/Libraries/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/Strype-Editor/DotNet/Coral.Managed.runtimeconfig.json"' }
+    postbuildcommands { 
+        '{COPYFILE} "%{wks.location}/Libraries/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/Strype-Editor/master/DotNet/Coral.Managed.runtimeconfig.json"' 
+    }
         
