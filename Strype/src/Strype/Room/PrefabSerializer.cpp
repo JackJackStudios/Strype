@@ -43,6 +43,18 @@ namespace Strype {
 				out << YAML::EndMap;
 			}
 
+			if (prefab->HasComponent<RigidBodyComponent>())
+			{
+				out << YAML::Key << "RigidBodyComponent" << YAML::Value;
+				out << YAML::BeginMap;
+
+				RigidBodyComponent& rbc = prefab->GetComponent<RigidBodyComponent>();
+				out << YAML::Key << "Type" << YAML::Value << Utils::BodyTypeToString(rbc.Type);
+				out << YAML::Key << "FixedRotation" << YAML::Value << rbc.FixedRotation;
+
+				out << YAML::EndMap;
+			}
+
 			out << YAML::EndMap;
 		}
 		out << YAML::EndMap;
@@ -87,6 +99,14 @@ namespace Strype {
 		{
 			ScriptComponent& sc = newobj.AddComponent<ScriptComponent>();
 			sc.ClassID = Project::GetScriptEngine()->GetIDByName(script["ClassName"].as<std::string>());
+		}
+
+		YAML::Node rigid = data["RigidBodyComponent"];
+		if (rigid)
+		{
+			RigidBodyComponent& rbc = newobj.AddComponent<RigidBodyComponent>();
+			rbc.Type = Utils::BodyTypeFromString(rigid["Type"].as<std::string>());
+			rbc.FixedRotation = rigid["FixedRotation"].as<bool>();
 		}
 
 		prefab->SetObject(newobj);

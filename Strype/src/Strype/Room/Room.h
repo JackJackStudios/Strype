@@ -8,6 +8,7 @@
 #include "Strype/Asset/Asset.h"
 
 #include <entt/entt.hpp>
+#include <box2d/box2d.h>
 
 namespace Strype {
 
@@ -82,11 +83,14 @@ namespace Strype {
 		}
 	private:
 		entt::registry m_Registry;
+		b2WorldId m_PhysicsWorld;
 		RoomState m_RoomState = RoomState::Editor;
 
 		Camera m_Camera;
-
 		float m_CameraSpeed = 5.0f;
+
+		float m_Gravity = 10.0f;
+		uint16_t m_PhysicsSubsteps = 4;
 
 		friend class Object;
 		friend class Prefab;

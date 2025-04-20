@@ -19,7 +19,6 @@ namespace Strype {
 		void OpenProject(const std::filesystem::path& path);
 	private:
 		Ref<Room> m_Room;
-		Camera m_RuntimeCamera{ -ASPECT_RATIO, ASPECT_RATIO, -1, 1 };
 	};
 
 }

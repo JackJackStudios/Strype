@@ -5,6 +5,7 @@
 
 #include <agi.h>
 #include <glm/glm.hpp>
+#include <box2d/box2d.h>
 
 namespace Strype {
 
@@ -30,12 +31,6 @@ namespace Strype {
 			: Position(position), Scale(scale), Rotation(rotation) {}
 	};
 
-	struct ScriptComponent
-	{
-		ScriptID ClassID;
-		CSharpObject Instance;
-	};
-
 	struct SpriteRenderer
 	{
 		glm::vec4 Colour{ 1.0f, 1.0f, 1.0f, 1.0f };
@@ -44,7 +39,38 @@ namespace Strype {
 		SpriteRenderer() = default;
 		SpriteRenderer(const SpriteRenderer&) = default;
 		SpriteRenderer(AssetHandle texture, const glm::vec4& colour = glm::vec4(1.0f))
-			: Texture(texture), Colour(colour)  {}
+			: Texture(texture), Colour(colour) {
+		}
+	};
+
+	struct ScriptComponent
+	{
+		ScriptID ClassID;
+		CSharpObject Instance;
+
+		ScriptComponent() = default;
+		ScriptComponent(const ScriptComponent&) = default;
+	};
+
+	enum class BodyType 
+	{ 
+		Static, 
+		Dynamic, 
+		Kinematic 
+	};
+
+	struct RigidBodyComponent
+	{
+		BodyType Type = BodyType::Static;
+		bool FixedRotation = true;
+
+		b2BodyId RuntimeBody = (b2BodyId)-1; //Undefined
+
+		RigidBodyComponent() = default;
+		RigidBodyComponent(const RigidBodyComponent&) = default;
+		RigidBodyComponent(BodyType type, bool fixedRotaion = false)
+			: Type(type), FixedRotation(fixedRotaion) {
+		}
 	};
 
 }

@@ -12,7 +12,7 @@
 #include <glm/glm.hpp>
 
 namespace Strype {
-	
+
 	Room::Room()
 		: m_Camera({ 1280.0f, 720.0f })
 	{
@@ -24,7 +24,17 @@ namespace Strype {
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
 			if (Project::IsAssetLoaded(sprite.Texture))
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, Project::GetAsset<Sprite>(sprite.Texture)->Texture, sprite.Colour);
+			{
+				Ref<Sprite> spr = Project::GetAsset<Sprite>(sprite.Texture);
+
+				Renderer::DrawRotatedQuad(
+					trans.Position, 
+					trans.Scale, 
+					trans.Rotation, 
+					sprite.Colour, 
+					spr->Texture
+				);
+			}
 			else
 				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
 		});
@@ -66,6 +76,16 @@ namespace Strype {
 					STY_CORE_ERROR("Object '{}' has invalid script!", (uint32_t)entity);
 				}
 			});
+
+			b2World_Step(m_PhysicsWorld, ts, m_PhysicsSubsteps);
+
+			m_Registry.view<RigidBodyComponent, Transform>().each([&](auto entity, RigidBodyComponent& rigid, Transform& transform) {
+				const auto& position = b2Body_GetPosition(rigid.RuntimeBody);
+
+				transform.Position.x = position.x;
+				transform.Position.y = position.y;
+				transform.Rotation = glm::degrees(b2Rot_GetAngle(b2Body_GetRotation(rigid.RuntimeBody)));
+			});
 		}
 
 		Renderer::EndRoom();
@@ -95,6 +115,28 @@ namespace Strype {
 			}
 		});
 
+		b2WorldDef worldDef = b2DefaultWorldDef();
+		worldDef.gravity = { 0.0f, -m_Gravity };
+		m_PhysicsWorld = b2CreateWorld(&worldDef);
+		
+		m_Registry.view<RigidBodyComponent, Transform>().each([&](auto entity, RigidBodyComponent& rigid, Transform& transform) {
+			Object temp{ entity, this };
+		
+			b2BodyDef bodyDef = b2DefaultBodyDef();
+			bodyDef.type = (b2BodyType)rigid.Type;
+			bodyDef.position = { transform.Position.x, transform.Position.y };
+			bodyDef.fixedRotation = rigid.FixedRotation;
+			//bodyDef.rotation = transform.Rotation;
+		
+			rigid.RuntimeBody = b2CreateBody(m_PhysicsWorld, &bodyDef);
+
+			b2ShapeDef shapeDef = b2DefaultShapeDef();
+			shapeDef.density = 1.0f;
+			b2Polygon polygonShape = b2MakeBox(transform.Scale.x, transform.Scale.y);
+
+			b2CreatePolygonShape(rigid.RuntimeBody, &shapeDef, &polygonShape);
+		});
+
 		m_RoomState = RoomState::Runtime;
 	}
 
@@ -112,6 +154,8 @@ namespace Strype {
 			script.Instance.Invoke("OnDestroy");
 			scriptEngine->DestroyInstance(script.Instance);
 		});
+
+		b2DestroyWorld(m_PhysicsWorld);
 
 		m_RoomState = RoomState::Editor;
 	}

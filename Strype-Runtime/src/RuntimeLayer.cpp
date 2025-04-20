@@ -15,7 +15,7 @@ namespace Strype {
 
 	void RuntimeLayer::OnUpdate(Timestep ts)
 	{
-		m_Room->OnUpdate(ts, m_RuntimeCamera);
+		m_Room->OnUpdate(ts);
 	}
 
 	void RuntimeLayer::OpenProject(const std::filesystem::path& path)

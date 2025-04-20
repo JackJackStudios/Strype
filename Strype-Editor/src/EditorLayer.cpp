@@ -46,7 +46,7 @@ namespace Strype {
 		m_Framebuffer->Bind();
 		Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 		Renderer::Clear();
-
+		
 		m_Room->OnUpdate(ts);
 
 		m_Framebuffer->Unbind();
@@ -57,7 +57,7 @@ namespace Strype {
 	void EditorLayer::UI_RoomPanel()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin((Project::GetFilePath(m_Room->Handle).filename().string() + "##Room").c_str());
+		ImGui::Begin((Project::GetFilePath(m_Room->Handle).filename().string()).c_str());
 
 		Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
 
@@ -155,6 +155,7 @@ namespace Strype {
 		{
 			AddComponentPopup<SpriteRenderer>(prefab, "Sprite Renderer");
 			AddComponentPopup<ScriptComponent>(prefab, "Script Component");
+			AddComponentPopup<RigidBodyComponent>(prefab, "Rigidbody Component");
 
 			ImGui::EndPopup();
 		}
@@ -233,6 +234,31 @@ namespace Strype {
 			}
 		});
 
+		changed |= DrawComponent<RigidBodyComponent>("Rigidbody Component", prefab, [](Prefab* select, RigidBodyComponent& component)
+		{
+			const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
+			const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
+			if (ImGui::BeginCombo("Body Type", currentBodyTypeString))
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					bool isSelected = currentBodyTypeString == bodyTypeStrings[i];
+					if (ImGui::Selectable(bodyTypeStrings[i], isSelected))
+					{
+						currentBodyTypeString = bodyTypeStrings[i];
+						component.Type = (BodyType)i;
+					}
+
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+
+			ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
+		});
+
 		if (changed)
 		{
 			for (const auto& obj : prefab->GetConnectedObjects())
@@ -263,6 +289,12 @@ namespace Strype {
 					SaveProject();
 
 				ImGui::Separator();
+
+				if (ImGui::MenuItem("Build C# Assembly", "Ctrl+B"))
+					ScriptEngine::BuildProject(Project::GetActive());
+
+				if (ImGui::MenuItem("Build C# Project", ""))
+					ScriptEngine::BuildProject(Project::GetActive());
 
 				if (ImGui::MenuItem("Exit"))
 					Application::Get().Close();
