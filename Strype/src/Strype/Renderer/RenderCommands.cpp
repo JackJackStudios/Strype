@@ -19,24 +19,17 @@ namespace Strype {
 	}
 
 	// Simple functions
-	void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour)
+	void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, colour);
+		DrawQuad({ position.x, position.y, 0.0f }, size, colour, texture);
 	}
 
-	void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour)
+	void Renderer::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tintColour);
-	}
+		if (rotation == 0)
+			return DrawQuad(position, size, colour, texture);
 
-	void Renderer::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour)
-	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, colour);
-	}
-
-	void Renderer::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour)
-	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tintColour);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, colour, texture);
 	}
 
 }

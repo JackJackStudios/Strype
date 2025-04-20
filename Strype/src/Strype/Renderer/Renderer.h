@@ -22,18 +22,12 @@ namespace Strype {
 		static void DrawBasicQuad(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], const Ref<AGI::Texture>& texture = nullptr);
 
 		// Primitives
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour);
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<AGI::Texture>& texture, const glm::vec2 texcoords[], const glm::vec4& tintColour = glm::vec4(1.0f));
-		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour);
-		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
-		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<AGI::Texture>& texture, const glm::vec2 texcoords[], const glm::vec4& tintColour = glm::vec4(1.0f));
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
+		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
 
 		// Shorthands for 2D coords
-		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
-		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour);
-		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour);
-		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<AGI::Texture>& texture, const glm::vec4& tintColour = glm::vec4(1.0f));
+		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
+		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
 	private:
 		static Scope<AGI::RenderAPI> s_RenderAPI;
 	private:
