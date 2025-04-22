@@ -56,6 +56,25 @@ namespace Strype {
 	{
 	}
 
+	void Project::BuildProjectFiles(const std::filesystem::path& path)
+	{
+		std::string content = Utils::ReadFile("assets/defaults/premake5.lua");
+		Utils::ReplaceKeyWord(content, "{0}", path.filename().string());
+
+		std::ofstream out((path / "premake5.lua").string(), std::ios::out | std::ios::binary);
+		out << content;
+		out.close();
+
+		// Build C# project
+		std::filesystem::path workingdir = std::filesystem::current_path();
+
+		std::filesystem::current_path(path);
+		system("%STRYPE_DIR%/Libraries/premake/premake5.exe --verbose vs2022");
+		std::filesystem::current_path(workingdir);
+
+		std::filesystem::remove(path / "premake5.lua");
+	}
+
 	void Project::GenerateNew(const std::filesystem::path& path)
 	{
 		// Copy empty project
@@ -74,22 +93,7 @@ namespace Strype {
 			}
 		}
 
-		// Copy premake5.lua file to new project
-		std::string content = Utils::ReadFile("assets/defaults/premake5.lua");
-		Utils::ReplaceKeyWord(content, "{0}", path.filename().string());
-
-		std::ofstream out((path / "premake5.lua").string(), std::ios::out | std::ios::binary);
-		out << content;
-		out.close();
-
-		// Build C# project
-		std::filesystem::path workingdir = std::filesystem::current_path();
-
-		std::filesystem::current_path(path);
-		system("%STRYPE_DIR%/Libraries/premake/premake5.exe --verbose vs2022 >nul 2>&1");
-		std::filesystem::current_path(workingdir);
-
-		std::filesystem::remove(path / "premake5.lua");
+		BuildProjectFiles(path);
 
 		//Change empty project to fit new project name
 		std::string projName = path.filename().string();

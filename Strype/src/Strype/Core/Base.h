@@ -44,7 +44,7 @@ namespace Strype {
 
 #ifdef STY_ENABLE_VERIFY
 #define STY_CORE_VERIFY(condition, ...) { if(!(condition)) { STY_CORE_ERROR(__VA_ARGS__); } }
-#define STY_VERIFY(condition, ...) { if(!(condition)) { STY_CORE_ERROR(__VA_ARGS__); } }
+#define STY_VERIFY(condition, ...) { if(!(condition)) { STY_ERROR(__VA_ARGS__); } }
 #else
 #define STY_CORE_VERIFY(condition, ...)
 #define STY_VERIFY(condition, ...)

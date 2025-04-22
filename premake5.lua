@@ -10,7 +10,7 @@ workspace "Strype"
 	flags { "MultiProcessorCompile" }
 
 	filter "action:vs*"
-		linkoptions { "/ignore:4099" }
+		linkoptions { "/ignore:4099", "/ignore:4006" }
 		disablewarnings { "4068" }
 
 	filter "language:C++ or language:C"

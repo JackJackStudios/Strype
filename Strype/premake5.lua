@@ -29,13 +29,14 @@ project "Strype"
         "src",
         "%{wks.location}/Libraries/yaml-cpp/include",
         "%{wks.location}/Libraries/GLFW/include",
-        "%{wks.location}/Libraries/agi/src",
+        "%{wks.location}/Libraries/agi/include",
         "%{wks.location}/Libraries/imgui/",
         "%{wks.location}/Libraries/Coral/Coral.Native/Include",
         "%{wks.location}/Libraries/box2d/include",
         "%{wks.location}/Libraries/spdlog/include",
         "%{wks.location}/Libraries/glm",
         "%{wks.location}/Libraries/entt/src",
+        "%{wks.location}/Libraries/magic_enum/include",
 
         "%{wks.location}/Libraries/include",
     }
@@ -52,7 +53,6 @@ project "Strype"
         "agi",
         "Coral.Native",
         "Box2D",
-        "spdlog",
 
         "opengl32.lib"
     }

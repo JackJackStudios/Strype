@@ -161,7 +161,7 @@ namespace Strype {
 
 		changed |= DrawComponent<SpriteRenderer>("Sprite Renderer", prefab, [](Prefab* select, SpriteRenderer& component)
 		{
-			ImGui::ColorEdit4("Color", glm::value_ptr(component.Colour));
+			ImGui::ColorEdit4("Colour", glm::value_ptr(component.Colour));
 
 			if (!component.Texture)
 			{

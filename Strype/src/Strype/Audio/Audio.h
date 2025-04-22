@@ -18,15 +18,18 @@ namespace Strype {
 	class AudioFile : public Asset
 	{
 	public:
-		AudioFile(const std::filesystem::path& filepath);
+		AudioFile(uint64_t frames, uint32_t channels, uint32_t samplerate);
 		~AudioFile();
 
 		static AssetType GetStaticType() { return AssetType::AudioFile; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 
+		void SetData(void* data, uint32_t size);
 		uint32_t GetNative() const { return m_RendererID; }
 	private:
 		uint32_t m_RendererID = 0;
+		uint32_t m_SampleRate;
+		int m_DataFormat;
 	};
 
 	class Source

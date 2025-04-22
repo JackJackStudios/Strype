@@ -15,13 +15,6 @@ namespace Strype {
 		AudioFile,
 	};
 
-	namespace Utils {
-
-		std::string_view AssetTypeToString(AssetType type);
-		AssetType AssetTypeFromString(std::string_view assetType);
-
-	}
-
 	struct AssetMetadata
 	{
 		AssetHandle Handle;

@@ -8,17 +8,14 @@
 
 namespace Strype {
 
-	AudioFile::AudioFile(const std::filesystem::path& filepath)
+	AudioFile::AudioFile(uint64_t frames, uint32_t channels, uint32_t samplerate)
 	{
-		SF_INFO sfinfo;
-		SNDFILE* sndfile = sf_open(filepath.string().c_str(), SFM_READ, &sfinfo);
-
-		STY_CORE_VERIFY(sndfile, "Could not open sound file");
-		STY_CORE_VERIFY((sfinfo.frames >= 1 && sfinfo.frames <= (sf_count_t)(INT_MAX / sizeof(short)) / sfinfo.channels), "Bad sample count in sound file");
-		STY_CORE_VERIFY(sfinfo.channels <= 4, "Unsupported channel count in sound file");
+		STY_CORE_VERIFY(frames >= 1, "Cannot read samples in sound file");
+		STY_CORE_VERIFY((frames >= 1 && frames <= (sf_count_t)(INT_MAX / sizeof(short)) / channels), "Bad sample count in sound file");
+		STY_CORE_VERIFY(channels <= 4, "Unsupported channel count in sound file");
 
 		ALenum format = AL_NONE;
-		switch (sfinfo.channels)
+		switch (channels)
 		{
 		case 1:
 			format = AL_FORMAT_MONO16;
@@ -27,38 +24,39 @@ namespace Strype {
 			format = AL_FORMAT_STEREO16;
 			break;
 		case 3:
-			if (sf_command(sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
-				format = AL_FORMAT_BFORMAT2D_16;
+			format = AL_FORMAT_BFORMAT2D_16;
 			break;
-
 		case 4:
-			if (sf_command(sndfile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
-				format = AL_FORMAT_BFORMAT3D_16;
+			format = AL_FORMAT_BFORMAT3D_16;
 			break;
 		}
 
-		short* membuf = static_cast<short*>(malloc((size_t)(sfinfo.frames * sfinfo.channels) * sizeof(short)));
-
-		sf_count_t num_frames = sf_readf_short(sndfile, membuf, sfinfo.frames);
-		ALsizei num_bytes = (ALsizei)(num_frames * sfinfo.channels) * (ALsizei)sizeof(short);
-
-		STY_CORE_VERIFY(num_frames >= 1, "Cannot read samples in sound file");
+		ALsizei num_bytes = (ALsizei)(frames * channels) * (ALsizei)sizeof(short);
+		short* membuf = static_cast<short*>(malloc(num_bytes));
 
 		ALuint buffer = 0;
 		alGenBuffers(1, &buffer);
-		alBufferData(buffer, format, membuf, num_bytes, sfinfo.samplerate);
+		alBufferData(buffer, format, membuf, num_bytes, samplerate);
 
 		free(membuf);
-		sf_close(sndfile);
 
 		STY_CORE_VERIFY(!alGetError(), "Could not read sound file");
 
 		m_RendererID = buffer;
+		m_DataFormat = format;
+		m_SampleRate = samplerate;
 	}
 
 	AudioFile::~AudioFile()
 	{
 		alDeleteBuffers(1, &m_RendererID);
+	}
+
+	void AudioFile::SetData(void* data, uint32_t size)
+	{
+		alBufferData(m_RendererID, m_DataFormat, data, size, m_SampleRate);
+
+		STY_CORE_VERIFY(!alGetError(), "Could not read sound file");
 	}
 
 }

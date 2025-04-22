@@ -8,14 +8,13 @@ workspace "{0}"
 	configurations { "Debug", "Release", "Dist" }
 
 	project "{0}"
-		location "strype/"
 		kind "SharedLib"
 		language "C#"
 		dotnetframework "net8.0"
 
 		targetname "{0}"
-		targetdir ("%{prj.location}/Binaries")
-		objdir ("%{prj.location}/Intermediates")
+		targetdir ("%{prj.location}/strype/Binaries")
+		objdir ("%{prj.location}/strype/Intermediates")
 
 		propertytags {
 			{ "AppendTargetFrameworkToOutputPath", "false" },
@@ -27,8 +26,8 @@ workspace "{0}"
 		}
 
 		links {
-			"%{StrypeDirectory}/Strype-Editor/DotNet/Strype-ScriptCore.dll",
-			"%{StrypeDirectory}/Strype-Editor/DotNet/Coral.Managed.dll",
+			"Strype-ScriptCore",
+			"Coral.Managed",
 		}	
 
 		filter "configurations:Debug"

@@ -22,16 +22,16 @@ namespace Strype {
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		ImGui::Begin("Content Browser");
-		
+
 		float padding = 16.0f;
 		float thumbnailSize = 90.0f;
 		float cellSize = thumbnailSize + padding;
-		
+
 		float panelWidth = ImGui::GetContentRegionAvail().x;
 		int columnCount = (int)(panelWidth / cellSize);
 		if (columnCount < 1)
 			columnCount = 1;
-		
+
 		ImGui::Columns(columnCount + 1, 0, false);
 
 		if (m_CurrentDirectory->Parent != nullptr)
@@ -39,7 +39,7 @@ namespace Strype {
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::ImageButton("<-", (ImTextureID)m_DirectoryIcon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 			ImGui::PopStyleColor();
-			
+
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				m_CurrentDirectory = m_CurrentDirectory->Parent;
 
@@ -54,7 +54,7 @@ namespace Strype {
 			std::string name = path.filename().string();
 			AssetHandle handle = node.Handle;
 			bool isDirectory = std::filesystem::is_directory(m_CurrentDirectory->Path / path);
-		
+
 			Ref<AGI::Texture> icon;
 			if (isDirectory)
 			{
@@ -64,38 +64,38 @@ namespace Strype {
 			{
 				switch (Project::GetAssetType(handle))
 				{
-					case AssetType::Sprite:
-					{
-						icon = Project::GetAsset<Sprite>(handle)->Texture;
-						break;
-					}
-					case AssetType::Room:
-					{
-						icon = m_RoomIcon;
-						break;
-					}
-					case AssetType::AudioFile:
-					{
-						icon = m_AudioFileIcon;
-						break;
-					}
-					default:
-					{
-						icon = m_FileIcon;
-						break;
-					}
+				case AssetType::Sprite:
+				{
+					icon = Project::GetAsset<Sprite>(handle)->Texture;
+					break;
+				}
+				case AssetType::Room:
+				{
+					icon = m_RoomIcon;
+					break;
+				}
+				case AssetType::AudioFile:
+				{
+					icon = m_AudioFileIcon;
+					break;
+				}
+				default:
+				{
+					icon = m_FileIcon;
+					break;
+				}
 				}
 			}
-		
+
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::ImageButton((std::string("##") + name).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
-		
+
 			if (ImGui::BeginDragDropSource())
 			{
 				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", &node.Handle, sizeof(AssetHandle));
 				ImGui::EndDragDropSource();
 			}
-		
+
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (isDirectory)
@@ -110,14 +110,14 @@ namespace Strype {
 					m_ItemClicksCallbacks[type](metadata);
 				}
 			}
-		
+
 			ImGui::PopStyleColor();
-		
+
 			ImGui::TextWrapped(name.c_str());
-		
+
 			ImGui::NextColumn();
 		}
-		
+
 		if (ImGui::BeginPopupContextWindow())
 		{
 			ImGui::MenuItem("New Room");
@@ -155,13 +155,13 @@ namespace Strype {
 			{
 				if (!(entry.path().filename() == "strype" || entry.path().filename() == ".vs"))
 				{
-					node.Nodes.emplace_back(relativePath, &node);
+					node.Nodes.emplace_back(entry.path(), &node);
 					FillTreeNode(node.Nodes.back());
 				}
 			}
 			else
 			{
-				node.Nodes.emplace_back(relativePath, &node, Project::GetAssetHandle(relativePath));
+				node.Nodes.emplace_back(entry.path(), &node, Project::GetAssetHandle(relativePath));
 			}
 		}
 

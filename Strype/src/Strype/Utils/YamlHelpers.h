@@ -100,33 +100,6 @@ namespace YAML {
 
 namespace Strype {
 
-	namespace Utils {
-
-		static std::string BodyTypeToString(BodyType bodyType)
-		{
-			switch (bodyType)
-			{
-			case BodyType::Static:    return "Static";
-			case BodyType::Dynamic:   return "Dynamic";
-			case BodyType::Kinematic: return "Kinematic";
-			}
-
-			STY_CORE_VERIFY(false, "Unknown body type");
-			return {};
-		}
-
-		static BodyType BodyTypeFromString(const std::string& bodyTypeString)
-		{
-			if (bodyTypeString == "Static")    return BodyType::Static;
-			if (bodyTypeString == "Dynamic")   return BodyType::Dynamic;
-			if (bodyTypeString == "Kinematic") return BodyType::Kinematic;
-
-			STY_CORE_VERIFY(false, "Unknown body type");
-			return BodyType::Static;
-		}
-
-	}
-
 	inline YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& v)
 	{
 		out << YAML::Flow;

@@ -3,16 +3,17 @@
 
 #include "Strype/Project/Project.h"
 
-#include "SpriteSerializer.h"
+#include "AssetSerializer.h"
 #include "Strype/Room/PrefabSerializer.h"
 #include "Strype/Room/RoomSerializer.h"
-#include "Strype/Audio/AudioFileSerializer.h"
+
+#include <magic_enum/magic_enum.hpp>
 
 namespace Strype {
 
 	namespace Utils {
 
-		std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
+		static std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
 		{
 			return filepath.is_absolute() ? std::filesystem::relative(filepath, Project::GetProjectDirectory()) : filepath;
 		}
@@ -90,7 +91,15 @@ namespace Strype {
 
 	void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& path)
 	{
-		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), path);
+		if (m_Serializers.find(GetAssetType(handle)) == m_Serializers.end())
+		{
+			STY_CORE_WARN("No serializer available for Type: {}", magic_enum::enum_name(GetAssetType(handle)));
+			return;
+		}
+
+		STY_CORE_TRACE("Serializing asset \"{}\" ", GetFilePath(handle).string());
+
+		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / path);
 	}
 
 	AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)
@@ -130,7 +139,7 @@ namespace Strype {
 	{
 		if (m_Serializers.find(metadata.Type) == m_Serializers.end())
 		{
-			STY_CORE_WARN("No serializer available for Type: {}", Utils::AssetTypeToString(metadata.Type));
+			STY_CORE_WARN("No serializer available for Type: {}", magic_enum::enum_name(metadata.Type));
 			return nullptr;
 		}
 

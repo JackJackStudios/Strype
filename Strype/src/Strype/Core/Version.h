@@ -1,6 +1,6 @@
 #pragma once
 
-#define STY_VERSION "0.3"
+#define STY_VERSION "0.4"
 
 //
 // Build Configuration
@@ -9,7 +9,7 @@
 #define STY_BUILD_CONFIG_NAME "Debug"
 #elif defined(STY_RELEASE)
 #define STY_BUILD_CONFIG_NAME "Release"
-#elif defined(STT_DIST)
+#elif defined(STY_DIST)
 #define STY_BUILD_CONFIG_NAME "Dist"
 #else
 #error Undefined configuration?

@@ -40,6 +40,7 @@ namespace Strype {
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
 
+		static void BuildProjectFiles(const std::filesystem::path& path);
 		static void GenerateNew(const std::filesystem::path& path);
 
 		static const std::string& GetProjectName()

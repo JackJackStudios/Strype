@@ -7,6 +7,7 @@
 #include "Strype/Project/Project.h"
 
 #include <fstream>
+#include <magic_enum/magic_enum.hpp>
 
 namespace Strype {
 
@@ -49,8 +50,20 @@ namespace Strype {
 				out << YAML::BeginMap;
 
 				RigidBodyComponent& rbc = prefab->GetComponent<RigidBodyComponent>();
-				out << YAML::Key << "Type" << YAML::Value << Utils::BodyTypeToString(rbc.Type);
+				out << YAML::Key << "Type" << YAML::Value << magic_enum::enum_name(rbc.Type);
 				out << YAML::Key << "FixedRotation" << YAML::Value << rbc.FixedRotation;
+
+				out << YAML::EndMap;
+			}
+
+			if (prefab->HasComponent<ColliderComponent>())
+			{
+				out << YAML::Key << "ColliderComponent" << YAML::Value;
+				out << YAML::BeginMap;
+
+				ColliderComponent& cc = prefab->GetComponent<ColliderComponent>();
+				out << YAML::Key << "Shape" << YAML::Value << magic_enum::enum_name(cc.Shape);
+				out << YAML::Key << "Dimensions" << YAML::Value << cc.Dimensions;
 
 				out << YAML::EndMap;
 			}
@@ -103,12 +116,19 @@ namespace Strype {
 		if (rigid)
 		{
 			RigidBodyComponent& rbc = newobj.AddComponent<RigidBodyComponent>();
-			rbc.Type = Utils::BodyTypeFromString(rigid["Type"].as<std::string>());
+			rbc.Type = magic_enum::enum_cast<BodyType>(rigid["Type"].as<std::string>()).value_or(BodyType::Static);
 			rbc.FixedRotation = rigid["FixedRotation"].as<bool>();
 		}
 
-		prefab->SetObject(newobj);
+		YAML::Node collider = data["ColliderComponent"];
+		if (collider)
+		{
+			ColliderComponent& cc = newobj.AddComponent<ColliderComponent>();
+			cc.Shape = magic_enum::enum_cast<ColliderShape>(collider["Shape"].as<std::string>()).value_or(ColliderShape::Polygon);
+			cc.Dimensions = collider["Dimensions"].as<glm::vec2>();
+		}
 
+		prefab->SetObject(newobj);
 		return prefab;
 	}
 
