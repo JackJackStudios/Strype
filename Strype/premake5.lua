@@ -29,7 +29,7 @@ project "Strype"
         "src",
         "%{wks.location}/Libraries/yaml-cpp/include",
         "%{wks.location}/Libraries/GLFW/include",
-        "%{wks.location}/Libraries/agi/src",
+        "%{wks.location}/Libraries/agi/include",
         "%{wks.location}/Libraries/imgui/",
         "%{wks.location}/Libraries/Coral/Coral.Native/Include",
         "%{wks.location}/Libraries/box2d/include",
@@ -52,7 +52,6 @@ project "Strype"
         "agi",
         "Coral.Native",
         "Box2D",
-        "spdlog",
 
         "opengl32.lib"
     }

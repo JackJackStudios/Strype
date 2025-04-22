@@ -1,6 +1,6 @@
 #pragma once
 
-#include <agi.h>
+#include <AGI/agi.h>
 
 #include "Camera.h"
 
@@ -29,7 +29,7 @@ namespace Strype {
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
 	private:
-		static Scope<AGI::RenderAPI> s_RenderAPI;
+		inline static std::unique_ptr<AGI::RenderAPI> s_RenderAPI;
 	private:
 		static void Flush();
 		static void FlushAndReset();

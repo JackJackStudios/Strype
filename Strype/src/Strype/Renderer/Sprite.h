@@ -2,7 +2,7 @@
 
 #include "Strype/Asset/Asset.h"
 
-#include <agi.h>
+#include <AGI/agi.h>
 
 namespace Strype {
 

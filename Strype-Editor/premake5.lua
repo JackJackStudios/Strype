@@ -19,7 +19,7 @@ project "Strype-Editor"
 		"%{wks.location}/Strype/src",
 		"%{wks.location}/Libraries/include",
 
-		"%{wks.location}/Libraries/agi/src",
+        "%{wks.location}/Libraries/agi/include",
 		"%{wks.location}/Libraries/GLFW/include",
 		"%{wks.location}/Libraries/imgui",
         "%{wks.location}/Libraries/Coral/Coral.Native/Include",
