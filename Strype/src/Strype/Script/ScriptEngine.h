@@ -37,6 +37,7 @@ namespace Strype {
 		const ScriptMap& GetAllScripts() const { return m_ScriptMetadata; }
 
 		bool IsValidScript(ScriptID scriptID) const;
+		bool IsValidScript(const std::string& name) const { return IsValidScript(GetIDByName(name)); }
 
 		const std::string& GetScriptName(ScriptID scriptID) const { return GetScriptMetadata(scriptID).FullName; }
 		const Coral::Type* GetTypeByName(const std::string& name) const { return m_ScriptMetadata.at(Hash::GenerateFNVHash(name)).Type; }

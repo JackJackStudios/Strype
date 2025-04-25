@@ -153,7 +153,7 @@ namespace Strype {
 
 			if (isDirectory)
 			{
-				if (!(entry.path().filename() == "strype" || entry.path().filename() == ".vs"))
+				if (!(entry.path().filename() == "strype" || entry.path().filename() == ".vs" || entry.path().filename() == "obj"))
 				{
 					node.Nodes.emplace_back(entry.path(), &node);
 					FillTreeNode(node.Nodes.back());

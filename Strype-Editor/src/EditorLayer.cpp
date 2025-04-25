@@ -1,6 +1,5 @@
 #include "EditorLayer.h"
 
-
 namespace Strype {
 
 	EditorLayer::EditorLayer()
@@ -72,22 +71,11 @@ namespace Strype {
 			{
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
-				switch (Project::GetAssetType(handle))
+				if (Project::GetAssetType(handle) == AssetType::Prefab)
 				{
-					case AssetType::Prefab:
-					{
-						Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
-						newobj.AddComponent<PrefabComponent>(handle);
-						Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
-						break;
-					}
-					case AssetType::Sprite:
-					{
-						Object obj = m_Room->CreateObject();
-						obj.AddComponent<Transform>(m_Room->GetCamera().Position);
-						obj.AddComponent<SpriteRenderer>(handle);
-						break;
-					}
+					Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
+					newobj.AddComponent<PrefabComponent>(handle);
+					Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
 				}
 			}
 			ImGui::EndDragDropTarget();
@@ -149,112 +137,95 @@ namespace Strype {
 	void EditorLayer::OnInspectorRender(Prefab* prefab)
 	{
 		bool changed = false;
+		auto& scriptEngine = Project::GetScriptEngine();
 
-		if (ImGui::BeginPopupContextWindow())
+		SpriteRenderer& spr = prefab->GetComponent<SpriteRenderer>();
+
+		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr.Texture)->Texture->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+
+		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		ImGui::Button(Project::GetFilePath(spr.Texture).filename().string().c_str(), ImVec2(128.0f, 0));
+
+		if (ImGui::BeginDragDropTarget())
 		{
-			AddComponentPopup<SpriteRenderer>(prefab, "Sprite Renderer");
-			AddComponentPopup<ScriptComponent>(prefab, "Script Component");
-			AddComponentPopup<RigidBodyComponent>(prefab, "Rigidbody Component");
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				AssetHandle handle = *(AssetHandle*)payload->Data;
 
-			ImGui::EndPopup();
+				if (Project::GetAssetType(handle) == AssetType::Sprite)
+					spr.Texture = handle;
+				else
+					STY_CORE_WARN("Wrong asset type!");
+			}
+			ImGui::EndDragDropTarget();
 		}
 
-		changed |= DrawComponent<SpriteRenderer>("Sprite Renderer", prefab, [](Prefab* select, SpriteRenderer& component)
+		DropdownMenu("Properties", [&]() 
 		{
-			ImGui::ColorEdit4("Colour", glm::value_ptr(component.Colour));
+			ImGui::Columns(2, nullptr, false);
 
-			if (!component.Texture)
+			bool solid = prefab->HasComponent<ColliderComponent>();
+			bool physics = prefab->HasComponent<RigidBodyComponent>();
+
+			if (ImGui::Checkbox("Solid", &solid))
 			{
-				ImGui::Button("<empty>");
+				if (solid)
+					prefab->AddComponent<ColliderComponent>(glm::vec2(1.0f, 1.0f));
+				else
+					prefab->RemoveComponent<ColliderComponent>();
 			}
-			else
+			ImGui::NextColumn();
+
+			if (ImGui::Checkbox("Uses Physics", &physics))
 			{
-				std::string id = std::format("##{0}{1}", (uint32_t)select->GetObject(), "Sprite Renderer");
-				ImGui::ImageButton(id.c_str(), (ImTextureID)Project::GetAsset<Sprite>(component.Texture)->Texture->GetRendererID(), ImVec2{ 32.0f, 32.0f }, { 0, 1 }, { 1, 0 });
-
-				if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
-				{
-					component.Texture = 0;
-				}
-
-				ImGui::SameLine();
-				ImGui::Text("Texture");
+				if (physics)
+					prefab->AddComponent<RigidBodyComponent>(BodyType::Kinematic);
+				else
+					prefab->RemoveComponent<RigidBodyComponent>();
 			}
+			ImGui::NextColumn();
 
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-				{
-					AssetHandle handle = *(AssetHandle*)payload->Data;
+			ImGui::Columns(1);
 
-					if (Project::GetAssetType(handle) == AssetType::Sprite)
-						component.Texture = handle;
-					else
-						STY_CORE_WARN("Wrong asset type!");
-				}
-				ImGui::EndDragDropTarget();
-			}
 		});
 
-		changed |= DrawComponent<ScriptComponent>("Script Component", prefab, [](Prefab* select, ScriptComponent& component)
+		DropdownMenu("Components", [&]() 
 		{
-			auto& scriptEngine = Project::GetScriptEngine();
+			if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+				ImGui::OpenPopup("AddComponent");
 
-			const char* scriptName = scriptEngine->IsValidScript(component.ClassID) ? scriptEngine->GetScriptName(component.ClassID).c_str() : "None";
-
-			if (ImGui::Button(scriptName))
-			{
-				ImGui::OpenPopup("Script search");
-			}
-
-			if (ImGui::IsItemHovered() && ImGui::IsItemClicked(ImGuiMouseButton_Right))
-			{
-				component.ClassID = 0;
-			}
-
-			ImGui::SameLine();
-			ImGui::Text("Script Class");
-
-			if (ImGui::BeginPopup("Script search"))
+			if (ImGui::BeginPopup("AddComponent"))
 			{
 				for (const auto& [id, metadata] : scriptEngine->GetAllScripts())
 				{
-					const auto& scriptName = metadata.FullName;
+					ScriptContainer& sc = prefab->EnsureCurrent<ScriptContainer>();
 
-					if (ImGui::Selectable(scriptName.c_str(), scriptName == scriptEngine->GetScriptName(component.ClassID)))
-					{
-						component.ClassID = id;
-					}
+					if (std::find(sc.begin(), sc.end(), ScriptComponent(id)) != sc.end())
+						continue;
+
+					if (ImGui::MenuItem(metadata.FullName.c_str()))
+						sc.emplace_back(id);
 				}
 
 				ImGui::EndPopup();
 			}
-		});
 
-		changed |= DrawComponent<RigidBodyComponent>("Rigidbody Component", prefab, [](Prefab* select, RigidBodyComponent& component)
-		{
-			const char* bodyTypeStrings[] = { "Static", "Dynamic", "Kinematic" };
-			const char* currentBodyTypeString = bodyTypeStrings[(int)component.Type];
-
-			if (ImGui::BeginCombo("Body Type", currentBodyTypeString))
+			if (ScriptContainer* sc = prefab->TryGetComponent<ScriptContainer>())
 			{
-				for (int i = 0; i < 3; i++)
+				for (const auto& script : *sc)
 				{
-					bool isSelected = currentBodyTypeString == bodyTypeStrings[i];
-					if (ImGui::Selectable(bodyTypeStrings[i], isSelected))
+					ImGui::MenuItem(scriptEngine->GetScriptName(script.ClassID).c_str());
+
+					if (ImGui::BeginPopupContextItem())
 					{
-						currentBodyTypeString = bodyTypeStrings[i];
-						component.Type = (BodyType)i;
+						if (ImGui::MenuItem("Remove component"))
+							sc->erase(std::remove(sc->begin(), sc->end(), script), sc->end());
+
+						ImGui::EndPopup();
 					}
-
-					if (isSelected)
-						ImGui::SetItemDefaultFocus();
 				}
-
-				ImGui::EndCombo();
 			}
-
-			ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
 		});
 
 		if (changed)
@@ -292,7 +263,7 @@ namespace Strype {
 					ScriptEngine::BuildProject(Project::GetActive());
 
 				if (ImGui::MenuItem("Build C# Project", ""))
-					ScriptEngine::BuildProject(Project::GetActive());
+					Project::BuildProjectFiles(Project::GetProjectDirectory());
 
 				if (ImGui::MenuItem("Exit"))
 					Application::Get().Close();

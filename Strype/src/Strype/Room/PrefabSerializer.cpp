@@ -21,51 +21,52 @@ namespace Strype {
 		{
 			out << YAML::Key << "Prefab" << YAML::Value << YAML::BeginMap;
 
-			if (prefab->HasComponent<SpriteRenderer>())
+			if (SpriteRenderer* s = prefab->TryGetComponent<SpriteRenderer>())
 			{
 				out << YAML::Key << "SpriteRenderer" << YAML::Value;
 				out << YAML::BeginMap;
 
-				SpriteRenderer& s = prefab->GetComponent<SpriteRenderer>();
-				out << YAML::Key << "Colour" << YAML::Value << s.Colour;
-				out << YAML::Key << "TexturePath" << YAML::Value << (s.Texture ? Project::GetFilePath(s.Texture) : "");
+				out << YAML::Key << "Colour" << YAML::Value << s->Colour;
+				out << YAML::Key << "TexturePath" << YAML::Value << (s->Texture ? Project::GetFilePath(s->Texture) : "");
 
 				out << YAML::EndMap;
 			}
 
-			if (prefab->HasComponent<ScriptComponent>())
-			{
-				out << YAML::Key << "ScriptComponent" << YAML::Value;
-				out << YAML::BeginMap;
-
-				ScriptComponent& sc = prefab->GetComponent<ScriptComponent>();
-				out << YAML::Key << "ClassName" << YAML::Value << Project::GetScriptEngine()->GetScriptName(sc.ClassID);
-
-				out << YAML::EndMap;
-			}
-
-			if (prefab->HasComponent<RigidBodyComponent>())
+			if (RigidBodyComponent* rbc = prefab->TryGetComponent<RigidBodyComponent>())
 			{
 				out << YAML::Key << "RigidBodyComponent" << YAML::Value;
 				out << YAML::BeginMap;
 
-				RigidBodyComponent& rbc = prefab->GetComponent<RigidBodyComponent>();
-				out << YAML::Key << "Type" << YAML::Value << magic_enum::enum_name(rbc.Type);
-				out << YAML::Key << "FixedRotation" << YAML::Value << rbc.FixedRotation;
+				out << YAML::Key << "Type" << YAML::Value << magic_enum::enum_name(rbc->Type);
+				out << YAML::Key << "FixedRotation" << YAML::Value << rbc->FixedRotation;
 
 				out << YAML::EndMap;
 			}
 
-			if (prefab->HasComponent<ColliderComponent>())
+			if (ColliderComponent* cc = prefab->TryGetComponent<ColliderComponent>())
 			{
 				out << YAML::Key << "ColliderComponent" << YAML::Value;
 				out << YAML::BeginMap;
 
-				ColliderComponent& cc = prefab->GetComponent<ColliderComponent>();
-				out << YAML::Key << "Shape" << YAML::Value << magic_enum::enum_name(cc.Shape);
-				out << YAML::Key << "Dimensions" << YAML::Value << cc.Dimensions;
+				out << YAML::Key << "Shape" << YAML::Value << magic_enum::enum_name(cc->Shape);
+				out << YAML::Key << "Dimensions" << YAML::Value << cc->Dimensions;
 
 				out << YAML::EndMap;
+			}
+
+			if (ScriptContainer* sc = prefab->TryGetComponent<ScriptContainer>())
+			{
+				auto& scriptEngine = Project::GetScriptEngine();
+
+				for (const auto& script : *sc)
+				{
+					out << YAML::Key << scriptEngine->GetScriptName(script.ClassID) << YAML::Value;
+					out << YAML::BeginMap;
+
+					out << YAML::Key << "ClassID" << YAML::Value << script.ClassID;
+
+					out << YAML::EndMap;
+				}
 			}
 
 			out << YAML::EndMap;
@@ -105,13 +106,6 @@ namespace Strype {
 			}
 		}
 
-		YAML::Node script = data["ScriptComponent"];
-		if (script)
-		{
-			ScriptComponent& sc = newobj.AddComponent<ScriptComponent>();
-			sc.ClassID = Project::GetScriptEngine()->GetIDByName(script["ClassName"].as<std::string>());
-		}
-
 		YAML::Node rigid = data["RigidBodyComponent"];
 		if (rigid)
 		{
@@ -127,6 +121,20 @@ namespace Strype {
 			cc.Shape = magic_enum::enum_cast<ColliderShape>(collider["Shape"].as<std::string>()).value_or(ColliderShape::Polygon);
 			cc.Dimensions = collider["Dimensions"].as<glm::vec2>();
 		}
+
+		auto& scriptEngine = Project::GetScriptEngine();
+
+		for (YAML::const_iterator it = data.begin(); it != data.end(); ++it) 
+		{
+			std::string componentName = it->first.as<std::string>();
+
+			if (scriptEngine->IsValidScript(componentName))
+			{
+				ScriptContainer& sc = newobj.EnsureCurrent<ScriptContainer>();
+				sc.emplace_back(scriptEngine->GetIDByName(componentName));
+			}
+		}
+
 
 		prefab->SetObject(newobj);
 		return prefab;

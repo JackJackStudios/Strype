@@ -8,6 +8,27 @@ namespace Strype {
 	{
 	}
 
+	template<typename UIFunction>
+	static void DropdownMenu(const std::string& name, UIFunction uiFunction)
+	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
+			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
+			ImGuiTreeNodeFlags_FramePadding;
+
+		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+		float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
+		bool open = ImGui::TreeNodeEx(name.c_str(), treeNodeFlags, "%s", name.c_str());
+		ImGui::PopStyleVar();
+
+		if (open)
+		{
+			uiFunction();
+			ImGui::TreePop();
+		}
+	}
+
 	static void DrawVec2Control(const std::string& label, glm::vec2& values, float resetValue = 0.0f, float columnWidth = 100.0f)
 	{
 		ImGuiIO& io = ImGui::GetIO();
@@ -110,11 +131,27 @@ namespace Strype {
 	void SceneHierachyPanel::OnInspectorRender(Object* select)
 	{	
 		Transform& trans = select->GetComponent<Transform>();
-		DrawVec2Control("Position", trans.Position);
-		DrawVec2Control("Scale", trans.Scale, 1.0f);
-		ImGui::Text("Rotation");
-		ImGui::SameLine();
-		ImGui::DragFloat("##Rotation", &trans.Rotation);
+		SpriteRenderer& spr = select->GetComponent<SpriteRenderer>();
+		PrefabComponent& prefab = select->GetComponent<PrefabComponent>();
+		
+		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr.Texture)->Texture->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+
+		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		ImGui::Button(Project::GetFilePath(prefab.Handle).filename().string().c_str(), ImVec2(128.0f, 0));
+
+		DropdownMenu("Properties", [&]() {
+			DrawVec2Control("Position", trans.Position);
+			DrawVec2Control("Scale", trans.Scale, 1.0f);
+
+			ImGui::Text("Colour");
+			ImGui::SameLine();
+			ImGui::ColorEdit4("##Colour", glm::value_ptr(spr.Colour), ImGuiColorEditFlags_NoInputs);
+
+			ImGui::Text("Rotation");
+			ImGui::SameLine();
+			ImGui::DragFloat("##Rotation", &trans.Rotation);
+		});
 	}
 
 }

@@ -22,61 +22,25 @@ namespace Strype {
 		}
 	}
 
-	template<typename T, typename UIFunction>
-	static bool DrawComponent(const std::string& name, Prefab* entity, UIFunction uiFunction)
+	template<typename UIFunction>
+	static void DropdownMenu(const std::string& name, UIFunction uiFunction)
 	{
-		bool changed = false;
-
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
 			ImGuiTreeNodeFlags_FramePadding;
-		if (entity->HasComponent<T>())
+
+		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+		float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
+		bool open = ImGui::TreeNodeEx(name.c_str(), treeNodeFlags, "%s", name.c_str());
+		ImGui::PopStyleVar();
+
+		if (open)
 		{
-			T& component = entity->GetComponent<T>();
-			T oldComponent = entity->GetComponent<T>();
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
-			bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(typeid(T).hash_code()), treeNodeFlags, "%s", name.c_str());
-			ImGui::PopStyleVar();
-
-			ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
-
-			std::string popupID = "ComponentSettings_" + std::to_string(typeid(T).hash_code());
-			if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
-			{
-				ImGui::OpenPopup(popupID.c_str());
-			}
-
-			bool removeComponent = false;
-			if (ImGui::BeginPopup(popupID.c_str()))
-			{
-				if (ImGui::MenuItem("Remove component"))
-					removeComponent = true;
-
-				ImGui::EndPopup();
-			}
-
-			if (open)
-			{
-				uiFunction(entity, component);
-
-				//HACK: This function fails if component contains pointers
-				if (std::memcmp(&component, &oldComponent, sizeof(T)) != 0)
-					changed = true;
-
-				ImGui::TreePop();
-			}
-
-			if (removeComponent)
-			{
-				entity->RemoveComponent<T>();
-				changed = true;
-			}
+			uiFunction();
+			ImGui::TreePop();
 		}
-
-		return changed;
 	}
 
 	class EditorLayer : public Layer

@@ -13,6 +13,7 @@
 namespace Strype {
 
 	class Object;
+	struct ScriptComponent;
 
 	enum class RoomState
 	{
@@ -20,6 +21,8 @@ namespace Strype {
 		Runtime,
 		Paused
 	};
+
+	using ScriptContainer = std::vector<ScriptComponent>;
 
 	class Room : public Asset
 	{

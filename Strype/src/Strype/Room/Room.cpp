@@ -119,9 +119,17 @@ namespace Strype {
 		worldDef.gravity = { 0.0f, -m_Gravity };
 		m_PhysicsWorld = b2CreateWorld(&worldDef);
 		
-		m_Registry.view<RigidBodyComponent, Transform>().each([&](auto entity, RigidBodyComponent& rigid, Transform& transform) {
+		m_Registry.view<Transform, RigidBodyComponent>().each([&](auto entity, Transform& transform, RigidBodyComponent& rigid) {
 			Object temp{ entity, this };
-		
+			
+			if (!temp.HasComponent<ColliderComponent>())
+			{
+				STY_CORE_WARN("Cannot apply physics to object ({}) without collider", (uint32_t)temp);
+				return;
+			}
+
+			ColliderComponent& collider = temp.GetComponent<ColliderComponent>();
+
 			b2BodyDef bodyDef = b2DefaultBodyDef();
 			bodyDef.type = (b2BodyType)rigid.Type;
 			bodyDef.position = { transform.Position.x, transform.Position.y };
@@ -132,7 +140,7 @@ namespace Strype {
 
 			b2ShapeDef shapeDef = b2DefaultShapeDef();
 			shapeDef.density = 1.0f;
-			b2Polygon polygonShape = b2MakeBox(transform.Scale.x, transform.Scale.y);
+			b2Polygon polygonShape = b2MakeBox(collider.Dimensions.x, collider.Dimensions.y);
 
 			b2CreatePolygonShape(rigid.RuntimeBody, &shapeDef, &polygonShape);
 		});

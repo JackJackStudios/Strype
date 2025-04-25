@@ -43,6 +43,12 @@ namespace Strype {
 		}
 
 		template<typename T>
+		T& EnsureCurrent()
+		{
+			return HasComponent<T>() ? GetComponent<T>() : AddComponent<T>();
+		}
+
+		template<typename T>
 		void RemoveComponent()
 		{
 			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");

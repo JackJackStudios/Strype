@@ -17,26 +17,24 @@ namespace Strype {
 		out << YAML::BeginMap;
 		out << YAML::Key << "Object" << YAML::Value << (uint32_t)obj;
 
-		if (obj.HasComponent<PrefabComponent>())
+		if (PrefabComponent* p = obj.TryGetComponent<PrefabComponent>())
 		{
 			out << YAML::Key << "PrefabComponent";
 			out << YAML::BeginMap;
 
-			PrefabComponent& p = obj.GetComponent<PrefabComponent>();
-			out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(p.Handle);
+			out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(p->Handle);
 
 			out << YAML::EndMap;
 		}
 
-		if (obj.HasComponent<Transform>())
+		if (Transform* t = obj.TryGetComponent<Transform>())
 		{
 			out << YAML::Key << "Transform";
 			out << YAML::BeginMap;
 
-			Transform& t = obj.GetComponent<Transform>();
-			out << YAML::Key << "Position" << YAML::Value << t.Position;
-			out << YAML::Key << "Scale" << YAML::Value << t.Scale;
-			out << YAML::Key << "Rotation" << YAML::Value << t.Rotation;
+			out << YAML::Key << "Position" << YAML::Value << t->Position;
+			out << YAML::Key << "Scale" << YAML::Value << t->Scale;
+			out << YAML::Key << "Rotation" << YAML::Value << t->Rotation;
 
 			out << YAML::EndMap;
 		}

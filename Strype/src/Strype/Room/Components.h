@@ -9,6 +9,21 @@
 
 namespace Strype {
 
+	enum class BodyType
+	{
+		Static,
+		Dynamic,
+		Kinematic
+	};
+
+	enum class ColliderShape
+	{
+		Circle,
+		Capsule,
+		Segment,
+		Polygon,
+	};
+
 	struct PrefabComponent
 	{
 		AssetHandle Handle;
@@ -39,8 +54,7 @@ namespace Strype {
 		SpriteRenderer() = default;
 		SpriteRenderer(const SpriteRenderer&) = default;
 		SpriteRenderer(AssetHandle texture, const glm::vec4& colour = glm::vec4(1.0f))
-			: Texture(texture), Colour(colour) {
-		}
+			: Texture(texture), Colour(colour) {}
 	};
 
 	struct ScriptComponent
@@ -50,13 +64,10 @@ namespace Strype {
 
 		ScriptComponent() = default;
 		ScriptComponent(const ScriptComponent&) = default;
-	};
+		ScriptComponent(ScriptID id)
+			: ClassID(id) {}
 
-	enum class BodyType 
-	{ 
-		Static, 
-		Dynamic, 
-		Kinematic 
+		bool operator==(const ScriptComponent& other) const { return ClassID == other.ClassID; }
 	};
 
 	struct RigidBodyComponent
@@ -69,8 +80,18 @@ namespace Strype {
 		RigidBodyComponent() = default;
 		RigidBodyComponent(const RigidBodyComponent&) = default;
 		RigidBodyComponent(BodyType type, bool fixedRotaion = false)
-			: Type(type), FixedRotation(fixedRotaion) {
-		}
+			: Type(type), FixedRotation(fixedRotaion) {}
+	};
+
+	struct ColliderComponent
+	{
+		ColliderShape Shape = ColliderShape::Polygon;
+		glm::vec2 Dimensions;
+
+		ColliderComponent() = default;
+		ColliderComponent(const ColliderComponent&) = default;
+		ColliderComponent(const glm::vec2& dims)
+			: Dimensions(dims) {}
 	};
 
 }

@@ -24,11 +24,17 @@ namespace Strype {
 		T& GetComponent() { return m_Object.GetComponent<T>(); }
 
 		template<typename T>
+		T& EnsureCurrent() { return m_Object.EnsureCurrent<T>(); }
+
+		template<typename T>
+		T* TryGetComponent() { return m_Object.TryGetComponent<T>(); }
+
+		template<typename T>
 		bool HasComponent() { return m_Object.HasComponent<T>(); }
 
 		template<typename T>
 		void RemoveComponent() { m_Object.RemoveComponent<T>(); }
-
+		
 		Object GetObject() { return m_Object; }
 		void SetObject(Object obj) { m_Object = obj; }
 
