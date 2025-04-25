@@ -24,6 +24,7 @@ namespace Strype {
 	Application* CreateApplication()
 	{
 		AppConfig config;
+		config.AppName = "Strype-Editor";
 		config.StartupFrames = 10;
 		config.DockspaceEnabled = true;
 

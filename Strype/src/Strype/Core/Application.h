@@ -18,6 +18,8 @@ namespace Strype {
 	struct AppConfig
 	{
 		std::string WorkingDir;
+		std::string AppName;
+
 		bool DockspaceEnabled;
 		int StartupFrames = 10;
 	};

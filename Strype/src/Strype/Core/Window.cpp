@@ -146,4 +146,9 @@ namespace Strype
 			glfwHideWindow(m_Window);
 	}
 
+	void Window::SetTitle(const std::string& title)
+	{
+		glfwSetWindowTitle(m_Window, title.c_str());
+	}
+
 }

@@ -25,7 +25,8 @@ namespace Strype {
 
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
-		
+		m_Window->SetTitle(config.AppName + " - " + STY_VERSION_LONG);
+
 		Input::SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
 		Audio::Init();
 

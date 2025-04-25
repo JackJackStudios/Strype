@@ -46,6 +46,7 @@ namespace Strype {
 		void SetVSync(bool enabled);
 		bool IsVSync() const;
 		void SetVisable(bool enabled);
+		void SetTitle(const std::string& title);
 
 		GLFWwindow* GetNativeWindow() const { return m_Window; }
 

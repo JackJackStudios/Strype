@@ -24,6 +24,7 @@ namespace Strype {
 	Application* CreateApplication()
 	{
 		AppConfig config;
+		config.AppName = "Strype-Runtime";
 		config.StartupFrames = 10;
 		config.DockspaceEnabled = false;
 
