@@ -279,6 +279,7 @@ namespace Strype {
 				if (ImGui::MenuItem("Stop Runtime", ""))
 				{
 					m_PanelManager.RemovePanel(m_RuntimePanel);
+					m_RuntimePanel = nullptr;
 				}
 
 				ImGui::EndMenu();

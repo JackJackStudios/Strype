@@ -19,7 +19,7 @@ namespace Strype {
 	{
 		COPY_COMPONENTS(Transform);
 		COPY_COMPONENTS(SpriteRenderer);
-		COPY_COMPONENTS(ScriptComponent);
+		COPY_COMPONENTS(ScriptContainer);
 	}
 
 }

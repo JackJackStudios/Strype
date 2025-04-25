@@ -66,14 +66,11 @@ namespace Strype {
 		{
 			auto& scriptEngine = Project::GetScriptEngine();
 
-			m_Registry.view<ScriptComponent>().each([&](auto entity, ScriptComponent& script) {
-				if (scriptEngine->IsValidScript(script.ClassID) && script.Instance.IsValid())
+			m_Registry.view<ScriptContainer>().each([&](auto entity, ScriptContainer& container) {
+				for (auto& script : container) 
 				{
-					script.Instance.Invoke<float>("OnUpdate", ts);
-				}
-				else if (script.ClassID != 0)
-				{
-					STY_CORE_ERROR("Object '{}' has invalid script!", (uint32_t)entity);
+					if (scriptEngine->IsValidScript(script.ClassID))
+						script.Instance.Invoke<float>("OnUpdate", ts);
 				}
 			});
 
@@ -99,19 +96,20 @@ namespace Strype {
 			return;
 		}
 
-		Project::SetActiveRoom(Project::GetAsset<Room>(Handle));
+		Project::SetActiveRoom(Ref<Room>(this));
 
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		m_Registry.view<ScriptComponent>().each([&](auto entity, ScriptComponent& script) {
-			if (scriptEngine->IsValidScript(script.ClassID))
+		m_Registry.view<ScriptContainer>().each([&](auto entity, ScriptContainer& container) {
+			for (auto& script : container)
 			{
-				script.Instance = scriptEngine->CreateInstance(script.ClassID);
-				script.Instance.Invoke("OnCreate");
-			}
-			else if (script.ClassID != 0)
-			{
-				STY_CORE_WARN("Object '{}' has an invalid script id ({})", (uint32_t)entity, (uint64_t)script.ClassID);
+				if (scriptEngine->IsValidScript(script.ClassID))
+				{
+					script.Instance = scriptEngine->CreateInstance(script.ClassID);
+					script.Instance.Invoke("OnCreate");
+				}
+				else
+					STY_CORE_WARN("Object '{}' has an invalid script id ({})", (uint32_t)entity, (uint64_t)script.ClassID);
 			}
 		});
 
@@ -134,7 +132,7 @@ namespace Strype {
 			bodyDef.type = (b2BodyType)rigid.Type;
 			bodyDef.position = { transform.Position.x, transform.Position.y };
 			bodyDef.fixedRotation = rigid.FixedRotation;
-			//bodyDef.rotation = transform.Rotation;
+			bodyDef.rotation = b2MakeRot(glm::radians(transform.Rotation));
 		
 			rigid.RuntimeBody = b2CreateBody(m_PhysicsWorld, &bodyDef);
 
@@ -156,11 +154,16 @@ namespace Strype {
 			return;
 		}
 
+		Project::SetActiveRoom(nullptr);
+
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		m_Registry.view<ScriptComponent>().each([&](auto entity, ScriptComponent& script) {
-			script.Instance.Invoke("OnDestroy");
-			scriptEngine->DestroyInstance(script.Instance);
+		m_Registry.view<ScriptContainer>().each([&](auto entity, ScriptContainer& container) {
+			for (auto& script : container)
+			{
+				script.Instance.Invoke("OnDestroy");
+				scriptEngine->DestroyInstance(script.Instance);
+			}
 		});
 
 		b2DestroyWorld(m_PhysicsWorld);
