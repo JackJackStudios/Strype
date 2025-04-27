@@ -102,6 +102,12 @@ namespace Strype {
 
 	const AssetType AssetManager::GetAssetType(AssetHandle handle) const
 	{
+		if (m_AssetRegistry.find(handle) == m_AssetRegistry.end())
+		{
+			STY_CORE_WARN("Could not find AssetType for ({}) ", (uint64_t)handle);
+			return AssetType::None;
+		}
+
 		return m_AssetRegistry.at(handle).Type;
 	}
 

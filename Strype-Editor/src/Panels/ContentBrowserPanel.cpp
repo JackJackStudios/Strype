@@ -17,6 +17,7 @@ namespace Strype {
 		m_FileIcon = AGI::Texture::Create("assets/icons/FileIcon.png");
 		m_RoomIcon = AGI::Texture::Create("assets/icons/RoomIcon.png");
 		m_AudioFileIcon = AGI::Texture::Create("assets/icons/AudioFileIcon.png");
+		m_SpriteIcon = AGI::Texture::Create("assets/icons/SpriteIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -32,7 +33,7 @@ namespace Strype {
 		if (columnCount < 1)
 			columnCount = 1;
 
-		ImGui::Columns(columnCount + 1, 0, false);
+		ImGui::Columns(columnCount, 0, false);
 
 		if (m_CurrentDirectory->Parent != nullptr)
 		{
@@ -51,44 +52,10 @@ namespace Strype {
 		for (TreeNode& node : m_CurrentDirectory->Nodes)
 		{
 			const std::filesystem::path& path = node.Path;
-			std::string name = path.filename().string();
-			AssetHandle handle = node.Handle;
-			bool isDirectory = std::filesystem::is_directory(m_CurrentDirectory->Path / path);
-
-			Ref<AGI::Texture> icon;
-			if (isDirectory)
-			{
-				icon = m_DirectoryIcon;
-			}
-			else
-			{
-				switch (Project::GetAssetType(handle))
-				{
-				case AssetType::Sprite:
-				{
-					icon = Project::GetAsset<Sprite>(handle)->Texture;
-					break;
-				}
-				case AssetType::Room:
-				{
-					icon = m_RoomIcon;
-					break;
-				}
-				case AssetType::AudioFile:
-				{
-					icon = m_AudioFileIcon;
-					break;
-				}
-				default:
-				{
-					icon = m_FileIcon;
-					break;
-				}
-				}
-			}
+			Ref<AGI::Texture> icon = GetIcon(node.Handle);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGui::ImageButton((std::string("##") + name).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			ImGui::ImageButton((std::string("##") + path.filename().string()).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
 			if (ImGui::BeginDragDropSource())
 			{
@@ -98,7 +65,7 @@ namespace Strype {
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
-				if (isDirectory)
+				if (std::filesystem::is_directory(path))
 				{
 					m_CurrentDirectory = &node;
 				}
@@ -113,15 +80,86 @@ namespace Strype {
 
 			ImGui::PopStyleColor();
 
-			ImGui::TextWrapped(name.c_str());
+			ImGui::TextWrapped(path.stem().string().c_str());
 
 			ImGui::NextColumn();
 		}
 
+		if (m_InputActive)
+		{
+			ImGui::OpenPopup("TextInput");
+
+			if (ImGui::BeginPopup("TextInput"))
+			{
+				char inputText[256] = ""; 
+
+				ImGui::Text("Name"); ImGui::SameLine();
+				ImGui::InputText("##Input", inputText, sizeof(inputText));
+
+				if (ImGui::IsItemDeactivated())
+				{
+					m_InputActive = false;
+
+					if (m_InputType != AssetType::None)
+					{
+						std::string file = std::filesystem::path(inputText).stem().string() + Utils::GetFileExtensionFromAssetType(m_InputType).string();
+						Project::NewAsset(m_CurrentDirectory->Path / file);
+					}
+					else
+						std::filesystem::create_directory(m_CurrentDirectory->Path / inputText);
+
+					RefreshAssetTree();
+				}
+
+				if (Input::IsKeyPressed(KeyCode::Escape))
+					m_InputActive = false;
+
+				ImGui::EndPopup();
+			}
+		}
+
 		if (ImGui::BeginPopupContextWindow())
 		{
-			ImGui::MenuItem("New Room");
-			ImGui::MenuItem("New Prefab");
+			if (ImGui::BeginMenu("Create"))
+			{
+				if (ImGui::MenuItem("Prefab", "Alt+P"))
+				{
+					m_InputActive = true;
+					m_InputType = AssetType::Prefab;
+				}
+
+				if (ImGui::MenuItem("Room", "Alt+R"))
+				{
+					m_InputActive = true;
+					m_InputType = AssetType::Room;
+				}
+
+				if (ImGui::MenuItem("Sprite", "Alt+S"))
+				{
+					const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sprite (.png, .jpg, .jpeg)\0*.png\0*.jpg\0*.jpeg\0");
+					std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
+
+					Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
+					RefreshAssetTree();
+				}
+
+				if (ImGui::MenuItem("Sound", "Alt+U"))
+				{
+					const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sound (.wav)\0*.wav\0");
+					std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
+
+					Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
+					RefreshAssetTree();
+				}
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::MenuItem("Create Folder"))
+			{
+				m_InputActive = true;
+				m_InputType = AssetType::None;
+			}
 
 			ImGui::EndPopup();
 		}
@@ -135,10 +173,10 @@ namespace Strype {
 		m_RootDirectory = TreeNode(Project::GetProjectDirectory(), nullptr);
 		m_CurrentDirectory = &m_RootDirectory;
 		
-		FillTreeNode(m_RootDirectory);
+		RefreshTreeNode(m_RootDirectory);
 	}
 
-	void ContentBrowserPanel::FillTreeNode(TreeNode& node)
+	void ContentBrowserPanel::RefreshTreeNode(TreeNode& node)
 	{
 		if (!Utils::NumOfFileOrDirs(Project::GetProjectDirectory() / node.Path))
 			return;
@@ -156,7 +194,7 @@ namespace Strype {
 				if (!(entry.path().filename() == "strype" || entry.path().filename() == ".vs" || entry.path().filename() == "obj"))
 				{
 					node.Nodes.emplace_back(entry.path(), &node);
-					FillTreeNode(node.Nodes.back());
+					RefreshTreeNode(node.Nodes.back());
 				}
 			}
 			else
@@ -169,6 +207,35 @@ namespace Strype {
 		{
 			return std::filesystem::is_directory(Project::GetProjectDirectory() / node.Path);
 		});
+	}
+
+	Ref<AGI::Texture> ContentBrowserPanel::GetIcon(AssetHandle handle)
+	{
+		if (handle == 0)
+			return m_DirectoryIcon;
+
+		switch (Project::GetAssetType(handle))
+		{
+		case AssetType::Sprite:
+			return Project::GetAsset<Sprite>(handle)->Texture;
+			break;
+
+		case AssetType::Room:
+			return m_RoomIcon;
+			break;
+
+		case AssetType::AudioFile:
+			return m_AudioFileIcon;
+			break;
+
+		case AssetType::None:
+			return m_DirectoryIcon;
+			break;
+
+		default:
+			return m_FileIcon;
+			break;
+		}
 	}
 
 }

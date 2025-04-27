@@ -30,17 +30,22 @@ namespace Strype {
 		void SetItemClickCallback(AssetType type, ItemClickCallbackFunc func) { m_ItemClicksCallbacks[type] = func; }
 		void RefreshAssetTree();
 	private:
-		void FillTreeNode(TreeNode& node);
+		void RefreshTreeNode(TreeNode& node);
+		Ref<AGI::Texture> GetIcon(AssetHandle handle);
 
 		std::unordered_map<AssetType, ItemClickCallbackFunc> m_ItemClicksCallbacks;
 		
 		TreeNode m_RootDirectory;
 		TreeNode* m_CurrentDirectory;
 
+		bool m_InputActive = false;
+		AssetType m_InputType = AssetType::Sprite; //None = folder
+
 		Ref<AGI::Texture> m_DirectoryIcon;
 		Ref<AGI::Texture> m_FileIcon;
 		Ref<AGI::Texture> m_RoomIcon;
 		Ref<AGI::Texture> m_AudioFileIcon;
+		Ref<AGI::Texture> m_SpriteIcon;
 	};
 
 }
