@@ -22,6 +22,7 @@ project "Strype"
 	{
 		"_CRT_SECURE_NO_WARNINGS",
 		"YAML_CPP_STATIC_DEFINE",
+        "AL_LIBTYPE_STATIC",
 	}
 
     includedirs
@@ -54,10 +55,12 @@ project "Strype"
         "Coral.Native",
         "Box2D",
 
-        "opengl32.lib"
+        "opengl32.lib",
     }
     
     postbuildcommands { 
         '{COPYFILE} "%{wks.location}/Libraries/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/Strype-Editor/master/DotNet/Coral.Managed.runtimeconfig.json"' 
     }
-        
+    
+    filter "system:windows"
+        links { "winmm.lib", "avrt.lib" }
