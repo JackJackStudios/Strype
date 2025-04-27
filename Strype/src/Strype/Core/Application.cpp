@@ -74,6 +74,7 @@ namespace Strype {
 	void Application::Close()
 	{
 		m_Running = false;
+		m_Window->SetVisable(false);
 	}
 
 	void Application::Run()

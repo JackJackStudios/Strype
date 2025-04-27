@@ -104,8 +104,6 @@ namespace Strype {
 	{
 		if (s_ActiveProject)
 		{
-			s_AssetManager->SaveAllAssets();
-
 			s_ScriptEngine.reset();
 			s_AssetManager.reset();
 			s_ActiveRoom.reset();

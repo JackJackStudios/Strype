@@ -28,6 +28,12 @@ namespace Strype {
 		m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
 		m_Serializers[AssetType::AudioFile] = CreateScope<AudioFileSerializer>();
 	}
+
+	AssetManager::~AssetManager()
+	{
+		for (auto& [handle, asset] : m_LoadedAssets)
+			asset.reset();
+	}
 	
 	void AssetManager::ReloadAssets()
 	{

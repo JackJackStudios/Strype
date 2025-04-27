@@ -31,18 +31,11 @@ namespace Strype {
 			break;
 		}
 
-		ALsizei num_bytes = (ALsizei)(frames * channels) * (ALsizei)sizeof(short);
-		short* membuf = static_cast<short*>(malloc(num_bytes));
-
-		ALuint buffer = 0;
-		alGenBuffers(1, &buffer);
-		alBufferData(buffer, format, membuf, num_bytes, samplerate);
-
-		free(membuf);
-
+		//INFO: Entering empty membuf here shows scary error message!
+		alGenBuffers(1, &m_RendererID);
+		
 		STY_CORE_VERIFY(!alGetError(), "Could not read sound file");
 
-		m_RendererID = buffer;
 		m_DataFormat = format;
 		m_SampleRate = samplerate;
 	}
@@ -52,11 +45,9 @@ namespace Strype {
 		alDeleteBuffers(1, &m_RendererID);
 	}
 
-	void AudioFile::SetData(void* data, uint32_t size)
+	void AudioFile::SetData(const Buffer& buff) const
 	{
-		alBufferData(m_RendererID, m_DataFormat, data, size, m_SampleRate);
-
-		STY_CORE_VERIFY(!alGetError(), "Could not read sound file");
+		alBufferData(m_RendererID, m_DataFormat, buff.Data, buff.Size, m_SampleRate);
 	}
 
 }

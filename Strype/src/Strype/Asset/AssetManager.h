@@ -9,6 +9,7 @@ namespace Strype {
 		{ ".sprefab", AssetType::Prefab },
 		{ ".sroom", AssetType::Room },
 		{ ".wav", AssetType::AudioFile },
+		{ ".ogg", AssetType::AudioFile },
 		{ ".png", AssetType::Sprite },
 		{ ".jpg", AssetType::Sprite },
 		{ ".jpeg", AssetType::Sprite }
@@ -37,7 +38,7 @@ namespace Strype {
 	{
 	public:
 		AssetManager();
-		~AssetManager() = default;
+		~AssetManager();
 
 		Ref<Asset> GetAsset(AssetHandle handle);
 
