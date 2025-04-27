@@ -31,6 +31,12 @@ namespace Strype {
 	EditorLayer::~EditorLayer()
 	{
 		SaveProject();
+
+		//INFO: This line must happen! Usually this happens at end of main
+		//      besause the project is static, destorying the project also
+		//      destroys assets which must happen before Application shutdown
+		//      or Windows/VCRuntime gets involved.
+		Project::SetActive(nullptr);
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -139,13 +145,24 @@ namespace Strype {
 		bool changed = false;
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		SpriteRenderer& spr = prefab->GetComponent<SpriteRenderer>();
+		if (SpriteRenderer* spr = prefab->TryGetComponent<SpriteRenderer>())
+		{
+			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr->Texture)->Texture->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
 
-		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr.Texture)->Texture->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+			ImGui::Button(Project::GetFilePath(spr->Texture).filename().string().c_str(), ImVec2(128.0f, 0));
 
-		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Button(Project::GetFilePath(spr.Texture).filename().string().c_str(), ImVec2(128.0f, 0));
+			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+				prefab->RemoveComponent<SpriteRenderer>();
+		}
+		else
+		{
+			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+			ImGui::SetCursorPosY(128.0f);
+
+			ImGui::Button("<empty>", ImVec2(128.0f, 0));
+		}
 
 		if (ImGui::BeginDragDropTarget())
 		{
@@ -154,7 +171,7 @@ namespace Strype {
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
 				if (Project::GetAssetType(handle) == AssetType::Sprite)
-					spr.Texture = handle;
+					prefab->EnsureCurrent<SpriteRenderer>().Texture = handle;
 				else
 					STY_CORE_WARN("Wrong asset type!");
 			}
