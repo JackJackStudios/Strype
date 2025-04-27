@@ -3,6 +3,8 @@
 #include "Asset.h"
 #include "AssetSerializer.h"
 
+#include <magic_enum/magic_enum.hpp>
+
 namespace Strype {
 
 	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
@@ -12,7 +14,7 @@ namespace Strype {
 		{ ".ogg", AssetType::AudioFile },
 		{ ".png", AssetType::Sprite },
 		{ ".jpg", AssetType::Sprite },
-		{ ".jpeg", AssetType::Sprite }
+		{ ".jpeg", AssetType::Sprite },
 	};
 
 	namespace Utils {
@@ -27,6 +29,8 @@ namespace Strype {
 
 			return s_AssetExtensionMap.at(extension);
 		}
+
+		const std::filesystem::path& GetFileExtensionFromAssetType(AssetType type);
 
 	}
 	
@@ -57,7 +61,10 @@ namespace Strype {
 
 		AssetHandle GetHandle(const std::filesystem::path& path) const;
 
+		void NewAsset(const std::filesystem::path& path);
 		void SaveAsset(AssetHandle handle, const std::filesystem::path& path);
+
+		AssetSerializer* GetSerializer(AssetType type);
 	private:
 		void LoadDirectory(const std::filesystem::path& path);
 

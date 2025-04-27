@@ -7,7 +7,8 @@
 #include "Strype/Room/PrefabSerializer.h"
 #include "Strype/Room/RoomSerializer.h"
 
-#include <magic_enum/magic_enum.hpp>
+#define REGISTER_ASSET(a) if (Utils::GetAssetTypeFromFileExtension(path.extension()) == AssetType::a) temp = CreateRef<a>()
+#define DEREGISTER_ASSET(a) STY_CORE_VERIFY(Utils::GetAssetTypeFromFileExtension(path.extension()) != AssetType::a, "Cannot create a new instance of {}", #a)
 
 namespace Strype {
 
@@ -18,6 +19,31 @@ namespace Strype {
 			return filepath.is_absolute() ? std::filesystem::relative(filepath, Project::GetProjectDirectory()) : filepath;
 		}
 
+		const std::filesystem::path& GetFileExtensionFromAssetType(AssetType type)
+		{
+			for (const auto& [extension, assetType] : s_AssetExtensionMap)
+			{
+				if (assetType == type)
+					return extension;
+			}
+
+			STY_CORE_WARN("Could not find file extension for \"{}\" ", magic_enum::enum_name(type));
+			return "";
+		}
+
+	}
+
+	void AssetManager::NewAsset(const std::filesystem::path& path)
+	{
+		Ref<Asset> temp = nullptr;
+
+		REGISTER_ASSET(Prefab);
+		REGISTER_ASSET(Room);
+		DEREGISTER_ASSET(Sprite);
+		DEREGISTER_ASSET(AudioFile);
+
+		m_Serializers[temp->GetType()]->SaveAsset(temp, Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
+		ImportAsset(Utils::ToAssetSysPath(path));
 	}
 
 	AssetManager::AssetManager()
@@ -105,7 +131,18 @@ namespace Strype {
 
 		STY_CORE_TRACE("Serializing asset \"{}\" ", GetFilePath(handle).string());
 
-		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / path);
+		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
+	}
+
+	AssetSerializer* AssetManager::GetSerializer(AssetType type)
+	{
+		if (m_Serializers.find(type) == m_Serializers.end())
+		{
+			STY_CORE_WARN("No serializer available for Type: {}", magic_enum::enum_name(type));
+			return nullptr;
+		}
+
+		return m_Serializers[type].get();
 	}
 
 	AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)

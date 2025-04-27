@@ -2,6 +2,9 @@
 
 #include "Asset.h"
 
+#include "Strype/Renderer/Sprite.h"
+#include "Strype/Audio/Audio.h"
+
 namespace Strype {
 
 	class AssetSerializer

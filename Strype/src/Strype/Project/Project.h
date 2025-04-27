@@ -65,6 +65,16 @@ namespace Strype {
 			return std::static_pointer_cast<T>(assetManager->GetAsset(handle));
 		}
 
+		static void NewAsset(const std::filesystem::path& path)
+		{
+			Project::GetAssetManager()->NewAsset(path);
+		}
+
+		static void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path)
+		{
+			Project::GetAssetManager()->GetSerializer(asset->GetType())->SaveAsset(asset, path);
+		}
+
 		static bool IsAssetLoaded(AssetHandle handle)
 		{
 			return Project::GetAssetManager()->IsAssetLoaded(handle);
