@@ -1,6 +1,7 @@
 bin/
 bin-int/
 obj/
+build/
 
 DotNet/
 Binaries/

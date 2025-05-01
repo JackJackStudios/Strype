@@ -8,8 +8,8 @@ project "Strype-ScriptCore"
 	language "C#"
 	dotnetframework "net8.0"
 	clr "Unsafe"
-	targetdir "%{StrypeDirectory}/Strype-Editor/master/DotNet"
-	objdir "%{StrypeDirectory}/Strype-Editor/master/DotNet/Intermediates"
+	targetdir "%{StrypeDirectory}/Strype/master/DotNet"
+	objdir "%{StrypeDirectory}/Strype/master/DotNet/Intermediates"
 
 	links {
 		"Coral.Managed"

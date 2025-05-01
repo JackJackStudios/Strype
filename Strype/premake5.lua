@@ -59,7 +59,7 @@ project "Strype"
     }
     
     postbuildcommands { 
-        '{COPYFILE} "%{wks.location}/Libraries/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/Strype-Editor/master/DotNet/Coral.Managed.runtimeconfig.json"' 
+        '{COPYFILE} "%{wks.location}/Libraries/Coral/Coral.Managed/Coral.Managed.runtimeconfig.json" "%{wks.location}/Strype/master/DotNet/Coral.Managed.runtimeconfig.json"' 
     }
     
     filter "system:windows"

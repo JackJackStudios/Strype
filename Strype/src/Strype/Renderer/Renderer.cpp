@@ -111,7 +111,7 @@ namespace Strype {
 		for (uint32_t i = 0; i < s_RenderData.MaxTextureSlots; i++)
 			samplers[i] = i;
 
-		s_RenderData.TextureShader = AGI::Shader::Create("master/shaders/BaseShader.glsl");
+		s_RenderData.TextureShader = AGI::Shader::Create("../Strype/master/shaders/BaseShader.glsl");
 		s_RenderData.TextureShader->Bind();
 		s_RenderData.TextureShader->SetIntArray("u_Textures", samplers, s_RenderData.MaxTextureSlots);
 		
