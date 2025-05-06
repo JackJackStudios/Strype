@@ -74,6 +74,23 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(magic_enum)
 
-add_subdirectory("${STRYPE_LIBRARIES}/spdlog")
-add_subdirectory("${STRYPE_LIBRARIES}/imgui")
-add_subdirectory("${STRYPE_LIBRARIES}/Coral")
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG        v1.15.2
+)
+FetchContent_MakeAvailable(spdlog)
+
+FetchContent_Declare(
+  Coral
+  GIT_REPOSITORY https://github.com/JackKnox/Coral.git
+  GIT_TAG        main
+)
+FetchContent_MakeAvailable(Coral)
+
+FetchContent_Declare(
+  ImGui
+  GIT_REPOSITORY https://github.com/JackKnox/imgui.git
+  GIT_TAG        master
+)
+FetchContent_MakeAvailable(ImGui)
