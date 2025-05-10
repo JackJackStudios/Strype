@@ -57,7 +57,7 @@ namespace Strype {
 
 	AssetManager::~AssetManager()
 	{
-		for (auto& [handle, asset] : m_LoadedAssets)
+		for (auto& [handle, asset] : m_AssetRegistry)
 			asset.reset();
 	}
 	
@@ -77,14 +77,15 @@ namespace Strype {
 		Ref<Asset> asset;
 		if (IsAssetLoaded(handle))
 		{
-			asset = m_LoadedAssets.at(handle);
+			asset = m_AssetRegistry.at(handle).asset;
 		}
 		else
 		{
 			const AssetMetadata& metadata = GetMetadata(handle);
 			asset = ImportAsset(handle, metadata);
 
-			m_LoadedAssets[handle] = asset;
+			m_AssetRegistry[handle].asset = asset;
+			m_AssetRegistry[handle].Type = asset->GetType();
 		}
 
 		return asset;
@@ -92,7 +93,7 @@ namespace Strype {
 
 	bool AssetManager::IsAssetLoaded(AssetHandle handle) const
 	{
-		return m_LoadedAssets.find(handle) != m_LoadedAssets.end();
+		return m_AssetRegistry.find(handle) != m_AssetRegistry.end();
 	}
 
 	bool AssetManager::IsAssetLoaded(const std::filesystem::path& filepath) const
@@ -157,7 +158,6 @@ namespace Strype {
 
 		AssetHandle handle;
 		AssetMetadata metadata;
-		metadata.Handle = handle;
 		metadata.FilePath = Utils::ToAssetSysPath(filepath);
 		metadata.Type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
@@ -172,9 +172,10 @@ namespace Strype {
 		if (asset)
 		{
 			asset->Handle = handle;
-			m_LoadedAssets[handle] = asset;
-			m_LoadedFiles[metadata.FilePath] = handle;
+			metadata.asset = asset;
+
 			m_AssetRegistry[handle] = metadata;
+			m_LoadedFiles[metadata.FilePath] = handle;
 		}
 		else
 		{

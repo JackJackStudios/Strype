@@ -36,8 +36,7 @@ namespace Strype {
 	
 	using AssetFileSystem = std::map<std::filesystem::path, AssetHandle>;
 	using AssetRegistry = std::map<AssetHandle, AssetMetadata>;
-	using AssetMap = std::map<AssetHandle, Ref<Asset>>;
-
+	
 	class AssetManager
 	{
 	public:
@@ -63,6 +62,7 @@ namespace Strype {
 
 		void NewAsset(const std::filesystem::path& path);
 		void SaveAsset(AssetHandle handle, const std::filesystem::path& path);
+		void DeleteAsset(AssetHandle handle);
 
 		AssetSerializer* GetSerializer(AssetType type);
 	private:
@@ -70,7 +70,6 @@ namespace Strype {
 
 		AssetFileSystem m_LoadedFiles;
 		AssetRegistry m_AssetRegistry;
-		AssetMap m_LoadedAssets;
 
 		std::unordered_map<AssetType, Scope<AssetSerializer>> m_Serializers;
 	};
