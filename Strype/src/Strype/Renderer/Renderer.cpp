@@ -1,8 +1,10 @@
 #include "stypch.h"
 #include "Strype/Renderer/Renderer.h"
 
-#include <glm/gtc/matrix_transform.hpp>
+#include "Strype/Core/Application.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <numeric>
 #include <GLFW/glfw3.h>
 
 namespace Strype {
@@ -36,11 +38,11 @@ namespace Strype {
 
 	struct RendererData
 	{
-		static const uint32_t MaxQuads = 20000;
-		static const uint32_t MaxVertices = MaxQuads * 4;
-		static const uint32_t MaxIndices = MaxQuads * 6;
-		static const uint32_t MaxTextureSlots = 32; // TODO: RenderCaps
-		static const size_t QuadVertexCount = 4;
+		static constexpr uint32_t MaxQuads = 20000;
+		static constexpr uint32_t MaxVertices = MaxQuads * 4;
+		static constexpr uint32_t MaxIndices = MaxQuads * 6;
+		static constexpr uint32_t MaxTextureSlots = 32; // TODO: RenderCaps
+		static constexpr size_t QuadVertexCount = 4;
 
 		static constexpr glm::vec2 TextureCoords[] = { { 0.0f,  0.0f }, { 1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
@@ -53,7 +55,7 @@ namespace Strype {
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
 
-		std::vector<std::shared_ptr<AGI::Texture>> TextureSlots;
+		std::array<std::shared_ptr<AGI::Texture>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
 
 		glm::vec4 QuadVertexPositions[4];
@@ -63,16 +65,17 @@ namespace Strype {
 
 	void Renderer::Init()
 	{
-		AGI::RenderAPI::SetPrintCallback(OnAGIMessage);
+		AGI::RenderAPISetttings settings =
+		{
+			.PreferedAPI = AGI::APIType::Guess,
+			.loaderfunc = (AGI::OpenGLloaderFn)glfwGetProcAddress,
+			.messagefunc = OnAGIMessage,
+		};
 
-		s_RenderAPI = AGI::RenderAPI::Create(AGI::BestAPI());
-		s_RenderAPI->Init((AGIloadproc)glfwGetProcAddress);
-
-		s_RenderData.TextureSlots.resize(RendererData::MaxTextureSlots);
+		s_RenderAPI = AGI::RenderAPI::Create(settings);
 
 		s_RenderData.QuadVertexArray = AGI::VertexArray::Create();
-
-		s_RenderData.QuadVertexBuffer = AGI::VertexBuffer::Create(s_RenderData.MaxVertices * sizeof(QuadVertex));
+		s_RenderData.QuadVertexBuffer = AGI::VertexBuffer::Create(RendererData::MaxVertices * sizeof(QuadVertex));
 		s_RenderData.QuadVertexBuffer->SetLayout({
 			{ AGI::ShaderDataType::Float3, "a_Position" },
 			{ AGI::ShaderDataType::Float4, "a_Colour" },
@@ -81,10 +84,9 @@ namespace Strype {
 		});
 		s_RenderData.QuadVertexArray->AddVertexBuffer(s_RenderData.QuadVertexBuffer);
 
-		s_RenderData.QuadVertexBufferBase = new QuadVertex[s_RenderData.MaxVertices];
+		s_RenderData.QuadVertexBufferBase = new QuadVertex[RendererData::MaxVertices];
 
-		uint32_t* quadIndices = new uint32_t[s_RenderData.MaxIndices];
-
+		std::vector<uint32_t> quadIndices(RendererData::MaxIndices);
 		uint32_t offset = 0;
 		for (uint32_t i = 0; i < s_RenderData.MaxIndices; i += 6)
 		{
@@ -99,24 +101,19 @@ namespace Strype {
 			offset += 4;
 		}
 
-		Ref<AGI::IndexBuffer> quadIB = AGI::IndexBuffer::Create(quadIndices, s_RenderData.MaxIndices);
-		s_RenderData.QuadVertexArray->SetIndexBuffer(quadIB);
-		delete[] quadIndices;
+		s_RenderData.QuadVertexArray->SetIndexBuffer(AGI::IndexBuffer::Create(quadIndices.data(), s_RenderData.MaxIndices));
 
 		s_RenderData.WhiteTexture = AGI::Texture::Create(1, 1, 4);
 		uint32_t whiteTextureData = 0xffffffff;
 		s_RenderData.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+		s_RenderData.TextureSlots[0] = s_RenderData.WhiteTexture;
 
-		int32_t samplers[s_RenderData.MaxTextureSlots];
-		for (uint32_t i = 0; i < s_RenderData.MaxTextureSlots; i++)
-			samplers[i] = i;
+		std::array<int32_t, RendererData::MaxTextureSlots> samplers;
+		std::iota(samplers.begin(), samplers.end(), 0);
 
 		s_RenderData.TextureShader = AGI::Shader::Create(Application::Get().GetConfig().ShaderPath);
 		s_RenderData.TextureShader->Bind();
-		s_RenderData.TextureShader->SetIntArray("u_Textures", samplers, s_RenderData.MaxTextureSlots);
-		
-		// Set all texture slots to 0
-		s_RenderData.TextureSlots[0] = s_RenderData.WhiteTexture;
+		s_RenderData.TextureShader->SetIntArray("u_Textures", samplers.data(), s_RenderData.MaxTextureSlots);
 
 		s_RenderData.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
 		s_RenderData.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
@@ -172,7 +169,7 @@ namespace Strype {
 
 	void Renderer::DrawBasicQuad(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], const Ref<AGI::Texture>& texture)
 	{
-		if (s_RenderData.QuadIndexCount >= RendererData::MaxIndices)
+		if (s_RenderData.QuadIndexCount + 6 > RendererData::MaxIndices)
 			FlushAndReset();
 
 		float textureIndex = 0.0f;
@@ -181,7 +178,7 @@ namespace Strype {
 		{ 
 			for (uint32_t i = 1; i < s_RenderData.TextureSlotIndex; i++)
 			{
-				if (*s_RenderData.TextureSlots[i].get() == *texture.get())
+				if (*s_RenderData.TextureSlots[i] == *texture)
 				{
 					textureIndex = (float)i;
 					break;
@@ -193,9 +190,8 @@ namespace Strype {
 				if (s_RenderData.TextureSlotIndex >= RendererData::MaxTextureSlots)
 					FlushAndReset();
 
-				textureIndex = (float)s_RenderData.TextureSlotIndex;
-				s_RenderData.TextureSlots[s_RenderData.TextureSlotIndex] = texture;
-				s_RenderData.TextureSlotIndex++;
+				textureIndex = static_cast<float>(s_RenderData.TextureSlotIndex);
+				s_RenderData.TextureSlots[s_RenderData.TextureSlotIndex++] = texture;
 			}
 
 		}
