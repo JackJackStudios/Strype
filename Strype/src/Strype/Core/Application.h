@@ -19,6 +19,7 @@ namespace Strype {
 	{
 		std::string WorkingDir;
 		std::string AppName;
+		std::string ShaderPath;
 
 		bool DockspaceEnabled;
 		int StartupFrames = 10;

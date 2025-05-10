@@ -18,3 +18,4 @@ x32/
 **.vcxproj.filters
 **.vcxproj.user
 **.csproj
+.vscode

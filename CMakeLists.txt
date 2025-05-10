@@ -91,6 +91,6 @@ FetchContent_MakeAvailable(Coral)
 FetchContent_Declare(
   ImGui
   GIT_REPOSITORY https://github.com/JackKnox/imgui.git
-  GIT_TAG        master
+  GIT_TAG        docking
 )
 FetchContent_MakeAvailable(ImGui)
