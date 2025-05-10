@@ -106,7 +106,7 @@ namespace Strype {
 		{
 			s_ScriptEngine.reset();
 			s_AssetManager.reset();
-			s_ActiveRoom.reset();
+			s_ActiveRoom = nullptr;
 		}
 
 		s_ActiveProject = project;

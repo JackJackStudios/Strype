@@ -1,5 +1,7 @@
 #include "ContentBrowserPanel.h"
 
+#include <stb_image.h>
+
 namespace Strype {
 
 	namespace Utils {
@@ -9,15 +11,30 @@ namespace Strype {
 			return std::distance(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator{});
 		}
 
+		static std::shared_ptr<AGI::Texture> LoadTexture(const std::filesystem::path& path)
+		{
+			int width, height, channels;
+
+        	stbi_set_flip_vertically_on_load(1);
+        	stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
+
+			STY_VERIFY(data, "Failed to load sprite \"{}\" ", path.string());
+
+        	std::shared_ptr<AGI::Texture> texture = AGI::Texture::Create(width, height, channels);
+        	texture->SetData(data, width * height * channels);
+
+			return texture;
+		}
+
 	}
 
 	ContentBrowserPanel::ContentBrowserPanel()
 	{
-		m_DirectoryIcon = AGI::Texture::Create("assets/icons/DirectoryIcon.png");
-		m_FileIcon = AGI::Texture::Create("assets/icons/FileIcon.png");
-		m_RoomIcon = AGI::Texture::Create("assets/icons/RoomIcon.png");
-		m_AudioFileIcon = AGI::Texture::Create("assets/icons/AudioFileIcon.png");
-		m_SpriteIcon = AGI::Texture::Create("assets/icons/SpriteIcon.png");
+		m_DirectoryIcon = Utils::LoadTexture("assets/icons/DirectoryIcon.png");
+		m_FileIcon = Utils::LoadTexture("assets/icons/FileIcon.png");
+		m_RoomIcon = Utils::LoadTexture("assets/icons/RoomIcon.png");
+		m_AudioFileIcon = Utils::LoadTexture("assets/icons/AudioFileIcon.png");
+		m_SpriteIcon = Utils::LoadTexture("assets/icons/SpriteIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -27,6 +44,7 @@ namespace Strype {
 		float padding = 16.0f;
 		float thumbnailSize = 90.0f;
 		float cellSize = thumbnailSize + padding;
+		bool popupOpen = false;
 
 		float panelWidth = ImGui::GetContentRegionAvail().x;
 		int columnCount = (int)(panelWidth / cellSize);
@@ -62,6 +80,19 @@ namespace Strype {
 				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", &node.Handle, sizeof(AssetHandle));
 				ImGui::EndDragDropSource();
 			}
+			
+			if (ImGui::BeginPopupContextItem())
+			{
+				popupOpen = true;
+
+				if (ImGui::MenuItem("Delete"))
+				{
+					Project::DeleteAsset(node.Handle);
+					RefreshAssetTree();
+				}
+
+				ImGui::EndPopup();
+			}
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
@@ -73,7 +104,6 @@ namespace Strype {
 				{
 					AssetMetadata metadata;
 					metadata.FilePath = path;
-					metadata.Handle = node.Handle;
 					m_ItemClicksCallbacks[type](metadata);
 				}
 			}
@@ -118,50 +148,53 @@ namespace Strype {
 			}
 		}
 
-		if (ImGui::BeginPopupContextWindow())
+		if (!popupOpen)
 		{
-			if (ImGui::BeginMenu("Create"))
+			if (ImGui::BeginPopupContextWindow())
 			{
-				if (ImGui::MenuItem("Prefab", "Alt+P"))
+				if (ImGui::BeginMenu("Create"))
+				{
+					if (ImGui::MenuItem("Prefab", "Alt+P"))
+					{
+						m_InputActive = true;
+						m_InputType = AssetType::Prefab;
+					}
+
+					if (ImGui::MenuItem("Room", "Alt+R"))
+					{
+						m_InputActive = true;
+						m_InputType = AssetType::Room;
+					}
+
+					if (ImGui::MenuItem("Sprite", "Alt+S"))
+					{
+						const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sprite (.png, .jpg, .jpeg)\0*.png\0*.jpg\0*.jpeg\0");
+						std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
+
+						Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
+						RefreshAssetTree();
+					}
+
+					if (ImGui::MenuItem("Sound", "Alt+U"))
+					{
+						const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sound (.wav)\0*.wav\0");
+						std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
+
+						Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
+						RefreshAssetTree();
+					}
+
+					ImGui::EndMenu();
+				}
+
+				if (ImGui::MenuItem("Create Folder"))
 				{
 					m_InputActive = true;
-					m_InputType = AssetType::Prefab;
+					m_InputType = AssetType::None;
 				}
 
-				if (ImGui::MenuItem("Room", "Alt+R"))
-				{
-					m_InputActive = true;
-					m_InputType = AssetType::Room;
-				}
-
-				if (ImGui::MenuItem("Sprite", "Alt+S"))
-				{
-					const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sprite (.png, .jpg, .jpeg)\0*.png\0*.jpg\0*.jpeg\0");
-					std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
-
-					Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
-					RefreshAssetTree();
-				}
-
-				if (ImGui::MenuItem("Sound", "Alt+U"))
-				{
-					const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sound (.wav)\0*.wav\0");
-					std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
-
-					Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
-					RefreshAssetTree();
-				}
-
-				ImGui::EndMenu();
+				ImGui::EndPopup();
 			}
-
-			if (ImGui::MenuItem("Create Folder"))
-			{
-				m_InputActive = true;
-				m_InputType = AssetType::None;
-			}
-
-			ImGui::EndPopup();
 		}
 
 		ImGui::Columns(1);

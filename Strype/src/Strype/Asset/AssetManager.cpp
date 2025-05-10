@@ -141,7 +141,26 @@ namespace Strype {
 		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
 	}
 
-	AssetSerializer* AssetManager::GetSerializer(AssetType type)
+    void AssetManager::DeleteAsset(AssetHandle handle)
+    {
+		if (m_LoadedFiles.find(GetFilePath(handle)) == m_LoadedFiles.end())
+		{
+			STY_CORE_WARN("Cannot save memory-only assets to the filesystem");
+			return;
+		}
+
+		STY_CORE_TRACE("Deleting asset \"{}\" ", GetFilePath(handle).string());
+
+		std::filesystem::path path = GetFilePath(handle);
+		m_AssetRegistry[handle].reset();
+
+		m_AssetRegistry.erase(handle);
+		m_LoadedFiles.erase(path);
+
+		std::filesystem::remove(Project::GetProjectDirectory() / path);
+    }
+
+    AssetSerializer* AssetManager::GetSerializer(AssetType type)
 	{
 		if (m_Serializers.find(type) == m_Serializers.end())
 		{
