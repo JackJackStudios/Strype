@@ -96,7 +96,7 @@ namespace Strype {
 			return;
 		}
 
-		Project::SetActiveRoom(Ref<Room>(this));
+		Project::SetActiveRoom(this);
 
 		auto& scriptEngine = Project::GetScriptEngine();
 

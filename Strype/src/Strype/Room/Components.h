@@ -7,6 +7,12 @@
 #include <glm/glm.hpp>
 #include <box2d/box2d.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
 namespace Strype {
 
 	enum class BodyType
@@ -44,6 +50,13 @@ namespace Strype {
 		Transform(const Transform&) = default;
 		Transform(const glm::vec2& position, const glm::vec2& scale = glm::vec2(1.0f), float rotation = 0)
 			: Position(position), Scale(scale), Rotation(rotation) {}
+
+		glm::mat4 GetTransform() const
+		{
+			return glm::translate(glm::mat4(1.0f), { Position.x, Position.y, 0.0f })
+				* glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), { 0.0f, 0.0f, 1.0f })
+				* glm::scale(glm::mat4(1.0f), { Scale.x, Scale.y, 1.0f });
+		}
 	};
 
 	struct SpriteRenderer

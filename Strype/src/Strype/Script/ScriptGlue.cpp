@@ -18,7 +18,6 @@ namespace Strype {
 	template<typename TComponent>
 	static void RegisterManagedComponent(Coral::ManagedAssembly& coreAssembly)
 	{
-		// NOTE(Peter): Get the demangled type name of TComponent
 		const TypeNameString& componentTypeName = TypeInfo<TComponent, true>().Name();
 		std::string componentName = std::format("Strype.{}", componentTypeName);
 
@@ -76,7 +75,7 @@ namespace Strype {
 
 		void Object_CreateComponent(uint32_t id, Coral::ReflectionType componentType)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 
 			Coral::Type& type = componentType;
 
@@ -89,11 +88,9 @@ namespace Strype {
 
 		bool Object_HasComponent(uint32_t id, Coral::ReflectionType componentType)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 
 			Coral::Type& type = componentType;
-
-			STY_CORE_INFO("Hello");
 
 			if (auto it = s_HasComponentFuncs.find(type.GetTypeId()); it != s_HasComponentFuncs.end())
 			{
@@ -106,7 +103,7 @@ namespace Strype {
 
 		bool Object_RemoveComponent(uint32_t id, Coral::ReflectionType componentType)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 
 			Coral::Type& type = componentType;
 
@@ -124,47 +121,47 @@ namespace Strype {
 
 		bool Room_ObjectExists(uint32_t id)
 		{
-			return Project::GetActiveRoom()->ObjectExists(Object{ (entt::entity)id, Project::GetActiveRoom().get() });
+			return Project::GetActiveRoom()->ObjectExists(Object{ (entt::entity)id, Project::GetActiveRoom() });
 		}
 
 		void Room_DestroyObject(uint32_t id)
 		{
-			return Project::GetActiveRoom()->DestroyObject(Object{ (entt::entity)id, Project::GetActiveRoom().get() });
+			return Project::GetActiveRoom()->DestroyObject(Object{ (entt::entity)id, Project::GetActiveRoom() });
 		}
 
 		void Transform_GetPosition(uint32_t id, glm::vec2* outPosition)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 			*outPosition = obj.GetComponent<Transform>().Position;
 		}											 
 													 
 		void Transform_SetPosition(uint32_t id, glm::vec2* inPosition)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 			obj.GetComponent<Transform>().Position = *inPosition;
 		}
 
 		void Transform_GetRotation(uint32_t id, float* outRotation)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 			*outRotation = obj.GetComponent<Transform>().Rotation;
 		}
 
 		void Transform_SetRotation(uint32_t id, float* inRotation)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 			obj.GetComponent<Transform>().Rotation = *inRotation;
 		}
 
 		void Transform_GetScale(uint32_t id, glm::vec2* outScale)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 			*outScale = obj.GetComponent<Transform>().Scale;
 		}
 
 		void Transform_SetScale(uint32_t id, glm::vec2* inScale)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom().get() };
+			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
 			obj.GetComponent<Transform>().Scale = *inScale;
 		}
 

@@ -23,7 +23,7 @@
 #elif defined(STY_PLATFORM_LINUX)
 #define STY_BUILD_PLATFORM_NAME "Linux"
 #else
-#define STY_BUILD_PLATFORM_NAME "Unknown"
+#error Undefined Platform?
 #endif
 
 #define STY_VERSION_LONG "Strype " STY_VERSION " (" STY_BUILD_PLATFORM_NAME " " STY_BUILD_CONFIG_NAME ")"
