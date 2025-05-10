@@ -154,7 +154,7 @@ namespace Strype {
 		if (SpriteRenderer* spr = prefab->TryGetComponent<SpriteRenderer>())
 		{
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr->Texture)->Texture->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr->Texture)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
 
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
 			ImGui::Button(Project::GetFilePath(spr->Texture).filename().string().c_str(), ImVec2(128.0f, 0));

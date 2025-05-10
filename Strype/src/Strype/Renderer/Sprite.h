@@ -11,10 +11,12 @@ namespace Strype {
 	public:
 		Sprite(std::shared_ptr<AGI::Texture> texture);
 
+		Ref<AGI::Texture>& GetTexture() { return m_Texture; }
+
 		static AssetType GetStaticType() { return AssetType::Sprite; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
-	public:
-		Ref<AGI::Texture> Texture;
+	private:
+		Ref<AGI::Texture> m_Texture;
 	};
 
 }

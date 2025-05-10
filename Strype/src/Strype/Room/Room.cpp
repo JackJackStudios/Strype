@@ -27,13 +27,7 @@ namespace Strype {
 			{
 				Ref<Sprite> spr = Project::GetAsset<Sprite>(sprite.Texture);
 
-				Renderer::DrawRotatedQuad(
-					trans.Position, 
-					trans.Scale, 
-					trans.Rotation, 
-					sprite.Colour, 
-					spr->Texture
-				);
+				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour, spr->GetTexture());
 			}
 			else
 				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);

@@ -250,7 +250,7 @@ namespace Strype {
 		switch (Project::GetAssetType(handle))
 		{
 		case AssetType::Sprite:
-			return Project::GetAsset<Sprite>(handle)->Texture;
+			return Project::GetAsset<Sprite>(handle)->GetTexture();
 			break;
 
 		case AssetType::Room:
