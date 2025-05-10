@@ -5,7 +5,12 @@ namespace Strype {
 	RuntimePanel::RuntimePanel(Ref<Room>& room)
 	{
 		m_Room = CreateRef<Room>();
-		m_Framebuffer = AGI::Framebuffer::Create(1280, 720);
+		
+		AGI::FramebufferSpecification framebufferSpec;
+		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8 };
+		framebufferSpec.Width = 1280;
+		framebufferSpec.Height = 720;
+		m_Framebuffer = AGI::Framebuffer::Create(framebufferSpec);
 
 		m_Room->Clear();
 		room->CopyTo(m_Room);

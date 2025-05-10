@@ -13,6 +13,8 @@ namespace Strype {
 		virtual void OnImGuiRender();
 		virtual void SetInspector(Ref<InspectorPanel> panel) { m_Inspector = panel; }
 		inline virtual void SetRoomContext(const Ref<Room>& room) { m_ActiveScene = room; m_Selection = {}; }
+
+		Object GetSelected() const { return m_Selection; }
 	private:
 		void OnInspectorRender(Object* select);
 	private:

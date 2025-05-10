@@ -5,12 +5,17 @@ namespace Strype {
 	EditorLayer::EditorLayer()
 	{
 		m_Room = CreateRef<Room>();
-		m_Framebuffer = AGI::Framebuffer::Create(1280, 720);
+
+		AGI::FramebufferSpecification framebufferSpec;
+		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8, AGI::FramebufferTextureFormat::RED_INTEGER };
+		framebufferSpec.Width = 1280;
+		framebufferSpec.Height = 720;
+		m_Framebuffer = AGI::Framebuffer::Create(framebufferSpec);
 
 		//Configure PanelManager
 		m_PanelManager.SetRoomContext(m_Room);
 
-		m_PanelManager.AddPanel<SceneHierachyPanel>();
+		m_SceneHierachyPanel = m_PanelManager.AddPanel<SceneHierachyPanel>();
 		m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata)
@@ -20,7 +25,7 @@ namespace Strype {
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Prefab, [this](const AssetMetadata& metadata)
 		{
-			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Prefab>(metadata.Handle).get());
+			m_PanelManager.GetInspector()->SetSelected(metadata.asset.get());
 		});
 
 		m_PanelManager.GetInspector()->AddType<Prefab>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
@@ -62,8 +67,8 @@ namespace Strype {
 	void EditorLayer::UI_RoomPanel()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin((Project::GetFilePath(m_Room->Handle).filename().string()).c_str());
-
+		ImGui::Begin("Room");
+		
 		Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
 
 		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
@@ -81,6 +86,7 @@ namespace Strype {
 				{
 					Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
 					newobj.AddComponent<PrefabComponent>(handle);
+					newobj.AddComponent<Transform>(glm::vec2(m_Room->GetCamera().Position));
 					Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
 				}
 			}

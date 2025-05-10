@@ -25,6 +25,8 @@ namespace Strype {
 	{
 		AppConfig config;
 		config.AppName = "Strype-Editor";
+		config.ShaderPath = "assets\\BaseShader.glsl";
+		config.WorkingDir = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\";
 		config.StartupFrames = 10;
 		config.DockspaceEnabled = true;
 
