@@ -16,6 +16,7 @@ target_link_libraries(Strype PUBLIC
     box2d
     glfw
     ImGui
+    ImGuizmo
     Coral
     EnTT::EnTT
     spdlog::spdlog

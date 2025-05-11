@@ -94,3 +94,10 @@ FetchContent_Declare(
   GIT_TAG        docking
 )
 FetchContent_MakeAvailable(ImGui)
+
+FetchContent_Declare(
+  ImGuizmo
+  GIT_REPOSITORY https://github.com/JackKnox/ImGuizmo
+  GIT_TAG        master
+)
+FetchContent_MakeAvailable(ImGuizmo)

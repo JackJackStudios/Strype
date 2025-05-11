@@ -1,6 +1,7 @@
 #include "EditorLayer.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <ImGuizmo.h>
 
 namespace Strype {
 
@@ -27,7 +28,7 @@ namespace Strype {
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Prefab, [this](const AssetMetadata& metadata)
 		{
-			m_PanelManager.GetInspector()->SetSelected(metadata.asset.get());
+			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Prefab>(Project::GetAssetHandle(metadata.FilePath)).get());
 		});
 
 		m_PanelManager.GetInspector()->AddType<Prefab>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
@@ -113,6 +114,32 @@ namespace Strype {
 				}
 			}
 			ImGui::EndDragDropTarget();
+		}
+
+		if (Object selected = m_SceneHierachyPanel->GetSelected())
+		{
+			ImGuizmo::SetOrthographic(true);
+			ImGuizmo::SetDrawlist();
+
+			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+			auto& tc = selected.GetComponent<Transform>();
+			glm::mat4 transform = tc.GetTransform();
+
+			ImGuizmo::Manipulate(glm::value_ptr(m_Room->GetCamera().GetViewMatrix()), glm::value_ptr(m_Room->GetCamera().GetProjectionMatrix()),
+				ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform),
+				nullptr, nullptr);
+
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec2 position, scale;
+				float rotation;
+				DecomposeTransform(transform, position, rotation, scale);
+
+				tc.Position = position;
+				tc.Rotation = rotation;
+				tc.Scale = scale;
+			}
 		}
 
 		ImGui::End();

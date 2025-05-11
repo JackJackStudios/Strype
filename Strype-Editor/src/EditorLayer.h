@@ -13,53 +13,26 @@
 
 namespace Strype {
 
-    static bool DecomposeTransform(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
+    static bool DecomposeTransform(const glm::mat4& transform, glm::vec2& position, float& rotation, glm::vec2& scale)
     {
-        // From glm::decompose in matrix_decompose.inl
+        glm::vec2 col0 = glm::vec2(transform[0]); // X axis
+		glm::vec2 col1 = glm::vec2(transform[1]); // Y axis
 
-        glm::mat4 LocalMatrix(transform);
+		// Extract translation
+		position = glm::vec2(transform[3]);
 
-        if (glm::epsilonEqual(LocalMatrix[3][3], static_cast<float>(0), glm::epsilon<float>()))
-            return false;
+		// Extract scale
+		scale.x = glm::length(col0);
+		scale.y = glm::length(col1);
 
-        if (
-            glm::epsilonNotEqual(LocalMatrix[0][3], static_cast<float>(0), glm::epsilon<float>()) ||
-            glm::epsilonNotEqual(LocalMatrix[1][3], static_cast<float>(0), glm::epsilon<float>()) ||
-            glm::epsilonNotEqual(LocalMatrix[2][3], static_cast<float>(0), glm::epsilon<float>()))
-        {
-            LocalMatrix[0][3] = LocalMatrix[1][3] = LocalMatrix[2][3] = static_cast<float>(0);
-            LocalMatrix[3][3] = static_cast<float>(1);
-        }
+		// Normalize the axes to remove scale
+		if (scale.x != 0) col0 /= scale.x;
+		if (scale.y != 0) col1 /= scale.y;
 
-        translation = glm::vec3(LocalMatrix[3]);
-        LocalMatrix[3] = glm::vec4(0, 0, 0, LocalMatrix[3].w);
+		// Compute rotation (angle from X axis)
+		rotation = atan2(col0.y, col0.x); // in radians
 
-		glm::vec3 Row[3], Pdum3;
-
-        for (glm::length_t i = 0; i < 3; ++i)
-            for (glm::length_t j = 0; j < 3; ++j)
-                Row[i][j] = LocalMatrix[i][j];
-
-        scale.x = glm::length(Row[0]);
-        Row[0] = glm::detail::scale(Row[0], static_cast<float>(1));
-        scale.y = glm::length(Row[1]);
-        Row[1] = glm::detail::scale(Row[1], static_cast<float>(1));
-        scale.z = glm::length(Row[2]);
-        Row[2] = glm::detail::scale(Row[2], static_cast<float>(1));
-
-        rotation.y = glm::asin(-Row[0][2]);
-        if (glm::cos(rotation.y) != 0)
-		{
-            rotation.x = atan2(Row[1][2], Row[2][2]);
-            rotation.z = atan2(Row[0][1], Row[0][0]);
-        }
-        else 
-		{
-            rotation.x = atan2(-Row[2][0], Row[1][1]);
-            rotation.z = 0;
-        }
-
-        return true;
+		return true;
     }
 
 	template<typename T>

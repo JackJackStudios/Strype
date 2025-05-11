@@ -29,6 +29,7 @@ namespace Strype {
 		config.WorkingDir = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\";
 		config.StartupFrames = 10;
 		config.DockspaceEnabled = true;
+		config.ImGuizmoEnabled = true;
  
 		config.RendererLayout = {
 			{ AGI::ShaderDataType::Float3, "a_Position" },

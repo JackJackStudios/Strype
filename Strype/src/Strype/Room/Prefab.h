@@ -7,12 +7,17 @@ namespace Strype {
 	class Prefab : public Asset
 	{
 	public:
-		Prefab() = default;
-		Prefab(const Prefab& other) = default;
+		Prefab()
+			: m_Object((entt::entity)0, s_PrefabRoom.get())
+		{
+		}
+
 		Prefab(entt::entity handle)
 			: m_Object(handle, s_PrefabRoom.get())
 		{
 		}
+
+		Prefab(const Prefab& other) = default;
 
 		void ConnectObject(Object obj) { m_ConnectedObjects.emplace_back(obj); }
 		std::vector<Object>& GetConnectedObjects() { return m_ConnectedObjects; }

@@ -26,6 +26,7 @@ namespace Strype {
 		AGI::BufferLayout RendererLayout;
 
 		bool DockspaceEnabled;
+		bool ImGuizmoEnabled;
 		int StartupFrames = 10;
 	};
 

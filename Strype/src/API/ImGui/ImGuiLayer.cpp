@@ -5,6 +5,7 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
+#include <ImGuizmo.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 
@@ -55,10 +56,12 @@ namespace Strype {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		if (Application::Get().GetConfig().ImGuizmoEnabled)
+			ImGuizmo::BeginFrame();
 		
 		if (m_Dockspace)
 		{
-			static bool dockspaceOpen = true;
 			static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar;
 
@@ -75,7 +78,7 @@ namespace Strype {
 				window_flags |= ImGuiWindowFlags_NoBackground;
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-			ImGui::Begin("DockSpace", &dockspaceOpen, window_flags);
+			ImGui::Begin("DockSpace", 0, window_flags);
 			ImGui::PopStyleVar();
 
 			ImGui::PopStyleVar(2);

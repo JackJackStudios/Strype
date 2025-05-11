@@ -51,7 +51,7 @@ namespace Strype {
 		Transform(const glm::vec2& position, const glm::vec2& scale = glm::vec2(1.0f), float rotation = 0)
 			: Position(position), Scale(scale), Rotation(rotation) {}
 
-		glm::mat4 GetTransform()
+		glm::mat4 GetTransform() const
 		{
 			return glm::translate(glm::mat4(1.0f), { Position.x, Position.y, 0.0f })
 				* glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), { 0.0f, 0.0f, 1.0f })
