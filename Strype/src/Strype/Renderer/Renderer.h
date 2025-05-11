@@ -1,8 +1,9 @@
 #pragma once
 
-#include <AGI/agi.h>
-
 #include "Camera.h"
+
+#include <AGI/agi.h>
+#include <any>
 
 namespace Strype {
 
@@ -30,7 +31,9 @@ namespace Strype {
 
 		glm::vec4 QuadVertexPositions[4];
 		AGI::BufferLayout Layout;
-		std::unordered_map<std::string, uint32_t> EngineAttributes;
+		std::unordered_map<std::string, AGI::BufferElement> AttributeCache;
+
+		std::unordered_map<std::string, std::any> UserAttributes;
 	};
 
 	class Renderer
@@ -55,6 +58,8 @@ namespace Strype {
 		// Shorthands for 2D coords
 		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
 		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
+	
+		static void SubmitAttribute(const std::string& name, const std::any& value);
 	private:
 		inline static std::unique_ptr<AGI::RenderAPI> s_RenderAPI;
 	private:

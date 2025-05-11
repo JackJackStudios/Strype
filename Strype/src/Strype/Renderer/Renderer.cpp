@@ -21,7 +21,7 @@ namespace Strype {
 		template<typename T>
 		static void EnterData(const std::string& attr, const T& value)
 		{
-			*((T*)Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.EngineAttributes[attr])) = value;
+			std::memcpy(Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.AttributeCache[attr].Offset), &value, s_Data.AttributeCache[attr].Size);
 		}
 
 	};
@@ -45,10 +45,7 @@ namespace Strype {
 
 		std::vector<std::string> requiredAttributes = { "a_Position", "a_Colour", "a_TexCoord", "a_TexIndex" };
 		for (const auto& attr : requiredAttributes) 
-		{
 			STY_CORE_VERIFY(s_Data.Layout.HasElement(attr), "Missing layout element: {}", attr);
-			s_Data.EngineAttributes[attr] = s_Data.Layout.GetElementOffset(attr);
-		}
 
 		s_RenderAPI = AGI::RenderAPI::Create(
 		{
@@ -96,6 +93,9 @@ namespace Strype {
 		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
 		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+
+		for (const auto& attr : s_Data.Layout)
+			s_Data.AttributeCache[attr.Name] = attr;
 	}
 
 	void Renderer::Shutdown()
@@ -172,10 +172,13 @@ namespace Strype {
 		{
 			auto base = s_Data.QuadVertexBufferPtr;
 
-			Utils::EnterData<glm::vec3>("a_Position", transform * s_Data.QuadVertexPositions[i]);
-			Utils::EnterData<glm::vec4>("a_Colour", colour);
-			Utils::EnterData<glm::vec2>("a_TexCoord", texcoords[i]);
-			Utils::EnterData<float>("a_TexIndex", textureIndex);
+			Utils::EnterData("a_Position", transform * s_Data.QuadVertexPositions[i]);
+			Utils::EnterData("a_Colour", colour);
+			Utils::EnterData("a_TexCoord", texcoords[i]);
+			Utils::EnterData("a_TexIndex", textureIndex);
+
+			for (auto& [name, value] : s_Data.UserAttributes)
+				Utils::EnterData(name, value);
 
 			s_Data.QuadVertexBufferPtr = Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.QuadVertexBuffer->GetLayout().GetStride());
 		}
@@ -199,5 +202,10 @@ namespace Strype {
 
 		DrawBasicQuad(transform, colour, RendererData::TextureCoords, texture);
 	}
+
+    void Renderer::SubmitAttribute(const std::string& name, const std::any& value)
+    {
+		s_Data.UserAttributes[name] = value;
+    }
 
 }
