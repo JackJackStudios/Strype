@@ -1,5 +1,7 @@
 #include "EditorLayer.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Strype {
 
 	EditorLayer::EditorLayer()
@@ -46,18 +48,33 @@ namespace Strype {
 
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
-		if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
-			(m_Framebuffer->GetWidth() != m_ViewportSize.x || m_Framebuffer->GetHeight() != m_ViewportSize.y))
+		auto[mouseX, mouseY] = ImGui::GetMousePos();
+		mouseX -= m_ViewportBounds[0].x;
+		mouseY -= m_ViewportBounds[0].y;
+		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		mouseY = viewportSize.y - mouseY;
+
+		if (viewportSize.x > 0.0f && viewportSize.y > 0.0f && // zero sized framebuffer is invalid
+			(m_Framebuffer->GetWidth() != viewportSize.x || m_Framebuffer->GetHeight() != viewportSize.y))
 		{
-			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_Room->OnResize(m_ViewportSize);
+			m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+			m_Room->OnResize(viewportSize);
 		}
 
 		m_Framebuffer->Bind();
 		Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 		Renderer::Clear();
 		
+		m_Framebuffer->ClearAttachment(1, -1);
 		m_Room->OnUpdate(ts);
+
+		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		{
+			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+
+			if (pixelData != -1)
+				m_SceneHierachyPanel->SetSelected(Object((entt::entity)pixelData, m_Room.get()));
+		}
 
 		m_Framebuffer->Unbind();
 
@@ -71,8 +88,13 @@ namespace Strype {
 		
 		Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
 
-		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-		m_ViewportSize = glm::vec2(viewportSize.x, viewportSize.y);
+		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		auto viewportOffset = ImGui::GetWindowPos();
+		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+		
+		ImVec2 viewportSize = { m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y };
 
 		ImGui::Image(m_Framebuffer->GetAttachmentID(), viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 

@@ -35,6 +35,7 @@ namespace Strype {
 			{ AGI::ShaderDataType::Float4, "a_Colour" },
 			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
 			{ AGI::ShaderDataType::Float, "a_TexIndex" },
+			{ AGI::ShaderDataType::Int, "a_ObjectID" },
 		};
 
 		return new Editor(config);

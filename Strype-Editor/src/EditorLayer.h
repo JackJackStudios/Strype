@@ -125,7 +125,7 @@ namespace Strype {
 		Ref<RuntimePanel> m_RuntimePanel;
 		Ref<SceneHierachyPanel> m_SceneHierachyPanel;
 
-		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+		glm::vec2 m_ViewportBounds[2];
 	};
 
 }
