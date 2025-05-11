@@ -11,6 +11,8 @@
 
 #include "API/ImGui/ImGuiLayer.h"
 
+#include <AGI/agi.h>
+
 int main(int argc, char** argv);
 
 namespace Strype {
@@ -20,6 +22,8 @@ namespace Strype {
 		std::string WorkingDir;
 		std::string AppName;
 		std::string ShaderPath;
+
+		AGI::BufferLayout RendererLayout;
 
 		bool DockspaceEnabled;
 		int StartupFrames = 10;

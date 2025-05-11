@@ -9,86 +9,63 @@
 
 namespace Strype {
 
+	static RendererData s_Data;
+
+	namespace Utils {
+
+		static void* ShiftPtr(void* origin, uint32_t shift)
+		{
+			return (uint8_t*)origin + shift;
+		}
+
+		template<typename T>
+		static void EnterData(const std::string& attr, const T& value)
+		{
+			*((T*)Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.EngineAttributes[attr])) = value;
+		}
+
+	};
+
 	static void OnAGIMessage(std::string_view message, AGI::LogLevel level)
 	{
+		using enum AGI::LogLevel;
 		switch (level)
 		{
-		case AGI::LogLevel::Trace:
-			STY_CORE_TRACE("{}", std::string(message));
-			break;
-		case AGI::LogLevel::Info:
-			STY_CORE_INFO("{}", std::string(message));
-			break;
-		case AGI::LogLevel::Warning:
-			STY_CORE_WARN("{}", std::string(message));
-			break;
-		case AGI::LogLevel::Error:
-			STY_CORE_ERROR("{}", std::string(message));
-			break;
+			case Trace:   STY_CORE_TRACE("{}", std::string(message)); break;
+			case Info:    STY_CORE_INFO("{}", std::string(message)); break;
+			case Warning: STY_CORE_WARN("{}", std::string(message)); break;
+			case Error:   STY_CORE_ERROR("{}", std::string(message)); break;
 		}
 	}
 
-	struct QuadVertex
-	{
-		glm::vec3 Position;
-		glm::vec4 Colour;
-		glm::vec2 TexCoord;
-		float TexIndex;
-	};
-
-	struct RendererData
-	{
-		static constexpr uint32_t MaxQuads = 20000;
-		static constexpr uint32_t MaxVertices = MaxQuads * 4;
-		static constexpr uint32_t MaxIndices = MaxQuads * 6;
-		static constexpr uint32_t MaxTextureSlots = 32; // TODO: RenderCaps
-		static constexpr size_t QuadVertexCount = 4;
-
-		static constexpr glm::vec2 TextureCoords[] = { { 0.0f,  0.0f }, { 1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-
-		std::shared_ptr<AGI::VertexArray> QuadVertexArray;
-		std::shared_ptr<AGI::VertexBuffer> QuadVertexBuffer;
-		std::shared_ptr<AGI::Shader> TextureShader;
-		std::shared_ptr<AGI::Texture> WhiteTexture;
-
-		uint32_t QuadIndexCount = 0;
-		QuadVertex* QuadVertexBufferBase = nullptr;
-		QuadVertex* QuadVertexBufferPtr = nullptr;
-
-		std::array<std::shared_ptr<AGI::Texture>, MaxTextureSlots> TextureSlots;
-		uint32_t TextureSlotIndex = 1; // 0 = white texture
-
-		glm::vec4 QuadVertexPositions[4];
-	};
-
-	static RendererData s_RenderData;
-
 	void Renderer::Init()
 	{
-		AGI::RenderAPISetttings settings =
+		auto& appConfig = Application::Get().GetConfig();
+		s_Data.Layout = appConfig.RendererLayout;
+
+		std::vector<std::string> requiredAttributes = { "a_Position", "a_Colour", "a_TexCoord", "a_TexIndex" };
+		for (const auto& attr : requiredAttributes) 
+		{
+			STY_CORE_VERIFY(s_Data.Layout.HasElement(attr), "Missing layout element: {}", attr);
+			s_Data.EngineAttributes[attr] = s_Data.Layout.GetElementOffset(attr);
+		}
+
+		s_RenderAPI = AGI::RenderAPI::Create(
 		{
 			.PreferedAPI = AGI::APIType::Guess,
 			.loaderfunc = (AGI::OpenGLloaderFn)glfwGetProcAddress,
 			.messagefunc = OnAGIMessage,
-		};
-
-		s_RenderAPI = AGI::RenderAPI::Create(settings);
-
-		s_RenderData.QuadVertexArray = AGI::VertexArray::Create();
-		s_RenderData.QuadVertexBuffer = AGI::VertexBuffer::Create(RendererData::MaxVertices * sizeof(QuadVertex));
-		s_RenderData.QuadVertexBuffer->SetLayout({
-			{ AGI::ShaderDataType::Float3, "a_Position" },
-			{ AGI::ShaderDataType::Float4, "a_Colour" },
-			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
-			{ AGI::ShaderDataType::Float, "a_TexIndex" },
 		});
-		s_RenderData.QuadVertexArray->AddVertexBuffer(s_RenderData.QuadVertexBuffer);
 
-		s_RenderData.QuadVertexBufferBase = new QuadVertex[RendererData::MaxVertices];
+		s_Data.QuadVertexArray = AGI::VertexArray::Create();
+		s_Data.QuadVertexBuffer = AGI::VertexBuffer::Create(RendererData::MaxVertices, s_Data.Layout);
+		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
+		
+		s_Data.QuadVertexBufferBase = malloc(s_Data.QuadVertexBuffer->GetSize());
 
 		std::vector<uint32_t> quadIndices(RendererData::MaxIndices);
 		uint32_t offset = 0;
-		for (uint32_t i = 0; i < s_RenderData.MaxIndices; i += 6)
+		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
 		{
 			quadIndices[i + 0] = offset + 0;
 			quadIndices[i + 1] = offset + 1;
@@ -101,84 +78,80 @@ namespace Strype {
 			offset += 4;
 		}
 
-		s_RenderData.QuadVertexArray->SetIndexBuffer(AGI::IndexBuffer::Create(quadIndices.data(), s_RenderData.MaxIndices));
+		s_Data.QuadVertexArray->SetIndexBuffer(AGI::IndexBuffer::Create(quadIndices.data(), s_Data.MaxIndices));
 
-		s_RenderData.WhiteTexture = AGI::Texture::Create(1, 1, 4);
+		s_Data.WhiteTexture = AGI::Texture::Create(1, 1, 4);
 		uint32_t whiteTextureData = 0xffffffff;
-		s_RenderData.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-		s_RenderData.TextureSlots[0] = s_RenderData.WhiteTexture;
+		s_Data.WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+		s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
 		std::array<int32_t, RendererData::MaxTextureSlots> samplers;
 		std::iota(samplers.begin(), samplers.end(), 0);
 
-		s_RenderData.TextureShader = AGI::Shader::Create(Application::Get().GetConfig().ShaderPath);
-		s_RenderData.TextureShader->Bind();
-		s_RenderData.TextureShader->SetIntArray("u_Textures", samplers.data(), s_RenderData.MaxTextureSlots);
+		s_Data.TextureShader = AGI::Shader::Create(appConfig.ShaderPath);
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetIntArray("u_Textures", samplers.data(), s_Data.MaxTextureSlots);
 
-		s_RenderData.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-		s_RenderData.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
-		s_RenderData.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
-		s_RenderData.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+		s_Data.QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+		s_Data.QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
+		s_Data.QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
+		s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 	}
 
 	void Renderer::Shutdown()
 	{
-		delete[] s_RenderData.QuadVertexBufferBase;
+		free(s_Data.QuadVertexBufferBase);
 	}
 	
 	void Renderer::BeginRoom(Camera& camera)
 	{
-		s_RenderData.TextureShader->Bind();
-		s_RenderData.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		
-		s_RenderData.QuadIndexCount = 0;
-		s_RenderData.QuadVertexBufferPtr = s_RenderData.QuadVertexBufferBase;
-		
-		s_RenderData.TextureSlotIndex = 1;
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		s_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer::EndRoom()
 	{
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_RenderData.QuadVertexBufferPtr - (uint8_t*)s_RenderData.QuadVertexBufferBase);
-		s_RenderData.QuadVertexBuffer->SetData(s_RenderData.QuadVertexBufferBase, dataSize);
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.QuadVertexBufferPtr - (uint8_t*)s_Data.QuadVertexBufferBase);
+		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
 
 		Flush();
 	}
 
 	void Renderer::Flush()
 	{
-		if (s_RenderData.QuadIndexCount == 0)
-			return; // Nothing to draw
+		if (s_Data.QuadIndexCount == 0) return;
 
-		// Bind textures
-		for (uint32_t i = 0; i < s_RenderData.TextureSlotIndex; i++)
-			s_RenderData.TextureSlots[i]->Bind(i);
+		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; ++i)
+			s_Data.TextureSlots[i]->Bind(i);
 
-		s_RenderAPI->DrawIndexed(s_RenderData.QuadVertexArray, s_RenderData.QuadIndexCount);
+		s_RenderAPI->DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
 	}
 
 	void Renderer::FlushAndReset()
 	{
 		EndRoom();
 
-		s_RenderData.QuadIndexCount = 0;
-		s_RenderData.QuadVertexBufferPtr = s_RenderData.QuadVertexBufferBase;
+		s_Data.QuadIndexCount = 0;
+		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
 
-		s_RenderData.TextureSlotIndex = 1;
+		s_Data.TextureSlotIndex = 1;
 	}
 
-	void Renderer::DrawBasicQuad(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], const Ref<AGI::Texture>& texture)
-	{
-		if (s_RenderData.QuadIndexCount + 6 > RendererData::MaxIndices)
+    void Renderer::DrawBasicQuad(const glm::mat4 &transform, const glm::vec4 &colour, const glm::vec2 texcoords[], const Ref<AGI::Texture> &texture)
+    {
+		if (s_Data.QuadIndexCount + 6 > RendererData::MaxIndices)
 			FlushAndReset();
 
 		float textureIndex = 0.0f;
-
 		if (texture)
 		{ 
-			for (uint32_t i = 1; i < s_RenderData.TextureSlotIndex; i++)
+			for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 			{
-				if (*s_RenderData.TextureSlots[i] == *texture)
+				if (*s_Data.TextureSlots[i] == *texture)
 				{
 					textureIndex = (float)i;
 					break;
@@ -187,25 +160,27 @@ namespace Strype {
 
 			if (textureIndex == 0.0f)
 			{
-				if (s_RenderData.TextureSlotIndex >= RendererData::MaxTextureSlots)
+				if (s_Data.TextureSlotIndex >= RendererData::MaxTextureSlots)
 					FlushAndReset();
 
-				textureIndex = static_cast<float>(s_RenderData.TextureSlotIndex);
-				s_RenderData.TextureSlots[s_RenderData.TextureSlotIndex++] = texture;
+				textureIndex = (float)(s_Data.TextureSlotIndex);
+				s_Data.TextureSlots[s_Data.TextureSlotIndex++] = texture;
 			}
-
 		}
 
 		for (size_t i = 0; i < RendererData::QuadVertexCount; i++)
 		{
-			s_RenderData.QuadVertexBufferPtr->Position = transform * s_RenderData.QuadVertexPositions[i];
-			s_RenderData.QuadVertexBufferPtr->Colour = colour;
-			s_RenderData.QuadVertexBufferPtr->TexCoord = texcoords[i];
-			s_RenderData.QuadVertexBufferPtr->TexIndex = textureIndex;
-			s_RenderData.QuadVertexBufferPtr++;
+			auto base = s_Data.QuadVertexBufferPtr;
+
+			Utils::EnterData<glm::vec3>("a_Position", transform * s_Data.QuadVertexPositions[i]);
+			Utils::EnterData<glm::vec4>("a_Colour", colour);
+			Utils::EnterData<glm::vec2>("a_TexCoord", texcoords[i]);
+			Utils::EnterData<float>("a_TexIndex", textureIndex);
+
+			s_Data.QuadVertexBufferPtr = Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.QuadVertexBuffer->GetLayout().GetStride());
 		}
 
-		s_RenderData.QuadIndexCount += 6;
+		s_Data.QuadIndexCount += 6;
 	}
 
 	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture)

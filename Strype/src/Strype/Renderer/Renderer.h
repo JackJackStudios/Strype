@@ -6,6 +6,33 @@
 
 namespace Strype {
 
+	struct RendererData
+	{
+		static constexpr uint32_t MaxQuads = 20000;
+		static constexpr uint32_t MaxVertices = MaxQuads * 4;
+		static constexpr uint32_t MaxIndices = MaxQuads * 6;
+		static constexpr uint32_t MaxTextureSlots = 32; // TODO: RenderCaps
+		static constexpr size_t QuadVertexCount = 4;
+
+		static constexpr glm::vec2 TextureCoords[] = { { 0.0f,  0.0f }, { 1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		
+		void* QuadVertexBufferBase = nullptr; 
+		void* QuadVertexBufferPtr = nullptr;
+
+		uint32_t QuadIndexCount = 0;
+		std::array<std::shared_ptr<AGI::Texture>, MaxTextureSlots> TextureSlots;
+		uint32_t TextureSlotIndex = 1; // 0 = white texture
+
+		std::shared_ptr<AGI::VertexArray> QuadVertexArray;
+		std::shared_ptr<AGI::VertexBuffer> QuadVertexBuffer;
+		std::shared_ptr<AGI::Shader> TextureShader;
+		std::shared_ptr<AGI::Texture> WhiteTexture;
+
+		glm::vec4 QuadVertexPositions[4];
+		AGI::BufferLayout Layout;
+		std::unordered_map<std::string, uint32_t> EngineAttributes;
+	};
+
 	class Renderer
 	{
 	public:
