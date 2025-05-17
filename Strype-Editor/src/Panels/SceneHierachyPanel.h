@@ -16,6 +16,7 @@ namespace Strype {
 
 		Object GetSelected() const { return m_Selection; }
 		void SetSelected(Object obj) { m_Selection = obj; m_Inspector->SetSelected(&m_Selection); }
+		void RemoveSelected() { m_Selection = Object(); m_Inspector->SetSelected<void>(nullptr); }
 	private:
 		void OnInspectorRender(Object* select);
 	private:

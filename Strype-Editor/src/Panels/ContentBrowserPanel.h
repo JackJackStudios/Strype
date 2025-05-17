@@ -46,6 +46,7 @@ namespace Strype {
 		Ref<AGI::Texture> m_RoomIcon;
 		Ref<AGI::Texture> m_AudioFileIcon;
 		Ref<AGI::Texture> m_SpriteIcon;
+		Ref<AGI::Texture> m_PrefabIcon;
 	};
 
 }

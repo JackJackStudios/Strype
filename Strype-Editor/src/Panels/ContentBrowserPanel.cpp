@@ -35,6 +35,7 @@ namespace Strype {
 		m_RoomIcon = Utils::LoadTexture("assets/icons/RoomIcon.png");
 		m_AudioFileIcon = Utils::LoadTexture("assets/icons/AudioFileIcon.png");
 		m_SpriteIcon = Utils::LoadTexture("assets/icons/SpriteIcon.png");
+		m_PrefabIcon = Utils::LoadTexture("assets/icons/PrefabIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -88,6 +89,15 @@ namespace Strype {
 				if (ImGui::MenuItem("Delete"))
 				{
 					Project::DeleteAsset(node.Handle);
+
+					if (Project::GetAssetType(node.Handle) == AssetType::Prefab)
+					{
+						Ref<Prefab> prefab = Project::GetAsset<Prefab>(node.Handle);
+
+						for (auto& obj : prefab->GetConnectedObjects())
+							obj.RemoveSelf();
+					}
+
 					RefreshAssetTree();
 				}
 
@@ -230,7 +240,7 @@ namespace Strype {
 					RefreshTreeNode(node.Nodes.back());
 				}
 			}
-			else
+			else if (Project::IsAssetLoaded(relativePath))
 			{
 				node.Nodes.emplace_back(entry.path(), &node, Project::GetAssetHandle(relativePath));
 			}
@@ -259,6 +269,10 @@ namespace Strype {
 
 		case AssetType::AudioFile:
 			return m_AudioFileIcon;
+			break;
+		
+		case AssetType::Prefab:
+			return m_PrefabIcon;
 			break;
 
 		case AssetType::None:
