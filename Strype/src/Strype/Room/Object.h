@@ -31,6 +31,22 @@ namespace Strype {
 		}
 
 		template<typename T>
+		void RemoveComponent()
+		{
+			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
+			m_Room->m_Registry.remove<T>(m_Handle);
+		}
+
+		entt::entity RemoveSelf()
+		{
+			entt::entity oldID = m_Handle;
+			m_Room->m_Registry.destroy(m_Handle);
+
+			m_Handle = entt::null;
+			return oldID;
+		}
+
+		template<typename T>
 		bool HasComponent()
 		{
 			return m_Room->m_Registry.all_of<T>(m_Handle);
@@ -46,13 +62,6 @@ namespace Strype {
 		T& EnsureCurrent()
 		{
 			return HasComponent<T>() ? GetComponent<T>() : AddComponent<T>();
-		}
-
-		template<typename T>
-		void RemoveComponent()
-		{
-			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
-			m_Room->m_Registry.remove<T>(m_Handle);
 		}
 
 		static Object Copy(Object src, Ref<Room> targetroom);

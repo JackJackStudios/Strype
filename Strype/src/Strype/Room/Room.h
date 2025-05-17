@@ -6,6 +6,7 @@
 #include "Strype/Renderer/Camera.h"
 
 #include "Strype/Asset/Asset.h"
+#include "Strype/Events/MouseEvent.h"
 
 #include <entt/entt.hpp>
 #include <box2d/box2d.h>
@@ -37,6 +38,7 @@ namespace Strype {
 
 		void OnUpdate(Timestep ts);
 		void OnResize(const glm::vec2& dims);
+		void OnEvent(Event& e);
 
 		void StartRuntime();
 		void StopRuntime();
@@ -85,12 +87,15 @@ namespace Strype {
 			}
 		}
 	private:
+		bool OnMouseScrolled(MouseScrolledEvent& e);
+	private:
 		entt::registry m_Registry;
 		b2WorldId m_PhysicsWorld;
 		RoomState m_RoomState = RoomState::Editor;
 
 		Camera m_Camera;
 		float m_CameraSpeed = 5.0f;
+		float m_ZoomLevel = 1.0f;
 
 		float m_Gravity = 10.0f;
 		uint16_t m_PhysicsSubsteps = 4;

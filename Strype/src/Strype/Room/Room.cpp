@@ -18,6 +18,23 @@ namespace Strype {
 	{
 	}
 
+	void Room::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+
+		if (m_RoomState == RoomState::Editor)
+			dispatcher.Dispatch<MouseScrolledEvent>(STY_BIND_EVENT_FN(Room::OnMouseScrolled));
+	}
+
+	bool Room::OnMouseScrolled(MouseScrolledEvent& e)
+	{
+		m_ZoomLevel -= e.GetYOffset() * 0.25f;
+		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
+		m_Camera.SetZoomLevel(m_ZoomLevel);
+		
+		return true;
+	}
+
 	void Room::OnUpdate(Timestep ts)
 	{
 		Renderer::BeginRoom(m_Camera);

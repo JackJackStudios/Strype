@@ -94,7 +94,7 @@ namespace Strype {
 			YAML::Node prefab = obj["PrefabComponent"];
 			const std::filesystem::path& path = prefab["PrefabPath"].as<std::filesystem::path>();
 
-			if (!path.empty())
+			if (std::filesystem::exists(Project::GetProjectDirectory() / path))
 			{
 				AssetHandle handle = Project::ImportAsset(path);
 				Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), room);
@@ -111,6 +111,10 @@ namespace Strype {
 					tc.Scale = transform["Scale"].as<glm::vec2>();
 					tc.Rotation = transform["Rotation"].as<float>();
 				}
+			}
+			else
+			{
+				STY_CORE_WARN("Could not find specifed path: \"{}\" ", path.string());
 			}
 		}
 	

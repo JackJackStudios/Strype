@@ -17,13 +17,6 @@ namespace Strype {
 		{
 			return (uint8_t*)origin + shift;
 		}
-
-		template<typename T>
-		static void EnterData(const std::string& attr, const T& value)
-		{
-			std::memcpy(Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.AttributeCache[attr].Offset), &value, s_Data.AttributeCache[attr].Size);
-		}
-
 	};
 
 	static void OnAGIMessage(std::string_view message, AGI::LogLevel level)
@@ -172,35 +165,19 @@ namespace Strype {
 		{
 			auto base = s_Data.QuadVertexBufferPtr;
 
-			Utils::EnterData("a_Position", transform * s_Data.QuadVertexPositions[i]);
-			Utils::EnterData("a_Colour", colour);
-			Utils::EnterData("a_TexCoord", texcoords[i]);
-			Utils::EnterData("a_TexIndex", textureIndex);
+			SubmitAttribute("a_Position", transform * s_Data.QuadVertexPositions[i]);
+			SubmitAttribute("a_Colour", colour);
+			SubmitAttribute("a_TexCoord", texcoords[i]);
+			SubmitAttribute("a_TexIndex", textureIndex);
 
 			for (auto& [name, value] : s_Data.UserAttributes)
-				Utils::EnterData(name, value);
+				std::memcpy(Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.AttributeCache[name].Offset), &value, s_Data.AttributeCache[name].Size);
 
 			s_Data.QuadVertexBufferPtr = Utils::ShiftPtr(s_Data.QuadVertexBufferPtr, s_Data.QuadVertexBuffer->GetLayout().GetStride());
 		}
 
 		s_Data.QuadIndexCount += 6;
-	}
-
-	void Renderer::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
-		DrawBasicQuad(transform, colour, RendererData::TextureCoords, texture);
-	}
-
-	void Renderer::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
-		DrawBasicQuad(transform, colour, RendererData::TextureCoords, texture);
+		s_Data.UserAttributes.clear();
 	}
 
     void Renderer::SubmitAttribute(const std::string& name, const std::any& value)

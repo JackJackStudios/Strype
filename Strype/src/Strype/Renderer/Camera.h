@@ -10,6 +10,7 @@ namespace Strype {
 		Camera(const glm::vec2& size);
 
 		void SetProjection(const glm::vec2& size);
+		void SetZoomLevel(float zoom);
 
 		void UpdateMatrix();
 
