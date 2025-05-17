@@ -27,7 +27,23 @@ namespace Strype {
 
 		bool DockspaceEnabled;
 		bool ImGuizmoEnabled;
+		bool ImGuiEnabled;
+		
 		int StartupFrames = 10;
+	};
+
+	struct ApplicationArguments
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int index) const
+		{
+			if (index >= Count && index < 0)
+				return "";
+				
+			return Args[index];
+		}
 	};
 
 	class Application
@@ -37,6 +53,7 @@ namespace Strype {
 		virtual ~Application();
 
 		Window& GetWindow() { return *m_Window; }
+		ApplicationArguments& GetArgs() { return m_Arguments; }
 
 		void Close();
 
@@ -51,12 +68,14 @@ namespace Strype {
 		void PushOverlay(Layer* layer);
 	private:
 		void Run();
+		void SetArgs(ApplicationArguments args) { m_Arguments = args; }
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		AppConfig m_Config;
+		ApplicationArguments m_Arguments;
 
 		bool m_Running = true;
 		bool m_Minimized = false;

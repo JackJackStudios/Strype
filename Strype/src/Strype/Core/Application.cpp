@@ -32,8 +32,8 @@ namespace Strype {
 
 		ScriptEngine::Initialize();
 
-		m_ImGuiLayer = new ImGuiLayer(m_Config.DockspaceEnabled);
-		PushOverlay(m_ImGuiLayer);
+		if (m_Config.ImGuiEnabled)
+			m_ImGuiLayer = new ImGuiLayer(m_Config.DockspaceEnabled);
 	}
 
 	Application::~Application()
@@ -91,12 +91,15 @@ namespace Strype {
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate(timestep);
 
-			m_ImGuiLayer->Begin();
+			if (m_Config.ImGuiEnabled)
 			{
+				m_ImGuiLayer->Begin();
+
 				for (Layer* layer : m_LayerStack)
 					layer->OnImGuiRender();
+					
+				m_ImGuiLayer->End();
 			}
-			m_ImGuiLayer->End();
 			
 			m_Window->OnUpdate();
 			Input::Update();
