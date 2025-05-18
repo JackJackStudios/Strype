@@ -24,11 +24,11 @@ namespace Strype {
 		std::string ShaderPath;
 
 		AGI::BufferLayout RendererLayout;
+		WindowProps WindowProps;
 
-		bool DockspaceEnabled;
-		bool ImGuizmoEnabled;
-		bool ImGuiEnabled;
-		
+		bool DockspaceEnabled = false;
+		bool ImGuizmoEnabled = false;
+		bool ImGuiEnabled = true;
 		int StartupFrames = 10;
 	};
 

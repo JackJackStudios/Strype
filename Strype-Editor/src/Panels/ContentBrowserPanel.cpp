@@ -1,10 +1,33 @@
 #include "ContentBrowserPanel.h"
 
+#include "InspectorPanel.h"
+
 #include <stb_image.h>
 
 namespace Strype {
 
 	namespace Utils {
+
+		template<typename UIFunction>
+		static void DropdownMenu(const std::string& name, UIFunction uiFunction)
+		{
+			const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
+				ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
+				ImGuiTreeNodeFlags_FramePadding;
+
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
+			float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
+			bool open = ImGui::TreeNodeEx(name.c_str(), treeNodeFlags, "%s", name.c_str());
+			ImGui::PopStyleVar();
+
+			if (open)
+			{
+				uiFunction();
+				ImGui::TreePop();
+			}
+		}
 
 		static int NumOfFileOrDirs(const std::filesystem::path& path)
 		{
@@ -209,6 +232,8 @@ namespace Strype {
 
 		ImGui::Columns(1);
 		ImGui::End();
+
+		m_Inspector->AddType<Room>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnInspectorRender));
 	}
 
 	void ContentBrowserPanel::RefreshAssetTree()
@@ -249,6 +274,25 @@ namespace Strype {
 		std::stable_partition(node.Nodes.begin(), node.Nodes.end(), [this](const TreeNode& node) 
 		{
 			return std::filesystem::is_directory(Project::GetProjectDirectory() / node.Path);
+		});
+	}
+
+	void ContentBrowserPanel::OnInspectorRender(Room* select)
+	{
+		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		ImGui::Image(m_RoomIcon->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+
+		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		ImGui::Button(Project::GetFilePath(select->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
+
+		Utils::DropdownMenu("Properties", [&]() {
+			ImGui::Columns(2, 0, false);
+
+			ImGui::DragScalar("Width", ImGuiDataType_U64, &select->m_Width);
+			ImGui::NextColumn();
+
+			ImGui::DragScalar("Height", ImGuiDataType_U64, &select->m_Height);
+			ImGui::NextColumn();
 		});
 	}
 

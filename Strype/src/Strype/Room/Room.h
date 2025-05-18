@@ -50,33 +50,6 @@ namespace Strype {
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 
-		template<typename T, typename... Args>
-		T& AddComponent(entt::entity handle, Args&&... args)
-		{
-			STY_CORE_VERIFY(!HasComponent<T>(), "Object already has component!");
-			return m_Registry.emplace<T>(handle, std::forward<Args>(args)...);
-		}
-
-		template<typename T>
-		T& GetComponent(entt::entity handle)
-		{
-			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
-			return m_Registry.get<T>(handle);
-		}
-
-		template<typename T>
-		bool HasComponent(entt::entity handle)
-		{
-			return m_Registry.all_of<T>(handle);
-		}
-
-		template<typename T>
-		void RemoveComponent(entt::entity handle)
-		{
-			STY_CORE_VERIFY(HasComponent<T>(), "Object does not have component!");
-			m_Registry.remove<T>(handle);
-		}
-
 		template<typename TComponent>
 		static void CopyComponent(entt::entity src, entt::registry& srcreg, entt::entity dest, entt::registry& destreg)
 		{
@@ -89,6 +62,7 @@ namespace Strype {
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 	private:
+		uint64_t m_Width = 720, m_Height = 360;
 		entt::registry m_Registry;
 		b2WorldId m_PhysicsWorld;
 		RoomState m_RoomState = RoomState::Editor;
@@ -104,6 +78,7 @@ namespace Strype {
 		friend class Prefab;
 		friend class SceneHierachyPanel;
 		friend class RoomSerializer;
+		friend class ContentBrowserPanel;
 	};
 
 	static Ref<Room> s_PrefabRoom = CreateRef<Room>();

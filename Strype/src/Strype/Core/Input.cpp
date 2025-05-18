@@ -23,7 +23,7 @@ namespace Strype {
 			if (data.State == InputState::Held && !Input::IsKeyOn(key))
 			{
 				KeyReleasedEvent event(key);
-				s_EventCallback(event);
+				Application::Get().OnEvent(event);
 
 				UpdateKeyState(key, InputState::Released);
 			}
@@ -31,7 +31,7 @@ namespace Strype {
 			if (data.State == InputState::None && Input::IsKeyOn(key))
 			{
 				KeyPressedEvent event(key);
-				s_EventCallback(event);
+				Application::Get().OnEvent(event);
 
 				UpdateKeyState(key, InputState::Pressed);
 			}
@@ -39,7 +39,7 @@ namespace Strype {
 			if (data.State == InputState::Held)
 			{
 				KeyHeldEvent event(key);
-				s_EventCallback(event);
+				Application::Get().OnEvent(event);
 			}
 		}
 
@@ -54,7 +54,7 @@ namespace Strype {
 			if (data.State == InputState::Held && !Input::IsMouseButtonOn(button))
 			{
 				MouseButtonReleasedEvent event(button);
-				s_EventCallback(event);
+				Application::Get().OnEvent(event);
 		
 				UpdateMouseState(button, InputState::Released);
 			}
@@ -62,7 +62,7 @@ namespace Strype {
 			if (data.State == InputState::None && Input::IsMouseButtonOn(button))
 			{
 				MouseButtonPressedEvent event(button);
-				s_EventCallback(event);
+				Application::Get().OnEvent(event);
 		
 				UpdateMouseState(button, InputState::Pressed);
 			}
@@ -70,7 +70,7 @@ namespace Strype {
 			if (data.State == InputState::Held)
 			{
 				MouseButtonHeldEvent event(button);
-				s_EventCallback(event);
+				Application::Get().OnEvent(event);
 			}
 		}
 	}

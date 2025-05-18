@@ -42,7 +42,6 @@ namespace Strype {
 		glm::vec2 GetPosition() const;
 
 		// Window attributes
-		inline void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
 		void SetVSync(bool enabled);
 		bool IsVSync() const;
 		void SetVisable(bool enabled);
@@ -53,17 +52,7 @@ namespace Strype {
 		static inline Scope<Window> Create(const WindowProps& props = WindowProps()) { return CreateScope<Window>(props); }
 	private:
 		GLFWwindow* m_Window;
-
-		struct WindowData
-		{
-			std::string Title;
-			unsigned int Width, Height;
-			bool VSync;
-
-			EventCallbackFn EventCallback;
-		};
-
-		WindowData m_Data;
+		WindowProps m_Data;
 	};
 
 }

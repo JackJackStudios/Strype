@@ -55,11 +55,8 @@ namespace Strype {
 
 		static void UpdateKeyState(KeyCode key, InputState newState);
 		static void UpdateMouseState(MouseCode key, InputState newState);
-
-		static inline void SetEventCallback(const EventCallbackFn& callback) { s_EventCallback = callback; };
 	private:
 		inline static std::unordered_map<KeyCode, KeyData> s_KeyStates;
 		inline static std::unordered_map<MouseCode, MouseData> s_MouseStates;
-		inline static EventCallbackFn s_EventCallback;
 	};
 }

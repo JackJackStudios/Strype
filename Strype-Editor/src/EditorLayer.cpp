@@ -24,6 +24,7 @@ namespace Strype {
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata)
 		{
 			OpenRoom(metadata.FilePath);
+			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Room>(Project::GetAssetHandle(metadata.FilePath)).get());
 		});
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Prefab, [this](const AssetMetadata& metadata)
@@ -68,13 +69,17 @@ namespace Strype {
 		
 		m_Framebuffer->ClearAttachment(1, -1);
 		m_Room->OnUpdate(ts);
-
+		
 		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			// HACK: The object ID is int but should be int
+			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY) >> 29;
+			Object obj = Object((entt::entity)pixelData, m_Room.get());
 
-			if (pixelData != -1)
-				m_SceneHierachyPanel->SetSelected(Object((entt::entity)pixelData, m_Room.get()));
+			if (pixelData != -1 && obj.IsValid())
+				m_SceneHierachyPanel->SetSelected(obj);
+			else
+				m_SceneHierachyPanel->RemoveSelected();
 		}
 
 		m_Framebuffer->Unbind();
@@ -94,7 +99,6 @@ namespace Strype {
 		auto viewportOffset = ImGui::GetWindowPos();
 		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
 		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-		
 		ImVec2 viewportSize = { m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y };
 
 		ImGui::Image(m_Framebuffer->GetAttachmentID(), viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
@@ -197,7 +201,6 @@ namespace Strype {
 
 	void EditorLayer::OnInspectorRender(Prefab* prefab)
 	{
-		bool changed = false;
 		auto& scriptEngine = Project::GetScriptEngine();
 
 		if (SpriteRenderer* spr = prefab->TryGetComponent<SpriteRenderer>())
@@ -206,39 +209,37 @@ namespace Strype {
 			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr->Texture)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
 
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Button(Project::GetFilePath(spr->Texture).filename().string().c_str(), ImVec2(128.0f, 0));
-
-			if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-				prefab->RemoveComponent<SpriteRenderer>();
-		}
-		else
-		{
-			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::SetCursorPosY(128.0f);
-
-			ImGui::Button("<empty>", ImVec2(128.0f, 0));
-		}
-
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-			{
-				AssetHandle handle = *(AssetHandle*)payload->Data;
-
-				if (Project::GetAssetType(handle) == AssetType::Sprite)
-					prefab->EnsureCurrent<SpriteRenderer>().Texture = handle;
-				else
-					STY_CORE_WARN("Wrong asset type!");
-			}
-			ImGui::EndDragDropTarget();
+			ImGui::Button(Project::GetFilePath(prefab->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
 		}
 
 		DropdownMenu("Properties", [&]() 
 		{
-			ImGui::Columns(2, nullptr, false);
-
 			bool solid = prefab->HasComponent<ColliderComponent>();
 			bool physics = prefab->HasComponent<RigidBodyComponent>();
+
+			if (SpriteRenderer* spr = prefab->TryGetComponent<SpriteRenderer>())
+			{
+				ImGui::Button(Project::GetFilePath(spr->Texture).filename().string().c_str());
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						AssetHandle handle = *(AssetHandle*)payload->Data;
+
+						if (Project::GetAssetType(handle) == AssetType::Sprite)
+							prefab->EnsureCurrent<SpriteRenderer>().Texture = handle;
+						else
+							STY_CORE_WARN("Wrong asset type!");
+					}
+					ImGui::EndDragDropTarget();
+				}
+
+				ImGui::SameLine();
+				ImGui::Text("Sprite");
+			}
+
+			ImGui::Columns(2, nullptr, false);
 
 			if (ImGui::Checkbox("Solid", &solid))
 			{
@@ -299,19 +300,12 @@ namespace Strype {
 				}
 			}
 		});
-
-		if (changed)
-		{
-			for (const auto& obj : prefab->GetConnectedObjects())
-			{
-				Object::CopyInto(prefab->GetObject(), obj);
-			}
-		}
 	}
 
-	void EditorLayer::OnEvent(Event& e)
+    void EditorLayer::OnEvent(Event& e)
 	{
 		m_PanelManager.OnEvent(e);
+		m_Room->OnEvent(e);
 	}
 
 	void EditorLayer::OnImGuiRender()

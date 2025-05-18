@@ -21,13 +21,12 @@ namespace Strype {
 
 		if (!m_Config.WorkingDir.empty())
 			std::filesystem::current_path(m_Config.WorkingDir);
+
 		m_StartupFrames = m_Config.StartupFrames;
 
-		m_Window = Window::Create();
-		m_Window->SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
-		m_Window->SetTitle(config.AppName + " - " + STY_VERSION_LONG);
+		m_Window = Window::Create(config.WindowProps);
+		m_Window->SetTitle(config.WindowProps.Title != WindowProps().Title ? config.WindowProps.Title : config.AppName);
 
-		Input::SetEventCallback(STY_BIND_EVENT_FN(Application::OnEvent));
 		Audio::Init();
 
 		ScriptEngine::Initialize();

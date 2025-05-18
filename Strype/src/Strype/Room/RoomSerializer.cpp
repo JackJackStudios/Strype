@@ -50,6 +50,10 @@ namespace Strype {
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		out << YAML::Key << "Room" << YAML::Value << YAML::BeginMap;
+
+		out << YAML::Key << "Width" << YAML::Value << room->m_Width;
+		out << YAML::Key << "Height" << YAML::Value << room->m_Height;
+
 		out << YAML::Key << "Objects" << YAML::Value << YAML::BeginSeq;
 
 		auto view = room->m_Registry.view<entt::entity>();
@@ -79,7 +83,15 @@ namespace Strype {
 		YAML::Node data = YAML::Load(stream.str())["Room"];
 
 		STY_CORE_VERIFY(data, "Could not load room")
-		STY_CORE_VERIFY(data["Objects"], "Could not load room")
+		STY_CORE_VERIFY(data["Objects"], "Could not load room");
+
+		YAML::Node width = data["Width"];
+		YAML::Node height = data["Height"];
+		if (width && height)
+		{
+			room->m_Width = width.as<uint64_t>();
+			room->m_Height = height.as<uint64_t>();
+		}
 
 		room->Clear();
 

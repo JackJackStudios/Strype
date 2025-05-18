@@ -1,6 +1,8 @@
 #include "stypch.h"
 #include "Strype/Core/Window.h"
 
+#include "Strype/Core/Application.h"
+
 #include "Strype/Events/ApplicationEvent.h"
 #include "Strype/Events/MouseEvent.h"
 #include "Strype/Events/KeyEvent.h"
@@ -24,12 +26,8 @@ namespace Strype
 	}
 
 	Window::Window(const WindowProps& props)
+		: m_Data(props)
 	{
-		m_Data.Title = props.Title;
-		m_Data.Width = props.Width;
-		m_Data.Height = props.Height;
-		m_Data.VSync = props.VSync;
-
 		STY_CORE_INFO("Creating window \"{}\" ({}, {})", props.Title, props.Width, props.Height);
 
 		if (s_GLFWWindowCount == 0)
@@ -53,47 +51,47 @@ namespace Strype
 		// Set GLFW callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
-			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
 			data.Width = width;
 			data.Height = height;
 
 			WindowResizeEvent event(width, height);
-			data.EventCallback(event);
+			Application::Get().OnEvent(event);
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
 		{
-			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
 			WindowCloseEvent event;
-			data.EventCallback(event);
+			Application::Get().OnEvent(event);
 		});
 
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 		{
-			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
 
 			MouseScrolledEvent event((float)xOffset, (float)yOffset);
-			data.EventCallback(event);
+			Application::Get().OnEvent(event);
 		});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
 		{
-			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
 
 			MouseMovedEvent event((float)xPos, (float)yPos);
-			data.EventCallback(event);
+			Application::Get().OnEvent(event);
 		});
 
 		glfwSetDropCallback(m_Window, [](GLFWwindow* window, int pathCount, const char* paths[])
 		{
-			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+			WindowProps& data = *(WindowProps*)glfwGetWindowUserPointer(window);
 
 			std::vector<std::filesystem::path> filepaths(pathCount);
 			for (int i = 0; i < pathCount; i++)
 				filepaths[i] = paths[i];
 
 			WindowDropEvent event(std::move(filepaths));
-			data.EventCallback(event);
+			Application::Get().OnEvent(event);
 		});
 	}
 
@@ -148,7 +146,8 @@ namespace Strype
 
 	void Window::SetTitle(const std::string& title)
 	{
-		glfwSetWindowTitle(m_Window, title.c_str());
+		glfwSetWindowTitle(m_Window, (title + " - " + STY_VERSION_LONG).c_str());
+		m_Data.Title = title;
 	}
 
 }

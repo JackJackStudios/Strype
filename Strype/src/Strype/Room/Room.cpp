@@ -40,7 +40,7 @@ namespace Strype {
 		Renderer::BeginRoom(m_Camera);
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
-			Renderer::SubmitAttribute("a_ObjectID", (uint32_t)entity);
+			Renderer::SubmitAttribute("a_ObjectID", (int)entity);
 
 			if (Project::IsAssetLoaded(sprite.Texture))
 			{

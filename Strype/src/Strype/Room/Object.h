@@ -72,7 +72,9 @@ namespace Strype {
 
 		bool operator!=(const entt::entity& other) { return m_Handle != other; }
 		bool operator==(const entt::entity& other) { return m_Handle == other; }
-		operator bool() const { return m_Handle != entt::null; }
+
+		bool IsValid() const { return m_Handle != entt::null && m_Room->m_Registry.valid(m_Handle); }
+		operator bool() const { return IsValid(); }
 	private:
 		entt::entity m_Handle{ entt::null };
 		Room* m_Room = nullptr;

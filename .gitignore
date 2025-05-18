@@ -9,13 +9,15 @@ Intermediates/
 
 x64/
 x32/
-
-*.log
+out/
 
 .vs/
+.vscode/
+
 **.sln
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
 **.csproj
-.vscode
+
+*.log

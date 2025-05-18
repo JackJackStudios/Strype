@@ -163,8 +163,6 @@ namespace Strype {
 
 		for (size_t i = 0; i < RendererData::QuadVertexCount; i++)
 		{
-			auto base = s_Data.QuadVertexBufferPtr;
-
 			SubmitAttribute("a_Position", transform * s_Data.QuadVertexPositions[i]);
 			SubmitAttribute("a_Colour", colour);
 			SubmitAttribute("a_TexCoord", texcoords[i]);
