@@ -16,12 +16,14 @@ namespace Strype {
 		unsigned int Width;
 		unsigned int Height;
 		bool VSync;
+		bool Maximise;
 
 		WindowProps(const std::string& title = "Strype Engine",
 			unsigned int width = 1280,
 			unsigned int height = 720,
-			bool vsync = true)
-			: Title(title), Width(width), Height(height), VSync(vsync)
+			bool vsync = true,
+			bool maximise = false)
+			: Title(title), Width(width), Height(height), VSync(vsync), Maximise(maximise)
 		{
 		}
 	};

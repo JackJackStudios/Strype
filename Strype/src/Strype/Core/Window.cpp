@@ -39,6 +39,7 @@ namespace Strype
 		}
 
 		glfwWindowHint(GLFW_VISIBLE, false);
+		glfwWindowHint(GLFW_MAXIMIZED, props.Maximise);
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		++s_GLFWWindowCount;
 

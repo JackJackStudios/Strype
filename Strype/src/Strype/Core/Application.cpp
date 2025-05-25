@@ -46,16 +46,6 @@ namespace Strype {
 		Audio::Shutdown();
 	}
 
-	void Application::PushLayer(Layer* layer)
-	{
-		m_LayerStack.PushLayer(layer);
-	}
-
-	void Application::PushOverlay(Layer* layer)
-	{
-		m_LayerStack.PushOverlay(layer);
-	}
-
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);

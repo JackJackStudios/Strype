@@ -30,6 +30,17 @@ namespace Strype {
 		bool ImGuizmoEnabled = false;
 		bool ImGuiEnabled = true;
 		int StartupFrames = 10;
+
+		AppConfig()
+		{
+			ShaderPath = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\assets\\BaseShader.glsl";
+			RendererLayout = {
+				{ AGI::ShaderDataType::Float3, "a_Position" },
+				{ AGI::ShaderDataType::Float4, "a_Colour" },
+				{ AGI::ShaderDataType::Float2, "a_TexCoord" },
+				{ AGI::ShaderDataType::Float, "a_TexIndex" },
+			};
+		}
 	};
 
 	struct ApplicationArguments
@@ -64,8 +75,17 @@ namespace Strype {
 
 		void OnEvent(Event& e);
 
-		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* layer);
+		template<typename T, typename... Args>
+		void PushLayer(Args&&... args)
+		{
+			m_LayerStack.PushLayer(new T(std::forward<Args>(args)...));
+		}
+
+		template<typename T, typename... Args>
+		void PushOverlay(Args&&... args)
+		{
+			m_LayerStack.PushOverlay(new T(std::forward<Args>(args)...));
+		}
 	private:
 		void Run();
 		void SetArgs(ApplicationArguments args) { m_Arguments = args; }
@@ -88,6 +108,6 @@ namespace Strype {
 		friend int ::main(int argc, char** argv);
 	};
 
-	Application* CreateApplication();
+	Application* CreateApplication(ApplicationArguments args);
 
 }
