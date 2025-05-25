@@ -23,75 +23,76 @@ message(STATUS "Library directory: ${STRYPE_LIBRARIES}")
 add_subdirectory(Strype)
 add_subdirectory(Strype-Editor)
 add_subdirectory(Strype-Runtime)
+add_subdirectory(Strype-ScriptCore)
 
 # Libraries
 FetchContent_Declare(
-  AGI
-  GIT_REPOSITORY https://github.com/JackKnox/agi.git
-  GIT_TAG        main
+    AGI
+    GIT_REPOSITORY https://github.com/JackKnox/agi.git
+    GIT_TAG        main
 )
 FetchContent_MakeAvailable(AGI)
 
 FetchContent_Declare(
-  box2d
-  GIT_REPOSITORY https://github.com/erincatto/box2d.git
-  GIT_TAG        v3.1.0
+    box2d
+    GIT_REPOSITORY https://github.com/erincatto/box2d.git
+    GIT_TAG        v3.1.0
 )
 FetchContent_MakeAvailable(box2d)
 
 FetchContent_Declare(
-  EnTT
-  GIT_REPOSITORY https://github.com/skypjack/entt.git
-  GIT_TAG        v3.15.0
+    EnTT
+    GIT_REPOSITORY https://github.com/skypjack/entt.git
+    GIT_TAG        v3.15.0
 )
 FetchContent_MakeAvailable(EnTT)
 
 FetchContent_Declare(
-  GLFW
-  GIT_REPOSITORY https://github.com/glfw/glfw.git
-  GIT_TAG        3.4
+    GLFW
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG        3.4
 )
 FetchContent_MakeAvailable(GLFW)
 
 FetchContent_Declare(
-  glm
-  GIT_REPOSITORY https://github.com/icaven/glm.git
-  GIT_TAG        master
+    glm
+    GIT_REPOSITORY https://github.com/icaven/glm.git
+    GIT_TAG        master
 )
 FetchContent_MakeAvailable(glm)
 
 FetchContent_Declare(
-  YAML_CPP
-  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-  GIT_TAG        master
+    YAML_CPP
+    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+    GIT_TAG        master
 )
 FetchContent_MakeAvailable(YAML_CPP)
 
 FetchContent_Declare(
-  magic_enum
-  GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
-  GIT_TAG        master
+    magic_enum
+    GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
+    GIT_TAG        master
 )
 FetchContent_MakeAvailable(magic_enum)
 
 FetchContent_Declare(
-  spdlog
-  GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG        v1.15.2
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG        v1.15.2
 )
 FetchContent_MakeAvailable(spdlog)
 
 FetchContent_Declare(
-  Coral
-  GIT_REPOSITORY https://github.com/JackKnox/Coral.git
-  GIT_TAG        main
+    Coral
+    GIT_REPOSITORY https://github.com/JackKnox/Coral.git
+    GIT_TAG        main
 )
 FetchContent_MakeAvailable(Coral)
 
 FetchContent_Declare(
-  ImGui
-  GIT_REPOSITORY https://github.com/JackKnox/imgui.git
-  GIT_TAG        docking
+    ImGui
+    GIT_REPOSITORY https://github.com/JackKnox/imgui.git
+    GIT_TAG        docking
 )
 FetchContent_MakeAvailable(ImGui)
 

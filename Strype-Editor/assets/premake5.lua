@@ -16,18 +16,13 @@ workspace "{0}"
 		targetdir ("%{prj.location}/strype/Binaries")
 		objdir ("%{prj.location}/strype/Intermediates")
 
-		propertytags {
-			{ "AppendTargetFrameworkToOutputPath", "false" },
-			{ "Nullable", "enable" },
-		}
-
 		files  {
 			"**.cs", 
 		}
 
 		links {
-			"Strype-ScriptCore",
-			"Coral.Managed",
+			"%{StrypeDirectory}/Strype-Editor/DotNet/Strype-ScriptCore.dll",
+			"%{StrypeDirectory}/Strype-Editor/DotNet/Coral.Managed.dll",
 		}	
 
 		filter "configurations:Debug"

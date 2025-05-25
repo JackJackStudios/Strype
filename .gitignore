@@ -21,3 +21,5 @@ out/
 **.csproj
 
 *.log
+Strype-ScriptCore/coral-src
+Strype/master/Strype-Runtime.exe

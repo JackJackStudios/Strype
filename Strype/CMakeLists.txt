@@ -17,9 +17,11 @@ target_link_libraries(Strype PUBLIC
     glfw
     ImGui
     ImGuizmo
-    Coral
+    Coral.Native
     EnTT::EnTT
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum
 )
+
+add_dependencies(Strype Strype-ScriptCore)

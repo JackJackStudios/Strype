@@ -1,7 +1,16 @@
 StrypeDirectory = os.getenv("STRYPE_DIR")
 
-include (path.join(StrypeDirectory, "Libraries", "Coral", "Premake", "CSExtensions.lua"))
-include (path.join(StrypeDirectory, "Libraries", "Coral", "Coral.Managed"))
+workspace "Strype-ScriptCore"
+	architecture "universal"
+	startproject "Strype-ScriptCore"
+
+	configurations {
+		"Debug",
+		"Release",
+	}
+
+include "%{StrypeDirectory}/Strype-ScriptCore/coral-src/Premake/CSExtensions.lua"
+include "%{StrypeDirectory}/Strype-ScriptCore/coral-src/Coral.Managed"
 
 project "Strype-ScriptCore"
 	kind "SharedLib"
@@ -13,11 +22,6 @@ project "Strype-ScriptCore"
 
 	links {
 		"Coral.Managed"
-	}
-
-	propertytags {
-		{ "AppendTargetFrameworkToOutputPath", "false" },
-		{ "Nullable", "enable" },
 	}
 
 	files {
