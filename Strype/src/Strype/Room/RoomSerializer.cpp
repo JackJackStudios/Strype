@@ -53,6 +53,7 @@ namespace Strype {
 
 		out << YAML::Key << "Width" << YAML::Value << room->m_Width;
 		out << YAML::Key << "Height" << YAML::Value << room->m_Height;
+		out << YAML::Key << "BackgroundColour" << YAML::Value << room->m_BackgroundColour;
 
 		out << YAML::Key << "Objects" << YAML::Value << YAML::BeginSeq;
 
@@ -92,6 +93,8 @@ namespace Strype {
 			room->m_Width = width.as<uint64_t>();
 			room->m_Height = height.as<uint64_t>();
 		}
+
+		room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
 
 		room->Clear();
 

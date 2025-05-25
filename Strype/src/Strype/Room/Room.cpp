@@ -10,6 +10,7 @@
 #include "Strype/Core/Input.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Strype {
 
@@ -39,17 +40,18 @@ namespace Strype {
 	{
 		Renderer::BeginRoom(m_Camera);
 
+		Renderer::DrawQuad({ 0.0f, 0.0f }, { m_Width, m_Height }, glm::make_vec4(m_BackgroundColour));
+
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
 			Renderer::SubmitAttribute("a_ObjectID", (int)entity);
 
-			if (Project::IsAssetLoaded(sprite.Texture))
-			{
-				Ref<Sprite> spr = Project::GetAsset<Sprite>(sprite.Texture);
-
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour, spr->GetTexture());
-			}
-			else
-				Renderer::DrawRotatedQuad(trans.Position, trans.Scale, trans.Rotation, sprite.Colour);
+			Renderer::DrawRotatedQuad(
+				trans.Position, 
+				trans.Scale, 
+				trans.Rotation, 
+				sprite.Colour, 
+				Project::IsAssetLoaded(sprite.Texture) ? Project::GetAsset<Sprite>(sprite.Texture)->GetTexture() : nullptr
+			);
 		});
 
 		if (m_RoomState == RoomState::Editor)
@@ -187,6 +189,7 @@ namespace Strype {
 	void Room::CopyTo(Ref<Room>& room)
 	{
 		room->Handle = Handle;
+		room->m_BackgroundColour = m_BackgroundColour;
 
 		for (auto entity : m_Registry.storage<entt::entity>())
 		{

@@ -63,8 +63,9 @@ namespace Strype {
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 	private:
 		uint64_t m_Width = 720, m_Height = 360;
+		glm::vec3 m_BackgroundColour;
 		entt::registry m_Registry;
-		b2WorldId m_PhysicsWorld;
+		b2WorldId m_PhysicsWorld = {0};
 		RoomState m_RoomState = RoomState::Editor;
 
 		Camera m_Camera;
