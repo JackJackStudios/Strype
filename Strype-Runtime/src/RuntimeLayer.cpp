@@ -2,9 +2,10 @@
 
 namespace Strype {
 
-	RuntimeLayer::RuntimeLayer()
+	RuntimeLayer::RuntimeLayer(const std::filesystem::path& path)
 	{
-		OpenProject(FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0"));
+		//FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0")
+		OpenProject(path);
 		m_Room->StartRuntime();
 	}
 

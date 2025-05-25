@@ -5,32 +5,15 @@
 
 namespace Strype {
 
-	class Editor : public Application
-	{
-	public:
-		Editor(const AppConfig& config)
-			: Application(config)
-		{
-			PushLayer(new EditorLayer());
-		}
-
-		~Editor()
-		{
-
-		}
-
-	};
-
-	Application* CreateApplication()
+	Application* CreateApplication(ApplicationArguments args)
 	{
 		AppConfig config;
 		config.AppName = "Strype-Editor";
-		config.ShaderPath = "assets\\BaseShader.glsl";
 		config.WorkingDir = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\";
-		config.StartupFrames = 10;
-		config.ImGuiEnabled = true;
 		config.DockspaceEnabled = true;
 		config.ImGuizmoEnabled = true;
+
+		config.WindowProps.Maximise = true;
  
 		config.RendererLayout = {
 			{ AGI::ShaderDataType::Float3, "a_Position" },
@@ -40,7 +23,10 @@ namespace Strype {
 			{ AGI::ShaderDataType::Int,    "a_ObjectID" },
 		};
 
-		return new Editor(config);
+		auto* app = new Application(config);
+		app->PushLayer<EditorLayer>();
+
+		return app;
 	}
 
 }

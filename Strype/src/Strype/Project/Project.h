@@ -20,7 +20,7 @@ namespace Strype {
 	};
 
 	// Relative to working directory
-	const std::filesystem::path EMPTY_PROJECT = "EmptyProject/EmptyProject.sproj";
+	const std::filesystem::path EMPTY_PROJECT = "assets/EmptyProject/EmptyProject.sproj";
 
 	//Note: Project is not a Asset because it holds the AssetManager
 	class Project

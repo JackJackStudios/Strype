@@ -36,9 +36,14 @@ namespace Strype {
 		auto& appConfig = Application::Get().GetConfig();
 		s_Data.Layout = appConfig.RendererLayout;
 
-		std::vector<std::string> requiredAttributes = { "a_Position", "a_Colour", "a_TexCoord", "a_TexIndex" };
-		for (const auto& attr : requiredAttributes) 
-			STY_CORE_VERIFY(s_Data.Layout.HasElement(attr), "Missing layout element: {}", attr);
+		for (const auto& attr : s_Data.Layout)
+		{
+			auto it = std::find(RendererData::RequiredAttrs.begin(), RendererData::RequiredAttrs.end(), attr.Name);
+			if (it != RendererData::RequiredAttrs.end())
+				STY_CORE_VERIFY(s_Data.Layout.HasElement(std::string(*it)), "Missing layout element: {}", *it);
+			
+			s_Data.AttributeCache[attr.Name] = attr;
+		}
 
 		s_RenderAPI = AGI::RenderAPI::Create(
 		{

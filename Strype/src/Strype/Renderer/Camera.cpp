@@ -6,7 +6,7 @@
 namespace Strype {
 
 	Camera::Camera(const glm::vec2& size)
-		: m_ViewMatrix(1.0f)
+		: m_Size(size), m_ViewMatrix(1.0f)
 	{
 		SetProjection(size);
 	}

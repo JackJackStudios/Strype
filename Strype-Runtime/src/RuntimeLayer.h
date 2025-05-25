@@ -11,7 +11,7 @@ namespace Strype {
 	class RuntimeLayer : public Layer
 	{
 	public:
-		RuntimeLayer();
+		RuntimeLayer(const std::filesystem::path& path);
 		~RuntimeLayer();
 
 		void OnUpdate(Timestep ts) override;

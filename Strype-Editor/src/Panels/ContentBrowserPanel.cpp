@@ -3,6 +3,7 @@
 #include "InspectorPanel.h"
 
 #include <stb_image.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Strype {
 
@@ -286,13 +287,16 @@ namespace Strype {
 		ImGui::Button(Project::GetFilePath(select->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
 
 		Utils::DropdownMenu("Properties", [&]() {
-			ImGui::Columns(2, 0, false);
+			ImGui::Columns(2, nullptr, false);
 
 			ImGui::DragScalar("Width", ImGuiDataType_U64, &select->m_Width);
 			ImGui::NextColumn();
-
+			
 			ImGui::DragScalar("Height", ImGuiDataType_U64, &select->m_Height);
 			ImGui::NextColumn();
+
+			ImGui::Columns(1);
+			ImGui::ColorEdit3("Background Colour", glm::value_ptr(select->m_BackgroundColour), ImGuiColorEditFlags_NoInputs);
 		});
 	}
 

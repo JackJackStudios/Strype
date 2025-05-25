@@ -42,7 +42,8 @@ namespace Strype {
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.csproj\" -property:Configuration={} -t:restore,build >nul 2>&1", (filepath / "strype").string(), msBuildPath.string(), name, STY_BUILD_CONFIG_NAME);
+		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.csproj\" -property:Configuration={} -t:restore,build", filepath.string(), msBuildPath.string(), name, STY_BUILD_CONFIG_NAME);
+		STY_CORE_INFO(command);
 		system(command.c_str());
 	}
 

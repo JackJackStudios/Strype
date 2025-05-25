@@ -4,6 +4,7 @@ namespace Strype {
 
 	RuntimePanel::RuntimePanel(Ref<Room>& room)
 	{
+		ScriptEngine::BuildProject(Project::GetActive());
 		m_Room = CreateRef<Room>();
 		
 		AGI::FramebufferSpecification framebufferSpec;

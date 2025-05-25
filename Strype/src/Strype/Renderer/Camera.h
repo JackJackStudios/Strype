@@ -12,6 +12,8 @@ namespace Strype {
 		void SetProjection(const glm::vec2& size);
 		void SetZoomLevel(float zoom);
 
+		glm::vec2 GetSize() const { return m_Size; }
+
 		void UpdateMatrix();
 
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
@@ -22,6 +24,7 @@ namespace Strype {
 		float Rotation = 0.0f;
 	private:
 		float m_AspectRatio;
+		glm::vec2 m_Size;
 
 		glm::mat4 m_ProjectionMatrix;
 		glm::mat4 m_ViewMatrix;
