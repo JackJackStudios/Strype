@@ -17,4 +17,10 @@ namespace Strype {
 		static float GetTime();
 	};
 
+	class PlatformUtils
+	{
+	public:
+		static bool StartProcess(std::string command);
+	};
+
 }

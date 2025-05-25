@@ -82,7 +82,7 @@ namespace Strype {
 		//void NewRoom();
 		void OpenRoom(const std::filesystem::path& path);
 
-		void NewProject();
+		void NewProject(const std::filesystem::path& path = std::filesystem::path());
 		void OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
 		void SaveProject();
 

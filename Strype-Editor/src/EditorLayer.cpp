@@ -14,7 +14,7 @@ namespace Strype {
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
 		m_Framebuffer = AGI::Framebuffer::Create(framebufferSpec);
-
+		
 		//Configure PanelManager
 		m_PanelManager.SetRoomContext(m_Room);
 
@@ -156,17 +156,17 @@ namespace Strype {
 		m_PanelManager.SetRoomContext(m_Room);
 	}
 
-	void EditorLayer::NewProject()
+	void EditorLayer::NewProject(const std::filesystem::path& path)
 	{
-		std::filesystem::path path = FileDialogs::OpenFolder();
-		if (path.empty())
+		std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFolder() : path;
+		if (dialog.empty())
 			return;
 
 		// NOTE: This function will copy a template project into
 		//       the new directory. This is because a Project cannot exist
 		//       without a folder or default room (you must deserialize the project yourself)
-		Project::GenerateNew(path);
-		OpenProject(true, path / (path.filename().string() + ".sproj"));
+		Project::GenerateNew(dialog);
+		//OpenProject(true, path / (path.filename().string() + ".sproj"));
 	}
 
 	void EditorLayer::SaveProject()
@@ -340,12 +340,13 @@ namespace Strype {
 			if (ImGui::BeginMenu("Runtime"))
 			{
 				if (ImGui::MenuItem("Start Runtime", ""))
-					m_RuntimePanel = m_PanelManager.AddPanel<RuntimePanel>(m_Room);
-				
-				if (ImGui::MenuItem("Stop Runtime", ""))
 				{
-					m_PanelManager.RemovePanel(m_RuntimePanel);
-					m_RuntimePanel = nullptr;
+					SaveProject();
+
+					std::filesystem::path runtimeExe = std::filesystem::path(std::getenv("STRYPE_DIR")) / "Strype" / "master" / "Strype-Runtime.exe";
+					std::filesystem::path projectPath = std::filesystem::path(Project::GetProjectDirectory()) / (Project::GetProjectName() + ".sproj");
+					
+					PlatformUtils::StartProcess(std::format("\"{}\" \"{}\"", runtimeExe.string(), projectPath.string()));
 				}
 
 				ImGui::EndMenu();

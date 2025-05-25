@@ -98,5 +98,29 @@ namespace Strype {
 		return std::filesystem::path();
 	}
 
+	bool PlatformUtils::StartProcess(std::string command)
+	{
+		STARTUPINFOA si = { sizeof(STARTUPINFOA) };
+		PROCESS_INFORMATION pi;
+
+		BOOL success = CreateProcessA(
+			nullptr,         
+			command.data(),	
+			nullptr, nullptr,
+			FALSE,           
+			DETACHED_PROCESS,
+			nullptr, nullptr,
+			&si, &pi         
+		);
+
+		if (success) 
+		{
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+		}
+
+		return success;
+	}
+
 }
 #endif
