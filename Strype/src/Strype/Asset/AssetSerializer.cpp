@@ -20,7 +20,12 @@ namespace Strype {
 
         STY_VERIFY(data, "Failed to load sprite \"{}\" ", path.string());
 
-        std::shared_ptr<AGI::Texture> texture = AGI::Texture::Create(width, height, channels);
+        AGI::TextureSpecifaction textureSpec;
+        textureSpec.Width = width;
+        textureSpec.Height = height;
+        textureSpec.Format = AGI::ChannelsToImageFormat(channels);
+
+        std::shared_ptr<AGI::Texture> texture = AGI::Texture::Create(textureSpec);
         texture->SetData(data, width * height * channels);
 
         return CreateRef<Sprite>(texture);
