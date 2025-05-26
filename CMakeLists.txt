@@ -6,6 +6,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_link_options("/ignore:4099")
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_BUILD_TOOLS  OFF CACHE BOOL "" FORCE)
+set(ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(ALSOFT_UTILS OFF CACHE BOOL "" FORCE)
+set(ALSOFT_TESTS OFF CACHE BOOL "" FORCE)
 
 add_compile_definitions(
     $<$<CONFIG:Debug>:STY_DEBUG>
@@ -16,9 +23,6 @@ add_compile_definitions(
 )
 
 set(ENV{STRYPE_DIR} ${CMAKE_SOURCE_DIR})
-
-set(STRYPE_LIBRARIES "${CMAKE_SOURCE_DIR}/Libraries")
-message(STATUS "Library directory: ${STRYPE_LIBRARIES}")
 
 add_subdirectory(Strype)
 add_subdirectory(Strype-Editor)
@@ -76,13 +80,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(magic_enum)
 
 FetchContent_Declare(
-    spdlog
-    GIT_REPOSITORY https://github.com/gabime/spdlog.git
-    GIT_TAG        v1.15.2
-)
-FetchContent_MakeAvailable(spdlog)
-
-FetchContent_Declare(
     Coral
     GIT_REPOSITORY https://github.com/JackKnox/Coral.git
     GIT_TAG        main
@@ -97,8 +94,43 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(ImGui)
 
 FetchContent_Declare(
-  ImGuizmo
-  GIT_REPOSITORY https://github.com/JackKnox/ImGuizmo
-  GIT_TAG        master
+    freetype
+    GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype.git
+    GIT_TAG        VER-2-13-3
+)
+FetchContent_MakeAvailable(freetype)
+
+FetchContent_Declare(
+    libsndfile 
+    GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
+    GIT_TAG        1.2.2
+)
+FetchContent_MakeAvailable(libsndfile)
+
+FetchContent_Declare(
+    OpenAL 
+    GIT_REPOSITORY https://github.com/kcat/openal-soft.git
+    GIT_TAG        1.24.3
+)
+FetchContent_MakeAvailable(OpenAL)
+
+FetchContent_Declare(
+    FFmpeg
+    GIT_REPOSITORY https://github.com/JackKnox/ffmpeg-cmake
+    GIT_TAG        main
+)
+FetchContent_MakeAvailable(FFmpeg)
+
+FetchContent_Declare(
+    ImGuizmo
+    GIT_REPOSITORY https://github.com/JackKnox/ImGuizmo.git
+    GIT_TAG        master
 )
 FetchContent_MakeAvailable(ImGuizmo)
+
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG        v1.15.2
+)
+FetchContent_MakeAvailable(spdlog)

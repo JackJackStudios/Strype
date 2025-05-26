@@ -7,7 +7,7 @@
 
 #include <stb_image.h>
 #include <AGI/agi.h>
-#include <sndfile/sndfile.h>
+#include <sndfile.h>
 
 namespace Strype {
 

@@ -5,6 +5,8 @@ namespace Strype
 {
 	internal static unsafe class InternalCalls
 	{
+#pragma warning disable CS0649
+
         internal static delegate* unmanaged<ulong, ReflectionType, void> Object_CreateComponent;
         internal static delegate* unmanaged<ulong, ReflectionType, bool> Object_HasComponent;
         internal static delegate* unmanaged<ulong, ReflectionType, bool> Object_RemoveComponent;
@@ -31,5 +33,7 @@ namespace Strype
 		internal static delegate* unmanaged<Vector2*, void> Input_GetMousePosition;
 
         internal static delegate* unmanaged<Log.LogLevel, NativeString, void> Log_LogMessage;
+
+#pragma warning restore CS0649
     }
 }
