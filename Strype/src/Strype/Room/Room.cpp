@@ -40,13 +40,13 @@ namespace Strype {
 	{
 		Renderer::BeginRoom(m_Camera);
 
-		Renderer::DrawQuad({ 0.0f, 0.0f }, { m_Width, m_Height }, glm::make_vec4(m_BackgroundColour));
+		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
-			Renderer::SubmitAttribute("a_ObjectID", (int)entity);
+			Renderer::SubmitAttribute<RenderPipeline>("a_ObjectID", (int)entity);
 
-			Renderer::DrawRotatedQuad(
-				trans.Position, 
+			Renderer::DrawQuad(
+				glm::make_vec3(trans.Position), 
 				trans.Scale, 
 				trans.Rotation, 
 				sprite.Colour, 

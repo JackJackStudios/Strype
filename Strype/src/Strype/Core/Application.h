@@ -21,26 +21,15 @@ namespace Strype {
 	{
 		std::string WorkingDir;
 		std::string AppName;
-		std::string ShaderPath;
+		std::filesystem::path MasterDir;
 
-		AGI::BufferLayout RendererLayout;
+		bool UseObjectID = false;
 		WindowProps WindowProps;
 
 		bool DockspaceEnabled = false;
 		bool ImGuizmoEnabled = false;
 		bool ImGuiEnabled = true;
 		int StartupFrames = 10;
-
-		AppConfig()
-		{
-			ShaderPath = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\assets\\BaseShader.glsl";
-			RendererLayout = {
-				{ AGI::ShaderDataType::Float3, "a_Position" },
-				{ AGI::ShaderDataType::Float4, "a_Colour" },
-				{ AGI::ShaderDataType::Float2, "a_TexCoord" },
-				{ AGI::ShaderDataType::Float, "a_TexIndex" },
-			};
-		}
 	};
 
 	struct ApplicationArguments

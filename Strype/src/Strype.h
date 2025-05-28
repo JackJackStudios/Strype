@@ -14,6 +14,8 @@
 #include "Strype/Renderer/Renderer.h"
 #include "Strype/Renderer/Sprite.h"
 
+#include "Strype/Renderer/RenderPipeline.h"
+
 #include "Strype/Room/Room.h"
 #include "Strype/Room/Object.h"
 #include "Strype/Room/Components.h"

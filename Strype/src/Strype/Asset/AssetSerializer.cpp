@@ -20,7 +20,7 @@ namespace Strype {
 
         STY_VERIFY(data, "Failed to load sprite \"{}\" ", path.string());
 
-        AGI::TextureSpecifaction textureSpec;
+        AGI::TextureSpecification textureSpec;
         textureSpec.Width = width;
         textureSpec.Height = height;
         textureSpec.Format = AGI::ChannelsToImageFormat(channels);

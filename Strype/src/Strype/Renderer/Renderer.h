@@ -1,40 +1,29 @@
 #pragma once
 
 #include "Camera.h"
+#include "Strype/Utils/TypeMap.h"
+#include "RenderPipeline.h"
 
-#include <AGI/agi.h>
-#include <any>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 namespace Strype {
 
-	struct RendererData
+	struct RenderCaps
 	{
-		static constexpr uint32_t MaxQuads = 20000;
-		static constexpr uint32_t MaxVertices = MaxQuads * 4;
-		static constexpr uint32_t MaxIndices = MaxQuads * 6;
-		static constexpr uint32_t MaxTextureSlots = 32; // TODO: RenderCaps
-		static constexpr size_t QuadVertexCount = 4;
-		static constexpr std::array<std::string_view, 4> RequiredAttrs = { "a_Position", "a_Colour", "a_TexCoord", "a_TexIndex" };
-
-		static constexpr glm::vec2 TextureCoords[] = { { 0.0f,  0.0f }, { 1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		static constexpr uint32_t MaxPrimitives = 20000;
+		static constexpr uint32_t MaxVertices = MaxPrimitives * 4;
+		static constexpr uint32_t MaxIndices = MaxPrimitives * 6;
 		
-		void* QuadVertexBufferBase = nullptr; 
-		void* QuadVertexBufferPtr = nullptr;
-
-		uint32_t QuadIndexCount = 0;
-		std::array<std::shared_ptr<AGI::Texture>, MaxTextureSlots> TextureSlots;
-		uint32_t TextureSlotIndex = 1; // 0 = white texture
-
-		std::shared_ptr<AGI::VertexArray> QuadVertexArray;
-		std::shared_ptr<AGI::VertexBuffer> QuadVertexBuffer;
-		std::shared_ptr<AGI::Shader> TextureShader;
-		std::shared_ptr<AGI::Texture> WhiteTexture;
-
-		glm::vec4 QuadVertexPositions[4];
-		AGI::BufferLayout Layout;
-		std::unordered_map<std::string, AGI::BufferElement> AttributeCache;
-
-		std::unordered_map<std::string, std::any> UserAttributes;
+		static constexpr uint32_t MaxTextureSlots = 32;
+		static constexpr std::array<std::string_view, 4> RequiredAttrs = { "a_Position", "a_Colour", "a_TexCoord", "a_TexIndex" };
+		static constexpr glm::vec2 TextureCoords[] = { { 0.0f,  0.0f }, { 1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		static constexpr glm::vec4 VertexPositions[] = {
+			{ -0.5f, -0.5f, 0.0f, 1.0f }, // Bottom-left
+			{  0.5f, -0.5f, 0.0f, 1.0f }, // Bottom-right
+			{  0.5f,  0.5f, 0.0f, 1.0f }, // Top-right
+			{ -0.5f,  0.5f, 0.0f, 1.0f }  // Top-left
+		};
 	};
 
 	class Renderer
@@ -50,22 +39,26 @@ namespace Strype {
 		static void BeginRoom(Camera& camera);
 		static void EndRoom();
 
-		static void DrawBasicQuad(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], const Ref<AGI::Texture>& texture = nullptr);
-
 		// Primitives
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
-		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
-
-		// Shorthands for 2D coords
-		static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
-		static void DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
-	
-		static void SubmitAttribute(const std::string& name, const std::any& value);
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
+		
+		template<typename T>
+		static void SubmitAttribute(const std::string& name, const std::any& value)
+		{
+			RenderPipelines.Get<QuadPipeline>()->SubmitAttribute(name, value);
+		}
 	private:
-		inline static std::unique_ptr<AGI::RenderAPI> s_RenderAPI;
-	private:
+		static float GetTextureSlot(const std::shared_ptr<AGI::Texture>& texture);
 		static void Flush();
 		static void FlushAndReset();
+	private:
+		inline static std::unique_ptr<AGI::RenderAPI> s_RenderAPI;
+
+		inline static std::array<std::shared_ptr<AGI::Texture>, RenderCaps::MaxTextureSlots> TextureSlots;
+		inline static std::shared_ptr<AGI::Texture> WhiteTexture;
+		inline static uint32_t TextureSlotIndex = 1; // 0 = white texture
+
+		inline static TypeMap<Ref<RenderPipeline>> RenderPipelines;
 	};
 
 }

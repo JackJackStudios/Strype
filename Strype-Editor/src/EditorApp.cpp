@@ -10,18 +10,12 @@ namespace Strype {
 		AppConfig config;
 		config.AppName = "Strype-Editor";
 		config.WorkingDir = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\";
+		config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
 		config.DockspaceEnabled = true;
 		config.ImGuizmoEnabled = true;
+		config.UseObjectID = true;
 
 		config.WindowProps.Maximise = true;
- 
-		config.RendererLayout = {
-			{ AGI::ShaderDataType::Float3, "a_Position" },
-			{ AGI::ShaderDataType::Float4, "a_Colour" },
-			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
-			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
-			{ AGI::ShaderDataType::Int,    "a_ObjectID" },
-		};
 
 		auto* app = new Application(config);
 		app->PushLayer<EditorLayer>();

@@ -6,7 +6,7 @@
 
 #include <glm/glm.hpp>
 
-#include "TypeInfo.h"
+#include "Strype/Utils/TypeInfo.h"
 
 #include "Strype/Core/Input.h"
 
