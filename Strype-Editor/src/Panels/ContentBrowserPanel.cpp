@@ -61,10 +61,26 @@ namespace Strype {
 	{
 		m_DirectoryIcon = Utils::LoadTexture("assets/icons/DirectoryIcon.png");
 		m_FileIcon = Utils::LoadTexture("assets/icons/FileIcon.png");
-		m_RoomIcon = Utils::LoadTexture("assets/icons/RoomIcon.png");
-		m_AudioFileIcon = Utils::LoadTexture("assets/icons/AudioFileIcon.png");
-		m_SpriteIcon = Utils::LoadTexture("assets/icons/SpriteIcon.png");
-		m_PrefabIcon = Utils::LoadTexture("assets/icons/PrefabIcon.png");
+
+		for (const auto& entry : std::filesystem::directory_iterator("assets/icons/"))
+		{
+			if (!entry.is_regular_file())
+				continue;
+
+			std::string filename = entry.path().stem().string();
+
+			const std::string suffix = "Icon";
+			if (filename.size() <= suffix.size() || filename.substr(filename.size() - suffix.size()) != suffix)
+				continue;
+
+			std::string enumName = filename.substr(0, filename.size() - suffix.size());
+
+			auto typeEnum = magic_enum::enum_cast<AssetType>(enumName);
+			if (!typeEnum.has_value())
+				continue;
+
+			m_Icons[typeEnum.value()] = Utils::LoadTexture(entry.path());
+		}
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -286,7 +302,7 @@ namespace Strype {
 	void ContentBrowserPanel::OnInspectorRender(Room* select)
 	{
 		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Image(m_RoomIcon->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+		ImGui::Image(m_Icons[AssetType::Room]->GetRendererID(), ImVec2(128.0f, 128.0f), {0, 1}, {1, 0});
 
 		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
 		ImGui::Button(Project::GetFilePath(select->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
@@ -310,32 +326,17 @@ namespace Strype {
 		if (handle == 0)
 			return m_DirectoryIcon;
 
-		switch (Project::GetAssetType(handle))
-		{
-		case AssetType::Sprite:
+		AssetType type = Project::GetAssetType(handle);
+		if (type == AssetType::Sprite)
 			return Project::GetAsset<Sprite>(handle)->GetTexture();
-			break;
 
-		case AssetType::Room:
-			return m_RoomIcon;
-			break;
-
-		case AssetType::AudioFile:
-			return m_AudioFileIcon;
-			break;
-		
-		case AssetType::Prefab:
-			return m_PrefabIcon;
-			break;
-
-		case AssetType::None:
-			return m_DirectoryIcon;
-			break;
-
-		default:
+		if (m_Icons.find(type) == m_Icons.end() || type == AssetType::None)
+		{
+			STY_CORE_WARN("No available icons from AssetHandle: {}", (uint64_t)handle);
 			return m_FileIcon;
-			break;
 		}
+
+		return m_Icons.at(type);
 	}
 
 }

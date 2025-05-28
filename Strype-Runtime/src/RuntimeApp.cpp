@@ -13,6 +13,9 @@ namespace Strype {
 		config.ImGuiEnabled = false;
 
 		auto* app = new Application(config);
+		app->PushPipeline<QuadPipeline>();
+		app->PushPipeline<TextPipeline>();
+
 		app->PushLayer<RuntimeLayer>(args[1]);
 
 		return app;

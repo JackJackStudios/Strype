@@ -45,12 +45,9 @@ namespace Strype {
 		AssetType m_InputType = AssetType::Sprite; //None = folder
 		Ref<InspectorPanel> m_Inspector;
 
-		Ref<AGI::Texture> m_DirectoryIcon;
-		Ref<AGI::Texture> m_FileIcon;
-		Ref<AGI::Texture> m_RoomIcon;
-		Ref<AGI::Texture> m_AudioFileIcon;
-		Ref<AGI::Texture> m_SpriteIcon;
-		Ref<AGI::Texture> m_PrefabIcon;
+		std::shared_ptr<AGI::Texture> m_DirectoryIcon;
+		std::shared_ptr<AGI::Texture> m_FileIcon;
+		std::unordered_map<AssetType, std::shared_ptr<AGI::Texture>> m_Icons;
 	};
 
 }

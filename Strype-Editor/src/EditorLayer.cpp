@@ -10,7 +10,7 @@ namespace Strype {
 		m_Room = CreateRef<Room>();
 
 		AGI::FramebufferSpecification framebufferSpec;
-		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8, AGI::FramebufferTextureFormat::RED_INTEGER };
+		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8 };
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
 		m_Framebuffer = AGI::Framebuffer::Create(framebufferSpec);
@@ -67,20 +67,18 @@ namespace Strype {
 		Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 		Renderer::Clear();
 		
-		m_Framebuffer->ClearAttachment(1, -1);
 		m_Room->OnUpdate(ts);
 		
-		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
-		{
-			// HACK: The object ID is int but should be int
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY) >> 29;
-			Object obj = Object((entt::entity)pixelData, m_Room.get());
-
-			if (pixelData != -1 && obj.IsValid())
-				m_SceneHierachyPanel->SetSelected(obj);
-			else
-				m_SceneHierachyPanel->RemoveSelected();
-		}
+		//if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		//{
+		//	int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY) >> 29;
+		//	Object obj = Object((entt::entity)pixelData, m_Room.get());
+		//
+		//	if (pixelData != -1 && obj.IsValid())
+		//		m_SceneHierachyPanel->SetSelected(obj);
+		//	else
+		//		m_SceneHierachyPanel->RemoveSelected();
+		//}
 
 		m_Framebuffer->Unbind();
 

@@ -13,11 +13,13 @@ namespace Strype {
 		config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
 		config.DockspaceEnabled = true;
 		config.ImGuizmoEnabled = true;
-		config.UseObjectID = true;
 
 		config.WindowProps.Maximise = true;
 
 		auto* app = new Application(config);
+		app->PushPipeline<QuadPipeline>();
+		app->PushPipeline<TextPipeline>();
+
 		app->PushLayer<EditorLayer>();
 
 		return app;
