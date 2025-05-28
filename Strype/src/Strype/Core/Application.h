@@ -7,11 +7,13 @@
 #include "Strype/Events/Event.h"
 #include "Strype/Events/ApplicationEvent.h"
 
+#include "Strype/Renderer/Renderer.h"
+
 #include "Strype/Core/Timestep.h"
 
 #include "API/ImGui/ImGuiLayer.h"
 
-#include <AGI/agi.h>
+#include <AGI/agi.hpp>
 
 int main(int argc, char** argv);
 
@@ -19,11 +21,10 @@ namespace Strype {
 
 	struct AppConfig
 	{
-		std::string WorkingDir;
 		std::string AppName;
 		std::filesystem::path MasterDir;
+		std::filesystem::path WorkingDir;
 
-		bool UseObjectID = false;
 		WindowProps WindowProps;
 
 		bool DockspaceEnabled = false;
@@ -68,6 +69,12 @@ namespace Strype {
 		void PushLayer(Args&&... args)
 		{
 			m_LayerStack.PushLayer(new T(std::forward<Args>(args)...));
+		}
+
+		template<typename T, typename... Args>
+		void PushPipeline(Args&&... args)
+		{
+			Renderer::PushPipeline<T>(std::forward<Args>(args)...);
 		}
 
 		template<typename T, typename... Args>

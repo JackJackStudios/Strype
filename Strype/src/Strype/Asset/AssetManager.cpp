@@ -41,6 +41,7 @@ namespace Strype {
 		REGISTER_ASSET(Room);
 		DEREGISTER_ASSET(Sprite);
 		DEREGISTER_ASSET(AudioFile);
+		DEREGISTER_ASSET(Font);
 
 		m_Serializers[temp->GetType()]->SaveAsset(temp, Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
 		ImportAsset(Utils::ToAssetSysPath(path));
@@ -53,6 +54,7 @@ namespace Strype {
 		m_Serializers[AssetType::Sprite] = CreateScope<SpriteSerializer>();
 		m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
 		m_Serializers[AssetType::AudioFile] = CreateScope<AudioFileSerializer>();
+		m_Serializers[AssetType::Font] = CreateScope<FontSerializer>();
 	}
 
 	AssetManager::~AssetManager()

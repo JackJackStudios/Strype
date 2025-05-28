@@ -3,9 +3,9 @@
 #include "Camera.h"
 #include "Strype/Utils/TypeMap.h"
 #include "RenderPipeline.h"
+#include "Sprite.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Strype {
 
@@ -40,25 +40,39 @@ namespace Strype {
 		static void EndRoom();
 
 		// Primitives
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<AGI::Texture>& texture = nullptr);
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr);
 		
 		template<typename T>
 		static void SubmitAttribute(const std::string& name, const std::any& value)
 		{
-			RenderPipelines.Get<QuadPipeline>()->SubmitAttribute(name, value);
+			s_RenderPipelines.Get<T>()->SubmitAttribute(name, value);
+		}
+
+		template<typename T>
+		static Ref<T> GetPipeline()
+		{
+			return std::dynamic_pointer_cast<T>(s_RenderPipelines.Get<T>());
+		}
+
+		template<typename T, typename... Args>
+		static void PushPipeline(Args&&... args)
+		{
+			static_assert(std::is_base_of<RenderPipeline, T>::value, "T must derive from RenderPipeline");
+			InitPipeline(s_RenderPipelines.Set<T>(CreateRef<T>(std::forward<Args>(args)...)));
 		}
 	private:
-		static float GetTextureSlot(const std::shared_ptr<AGI::Texture>& texture);
+		static float GetTextureSlot(const Ref<Sprite>& sprite);
 		static void Flush();
 		static void FlushAndReset();
+		static void InitPipeline(const Ref<RenderPipeline>& pipeline);
 	private:
 		inline static std::unique_ptr<AGI::RenderAPI> s_RenderAPI;
 
-		inline static std::array<std::shared_ptr<AGI::Texture>, RenderCaps::MaxTextureSlots> TextureSlots;
-		inline static std::shared_ptr<AGI::Texture> WhiteTexture;
-		inline static uint32_t TextureSlotIndex = 1; // 0 = white texture
+		inline static std::array<std::shared_ptr<AGI::Texture>, RenderCaps::MaxTextureSlots> s_TextureSlots;
+		inline static std::shared_ptr<AGI::Texture> s_WhiteTexture;
+		inline static uint32_t s_TextureSlotIndex = 1; // 0 = white texture
 
-		inline static TypeMap<Ref<RenderPipeline>> RenderPipelines;
+		inline static TypeMap<Ref<RenderPipeline>> s_RenderPipelines;
 	};
 
 }

@@ -3,7 +3,7 @@
 #include "Strype/Script/ScriptEngine.h"
 #include "Strype/Script/CSharpObject.h"
 
-#include <AGI/agi.h>
+#include <AGI/agi.hpp>
 #include <glm/glm.hpp>
 #include <box2d/box2d.h>
 

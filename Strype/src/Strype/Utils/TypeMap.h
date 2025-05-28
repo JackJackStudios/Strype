@@ -13,9 +13,10 @@ namespace Strype {
 		TypeMap() = default;
 
 		template<typename T>
-		void Set(TValue value)
+		TValue Set(TValue value)
 		{
 			m_Map[TypeInfo<T, false>().HashCode()] = value;
+			return value;
 		}
 
 		template<typename T>

@@ -43,14 +43,12 @@ namespace Strype {
 		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
 
 		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
-			Renderer::SubmitAttribute<RenderPipeline>("a_ObjectID", (int)entity);
-
 			Renderer::DrawQuad(
 				glm::make_vec3(trans.Position), 
 				trans.Scale, 
 				trans.Rotation, 
 				sprite.Colour, 
-				Project::IsAssetLoaded(sprite.Texture) ? Project::GetAsset<Sprite>(sprite.Texture)->GetTexture() : nullptr
+				Project::GetAsset<Sprite>(sprite.Texture)
 			);
 		});
 
