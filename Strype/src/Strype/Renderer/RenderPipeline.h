@@ -16,6 +16,7 @@ namespace Strype {
 		void* VBPtr = nullptr;
 
 		std::string TextureSampler;
+		std::string ProjectionUniform;
 
 		std::shared_ptr<AGI::VertexArray> VertexArray;
 		std::shared_ptr<AGI::VertexBuffer> VertexBuffer;

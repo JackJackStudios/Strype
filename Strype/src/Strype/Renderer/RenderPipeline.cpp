@@ -52,13 +52,10 @@ namespace Strype {
 			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
 			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
 		};
-
-		std::array<int32_t, RenderCaps::MaxTextureSlots> samplers;
-		std::iota(samplers.begin(), samplers.end(), 0);
+		TextureSampler = "u_Textures";
+		ProjectionUniform = "u_ViewProjection";
 
 		Shader = AGI::Shader::Create(AGI::Shader::ProcessSource(Utils::ReadFile((Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl").string())));
-		Shader->Bind();
-		Shader->SetIntArray("u_Textures", samplers.data(), RenderCaps::MaxTextureSlots);
 	}
 
 	void QuadPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], float textureIndex)
@@ -89,8 +86,9 @@ namespace Strype {
 			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
 		};
 		TextureSampler = "u_Textures";
+		ProjectionUniform = "u_ViewProjection";
 
-		Shader = AGI::Shader::Create(AGI::Shader::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl")));
+		Shader = AGI::Shader::Create(AGI::Shader::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / "TextShader.glsl")));
 
 		int sucess = FT_Init_FreeType(&m_FreetypeLib);
 		STY_CORE_VERIFY(sucess == 0, "Could not init FreeType");

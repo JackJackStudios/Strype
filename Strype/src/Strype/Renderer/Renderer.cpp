@@ -78,11 +78,12 @@ namespace Strype {
 
 		if (!pipeline->TextureSampler.empty())
 		{
-			std::array<int32_t, RenderCaps::MaxTextureSlots> samplers;
-			std::iota(samplers.begin(), samplers.end(), 0);
+			int32_t samplers[RenderCaps::MaxTextureSlots];
+			for (uint32_t i = 0; i < RenderCaps::MaxTextureSlots; i++)
+				samplers[i] = i;
 
 			pipeline->Shader->Bind();
-			pipeline->Shader->SetIntArray(pipeline->TextureSampler, samplers.data(), RenderCaps::MaxTextureSlots);
+			pipeline->Shader->SetIntArray(pipeline->TextureSampler, samplers, RenderCaps::MaxTextureSlots);
 		}
 	}
 
@@ -95,7 +96,7 @@ namespace Strype {
 		for (auto& [type, pipeline] : s_RenderPipelines)
 		{
 			pipeline->Shader->Bind();
-			pipeline->Shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+			pipeline->Shader->SetMat4(pipeline->ProjectionUniform, camera.GetViewProjectionMatrix());
 
 			pipeline->IndexCount = 0;
 			pipeline->VBPtr = pipeline->VBBase;
@@ -123,6 +124,7 @@ namespace Strype {
 		for (auto& [type, pipeline] : s_RenderPipelines)
 		{
 			if (pipeline->IndexCount == 0) continue;
+			pipeline->Shader->Bind();
 			s_RenderAPI->DrawIndexed(pipeline->VertexArray, pipeline->IndexCount);
 		}
 	}
@@ -140,15 +142,15 @@ namespace Strype {
 		s_TextureSlotIndex = 1;
 	}
 
-	float Renderer::GetTextureSlot(const Ref<Sprite>& sprite)
+	float Renderer::GetTextureSlot(const std::shared_ptr<AGI::Texture>& texture)
 	{
-		if (!sprite)
+		if (!texture)
 			return 0.0f;
 
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_TextureSlotIndex; i++)
 		{
-			if (*s_TextureSlots[i] == *sprite->GetTexture())
+			if (*s_TextureSlots[i] == *texture)
 			{
 				textureIndex = (float)i;
 				break;
@@ -161,7 +163,7 @@ namespace Strype {
 				FlushAndReset();
 
 			textureIndex = (float)(s_TextureSlotIndex);
-			s_TextureSlots[s_TextureSlotIndex++] = sprite->GetTexture();
+			s_TextureSlots[s_TextureSlotIndex++] = texture;
 		}
 
 		return textureIndex;

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Camera.h"
-#include "Strype/Utils/TypeMap.h"
-#include "RenderPipeline.h"
 #include "Sprite.h"
+#include "Font.h"
+
+#include "RenderPipeline.h"
+#include "Strype/Utils/TypeMap.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -41,6 +43,7 @@ namespace Strype {
 
 		// Primitives
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr);
+		static void DrawString(const glm::vec3& position, const std::string& string, const glm::vec4& colour, const Ref<Font>& font);
 		
 		template<typename T>
 		static void SubmitAttribute(const std::string& name, const std::any& value)
@@ -61,7 +64,7 @@ namespace Strype {
 			InitPipeline(s_RenderPipelines.Set<T>(CreateRef<T>(std::forward<Args>(args)...)));
 		}
 	private:
-		static float GetTextureSlot(const Ref<Sprite>& sprite);
+		static float GetTextureSlot(const std::shared_ptr<AGI::Texture>& texture);
 		static void Flush();
 		static void FlushAndReset();
 		static void InitPipeline(const Ref<RenderPipeline>& pipeline);

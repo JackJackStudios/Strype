@@ -1,3 +1,5 @@
+#pragma once
+
 #include <AGI/agi.hpp>
 
 #include <ft2build.h>
@@ -5,7 +7,7 @@
 
 #include "Strype/Asset/Asset.h"
 
-namespace Strype{
+namespace Strype {
 
 	struct Character 
 	{
@@ -19,7 +21,9 @@ namespace Strype{
 	class Font : public Asset
 	{
 	public:
-		Font() = default;
+		Font(FT_Face face);
+
+		const Character& GetCharacter(char character) { return m_Characters.at(character); }
 
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
