@@ -8,9 +8,6 @@ namespace Strype {
         m_Face = face;
 
         unsigned char* atlasBuffer = (unsigned char*)calloc(ATLAS_WIDTH * ATLAS_HEIGHT, 1);
-
-        uint32_t maxWidth = 0;
-        uint32_t maxHeight = 0;
         
         uint32_t penX = 0;
         uint32_t penY = 0;
@@ -22,8 +19,7 @@ namespace Strype {
                 continue;
 
             FT_Bitmap* bitmap = &m_Face->glyph->bitmap;
-            maxWidth = glm::max(maxWidth, bitmap->width);
-            maxHeight = glm::max(maxHeight, bitmap->rows);
+            m_MaxSize = glm::max(m_MaxSize, { bitmap->width, bitmap->rows });
         }
 
         for (uint8_t i = 0; i < 128; i++) 

@@ -25,6 +25,7 @@ namespace Strype {
 		Font(FT_Face face);
 
 		const Character& GetCharacter(char character) const { return m_Characters.at(character); }
+		const glm::vec2& GetMaxSize() const { return m_MaxSize; }
 
 		const std::shared_ptr<AGI::Texture>& GetAtlas() const { return m_Atlas; }
 
@@ -37,6 +38,8 @@ namespace Strype {
 		std::shared_ptr<AGI::Texture> m_Atlas;
 		std::unordered_map<char, Character> m_Characters;
 		FT_Face m_Face;
+
+		glm::vec2 m_MaxSize;
 
 		friend class FontSerializer;
 	};
