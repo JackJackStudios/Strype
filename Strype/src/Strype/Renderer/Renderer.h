@@ -19,7 +19,7 @@ namespace Strype {
 		
 		static constexpr uint32_t MaxTextureSlots = 32;
 		static constexpr std::array<std::string_view, 4> RequiredAttrs = { "a_Position", "a_Colour", "a_TexCoord", "a_TexIndex" };
-		static constexpr glm::vec2 TextureCoords[] = { { 0.0f,  0.0f }, { 1.0f,  0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		static constexpr TexCoords TextureCoords = { glm::vec2(0.0f, 0.0f), glm::vec2(1.0f,  0.0f), glm::vec2(1.0f, 1.0f), glm::vec2(0.0f, 1.0f) };
 		static constexpr glm::vec4 VertexPositions[] = {
 			{ -0.5f, -0.5f, 0.0f, 1.0f }, // Bottom-left
 			{  0.5f, -0.5f, 0.0f, 1.0f }, // Bottom-right

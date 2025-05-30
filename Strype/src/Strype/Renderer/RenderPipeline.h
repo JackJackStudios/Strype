@@ -8,6 +8,8 @@
 
 namespace Strype {
 
+	using TexCoords = std::array<glm::vec2, 4>;
+
 	class RenderPipeline
 	{
 	public:
@@ -27,7 +29,7 @@ namespace Strype {
 		std::unordered_map<std::string, AGI::BufferElement> AttributeCache;
 		std::unordered_map<std::string, std::any> UserAttributes;
 
-		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], float textureIndex) = 0;
+		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex) = 0;
 
 		void SubmitAttribute(const std::string& name, const std::any& value)
 		{
@@ -40,7 +42,7 @@ namespace Strype {
 	public:
 		QuadPipeline();
 
-		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], float textureIndex) override;
+		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex) override;
 	};
 
 	class TextPipeline : public RenderPipeline
@@ -49,7 +51,7 @@ namespace Strype {
 		TextPipeline();
 		~TextPipeline();
 
-		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], float textureIndex) override;
+		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex) override;
 	private:
 		FT_Library m_FreetypeLib;
 

@@ -58,7 +58,7 @@ namespace Strype {
 		Shader = AGI::Shader::Create(AGI::Shader::ProcessSource(Utils::ReadFile((Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl").string())));
 	}
 
-	void QuadPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], float textureIndex)
+	void QuadPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex)
 	{
 		for (size_t i = 0; i < 4; i++)
 		{
@@ -99,7 +99,7 @@ namespace Strype {
 		FT_Done_FreeType(m_FreetypeLib);
 	}
 
-	void TextPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const glm::vec2 texcoords[], float textureIndex)
+	void TextPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex)
 	{
 		for (size_t i = 0; i < 4; i++)
 		{
