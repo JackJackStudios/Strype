@@ -8,6 +8,18 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#if defined(AGI_WINDOWS)
+#	define GLFW_EXPOSE_NATIVE_WIN32
+#	include <GLFW/glfw3native.h>
+#elif defined(AGI_MACOSX)
+#	define GLFW_EXPOSE_NATIVE_COCOA
+#	include <GLFW/glfw3native.h>
+#elif defined(AGI_LINUX)
+#	define GLFW_EXPOSE_NATIVE_X11
+#	define GLFW_EXPOSE_NATIVE_WAYLAND
+#	include <GLFW/glfw3native.h>
+#endif
+
 namespace Strype {
 
 	struct WindowProps
@@ -50,6 +62,7 @@ namespace Strype {
 		void SetTitle(const std::string& title);
 
 		GLFWwindow* GetNativeWindow() const { return m_Window; }
+		void* GetOsWindow() const;
 
 		static inline Scope<Window> Create(const WindowProps& props = WindowProps()) { return CreateScope<Window>(props); }
 	private:

@@ -1,6 +1,8 @@
 #include "stypch.h"
 #include "Strype/Renderer/Renderer.h"
 
+#include "Strype/Core/Application.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <numeric>
 #include <GLFW/glfw3.h>
@@ -9,26 +11,23 @@ namespace Strype {
 
 	static void OnAGIMessage(std::string_view message, AGI::LogLevel level)
 	{
-		using enum AGI::LogLevel;
 		switch (level)
 		{
-			case Trace:   STY_CORE_TRACE("{}", std::string(message)); break;
-			case Info:    STY_CORE_INFO("{}", std::string(message)); break;
-			case Warning: STY_CORE_WARN("{}", std::string(message)); break;
-			case Error:   STY_CORE_ERROR("{}", std::string(message)); break;
+			case AGI::LogLevel::Trace:   STY_CORE_TRACE("{}", std::string(message)); break;
+			case AGI::LogLevel::Info:    STY_CORE_INFO("{}", std::string(message)); break;
+			case AGI::LogLevel::Warning: STY_CORE_WARN("{}", std::string(message)); break;
+			case AGI::LogLevel::Error:   STY_CORE_ERROR("{}", std::string(message)); break;
 		}
 	}
 
 	void Renderer::Init()
 	{
-		s_RenderAPI = AGI::RenderAPI::Create(
-		{
-			.PreferedAPI = AGI::APIType::Guess,
-			.Blending = true,
-
-			.LoaderFunc = (AGI::OpenGLloaderFn)glfwGetProcAddress,
-			.MessageFunc = OnAGIMessage,
-		});
+		AGI::Settings settings;
+		settings.PreferedAPI = AGI::APIType::Guess;
+		settings.MessageFunc = OnAGIMessage;
+		settings.Blending = true;
+		s_RenderContext = AGI::RenderContext::Create(settings);
+		s_RenderContext->Init();
 
 		AGI::TextureSpecification textureSpec;
 		textureSpec.Format = AGI::ImageFormat::RGBA;
@@ -89,6 +88,7 @@ namespace Strype {
 
 	void Renderer::Shutdown()
 	{
+		s_RenderContext->Shutdown();
 	}
 	
 	void Renderer::BeginRoom(Camera& camera)
@@ -125,7 +125,7 @@ namespace Strype {
 		{
 			if (pipeline->IndexCount == 0) continue;
 			pipeline->Shader->Bind();
-			s_RenderAPI->DrawIndexed(pipeline->VertexArray, pipeline->IndexCount);
+			s_RenderContext->DrawIndexed(pipeline->VertexArray, pipeline->IndexCount);
 		}
 	}
 

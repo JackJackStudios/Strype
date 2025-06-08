@@ -16,10 +16,10 @@ namespace Strype {
 	{
 		// Setup Dear ImGui context
 		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-#ifdef STY_PLATFORM_WINDOWS
+#ifdef STY_WINDOWS
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 #endif
 
@@ -27,7 +27,7 @@ namespace Strype {
 		ImGui::StyleColorsDark();
 
 		Application& app = Application::Get();
-		GLFWwindow* window = app.GetWindow().GetNativeWindow();
+		GLFWwindow* window = app.GetWindow()->GetNativeWindow();
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -95,7 +95,7 @@ namespace Strype {
 
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
-		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
+		io.DisplaySize = ImVec2((float)app.GetWindow()->GetWidth(), (float)app.GetWindow()->GetHeight());
 
 		// Rendering
 		ImGui::Render();

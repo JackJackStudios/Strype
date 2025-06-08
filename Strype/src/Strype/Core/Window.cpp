@@ -151,4 +151,23 @@ namespace Strype
 		m_Data.Title = title;
 	}
 
+	void* Window::GetOsWindow() const
+	{
+#if defined(STY_WINDOWS)
+		return (void*)glfwGetWin32Window(m_Window);
+
+#elif defined(STY_MACOSX)
+		return glfwGetCocoaWindow(m_Window);
+
+#elif defined(STY_LINUX)
+		if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND)
+			return (void*)glfwGetWaylandWindow(m_Window); // wl_surface*
+
+		else if (glfwGetPlatform() == GLFW_PLATFORM_X11)
+			return (void*)(uintptr_t)glfwGetX11Window(m_Window); // cast X11 Window (unsigned long) to void*
+#else
+#	error Undefined Platform?
+#endif
+	}
+
 }

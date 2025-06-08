@@ -20,7 +20,7 @@ namespace Strype {
 		CHAR currentDir[256] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+		ofn.hwndOwner = (HWND)Application::Get().GetWindow()->GetOsWindow();
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		if (GetCurrentDirectoryA(256, currentDir))
@@ -42,7 +42,7 @@ namespace Strype {
 		CHAR currentDir[256] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAME));
 		ofn.lStructSize = sizeof(OPENFILENAME);
-		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)Application::Get().GetWindow().GetNativeWindow());
+		ofn.hwndOwner = (HWND)Application::Get().GetWindow()->GetOsWindow();
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		if (GetCurrentDirectoryA(256, currentDir))
@@ -104,16 +104,16 @@ namespace Strype {
 		PROCESS_INFORMATION pi;
 
 		BOOL success = CreateProcessA(
-			nullptr,         
-			command.data(),	
+			nullptr,
+			command.data(),
 			nullptr, nullptr,
-			FALSE,           
+			FALSE,
 			DETACHED_PROCESS,
 			nullptr, nullptr,
-			&si, &pi         
+			&si, &pi
 		);
 
-		if (success) 
+		if (success)
 		{
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);

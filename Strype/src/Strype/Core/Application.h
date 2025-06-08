@@ -53,7 +53,7 @@ namespace Strype {
 		Application(const AppConfig& config);
 		virtual ~Application();
 
-		Window& GetWindow() { return *m_Window; }
+		Window* GetWindow() { return m_Window.get(); }
 		ApplicationArguments& GetArgs() { return m_Arguments; }
 
 		void Close();

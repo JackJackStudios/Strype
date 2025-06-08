@@ -69,7 +69,7 @@ namespace Strype {
 		static void FlushAndReset();
 		static void InitPipeline(const Ref<RenderPipeline>& pipeline);
 	private:
-		inline static std::unique_ptr<AGI::RenderAPI> s_RenderAPI;
+		inline static std::unique_ptr<AGI::RenderContext> s_RenderContext;
 
 		inline static std::array<std::shared_ptr<AGI::Texture>, RenderCaps::MaxTextureSlots> s_TextureSlots;
 		inline static std::shared_ptr<AGI::Texture> s_WhiteTexture;

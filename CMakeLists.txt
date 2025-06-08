@@ -34,7 +34,6 @@ set(ENV{STRYPE_DIR} ${CMAKE_SOURCE_DIR})
 add_subdirectory(Strype)
 add_subdirectory(Strype-Editor)
 add_subdirectory(Strype-Runtime)
-add_subdirectory(Strype-ScriptCore)
 
 # Libraries
 FetchContent_Declare(
