@@ -101,7 +101,7 @@ namespace Strype {
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-#ifdef STY_PLATFORM_WINDOWS
+#ifdef STY_WINDOWS
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			GLFWwindow* backup = glfwGetCurrentContext();

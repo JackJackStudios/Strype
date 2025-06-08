@@ -1,7 +1,5 @@
 #pragma once
 
-#define STY_VERSION "0.4"
-
 //
 // Build Configuration
 //
@@ -18,9 +16,9 @@
 //
 // Build Platform
 //
-#if defined(STY_PLATFORM_WINDOWS)
+#if defined(STY_WINDOWS)
 #define STY_BUILD_PLATFORM_NAME "Windows x64"
-#elif defined(STY_PLATFORM_LINUX)
+#elif defined(STY_LINUX)
 #define STY_BUILD_PLATFORM_NAME "Linux"
 #else
 #error Undefined Platform?

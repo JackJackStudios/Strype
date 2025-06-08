@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
-#ifdef STY_PLATFORM_WINDOWS
+#ifdef STY_WINDOWS
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <commdlg.h>

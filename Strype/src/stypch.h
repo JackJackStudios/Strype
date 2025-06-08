@@ -17,10 +17,9 @@
 
 #include "Strype/Core/Log.h"
 #include "Strype/Core/Base.h"
-#include "Strype/Core/PlatformDetection.h"
 #include "Strype/Core/Hash.h"
 #include "Strype/Core/Version.h"
 
-#ifdef STY_PLATFORM_WINDOWS
+#ifdef STY_WINDOWS
 #include <Windows.h>
 #endif

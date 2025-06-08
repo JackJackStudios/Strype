@@ -16,11 +16,17 @@ set(ALSOFT_TESTS OFF CACHE BOOL "" FORCE)
 set(AGI_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_compile_definitions(
+    $<$<PLATFORM_ID:Windows>:STY_WINDOWS>
+    $<$<PLATFORM_ID:Linux>:STY_LINUX>
+    $<$<PLATFORM_ID:Darwin>:STY_MACOSX>
+
     $<$<CONFIG:Debug>:STY_DEBUG>
     $<$<CONFIG:Release>:STY_RELEASE>
     $<$<CONFIG:RelWithDebInfo>:STY_RELEASE>
     $<$<CONFIG:MinSizeRel>:STY_DIST>
     YAML_CPP_STATIC_DEFINE
+    
+    STY_VERSION="${PROJECT_VERSION}"
 )
 
 set(ENV{STRYPE_DIR} ${CMAKE_SOURCE_DIR})
