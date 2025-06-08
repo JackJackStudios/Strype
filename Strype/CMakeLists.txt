@@ -30,3 +30,4 @@ target_link_libraries(Strype PUBLIC
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum
+)
