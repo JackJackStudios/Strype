@@ -32,3 +32,16 @@ target_link_libraries(Strype PUBLIC
     magic_enum::magic_enum
     msdf-atlas-gen::msdf-atlas-gen
 )
+
+# Download scripting binaries
+file(DOWNLOAD
+    "https://github.com/JackJackStudios/Strype-ScriptCore/releases/download/latest/Coral.Managed.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/master/DotNet/Coral.Managed.dll"
+    SHOW_PROGRESS
+    STATUS status)
+
+file(DOWNLOAD
+    "https://github.com/JackJackStudios/Strype-ScriptCore/releases/download/latest/Strype-ScriptCore.dll"
+    "${CMAKE_CURRENT_SOURCE_DIR}/master/DotNet/Strype-ScriptCore.dll"
+    SHOW_PROGRESS
+    STATUS status)

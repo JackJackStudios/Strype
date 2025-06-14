@@ -1,27 +1,23 @@
 #include <Strype.h>
-#include <Strype/Core/EntryPoint.h>
-
 #include "EditorLayer.h"
 
-namespace Strype {
+using namespace Strype;
 
-	Application* CreateApplication(ApplicationArguments args)
-	{
-		AppConfig config;
-		config.AppName = "Strype-Editor";
-		config.WorkingDir = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\";
-		config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
-		config.DockspaceEnabled = true;
-		config.ImGuizmoEnabled = true;
+int main(int argc, char** argv)
+{
+	AppConfig config;
+	config.AppName = "Strype-Editor";
+	config.WorkingDir = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\";
+	config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
+	config.DockspaceEnabled = true;
+	config.ImGuizmoEnabled = true;
 
-		config.WindowProps.Maximise = true;
+	config.WindowProps.Maximise = true;
 
-		auto* app = new Application(config);
-		app->PushPipeline<QuadPipeline>();
+	Application(config)
+		.PushPipeline<QuadPipeline>()
+		.PushLayer<EditorLayer>()
+		.Run();
 
-		app->PushLayer<EditorLayer>();
-
-		return app;
-	}
-
+	return 0;
 }

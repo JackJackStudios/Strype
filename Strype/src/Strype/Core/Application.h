@@ -33,20 +33,6 @@ namespace Strype {
 		int StartupFrames = 10;
 	};
 
-	struct ApplicationArguments
-	{
-		int Count = 0;
-		char** Args = nullptr;
-
-		const char* operator[](int index) const
-		{
-			if (index >= Count && index < 0)
-				return "";
-				
-			return Args[index];
-		}
-	};
-
 	class Application
 	{
 	public:
@@ -54,7 +40,6 @@ namespace Strype {
 		virtual ~Application();
 
 		Window* GetWindow() { return m_Window.get(); }
-		ApplicationArguments& GetArgs() { return m_Arguments; }
 
 		void Close();
 
@@ -66,32 +51,33 @@ namespace Strype {
 		void OnEvent(Event& e);
 
 		template<typename T, typename... Args>
-		void PushLayer(Args&&... args)
-		{
-			m_LayerStack.PushLayer(new T(std::forward<Args>(args)...));
-		}
-
-		template<typename T, typename... Args>
-		void PushPipeline(Args&&... args)
+		Application& PushPipeline(Args&&... args)
 		{
 			Renderer::PushPipeline<T>(std::forward<Args>(args)...);
+			return *this;
 		}
 
 		template<typename T, typename... Args>
-		void PushOverlay(Args&&... args)
+		Application& PushLayer(Args&&... args)
+		{
+			m_LayerStack.PushLayer(new T(std::forward<Args>(args)...));
+			return *this;
+		}
+
+		template<typename T, typename... Args>
+		Application& PushOverlay(Args&&... args)
 		{
 			m_LayerStack.PushOverlay(new T(std::forward<Args>(args)...));
+			return *this;
 		}
 	private:
 		void Run();
-		void SetArgs(ApplicationArguments args) { m_Arguments = args; }
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 
 		Scope<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		AppConfig m_Config;
-		ApplicationArguments m_Arguments;
 
 		bool m_Running = true;
 		bool m_Minimized = false;
@@ -104,6 +90,6 @@ namespace Strype {
 		friend int ::main(int argc, char** argv);
 	};
 
-	Application* CreateApplication(ApplicationArguments args);
+	Application* CreateApplication(int argc, char** argv);
 
 }

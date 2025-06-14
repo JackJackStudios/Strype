@@ -1,16 +1,25 @@
 # Strype
+[![CMake build](https://github.com/JackJackStudios/Strype/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/JackJackStudios/Strype/actions/workflows/cmake-multi-platform.yml)
 
+## Introduction
 Strype is a early-stage game engine built for pixel art, super quick rendering and fast iteration speed.
+The engine is officially tested on Windows x64 and Unbuntu ARM64.
 
-***
+## Requirements 
+* Windows or Linux (x64 or ARM64)
+* CMake 3.15
+* A C++ 20 compiler 
 
-## Getting Started
-Visual Studio 2022 is recommended, Strype is officially tested on Windows while we make the basics of our engine. Linux and MacOS might come in the future
+## Building Strype
+To build Strype-Editor:
 
-<ins>**1. Downloading the repository:**</ins>
+```console
+git clone https://github.com/JackJackStudios/Strype
+cd Strype
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
 
-Start by cloning the repository with `git clone --recursive https://github.com/JackKnox/Strype`.
-
-<ins>**2. Building the project files:**</ins>
-
-Run the [Setup.bat](https://github.com/JackKnox/Strype/blob/main/scripts/Setup.bat) file found in `scripts` folder. This will download prerequisites if needed and run `premake5.exe` downloaded with the repository 
+## License
+AGI is licensed under the [MIT License](LICENSE).

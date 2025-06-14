@@ -51,16 +51,16 @@ namespace Strype {
 	{
 		m_AppAssembly.reset();
 
-		auto filepath = proj->GetProjectDirectory() / "strype" / "Binaries" / (proj->GetProjectName() + ".dll");
-
+		std::filesystem::path filepath = proj->GetProjectDirectory() / "strype" / "Binaries" / (proj->GetProjectName() + ".dll");
 		m_AppAssembly = std::make_unique<Coral::ManagedAssembly>(std::move(s_LoadContext->LoadAssembly(filepath.string())));
 
-		if (m_AppAssembly->GetLoadStatus() != Coral::AssemblyLoadStatus::Success)
+		if (m_AppAssembly->GetLoadStatus() == Coral::AssemblyLoadStatus::Success)
 		{
+			BuildTypeCache(m_AppAssembly);
 			return;
 		}
 
-		BuildTypeCache(m_AppAssembly);
+		STY_CORE_ERROR("Error loading file: {}", filepath.string());
 	}
 
 	void ScriptEngine::BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly)
@@ -89,13 +89,10 @@ namespace Strype {
 	{
 		s_Host = std::make_unique<Coral::HostInstance>();
 
-		Coral::HostSettings settings =
-		{
-			.CoralDirectory = (std::filesystem::path(getenv("STRYPE_DIR")) / "Strype\\master" / "DotNet").string(),
-			.MessageCallback = OnCoralMessage,
-			.ExceptionCallback = OnCSharpException
-		};
-
+		Coral::HostSettings settings;
+		settings.CoralDirectory = (std::filesystem::path(getenv("STRYPE_DIR")) / "Strype\\master" / "DotNet").string();
+		settings.MessageCallback = OnCoralMessage;
+		settings.ExceptionCallback = OnCSharpException;
 		Coral::CoralInitStatus initStatus = s_Host->Initialize(settings);
 
 		if (initStatus == Coral::CoralInitStatus::Success)
@@ -111,7 +108,6 @@ namespace Strype {
 
 		switch (initStatus)
 		{
-
 		case Coral::CoralInitStatus::CoralManagedNotFound:
 			STY_CORE_ERROR("Could not find Coral.Managed.dll in directory {}", settings.CoralDirectory);
 			break;
@@ -123,10 +119,6 @@ namespace Strype {
 		case Coral::CoralInitStatus::DotNetNotFound:
 			STY_CORE_ERROR("Strype requires .NET 8 or higher!");
 			break;
-
-		default:
-			break;
-			
 		}
 
 		// All of the above errors are fatal
