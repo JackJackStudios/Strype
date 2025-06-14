@@ -100,11 +100,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(ImGui)
 
 FetchContent_Declare(
-    freetype
-    GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype.git
-    GIT_TAG        VER-2-13-3
+    msdf-atlas-gen
+    GIT_REPOSITORY https://github.com/JackKnox/msdf-atlas-gen
+    GIT_TAG        strype
 )
-FetchContent_MakeAvailable(freetype)
+FetchContent_MakeAvailable(msdf-atlas-gen)
 
 FetchContent_Declare(
     libsndfile 
