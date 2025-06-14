@@ -49,7 +49,7 @@ namespace Strype {
 			textureSpec.Height = height;
 			textureSpec.Format = AGI::ChannelsToImageFormat(channels);
 			
-        	std::shared_ptr<AGI::Texture> texture = AGI::Texture::Create(textureSpec);
+        	std::shared_ptr<AGI::Texture> texture = Renderer::GetContext()->CreateTexture(textureSpec);
         	texture->SetData(data, width * height * channels);
 
 			return texture;

@@ -15,7 +15,8 @@ target_include_directories(Strype PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(Strype PUBLIC ${stb_SOURCE_DIR})
 
 target_link_libraries(Strype PUBLIC
-    AGI
+    agi
+    agi_opengl
     glm
     box2d
     glfw
@@ -24,10 +25,10 @@ target_link_libraries(Strype PUBLIC
     FFmpeg
     sndfile
     ImGuizmo
-    freetype
     Coral.Native
     EnTT::EnTT
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum
+    msdf-atlas-gen::msdf-atlas-gen
 )

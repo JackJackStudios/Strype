@@ -3,15 +3,12 @@
 
 #include "Strype/Project/Project.h"
 #include "Strype/Renderer/Sprite.h"
-#include "Strype/Renderer/Font.h"
 #include "Strype/Renderer/Renderer.h"
 #include "Strype/Audio/Audio.h"
 
 #include <AGI/agi.hpp>
 #include <stb_image.h>
 #include <sndfile.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 namespace Strype {
 
@@ -29,7 +26,7 @@ namespace Strype {
         textureSpec.Height = height;
         textureSpec.Format = AGI::ChannelsToImageFormat(channels);
 
-        std::shared_ptr<AGI::Texture> texture = AGI::Texture::Create(textureSpec);
+        std::shared_ptr<AGI::Texture> texture = Renderer::GetContext()->CreateTexture(textureSpec);
         texture->SetData(data, width * height * channels);
 
         return CreateRef<Sprite>(texture);
@@ -55,17 +52,6 @@ namespace Strype {
         free(membuf);
 
         return file;
-    }
-
-    Ref<Asset> FontSerializer::LoadAsset(const std::filesystem::path& path)
-    {
-        FT_Face face;
-
-        FT_New_Face(Renderer::GetPipeline<TextPipeline>()->m_FreetypeLib, path.string().c_str(), 0, &face);
-        FT_Set_Pixel_Sizes(face, 0, 48);
-
-        Ref<Font> font = CreateRef<Font>(face);
-        return font;
     }
 
 }

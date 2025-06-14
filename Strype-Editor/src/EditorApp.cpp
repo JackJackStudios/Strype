@@ -18,7 +18,6 @@ namespace Strype {
 
 		auto* app = new Application(config);
 		app->PushPipeline<QuadPipeline>();
-		app->PushPipeline<TextPipeline>();
 
 		app->PushLayer<EditorLayer>();
 

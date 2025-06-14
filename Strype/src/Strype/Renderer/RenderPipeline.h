@@ -3,9 +3,6 @@
 #include <AGI/agi.hpp>
 #include <any>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 namespace Strype {
 
 	using TexCoords = std::array<glm::vec2, 4>;
@@ -43,19 +40,6 @@ namespace Strype {
 		QuadPipeline();
 
 		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex) override;
-	};
-
-	class TextPipeline : public RenderPipeline
-	{
-	public:
-		TextPipeline();
-		~TextPipeline();
-
-		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex) override;
-	private:
-		FT_Library m_FreetypeLib;
-
-		friend class FontSerializer;
 	};
 
 }

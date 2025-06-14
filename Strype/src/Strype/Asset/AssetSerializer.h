@@ -31,12 +31,4 @@ namespace Strype {
 		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path) {};
 	};
 
-	class FontSerializer : public AssetSerializer
-	{
-	public:
-		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
-
-		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path) {};
-	};
-
 }

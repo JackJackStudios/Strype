@@ -13,7 +13,7 @@ namespace Strype {
 		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8 };
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
-		m_Framebuffer = AGI::Framebuffer::Create(framebufferSpec);
+		m_Framebuffer = Renderer::GetContext()->CreateFramebuffer(framebufferSpec);
 		
 		//Configure PanelManager
 		m_PanelManager.SetRoomContext(m_Room);

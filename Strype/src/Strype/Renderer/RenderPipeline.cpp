@@ -55,51 +55,10 @@ namespace Strype {
 		TextureSampler = "u_Textures";
 		ProjectionUniform = "u_ViewProjection";
 
-		Shader = AGI::Shader::Create(AGI::Shader::ProcessSource(Utils::ReadFile((Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl").string())));
+		Shader = Renderer::GetContext()->CreateShader(AGI::Shader::ProcessSource(Utils::ReadFile((Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl").string())));
 	}
 
 	void QuadPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex)
-	{
-		for (size_t i = 0; i < 4; i++)
-		{
-			SubmitAttribute("a_Position", transform * RenderCaps::VertexPositions[i]);
-			SubmitAttribute("a_Colour", colour);
-			SubmitAttribute("a_TexCoord", texcoords[i]);
-			SubmitAttribute("a_TexIndex", textureIndex);
-
-			for (auto& [name, value] : UserAttributes)
-				std::memcpy(Utils::ShiftPtr(VBPtr, AttributeCache[name].Offset), &value, AttributeCache[name].Size);
-
-			VBPtr = Utils::ShiftPtr(VBPtr, VertexBuffer->GetLayout().GetStride());
-		}
-
-		IndexCount += 6;
-		UserAttributes.clear();
-	}
-
-	TextPipeline::TextPipeline()
-	{
-		Layout = {
-			{ AGI::ShaderDataType::Float3, "a_Position" },
-			{ AGI::ShaderDataType::Float4, "a_Colour" },
-			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
-			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
-		};
-		TextureSampler = "u_Textures";
-		ProjectionUniform = "u_ViewProjection";
-
-		Shader = AGI::Shader::Create(AGI::Shader::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / "TextShader.glsl")));
-
-		int sucess = FT_Init_FreeType(&m_FreetypeLib);
-		STY_CORE_VERIFY(sucess == 0, "Could not init FreeType");
-	}
-
-	TextPipeline::~TextPipeline()
-	{
-		FT_Done_FreeType(m_FreetypeLib);
-	}
-
-	void TextPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex)
 	{
 		for (size_t i = 0; i < 4; i++)
 		{

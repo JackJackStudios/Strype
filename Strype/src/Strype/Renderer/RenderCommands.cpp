@@ -31,17 +31,4 @@ namespace Strype {
 		s_RenderPipelines.Get<QuadPipeline>()->DrawPrimitive(transform, colour, RenderCaps::TextureCoords, sprite ? GetTextureSlot(sprite->GetTexture()) : 0.0f);
 	}
 
-	void Renderer::DrawString(const glm::vec3& position, const std::string& string, const glm::vec4& colour, const Ref<Font>& font)
-	{
-		Character character = font->GetCharacter('!'); 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-
-		glm::vec2 uvBL = character.UVOffset;
-		glm::vec2 uvBR = character.UVOffset + glm::vec2(character.UVSize.x, 0.0f);
-		glm::vec2 uvTR = character.UVOffset + character.UVSize;
-		glm::vec2 uvTL = character.UVOffset + glm::vec2(0.0f, character.UVSize.y);
-
-		s_RenderPipelines.Get<TextPipeline>()->DrawPrimitive(transform, colour, { uvBL, uvBR, uvTR, uvTL }, GetTextureSlot(font->GetAtlas()));
-	}
-
 }

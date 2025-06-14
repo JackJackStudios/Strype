@@ -15,8 +15,6 @@ namespace Strype {
 		{ ".png", AssetType::Sprite },
 		{ ".jpg", AssetType::Sprite },
 		{ ".jpeg", AssetType::Sprite },
-		{ ".ttf", AssetType::Font },
-		{ ".otf", AssetType::Font }
 	};
 
 	namespace Utils {

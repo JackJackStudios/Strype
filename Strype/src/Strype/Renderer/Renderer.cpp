@@ -33,7 +33,7 @@ namespace Strype {
 		textureSpec.Format = AGI::ImageFormat::RGBA;
 		textureSpec.Width = 1;
 		textureSpec.Height = 1;
-		s_WhiteTexture = AGI::Texture::Create(textureSpec);
+		s_WhiteTexture = Renderer::GetContext()->CreateTexture(textureSpec);
 
 		uint32_t whiteTextureData = 0xffffffff;
 		s_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
@@ -51,8 +51,8 @@ namespace Strype {
 			pipeline->AttributeCache[attr.Name] = attr;
 		}
 
-		pipeline->VertexArray = AGI::VertexArray::Create();
-		pipeline->VertexBuffer = AGI::VertexBuffer::Create(RenderCaps::MaxVertices, pipeline->Layout);
+		pipeline->VertexArray = Renderer::GetContext()->CreateVertexArray();
+		pipeline->VertexBuffer = Renderer::GetContext()->CreateVertexBuffer(RenderCaps::MaxVertices, pipeline->Layout);
 		pipeline->VertexArray->AddVertexBuffer(pipeline->VertexBuffer);
 
 		pipeline->VBBase = malloc(pipeline->VertexBuffer->GetSize());
@@ -72,7 +72,7 @@ namespace Strype {
 			offset += 4;
 		}
 
-		pipeline->IndexBuffer = AGI::IndexBuffer::Create(quadIndices.data(), RenderCaps::MaxIndices);
+		pipeline->IndexBuffer = Renderer::GetContext()->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
 		pipeline->VertexArray->SetIndexBuffer(pipeline->IndexBuffer);
 
 		if (!pipeline->TextureSampler.empty())
