@@ -1,5 +1,5 @@
-#include "stypch.h"
-#include "Strype/Renderer/Camera.h"
+#include "stypch.hpp"
+#include "Strype/Renderer/Camera.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 

@@ -1,4 +1,4 @@
-#include "PanelManager.h"
+#include "PanelManager.hpp"
 
 namespace Strype {
 

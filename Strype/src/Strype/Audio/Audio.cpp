@@ -1,5 +1,5 @@
-#include "stypch.h"
-#include "Strype/Audio/Audio.h"
+#include "stypch.hpp"
+#include "Strype/Audio/Audio.hpp"
 
 #include <AL/al.h>
 #include <AL/alc.h>

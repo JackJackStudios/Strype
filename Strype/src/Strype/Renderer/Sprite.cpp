@@ -1,5 +1,5 @@
-#include "stypch.h"
-#include "Sprite.h"
+#include "stypch.hpp"
+#include "Sprite.hpp"
 
 namespace Strype {
 

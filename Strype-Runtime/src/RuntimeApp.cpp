@@ -1,5 +1,5 @@
-#include <Strype.h>
-#include "RuntimeLayer.h"
+#include <Strype.hpp>
+#include "RuntimeLayer.hpp"
 
 using namespace Strype;
 

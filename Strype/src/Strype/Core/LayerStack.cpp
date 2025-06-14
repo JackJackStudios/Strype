@@ -1,5 +1,5 @@
-#include "stypch.h"
-#include "LayerStack.h"
+#include "stypch.hpp"
+#include "LayerStack.hpp"
 
 namespace Strype {
 

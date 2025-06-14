@@ -1,10 +1,10 @@
-#include "stypch.h"
-#include "PrefabSerializer.h"
+#include "stypch.hpp"
+#include "PrefabSerializer.hpp"
 
-#include "Components.h"
+#include "Components.hpp"
 
-#include "Strype/Utils/YamlHelpers.h"
-#include "Strype/Project/Project.h"
+#include "Strype/Utils/YamlHelpers.hpp"
+#include "Strype/Project/Project.hpp"
 
 #include <fstream>
 #include <magic_enum/magic_enum.hpp>

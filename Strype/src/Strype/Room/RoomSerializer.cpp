@@ -1,12 +1,12 @@
-#include "stypch.h"
-#include "RoomSerializer.h"
+#include "stypch.hpp"
+#include "RoomSerializer.hpp"
 
-#include "Object.h"
-#include "Prefab.h"
-#include "Components.h"
+#include "Object.hpp"
+#include "Prefab.hpp"
+#include "Components.hpp"
 
-#include "Strype/Utils/YamlHelpers.h"
-#include "Strype/Project/Project.h"
+#include "Strype/Utils/YamlHelpers.hpp"
+#include "Strype/Project/Project.hpp"
 
 #include <fstream>
 

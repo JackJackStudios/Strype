@@ -1,13 +1,13 @@
-#include "stypch.h"
-#include "Application.h"
+#include "stypch.hpp"
+#include "Application.hpp"
 
-#include "Strype/Renderer/Renderer.h"
-#include "Strype/Audio/Audio.h"
-#include "Strype/Core/Input.h"
+#include "Strype/Renderer/Renderer.hpp"
+#include "Strype/Audio/Audio.hpp"
+#include "Strype/Core/Input.hpp"
 
-#include "Strype/Script/ScriptEngine.h"
+#include "Strype/Script/ScriptEngine.hpp"
 
-#include "Strype/Utils/PlatformUtils.h"
+#include "Strype/Utils/PlatformUtils.hpp"
 
 namespace Strype {
 

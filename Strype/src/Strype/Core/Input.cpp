@@ -1,10 +1,10 @@
-#include "stypch.h"
-#include "Strype/Core/Input.h"
+#include "stypch.hpp"
+#include "Strype/Core/Input.hpp"
 
-#include "Strype/Core/Application.h"
+#include "Strype/Core/Application.hpp"
 
-#include "Strype/Events/KeyEvent.h"
-#include "Strype/Events/MouseEvent.h"
+#include "Strype/Events/KeyEvent.hpp"
+#include "Strype/Events/MouseEvent.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -14,29 +14,29 @@ namespace Strype {
 	{
 		for (const auto& [key, data] : s_KeyStates)
 		{
-			if (data.State == InputState::Pressed)
-				UpdateKeyState(key, InputState::Held);
+			if (data == InputState::Pressed)
+				s_KeyStates[key] = InputState::Held;
 
-			if (data.State == InputState::Released)
-				UpdateKeyState(key, InputState::None);
+			if (data == InputState::Released)
+				s_KeyStates[key] = InputState::None;
 
-			if (data.State == InputState::Held && !Input::IsKeyOn(key))
+			if (data == InputState::Held && !Input::IsKeyOn(key))
 			{
 				KeyReleasedEvent event(key);
 				Application::Get().OnEvent(event);
 
-				UpdateKeyState(key, InputState::Released);
+				s_KeyStates[key] = InputState::Released;
 			}
 
-			if (data.State == InputState::None && Input::IsKeyOn(key))
+			if (data == InputState::None && Input::IsKeyOn(key))
 			{
 				KeyPressedEvent event(key);
 				Application::Get().OnEvent(event);
 
-				UpdateKeyState(key, InputState::Pressed);
+				s_KeyStates[key] = InputState::Pressed;
 			}
 
-			if (data.State == InputState::Held)
+			if (data == InputState::Held)
 			{
 				KeyHeldEvent event(key);
 				Application::Get().OnEvent(event);
@@ -45,50 +45,34 @@ namespace Strype {
 
 		for (const auto& [button, data] : s_MouseStates)
 		{
-			if (data.State == InputState::Pressed)
-				UpdateMouseState(button, InputState::Held);
+			if (data == InputState::Pressed)
+				s_MouseStates[button] = InputState::Held;
 		
-			if (data.State == InputState::Released)
-				UpdateMouseState(button, InputState::None);
+			if (data == InputState::Released)
+				s_MouseStates[button] = InputState::None;
 		
-			if (data.State == InputState::Held && !Input::IsMouseButtonOn(button))
+			if (data == InputState::Held && !Input::IsMouseButtonOn(button))
 			{
 				MouseButtonReleasedEvent event(button);
 				Application::Get().OnEvent(event);
 		
-				UpdateMouseState(button, InputState::Released);
+				s_MouseStates[button] = InputState::Released;
 			}
 		
-			if (data.State == InputState::None && Input::IsMouseButtonOn(button))
+			if (data == InputState::None && Input::IsMouseButtonOn(button))
 			{
 				MouseButtonPressedEvent event(button);
 				Application::Get().OnEvent(event);
 		
-				UpdateMouseState(button, InputState::Pressed);
+				s_MouseStates[button] = InputState::Pressed;
 			}
 		
-			if (data.State == InputState::Held)
+			if (data == InputState::Held)
 			{
 				MouseButtonHeldEvent event(button);
 				Application::Get().OnEvent(event);
 			}
 		}
-	}
-
-	void Input::UpdateKeyState(KeyCode key, InputState newState)
-	{
-		auto& keyData = s_KeyStates[key];
-		keyData.Key = key;
-		keyData.OldState = keyData.State;
-		keyData.State = newState;
-	}
-
-	void Input::UpdateMouseState(MouseCode key, InputState newState)
-	{
-		auto& keyData = s_MouseStates[key];
-		keyData.Button = key;
-		keyData.OldState = keyData.State;
-		keyData.State = newState;
 	}
 
 	bool Input::IsKeyOn(const KeyCode key)
@@ -100,17 +84,17 @@ namespace Strype {
 
 	bool Input::IsKeyPressed(const KeyCode key)
 	{
-		return s_KeyStates[key].State == InputState::Pressed;
+		return s_KeyStates[key] == InputState::Pressed;
 	}
 
 	bool Input::IsKeyHeld(const KeyCode key)
 	{
-		return s_KeyStates[key].State == InputState::Held;
+		return s_KeyStates[key] == InputState::Held;
 	}
 
 	bool Input::IsKeyReleased(const KeyCode key)
 	{
-		return s_KeyStates[key].State == InputState::Released;
+		return s_KeyStates[key] == InputState::Released;
 	}
 
 	bool Input::IsMouseButtonOn(const MouseCode button)
@@ -122,17 +106,17 @@ namespace Strype {
 
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
-		return s_MouseStates[button].State == InputState::Released;
+		return s_MouseStates[button] == InputState::Released;
 	}
 
 	bool Input::IsMouseButtonHeld(MouseCode button)
 	{
-		return s_MouseStates[button].State == InputState::Released;
+		return s_MouseStates[button] == InputState::Released;
 	}
 
 	bool Input::IsMouseButtonReleased(MouseCode button)
 	{
-		return s_MouseStates[button].State == InputState::Released;
+		return s_MouseStates[button] == InputState::Released;
 	}
 
 	glm::vec2 Input::GetMousePosition()

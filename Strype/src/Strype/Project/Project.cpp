@@ -1,8 +1,8 @@
-#include "stypch.h"
-#include "Project.h"
+#include "stypch.hpp"
+#include "Project.hpp"
 
-#include "Strype/Project/ProjectSerializer.h"
-#include "Strype/Script/ScriptEngine.h"
+#include "Strype/Project/ProjectSerializer.hpp"
+#include "Strype/Script/ScriptEngine.hpp"
 
 namespace Strype {
 

@@ -1,4 +1,4 @@
-#include "RuntimeLayer.h"
+#include "RuntimeLayer.hpp"
 
 namespace Strype {
 

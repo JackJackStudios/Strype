@@ -1,4 +1,4 @@
-#include "InspectorPanel.h"
+#include "InspectorPanel.hpp"
 
 namespace Strype {
 

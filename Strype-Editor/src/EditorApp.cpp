@@ -1,5 +1,5 @@
-#include <Strype.h>
-#include "EditorLayer.h"
+#include <Strype.hpp>
+#include "EditorLayer.hpp"
 
 using namespace Strype;
 

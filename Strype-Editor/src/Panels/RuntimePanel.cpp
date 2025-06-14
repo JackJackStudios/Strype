@@ -1,4 +1,4 @@
-#include "RuntimePanel.h"
+#include "RuntimePanel.hpp"
 
 namespace Strype {
 

@@ -1,7 +1,7 @@
-#include "stypch.h"
-#include "Strype/Utils/PlatformUtils.h"
+#include "stypch.hpp"
+#include "Strype/Utils/PlatformUtils.hpp"
 
-#include "Strype/Core/Application.h"
+#include "Strype/Core/Application.hpp"
 
 #include <GLFW/glfw3.h>
 

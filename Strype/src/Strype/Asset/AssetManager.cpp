@@ -1,11 +1,11 @@
-#include "stypch.h"
-#include "AssetManager.h"
+#include "stypch.hpp"
+#include "AssetManager.hpp"
 
-#include "Strype/Project/Project.h"
+#include "Strype/Project/Project.hpp"
 
-#include "AssetSerializer.h"
-#include "Strype/Room/PrefabSerializer.h"
-#include "Strype/Room/RoomSerializer.h"
+#include "AssetSerializer.hpp"
+#include "Strype/Room/PrefabSerializer.hpp"
+#include "Strype/Room/RoomSerializer.hpp"
 
 #define REGISTER_ASSET(a) if (Utils::GetAssetTypeFromFileExtension(path.extension()) == AssetType::a) temp = CreateRef<a>()
 #define DEREGISTER_ASSET(a) STY_CORE_VERIFY(Utils::GetAssetTypeFromFileExtension(path.extension()) != AssetType::a, "Cannot create a new instance of {}", #a)

@@ -1,4 +1,4 @@
-#include "SceneHierachyPanel.h"
+#include "SceneHierachyPanel.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 

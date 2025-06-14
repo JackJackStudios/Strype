@@ -1,5 +1,5 @@
-#include "stypch.h"
-#include "Strype/Core/Log.h"
+#include "stypch.hpp"
+#include "Strype/Core/Log.hpp"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>

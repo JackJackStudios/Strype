@@ -1,10 +1,10 @@
-#include "stypch.h"
-#include "AssetSerializer.h"
+#include "stypch.hpp"
+#include "AssetSerializer.hpp"
 
-#include "Strype/Project/Project.h"
-#include "Strype/Renderer/Sprite.h"
-#include "Strype/Renderer/Renderer.h"
-#include "Strype/Audio/Audio.h"
+#include "Strype/Project/Project.hpp"
+#include "Strype/Renderer/Sprite.hpp"
+#include "Strype/Renderer/Renderer.hpp"
+#include "Strype/Audio/Audio.hpp"
 
 #include <AGI/agi.hpp>
 #include <stb_image.h>

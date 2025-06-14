@@ -1,7 +1,7 @@
-#include "stypch.h"
-#include "ScriptEngine.h"
+#include "stypch.hpp"
+#include "ScriptEngine.hpp"
 
-#include "ScriptGlue.h"
+#include "ScriptGlue.hpp"
 
 #include <Coral/TypeCache.hpp>
 

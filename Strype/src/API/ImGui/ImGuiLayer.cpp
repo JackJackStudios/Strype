@@ -1,7 +1,7 @@
-#include "stypch.h"
-#include "ImGuiLayer.h"
+#include "stypch.hpp"
+#include "ImGuiLayer.hpp"
 
-#include "Strype/Core/Application.h"
+#include "Strype/Core/Application.hpp"
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>

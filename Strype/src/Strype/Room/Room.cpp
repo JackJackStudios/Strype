@@ -1,13 +1,13 @@
-#include "stypch.h"
-#include "Room.h"
+#include "stypch.hpp"
+#include "Room.hpp"
 
-#include "Strype/Renderer/Renderer.h"
-#include "Strype/Renderer/Sprite.h"
+#include "Strype/Renderer/Renderer.hpp"
+#include "Strype/Renderer/Sprite.hpp"
 
-#include "Strype/Room/Object.h"
-#include "Strype/Room/Components.h"
-#include "Strype/Project/Project.h"
-#include "Strype/Core/Input.h"
+#include "Strype/Room/Object.hpp"
+#include "Strype/Room/Components.hpp"
+#include "Strype/Project/Project.hpp"
+#include "Strype/Core/Input.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

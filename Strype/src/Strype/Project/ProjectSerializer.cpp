@@ -1,7 +1,7 @@
-#include "stypch.h"
-#include "ProjectSerializer.h"
+#include "stypch.hpp"
+#include "ProjectSerializer.hpp"
 
-#include "Strype/Utils/YamlHelpers.h"
+#include "Strype/Utils/YamlHelpers.hpp"
 
 namespace Strype {
 

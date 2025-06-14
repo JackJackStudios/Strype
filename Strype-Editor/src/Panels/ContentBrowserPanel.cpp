@@ -1,6 +1,6 @@
-#include "ContentBrowserPanel.h"
+#include "ContentBrowserPanel.hpp"
 
-#include "InspectorPanel.h"
+#include "InspectorPanel.hpp"
 
 #include <stb_image.h>
 #include <glm/gtc/type_ptr.hpp>

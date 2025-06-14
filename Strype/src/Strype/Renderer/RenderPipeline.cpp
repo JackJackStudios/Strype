@@ -1,9 +1,9 @@
-#include "stypch.h"
-#include "RenderPipeline.h"
+#include "stypch.hpp"
+#include "RenderPipeline.hpp"
 
-#include "Strype/Core/Application.h"
+#include "Strype/Core/Application.hpp"
 
-#include "Renderer.h"
+#include "Renderer.hpp"
 #include <numeric>
 
 namespace Strype {

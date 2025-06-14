@@ -1,7 +1,7 @@
-#include "stypch.h"
-#include "Strype/Renderer/Renderer.h"
+#include "stypch.hpp"
+#include "Strype/Renderer/Renderer.hpp"
 
-#include "Strype/Core/Application.h"
+#include "Strype/Core/Application.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <numeric>

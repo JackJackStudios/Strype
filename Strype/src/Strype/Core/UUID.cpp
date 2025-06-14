@@ -1,5 +1,5 @@
-#include "stypch.h"
-#include "UUID.h"
+#include "stypch.hpp"
+#include "UUID.hpp"
 
 #include <random>
 

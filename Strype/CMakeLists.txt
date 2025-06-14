@@ -1,4 +1,4 @@
-file(GLOB_RECURSE SOURCE_DIR "src/**.cpp" "src/**.h")
+file(GLOB_RECURSE SOURCE_DIR "src/**.cpp" "src/**.hpp")
 add_library(Strype STATIC ${SOURCE_DIR})
 
 FetchContent_Declare(
@@ -9,7 +9,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(stb)
 FetchContent_GetProperties(stb)
 
-target_precompile_headers(Strype PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/stypch.h")
+target_precompile_headers(Strype PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/stypch.hpp")
 
 target_include_directories(Strype PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_include_directories(Strype PUBLIC ${stb_SOURCE_DIR})

@@ -1,15 +1,15 @@
-#include "stypch.h"
-#include "Strype/Core/Window.h"
+#include "stypch.hpp"
+#include "Strype/Core/Window.hpp"
 
-#include "Strype/Core/Application.h"
+#include "Strype/Core/Application.hpp"
 
-#include "Strype/Events/ApplicationEvent.h"
-#include "Strype/Events/MouseEvent.h"
-#include "Strype/Events/KeyEvent.h"
+#include "Strype/Events/ApplicationEvent.hpp"
+#include "Strype/Events/MouseEvent.hpp"
+#include "Strype/Events/KeyEvent.hpp"
 
-#include "Strype/Renderer/Renderer.h"
+#include "Strype/Renderer/Renderer.hpp"
 
-#include "Strype/Utils/PlatformUtils.h"
+#include "Strype/Utils/PlatformUtils.hpp"
 
 namespace Strype
 {

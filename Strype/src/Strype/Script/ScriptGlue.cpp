@@ -1,11 +1,11 @@
-#include "stypch.h"
-#include "ScriptGlue.h"
+#include "stypch.hpp"
+#include "ScriptGlue.hpp"
 
-#include "Strype/Room/Room.h"
-#include "Strype/Room/Object.h"
-#include "Strype/Room/Components.h"
+#include "Strype/Room/Room.hpp"
+#include "Strype/Room/Object.hpp"
+#include "Strype/Room/Components.hpp"
 
-#include "Strype/Project/Project.h"
+#include "Strype/Project/Project.hpp"
 
 #define STY_ADD_INTERNAL_CALL(icall) coreAssembly.AddInternalCall("Strype.InternalCalls", #icall, (void*)InternalCalls::icall)
 

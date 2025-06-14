@@ -1,7 +1,7 @@
-#include "stypch.h"
-#include "Object.h"
+#include "stypch.hpp"
+#include "Object.hpp"
 
-#include "Components.h"
+#include "Components.hpp"
 
 #define COPY_COMPONENTS(component) Room::CopyComponent<component>(src.m_Handle, src.m_Room->m_Registry, dest.m_Handle, dest.m_Room->m_Registry)
 
