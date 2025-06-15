@@ -31,7 +31,7 @@ namespace Strype {
 		static void Initialize();
 		static void Shutdown();
 
-		static void BuildProject(Ref<Project> proj);
+		static void BuildProject(const std::filesystem::path& path);
 
 		const ScriptMetadata& GetScriptMetadata(ScriptID scriptID) const { return m_ScriptMetadata.at(scriptID); }
 		const ScriptMap& GetAllScripts() const { return m_ScriptMetadata; }

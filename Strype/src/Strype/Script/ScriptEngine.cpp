@@ -32,18 +32,15 @@ namespace Strype {
 	}
 
 	//Windows only
-	void ScriptEngine::BuildProject(Ref<Project> proj)
+	void ScriptEngine::BuildProject(const std::filesystem::path& path)
 	{
-		std::filesystem::path filepath = proj->GetConfig().ProjectDirectory;
-		std::string name = proj->GetConfig().ProjectDirectory.filename().string();
-
-		STY_CORE_INFO("Building C# project '{}'", filepath);
+		STY_CORE_INFO("Building C# project '{}'", path);
 
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.csproj\" -property:Configuration={} -t:restore,build", filepath.string(), msBuildPath.string(), name, STY_BUILD_CONFIG_NAME);
-		STY_CORE_INFO(command);
+		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:restore,build > nul 2>&1", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		
 		system(command.c_str());
 	}
 
@@ -51,7 +48,7 @@ namespace Strype {
 	{
 		m_AppAssembly.reset();
 
-		std::filesystem::path filepath = proj->GetProjectDirectory() / "strype/bin/net8.0" / (proj->GetProjectName() + ".dll");
+		std::filesystem::path filepath = proj->GetProjectDirectory() / HIDDEN_FOLDER / "bin/net8.0" / (proj->GetProjectName() + ".dll");
 		m_AppAssembly = std::make_unique<Coral::ManagedAssembly>(std::move(s_LoadContext->LoadAssembly(filepath.string())));
 
 		if (m_AppAssembly->GetLoadStatus() == Coral::AssemblyLoadStatus::Success)

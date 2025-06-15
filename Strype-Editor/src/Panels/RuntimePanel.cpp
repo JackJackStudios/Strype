@@ -4,7 +4,7 @@ namespace Strype {
 
 	RuntimePanel::RuntimePanel(Ref<Room>& room)
 	{
-		ScriptEngine::BuildProject(Project::GetActive());
+		ScriptEngine::BuildProject(Project::GetActive()->GetProjectDirectory());
 		m_Room = CreateRef<Room>();
 		
 		AGI::FramebufferSpecification framebufferSpec;
@@ -46,8 +46,6 @@ namespace Strype {
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Game");
-
-		Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
 
 		ImVec2 viewportSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = glm::vec2(viewportSize.x, viewportSize.y);

@@ -1,43 +1,32 @@
-FileVersion = 1.2
-
 StrypeDirectory = os.getenv("STRYPE_DIR")
-include (path.join(StrypeDirectory, "Libraries", "Coral", "Premake", "CSExtensions.lua"))
 
-workspace "{0}"
-	startproject "{0}"
-	configurations { "Debug", "Release", "Dist" }
+workspace "EmptyProject"
+	startproject "EmptyProject"
+	configurations { "Debug", "Release" }
 
-	project "{0}"
+	filter "configurations:Debug"
+		optimize "Off"
+		symbols "Default"
+
+	filter "configurations:Release"
+		optimize "On"
+		symbols "Default"
+	
+	project "EmptyProject"
 		kind "SharedLib"
 		language "C#"
 		dotnetframework "net8.0"
 
-		targetname "{0}"
-		targetdir ("%{prj.location}/strype/Binaries")
-		objdir ("%{prj.location}/strype/Intermediates")
+		targetname "EmptyProject"
+		targetdir "%{prj.location}/bin"
+		objdir "%{prj.location}/bin"
 
-		files  {
-			"**.cs", 
-		}
+		files  { "../**.cs", }
+		removefiles { "./**.cs" }
 
 		links {
-			"%{StrypeDirectory}/Strype-Editor/DotNet/Strype-ScriptCore.dll",
-			"%{StrypeDirectory}/Strype-Editor/DotNet/Coral.Managed.dll",
-		}	
+			"Strype-StrypeCore",
+		}
 
-		filter "configurations:Debug"
-			optimize "Off"
-			symbols "Default"
-
-		filter "configurations:Release"
-			optimize "On"
-			symbols "Default"
-
-		filter "configurations:Dist"
-			optimize "Full"
-			symbols "Off"
-
-	group "Strype"
-		include (path.join(StrypeDirectory, "Libraries", "Coral", "Coral.Managed"))
-		include (path.join(StrypeDirectory, "Strype-ScriptCore"))
-	group ""
+	include "ScriptCore/Coral"
+	include "ScriptCore/Strype-ScriptCore"

@@ -23,3 +23,4 @@ out/
 *.log
 Strype-ScriptCore/coral-src
 Strype/master/Strype-Runtime.exe
+Strype-Editor/assets/ScriptCore

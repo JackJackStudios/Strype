@@ -283,7 +283,7 @@ namespace Strype {
 
 			if (isDirectory)
 			{
-				if (entry.path().filename() != "strype")
+				if (entry.path().filename() != HIDDEN_FOLDER)
 				{
 					node.Nodes.emplace_back(entry.path(), &node);
 					RefreshTreeNode(node.Nodes.back());

@@ -20,7 +20,8 @@ namespace Strype {
 	};
 
 	// Relative to working directory
-	const std::filesystem::path EMPTY_PROJECT = "assets/EmptyProject/EmptyProject.sproj";
+	constexpr std::string_view EMPTY_PROJECT = "assets/EmptyProject/EmptyProject.sproj";
+	constexpr std::string_view HIDDEN_FOLDER = "strype";
 
 	//Note: Project is not a Asset because it holds the AssetManager
 	class Project

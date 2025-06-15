@@ -89,8 +89,6 @@ namespace Strype {
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Room");
-		
-		Application::Get().GetImGuiLayer()->BlockEvents(!ImGui::IsWindowHovered());
 
 		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
@@ -164,7 +162,7 @@ namespace Strype {
 		//       the new directory. This is because a Project cannot exist
 		//       without a folder or default room (you must deserialize the project yourself)
 		Project::GenerateNew(dialog);
-		//OpenProject(true, path / (path.filename().string() + ".sproj"));
+		OpenProject(true, dialog / (dialog.filename().string() + ".sproj"));
 	}
 
 	void EditorLayer::SaveProject()
@@ -189,7 +187,7 @@ namespace Strype {
 		serializer.Deserialize(dialog);
 
 		if (buildProject)
-			ScriptEngine::BuildProject(project);
+			ScriptEngine::BuildProject(project->GetConfig().ProjectDirectory);
 
 		Project::SetActive(project);
 		m_PanelManager.OnProjectChanged();
@@ -324,7 +322,7 @@ namespace Strype {
 				ImGui::Separator();
 
 				if (ImGui::MenuItem("Build C# Assembly", "Ctrl+B"))
-					ScriptEngine::BuildProject(Project::GetActive());
+					ScriptEngine::BuildProject(Project::GetActive()->GetProjectDirectory());
 
 				if (ImGui::MenuItem("Build C# Project", ""))
 					Project::BuildProjectFiles(Project::GetProjectDirectory());
