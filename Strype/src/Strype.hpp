@@ -8,10 +8,9 @@
 
 #include "Strype/Core/Input.hpp"
 #include "Strype/Audio/Audio.hpp"
-#include "Strype/Core/KeyCodes.hpp"
-#include "Strype/Core/MouseCodes.hpp"
+#include "Strype/Core/InputCodes.hpp"
 
-#include "API/ImGui/ImGuiLayer.hpp"
+#include "Strype/Core/ImGuiLayer.hpp"
 
 #include "Strype/Renderer/Renderer.hpp"
 #include "Strype/Renderer/Sprite.hpp"

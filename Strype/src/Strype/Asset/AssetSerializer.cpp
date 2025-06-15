@@ -19,7 +19,7 @@ namespace Strype {
         stbi_set_flip_vertically_on_load(1);
         stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
 
-        STY_VERIFY(data, "Failed to load sprite \"{}\" ", path.string());
+        STY_VERIFY(data, "Failed to load sprite \"{}\" ", path);
 
         AGI::TextureSpecification textureSpec;
         textureSpec.Width = width;
@@ -46,7 +46,7 @@ namespace Strype {
         STY_CORE_VERIFY(num_frames == sfinfo.frames, "Error reading audio file data");
 
         Ref<AudioFile> file = CreateRef<AudioFile>(sfinfo.frames, sfinfo.channels, sfinfo.samplerate);
-        file->SetData(Buffer(membuf, num_bytes));
+        file->SetData(membuf, num_bytes);
 
         sf_close(sndfile);
         free(membuf);

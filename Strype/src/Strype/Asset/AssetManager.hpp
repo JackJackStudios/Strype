@@ -23,7 +23,7 @@ namespace Strype {
 		{
 			if (s_AssetExtensionMap.find(extension) == s_AssetExtensionMap.end())
 			{
-				STY_CORE_WARN("Could not find AssetType for \"{}\" ", extension.string());
+				STY_CORE_WARN("Could not find AssetType for \"{}\" ", extension);
 				return AssetType::None;
 			}
 

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Strype/Core/Base.hpp"
-#include "Strype/Events/Event.hpp"
-#include "Strype/Core/Timestep.hpp"
+#include "Strype/Core/Event.hpp"
 
 namespace Strype {
 
@@ -11,7 +10,7 @@ namespace Strype {
 	public:
 		virtual ~Layer() {}
 
-		virtual void OnUpdate(Timestep ts) {}
+		virtual void OnUpdate(float ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
 	};

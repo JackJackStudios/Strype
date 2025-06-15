@@ -25,21 +25,29 @@ namespace Strype {
 			std::filesystem::current_path(m_Config.WorkingDir);
 
 		m_StartupFrames = m_Config.StartupFrames;
+		m_Config.WindowProps.Title = config.WindowProps.Title != AGI::WindowProps().Title ? config.WindowProps.Title : config.AppName;
+		m_Config.WindowProps.Visible = false;
 
-		m_Window = Window::Create(config.WindowProps);
-		m_Window->SetTitle(config.WindowProps.Title != WindowProps().Title ? config.WindowProps.Title : config.AppName);
-
+		Renderer::Init();
 		Audio::Init();
+
+		Input::Init();
 
 		ScriptEngine::Initialize();
 
 		if (m_Config.ImGuiEnabled)
-			m_ImGuiLayer = new ImGuiLayer(m_Config.DockspaceEnabled);
+			m_ImGuiLayer = new ImGuiLayer();
+
+		InstallCallbacks();
 	}
 
 	Application::~Application()
 	{
 		m_Window->SetVisable(false);
+
+		if (m_Config.ImGuiEnabled)
+			delete m_ImGuiLayer;
+
 		m_LayerStack.DestroyLayers();
 
 		ScriptEngine::Shutdown();
@@ -72,8 +80,8 @@ namespace Strype {
 	{
 		while (m_Running)
 		{
-			float time = Time::GetTime();
-			Timestep timestep = time - m_LastFrameTime;
+			float time = m_Window->GetTime();
+			float timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
 			Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
@@ -118,6 +126,49 @@ namespace Strype {
 		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 
 		return false;
+	}
+
+	void Application::InstallCallbacks()
+	{
+		m_Window->SetWindowSizeCallback([](glm::vec2 size)
+		{
+			WindowResizeEvent event(size.x, size.y);
+			Application::Get().OnEvent(event);
+		});
+
+		m_Window->SetWindowPosCallback([](glm::vec2 pos)
+		{
+			WindowMoveEvent event(pos.x, pos.y);
+			Application::Get().OnEvent(event);
+		});
+
+		m_Window->SetWindowCloseCallback([]()
+		{
+			WindowCloseEvent event;
+			Application::Get().OnEvent(event);
+		});
+
+		m_Window->SetDropCallback([](int path_count, const char* paths[])
+		{
+			std::vector<std::filesystem::path> filepaths(path_count);
+			for (int i = 0; i < path_count; i++)
+				filepaths[i] = paths[i];
+
+			WindowDropEvent event(std::move(filepaths));
+			Application::Get().OnEvent(event);
+		});
+
+		m_Window->SetScrollCallback([](glm::vec2 offset)
+		{
+			MouseScrolledEvent event((float)offset.x, (float)offset.y);
+			Application::Get().OnEvent(event);
+		});
+
+		m_Window->SetCursorPosCallback([](glm::vec2 pos)
+		{
+			MouseMovedEvent event((float)pos.x, (float)pos.y);
+			Application::Get().OnEvent(event);
+		});
 	}
 
 }

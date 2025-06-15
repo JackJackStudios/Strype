@@ -42,7 +42,7 @@ namespace Strype {
         	stbi_set_flip_vertically_on_load(1);
         	stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
 
-			STY_VERIFY(data, "Failed to load sprite \"{}\" ", path.string());
+			STY_VERIFY(data, "Failed to load sprite \"{}\" ", path);
 
 			AGI::TextureSpecification textureSpec;
 			textureSpec.Width = width;
@@ -112,14 +112,17 @@ namespace Strype {
 
 			ImGui::NextColumn();
 		}
-
-		for (TreeNode& node : m_CurrentDirectory->Nodes)
+		
+		for (size_t i=0; i < m_CurrentDirectory->Nodes.size();)
 		{
+			TreeNode& node = m_CurrentDirectory->Nodes[i];
+
 			const std::filesystem::path& path = node.Path;
 			Ref<AGI::Texture> icon = GetIcon(node.Handle);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::ImageButton((std::string("##") + std::to_string(node.Handle)).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			ImGui::PopStyleColor();
 
 			if (ImGui::BeginDragDropSource())
 			{
@@ -133,17 +136,17 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Delete"))
 				{
-					Project::DeleteAsset(node.Handle);
-
 					if (Project::GetAssetType(node.Handle) == AssetType::Prefab)
 					{
-						Ref<Prefab> prefab = Project::GetAsset<Prefab>(node.Handle);
-
-						for (auto& obj : prefab->GetConnectedObjects())
+						for (auto& obj : Project::GetAsset<Prefab>(node.Handle)->GetConnectedObjects())
 							obj.RemoveSelf();
 					}
 
+					Project::DeleteAsset(node.Handle);
+
 					RefreshAssetTree();
+					ImGui::EndPopup();
+					continue;
 				}
 
 				ImGui::EndPopup();
@@ -163,11 +166,10 @@ namespace Strype {
 				}
 			}
 
-			ImGui::PopStyleColor();
-
 			ImGui::TextWrapped(path.stem().string().c_str());
 
 			ImGui::NextColumn();
+			++i;
 		}
 
 		if (m_InputActive)
@@ -281,7 +283,7 @@ namespace Strype {
 
 			if (isDirectory)
 			{
-				if (!(entry.path().filename() == "strype" || entry.path().filename() == ".vs" || entry.path().filename() == "obj"))
+				if (entry.path().filename() != "strype")
 				{
 					node.Nodes.emplace_back(entry.path(), &node);
 					RefreshTreeNode(node.Nodes.back());

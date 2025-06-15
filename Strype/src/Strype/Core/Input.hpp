@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Strype/Core/KeyCodes.hpp"
-#include "Strype/Core/MouseCodes.hpp"
-#include "Strype/Events/Event.hpp"
+#include "Strype/Core/InputCodes.hpp"
+#include "Strype/Core/Event.hpp"
 
 #include <glm/glm.hpp>
 
@@ -19,6 +18,7 @@ namespace Strype {
 	class Input
 	{
 	public:
+		static void Init();
 		static void Update();
 
 		static bool IsKeyOn(KeyCode key); //GLFW

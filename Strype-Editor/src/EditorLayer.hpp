@@ -71,10 +71,10 @@ namespace Strype {
 	class EditorLayer : public Layer
 	{
 	public:
-		EditorLayer();
+		EditorLayer(const std::filesystem::path& projectPath);
 		~EditorLayer();
 
-		void OnUpdate(Timestep ts) override;
+		void OnUpdate(float ts) override;
 		void OnImGuiRender() override;
 
 		void OnEvent(Event& e) override;

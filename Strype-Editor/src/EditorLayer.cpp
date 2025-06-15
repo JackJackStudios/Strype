@@ -5,7 +5,7 @@
 
 namespace Strype {
 
-	EditorLayer::EditorLayer()
+	EditorLayer::EditorLayer(const std::filesystem::path& projectPath)
 	{
 		m_Room = CreateRef<Room>();
 
@@ -34,7 +34,7 @@ namespace Strype {
 
 		m_PanelManager.GetInspector()->AddType<Prefab>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-		OpenProject(false);
+		OpenProject(false, projectPath);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -48,7 +48,7 @@ namespace Strype {
 		Project::SetActive(nullptr);
 	}
 
-	void EditorLayer::OnUpdate(Timestep ts)
+	void EditorLayer::OnUpdate(float ts)
 	{
 		auto[mouseX, mouseY] = ImGui::GetMousePos();
 		mouseX -= m_ViewportBounds[0].x;

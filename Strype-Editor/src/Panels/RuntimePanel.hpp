@@ -10,7 +10,7 @@ namespace Strype {
 		RuntimePanel(Ref<Room>& room);
 		~RuntimePanel();
 
-		virtual void OnUpdate(Timestep ts);
+		virtual void OnUpdate(float ts);
 		virtual void OnImGuiRender();
 	private:
 		Ref<AGI::Framebuffer> m_Framebuffer;

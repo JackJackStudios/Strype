@@ -11,26 +11,24 @@ namespace Strype {
 
 	void Log::Init()
 	{
-		std::vector<spdlog::sink_ptr> logSinks;
-		logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-
-		logSinks[0]->set_pattern("%^[%T] %n: %v%$");
-
 #ifdef STY_DEBUG
 		spdlog::level::level_enum loglevel = spdlog::level::trace;
 #else
 		spdlog::level::level_enum loglevel = spdlog::level::info;
 #endif
 
-		s_CoreLogger = std::make_shared<spdlog::logger>("STRYPE", begin(logSinks), end(logSinks));
-		spdlog::register_logger(s_CoreLogger);
-		s_CoreLogger->set_level(loglevel);
+		spdlog::sink_ptr console = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+		console->set_pattern("%^[%T] %n: %v%$");
+		console->set_level(loglevel);
+
+		s_CoreLogger = std::make_shared<spdlog::logger>("STRYPE", console);
 		s_CoreLogger->flush_on(loglevel);
 
-		s_ClientLogger = std::make_shared<spdlog::logger>("APP", begin(logSinks), end(logSinks));
-		spdlog::register_logger(s_ClientLogger);
-		s_ClientLogger->set_level(loglevel);
+		s_ClientLogger = std::make_shared<spdlog::logger>("APP", console);
 		s_ClientLogger->flush_on(loglevel);
+
+		spdlog::register_logger(s_CoreLogger);
+		spdlog::register_logger(s_ClientLogger);
 	}
 
 }

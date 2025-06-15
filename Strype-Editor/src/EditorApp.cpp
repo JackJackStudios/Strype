@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 
 	Application(config)
 		.PushPipeline<QuadPipeline>()
-		.PushLayer<EditorLayer>()
+		.PushLayer<EditorLayer>(argc > 1 ? argv[1] : "")
 		.Run();
 
 	return 0;

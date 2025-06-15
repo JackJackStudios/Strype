@@ -24,7 +24,7 @@ namespace Strype {
 		m_Room->StopRuntime();
 	}
 
-	void RuntimePanel::OnUpdate(Timestep ts)
+	void RuntimePanel::OnUpdate(float ts)
 	{
 		if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(m_Framebuffer->GetWidth() != m_ViewportSize.x || m_Framebuffer->GetHeight() != m_ViewportSize.y))

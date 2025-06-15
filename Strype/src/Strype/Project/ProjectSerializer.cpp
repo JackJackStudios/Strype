@@ -40,7 +40,7 @@ namespace Strype {
 
 		STY_CORE_VERIFY(root, "Could not open project");
 
-		STY_CORE_TRACE("Deserializing project '{0}'", filepath.stem().string());
+		STY_CORE_TRACE("Deserializing project '{0}'", filepath.stem());
 
 		ProjectConfig& config = m_Project->m_Config;
 		config.Name = filepath.stem().string();

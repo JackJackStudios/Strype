@@ -36,7 +36,7 @@ namespace Strype {
 		return true;
 	}
 
-	void Room::OnUpdate(Timestep ts)
+	void Room::OnUpdate(float ts)
 	{
 		Renderer::BeginRoom(m_Camera);
 
@@ -78,12 +78,13 @@ namespace Strype {
 		if (m_RoomState == RoomState::Runtime)
 		{
 			auto& scriptEngine = Project::GetScriptEngine();
+			float timestep = ts;
 
 			m_Registry.view<ScriptContainer>().each([&](auto entity, ScriptContainer& container) {
 				for (auto& script : container) 
 				{
 					if (scriptEngine->IsValidScript(script.ClassID))
-						script.Instance.Invoke<float>("OnUpdate", ts);
+						script.Instance.Invoke<float>("OnUpdate", std::move(timestep));
 				}
 			});
 
@@ -105,7 +106,7 @@ namespace Strype {
 	{
 		if (m_RoomState == RoomState::Runtime)
 		{
-			STY_CORE_WARN("Cannot start room ({}) twice!", Project::GetFilePath(Handle).filename().string());
+			STY_CORE_WARN("Cannot start room ({}) twice!", Project::GetFilePath(Handle).filename());
 			return;
 		}
 

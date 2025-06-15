@@ -13,7 +13,7 @@ set(ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ALSOFT_UTILS OFF CACHE BOOL "" FORCE)
 set(ALSOFT_TESTS OFF CACHE BOOL "" FORCE)
 set(AGI_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(AGI_EXTENSIONS OFF CACHE BOOL "" FORCE)
+set(AGI_EXTENSIONS ON CACHE BOOL "" FORCE)
 
 add_compile_definitions(
     $<$<PLATFORM_ID:Windows>:STY_WINDOWS>
@@ -56,13 +56,6 @@ FetchContent_Declare(
     GIT_TAG        v3.15.0
 )
 FetchContent_MakeAvailable(EnTT)
-
-FetchContent_Declare(
-    GLFW
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG        3.4
-)
-FetchContent_MakeAvailable(GLFW)
 
 FetchContent_Declare(
     glm

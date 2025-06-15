@@ -18,7 +18,6 @@
 #include "Strype/Core/Log.hpp"
 #include "Strype/Core/Base.hpp"
 #include "Strype/Core/Hash.hpp"
-#include "Strype/Core/Version.hpp"
 
 #ifdef STY_WINDOWS
 #include <Windows.h>

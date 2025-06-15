@@ -24,7 +24,7 @@ namespace Strype {
 		static AssetType GetStaticType() { return AssetType::AudioFile; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 
-		void SetData(const Buffer& buff) const;
+		void SetData(void* data, uint64_t size) const;
 		uint32_t GetNative() const { return m_RendererID; }
 	private:
 		uint32_t m_RendererID = 0;

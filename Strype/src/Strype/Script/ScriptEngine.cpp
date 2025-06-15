@@ -37,7 +37,7 @@ namespace Strype {
 		std::filesystem::path filepath = proj->GetConfig().ProjectDirectory;
 		std::string name = proj->GetConfig().ProjectDirectory.filename().string();
 
-		STY_CORE_INFO("Building C# project '{}'", filepath.string());
+		STY_CORE_INFO("Building C# project '{}'", filepath);
 
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
@@ -51,7 +51,7 @@ namespace Strype {
 	{
 		m_AppAssembly.reset();
 
-		std::filesystem::path filepath = proj->GetProjectDirectory() / "strype" / "Binaries" / (proj->GetProjectName() + ".dll");
+		std::filesystem::path filepath = proj->GetProjectDirectory() / "strype/bin/net8.0" / (proj->GetProjectName() + ".dll");
 		m_AppAssembly = std::make_unique<Coral::ManagedAssembly>(std::move(s_LoadContext->LoadAssembly(filepath.string())));
 
 		if (m_AppAssembly->GetLoadStatus() == Coral::AssemblyLoadStatus::Success)
@@ -60,7 +60,7 @@ namespace Strype {
 			return;
 		}
 
-		STY_CORE_ERROR("Error loading file: {}", filepath.string());
+		STY_CORE_ERROR("Error loading file: {}", filepath);
 	}
 
 	void ScriptEngine::BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly)

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Base.hpp"
+#include "Strype/Utils/LoggingHelpers.hpp"
+
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 
@@ -24,7 +26,7 @@ namespace Strype {
 #define STY_CORE_TRACE(...)    ::Strype::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define STY_CORE_INFO(...)     ::Strype::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define STY_CORE_WARN(...)     ::Strype::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define STY_CORE_ERROR(...)    ::Strype::Log::GetCoreLogger()->error(__VA_ARGS__); __debugbreak()
+#define STY_CORE_ERROR(...)    ::Strype::Log::GetCoreLogger()->error(__VA_ARGS__); STY_DEBUGBREAK()
 								 
 // Client log macros			 
 #define STY_TRACE(...)         ::Strype::Log::GetClientLogger()->trace(__VA_ARGS__)

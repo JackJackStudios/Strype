@@ -11,12 +11,6 @@ namespace Strype {
 		static std::filesystem::path OpenFolder();
 	};
 
-	class Time
-	{
-	public:
-		static float GetTime();
-	};
-
 	class PlatformUtils
 	{
 	public:

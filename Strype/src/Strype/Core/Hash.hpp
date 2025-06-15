@@ -58,7 +58,7 @@ namespace Strype {
 			return hash;
 		}
 
-		static uint32_t CRC32(const char* str)
+		static constexpr uint32_t CRC32(const char* str)
 		{
 			auto crc = 0xFFFFFFFFu;
 
@@ -69,7 +69,7 @@ namespace Strype {
 			return ~crc;
 		}
 
-		static uint32_t CRC32(const std::string& string)
+		static constexpr uint32_t CRC32(const std::string& string)
 		{
 			return CRC32(string.c_str());
 		}

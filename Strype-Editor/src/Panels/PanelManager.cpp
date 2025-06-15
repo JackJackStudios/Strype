@@ -15,7 +15,7 @@ namespace Strype {
 		m_Panels.clear();
 	}
 
-	void PanelManager::OnUpdate(Timestep ts)
+	void PanelManager::OnUpdate(float ts)
 	{
 		for (const Ref<EditorPanel>& panel : m_Panels)
 			panel->OnUpdate(ts);

@@ -13,7 +13,7 @@ namespace Strype {
 		PanelManager();
 		~PanelManager();
 
-		void OnUpdate(Timestep ts);
+		void OnUpdate(float ts);
 		void OnImGuiRender();
 		void OnEvent(Event& e);
 

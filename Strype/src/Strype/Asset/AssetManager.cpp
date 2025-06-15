@@ -121,7 +121,7 @@ namespace Strype {
 	{
 		if (m_LoadedFiles.find(Utils::ToAssetSysPath(path)) == m_LoadedFiles.end())
 		{
-			STY_CORE_WARN("Could not find AssetHandle for \"{}\" ", Utils::ToAssetSysPath(path).string());
+			STY_CORE_WARN("Could not find AssetHandle for \"{}\" ", Utils::ToAssetSysPath(path));
 			return 0;
 		}
 
@@ -136,7 +136,7 @@ namespace Strype {
 			return;
 		}
 
-		STY_CORE_TRACE("Serializing asset \"{}\" ", GetFilePath(handle).string());
+		STY_CORE_TRACE("Serializing asset \"{}\" ", GetFilePath(handle));
 
 		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
 	}
@@ -145,11 +145,11 @@ namespace Strype {
     {
 		if (m_LoadedFiles.find(GetFilePath(handle)) == m_LoadedFiles.end())
 		{
-			STY_CORE_WARN("Cannot save memory-only assets to the filesystem");
+			STY_CORE_WARN("Cannot delete memory-only assets from the filesystem");
 			return;
 		}
 
-		STY_CORE_TRACE("Deleting asset \"{}\" ", GetFilePath(handle).string());
+		STY_CORE_TRACE("Deleting asset \"{}\" ", GetFilePath(handle));
 
 		std::filesystem::path path = GetFilePath(handle);
 		m_AssetRegistry[handle].reset();
@@ -157,7 +157,7 @@ namespace Strype {
 		m_AssetRegistry.erase(handle);
 		m_LoadedFiles.erase(path);
 
-		std::filesystem::remove(Project::GetProjectDirectory() / path);
+		//std::filesystem::remove(Project::GetProjectDirectory() / path);
     }
 
     AssetSerializer* AssetManager::GetSerializer(AssetType type)
@@ -182,7 +182,7 @@ namespace Strype {
 
 		if (metadata.Type == AssetType::None)
 		{
-			STY_CORE_WARN("Could not import Asset \"{}\" ", filepath.string());
+			STY_CORE_WARN("Could not import Asset \"{}\" ", filepath);
 			return 0;
 		}
 
@@ -198,7 +198,7 @@ namespace Strype {
 		}
 		else
 		{
-			STY_CORE_WARN("Asset import failed \"{}\" ", metadata.FilePath.string());
+			STY_CORE_WARN("Asset import failed \"{}\" ", metadata.FilePath);
 		}
 
 		return handle;
@@ -212,7 +212,7 @@ namespace Strype {
 			return nullptr;
 		}
 
-		STY_CORE_TRACE("Deserializing asset \"{}\" ", metadata.FilePath.string());
+		STY_CORE_TRACE("Deserializing asset \"{}\" ", metadata.FilePath);
 
 		return m_Serializers.at(metadata.Type)->LoadAsset(Project::GetProjectDirectory() / metadata.FilePath);
 	}

@@ -14,7 +14,7 @@ namespace Strype {
 		RuntimeLayer(const std::filesystem::path& path);
 		~RuntimeLayer();
 
-		void OnUpdate(Timestep ts) override;
+		void OnUpdate(float ts) override;
 
 		void OpenProject(const std::filesystem::path& path);
 	private:

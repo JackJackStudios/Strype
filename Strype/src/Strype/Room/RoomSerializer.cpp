@@ -85,13 +85,14 @@ namespace Strype {
 
 		STY_CORE_VERIFY(data, "Could not load room")
 		STY_CORE_VERIFY(data["Objects"], "Could not load room");
+		STY_CORE_VERIFY(data["BackgroundColour"], "Could not load room");
 
 		YAML::Node width = data["Width"];
 		YAML::Node height = data["Height"];
 		if (width && height)
 		{
-			room->m_Width = width.as<uint64_t>();
-			room->m_Height = height.as<uint64_t>();
+			room->m_Width = data["Width"].as<uint64_t>();
+			room->m_Height = data["Height"].as<uint64_t>();
 		}
 
 		room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
@@ -129,7 +130,7 @@ namespace Strype {
 			}
 			else
 			{
-				STY_CORE_WARN("Could not find specifed path: \"{}\" ", path.string());
+				STY_CORE_WARN("Could not find specifed path: \"{}\" ", path);
 			}
 		}
 	

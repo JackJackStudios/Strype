@@ -11,7 +11,7 @@ namespace Strype {
 	public:
 		virtual ~EditorPanel() = default;
 
-		virtual void OnUpdate(Timestep ts) {}
+		virtual void OnUpdate(float ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
 		virtual void SetRoomContext(const Ref<Room>& room) {};

@@ -1,17 +1,14 @@
 #pragma once
 
 #include "Strype/Core/Layer.hpp"
-
-#include "Strype/Events/ApplicationEvent.hpp"
-#include "Strype/Events/KeyEvent.hpp"
-#include "Strype/Events/MouseEvent.hpp"
+#include "Strype/Core/Event.hpp"
 
 namespace Strype {
 
 	class ImGuiLayer : public Layer
 	{
 	public:
-		ImGuiLayer(bool dockspace = false);
+		ImGuiLayer();
 		~ImGuiLayer();
 
 		virtual void OnEvent(Event& e) override;
@@ -22,7 +19,6 @@ namespace Strype {
 		void BlockEvents(bool block) { m_BlockEvents = block; }
 	private:
 		bool m_BlockEvents = true;
-		bool m_Dockspace;
 	};
 
 }

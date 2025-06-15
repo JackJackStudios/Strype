@@ -14,7 +14,7 @@ namespace Strype {
 		m_Room->StopRuntime();
 	}
 
-	void RuntimeLayer::OnUpdate(Timestep ts)
+	void RuntimeLayer::OnUpdate(float ts)
 	{
 		m_Room->OnUpdate(ts);
 	}

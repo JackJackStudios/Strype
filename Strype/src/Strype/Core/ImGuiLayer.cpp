@@ -11,8 +11,7 @@
 
 namespace Strype {
 
-	ImGuiLayer::ImGuiLayer(bool dockspace)
-		: m_Dockspace(dockspace)
+	ImGuiLayer::ImGuiLayer()
 	{
 		// Setup Dear ImGui context
 		ImGui::CreateContext();
@@ -27,7 +26,7 @@ namespace Strype {
 		ImGui::StyleColorsDark();
 
 		Application& app = Application::Get();
-		GLFWwindow* window = app.GetWindow()->GetNativeWindow();
+		GLFWwindow* window = app.GetWindow()->GetGlfwWindow();
 
 		// Setup Platform/Renderer bindings
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -60,7 +59,7 @@ namespace Strype {
 		if (Application::Get().GetConfig().ImGuizmoEnabled)
 			ImGuizmo::BeginFrame();
 		
-		if (m_Dockspace)
+		if (Application::Get().GetConfig().DockspaceEnabled)
 		{
 			static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 			ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar;
@@ -90,7 +89,7 @@ namespace Strype {
 
 	void ImGuiLayer::End()
 	{
-		if (m_Dockspace)
+		if (Application::Get().GetConfig().DockspaceEnabled)
 			ImGui::End();
 
 		ImGuiIO& io = ImGui::GetIO();

@@ -2,16 +2,13 @@
 
 #include "Strype/Core/Base.hpp"
 
-#include "Strype/Core/Window.hpp"
+#include <AGI/Window.hpp>
 #include "Strype/Core/LayerStack.hpp"
-#include "Strype/Events/Event.hpp"
-#include "Strype/Events/ApplicationEvent.hpp"
+#include "Strype/Core/Event.hpp"
 
 #include "Strype/Renderer/Renderer.hpp"
 
-#include "Strype/Core/Timestep.hpp"
-
-#include "API/ImGui/ImGuiLayer.hpp"
+#include "Strype/Core/ImGuiLayer.hpp"
 
 #include <AGI/agi.hpp>
 
@@ -25,7 +22,7 @@ namespace Strype {
 		std::filesystem::path MasterDir;
 		std::filesystem::path WorkingDir;
 
-		WindowProps WindowProps;
+		AGI::WindowProps WindowProps;
 
 		bool DockspaceEnabled = false;
 		bool ImGuizmoEnabled = false;
@@ -39,7 +36,7 @@ namespace Strype {
 		Application(const AppConfig& config);
 		virtual ~Application();
 
-		Window* GetWindow() { return m_Window.get(); }
+		std::unique_ptr<AGI::Window>& GetWindow() { return m_Window; }
 
 		void Close();
 
@@ -74,8 +71,9 @@ namespace Strype {
 		void Run();
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
+		void InstallCallbacks();
 
-		Scope<Window> m_Window;
+		std::unique_ptr<AGI::Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		AppConfig m_Config;
 
@@ -87,6 +85,7 @@ namespace Strype {
 		LayerStack m_LayerStack;
 	private:
 		static Application* s_Instance;
+
 		friend int ::main(int argc, char** argv);
 	};
 

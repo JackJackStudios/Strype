@@ -1,12 +1,9 @@
 #pragma once
 
-#include "Strype/Events/Event.hpp"
-#include "Strype/Core/Timestep.hpp"
-#include "Strype/Events/ApplicationEvent.hpp"
+#include "Strype/Core/Event.hpp"
 #include "Strype/Renderer/Camera.hpp"
 
 #include "Strype/Asset/Asset.hpp"
-#include "Strype/Events/MouseEvent.hpp"
 
 #include <entt/entt.hpp>
 #include <box2d/box2d.h>
@@ -36,7 +33,7 @@ namespace Strype {
 
 		bool ObjectExists(entt::entity obj) { return m_Registry.valid(obj); }
 
-		void OnUpdate(Timestep ts);
+		void OnUpdate(float ts);
 		void OnResize(const glm::vec2& dims);
 		void OnEvent(Event& e);
 

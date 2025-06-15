@@ -45,9 +45,9 @@ namespace Strype {
 		alDeleteBuffers(1, &m_RendererID);
 	}
 
-	void AudioFile::SetData(const Buffer& buff) const
+	void AudioFile::SetData(void* data, uint64_t size) const
 	{
-		alBufferData(m_RendererID, m_DataFormat, buff.Data, buff.Size, m_SampleRate);
+		alBufferData(m_RendererID, m_DataFormat, data, size, m_SampleRate);
 	}
 
 }
