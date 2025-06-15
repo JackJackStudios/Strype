@@ -35,10 +35,10 @@ namespace Strype {
 
 		ScriptEngine::Initialize();
 
-		if (m_Config.ImGuiEnabled)
-			m_ImGuiLayer = new ImGuiLayer();
-
 		InstallCallbacks();
+
+		if (m_Config.ImGuiEnabled)
+			m_ImGuiLayer = new AGI::ImGuiLayer(m_Window);
 	}
 
 	Application::~Application()
@@ -92,12 +92,12 @@ namespace Strype {
 
 			if (m_Config.ImGuiEnabled)
 			{
-				m_ImGuiLayer->Begin();
+				m_ImGuiLayer->BeginFrame(m_Config.DockspaceEnabled);
 
 				for (Layer* layer : m_LayerStack)
 					layer->OnImGuiRender();
 					
-				m_ImGuiLayer->End();
+				m_ImGuiLayer->EndFrame();
 			}
 			
 			m_Window->OnUpdate();

@@ -89,8 +89,6 @@ namespace Strype {
 				MouseButtonHeldEvent event(button);
 				Application::Get().OnEvent(event);
 			}
-
-			STY_CORE_INFO("{}", Input::IsMouseButtonOn(button));
 		}
 	}
 

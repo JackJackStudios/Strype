@@ -17,6 +17,7 @@ target_include_directories(Strype PUBLIC ${stb_SOURCE_DIR})
 target_link_libraries(Strype PUBLIC
     agi
     agi_window
+    agi_imgui
     agi_opengl
 
     glm

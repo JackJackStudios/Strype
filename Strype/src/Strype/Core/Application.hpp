@@ -2,15 +2,14 @@
 
 #include "Strype/Core/Base.hpp"
 
-#include <AGI/Window.hpp>
 #include "Strype/Core/LayerStack.hpp"
 #include "Strype/Core/Event.hpp"
 
 #include "Strype/Renderer/Renderer.hpp"
 
-#include "Strype/Core/ImGuiLayer.hpp"
-
 #include <AGI/agi.hpp>
+#include <AGI/Window.hpp>
+#include <AGI/ImGuiLayer.hpp>
 
 int main(int argc, char** argv);
 
@@ -43,7 +42,7 @@ namespace Strype {
 		static Application& Get() { return *s_Instance; }
 
 		const AppConfig& GetConfig() const { return m_Config; }
-		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+		AGI::ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
 		void OnEvent(Event& e);
 
@@ -74,7 +73,7 @@ namespace Strype {
 		void InstallCallbacks();
 
 		std::unique_ptr<AGI::Window> m_Window;
-		ImGuiLayer* m_ImGuiLayer;
+		AGI::ImGuiLayer* m_ImGuiLayer;
 		AppConfig m_Config;
 
 		bool m_Running = true;

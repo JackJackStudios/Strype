@@ -10,8 +10,6 @@
 #include "Strype/Audio/Audio.hpp"
 #include "Strype/Core/InputCodes.hpp"
 
-#include "Strype/Core/ImGuiLayer.hpp"
-
 #include "Strype/Renderer/Renderer.hpp"
 #include "Strype/Renderer/Sprite.hpp"
 
