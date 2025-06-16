@@ -4,7 +4,6 @@
 
 #include "Panels/ContentBrowserPanel.hpp"
 #include "Panels/SceneHierachyPanel.hpp"
-#include "Panels/RuntimePanel.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -95,7 +94,6 @@ namespace Strype {
 
 		PanelManager m_PanelManager;
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
-		Ref<RuntimePanel> m_RuntimePanel;
 		Ref<SceneHierachyPanel> m_SceneHierachyPanel;
 
 		glm::vec2 m_ViewportBounds[2];

@@ -13,10 +13,39 @@
 
 namespace Strype {
 
+	enum class DataType
+	{
+		Bool,
+		Float,
+		Int, UInt,
+		Long, ULong,
+		Vector2, Vector3, Vector4,
+	};
+
+	static std::unordered_map<std::string, DataType> s_DataTypeLookup = {
+		{ "System.Boolean", DataType::Bool },
+		{ "System.Single",  DataType::Float },
+		{ "System.Int32",   DataType::Int },
+		{ "System.UInt32",  DataType::UInt },
+		{ "System.Int64",   DataType::Long },
+		{ "System.UInt64",  DataType::ULong },
+		{ "Hazel.Vector2",  DataType::Vector2 },
+		{ "Hazel.Vector3",  DataType::Vector3 },
+		{ "Hazel.Vector4",  DataType::Vector4 }
+	};
+
+	struct ScriptField
+	{
+		std::string Name;
+		DataType Type;
+	};
+
 	struct ScriptMetadata
 	{
 		Coral::Type* Type;
 		std::string FullName;
+
+		std::unordered_map<uint32_t, ScriptField> Fields;
 	};
 
 	using ScriptID = UUID;
@@ -38,7 +67,8 @@ namespace Strype {
 
 		bool IsValidScript(ScriptID scriptID) const;
 		bool IsValidScript(const std::string& name) const { return IsValidScript(GetIDByName(name)); }
-
+		
+		const ScriptField& GetField(ScriptID scriptID, const std::string& name) const { return GetScriptMetadata(scriptID).Fields.at(Hash::GenerateFNVHash(name)); }
 		const std::string& GetScriptName(ScriptID scriptID) const { return GetScriptMetadata(scriptID).FullName; }
 		const Coral::Type* GetTypeByName(const std::string& name) const { return m_ScriptMetadata.at(Hash::GenerateFNVHash(name)).Type; }
 		const ScriptID GetIDByName(const std::string& name) const { return Hash::GenerateFNVHash(name); }

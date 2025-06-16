@@ -4,7 +4,6 @@ namespace Strype {
 
 	RuntimeLayer::RuntimeLayer(const std::filesystem::path& path)
 	{
-		//FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0")
 		OpenProject(path);
 		m_Room->StartRuntime();
 	}
@@ -26,6 +25,7 @@ namespace Strype {
 		serializer.Deserialize(path);
 
 		Project::SetActive(project);
+		ScriptEngine::BuildProject(project->GetProjectDirectory());
 
 		m_Room = Project::GetAsset<Room>(Project::GetAssetHandle(project->GetStartRoom()));
 

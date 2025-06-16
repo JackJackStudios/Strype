@@ -93,13 +93,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(ImGui)
 
 FetchContent_Declare(
-    msdf-atlas-gen
-    GIT_REPOSITORY https://github.com/JackKnox/msdf-atlas-gen
-    GIT_TAG        strype
-)
-FetchContent_MakeAvailable(msdf-atlas-gen)
-
-FetchContent_Declare(
     libsndfile 
     GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
     GIT_TAG        1.2.2
@@ -112,13 +105,6 @@ FetchContent_Declare(
     GIT_TAG        1.24.3
 )
 FetchContent_MakeAvailable(OpenAL)
-
-FetchContent_Declare(
-    FFmpeg
-    GIT_REPOSITORY https://github.com/JackKnox/ffmpeg-cmake
-    GIT_TAG        main
-)
-FetchContent_MakeAvailable(FFmpeg)
 
 FetchContent_Declare(
     ImGuizmo

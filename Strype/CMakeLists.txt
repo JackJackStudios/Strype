@@ -24,7 +24,6 @@ target_link_libraries(Strype PUBLIC
     box2d
     ImGui
     OpenAL
-    FFmpeg
     sndfile
     ImGuizmo
     Coral.Native
@@ -32,7 +31,6 @@ target_link_libraries(Strype PUBLIC
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum
-    msdf-atlas-gen::msdf-atlas-gen
 )
 
 # Download scripting binaries

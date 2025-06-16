@@ -63,16 +63,40 @@ namespace Strype {
 	void ScriptEngine::BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly)
 	{
 		auto& types = assembly->GetTypes();
-		auto& entityType = assembly->GetType("Strype.Object");
+		auto& objectType = assembly->GetType("Strype.Object");
 
 		for (auto& type : types)
 		{
-			std::string fullName = type->GetFullName();
-			ScriptID scriptID = Hash::GenerateFNVHash(fullName);
+			if (type->IsSubclassOf(objectType))
+			{
+				std::string fullName = type->GetFullName();
+				ScriptID scriptID = Hash::GenerateFNVHash(fullName);
 
-			auto& metadata = m_ScriptMetadata[scriptID];
-			metadata.FullName = fullName;
-			metadata.Type = type;
+				auto& metadata = m_ScriptMetadata[scriptID];
+				metadata.FullName = fullName;
+				metadata.Type = type;
+
+				for (auto& fieldInfo : type->GetFields())
+				{
+					Coral::ScopedString fieldName = fieldInfo.GetName();
+					std::string fieldNameStr = fieldName;
+					auto fullFieldName = std::format("{}.{}", fullName, fieldNameStr);
+					uint32_t fieldID = Hash::GenerateFNVHash(fullFieldName);
+
+					Coral::Type* fieldType = &fieldInfo.GetType();
+					Coral::ScopedString typeName = fieldType->GetFullName();
+
+					if (fieldNameStr == "ID" || !s_DataTypeLookup.contains(typeName) || fieldNameStr.find("k__BackingField") != std::string::npos)
+						continue;
+
+					if (fieldType->IsSZArray())
+						fieldType = &fieldType->GetElementType();
+
+					auto& fieldMetadata = metadata.Fields[fieldID];
+					fieldMetadata.Name = fieldName;
+					fieldMetadata.Type = s_DataTypeLookup.at(typeName);
+				}
+			}
 		}
 	}
 
