@@ -10,7 +10,7 @@ namespace Strype {
 	{
 		STY_CORE_VERIFY(frames >= 1, "Cannot read samples in sound file");
 		STY_CORE_VERIFY((frames <= (sf_count_t)(INT_MAX / sizeof(short)) / channels), "Bad sample count in sound file");
-		STY_CORE_VERIFY(channels <= 4, "Unsupported channel count in sound file");
+		STY_CORE_VERIFY(channels <= 2, "Unsupported channel count in sound file");
 
 		ALenum format = AL_NONE;
 		switch (channels)
@@ -20,12 +20,6 @@ namespace Strype {
 			break;
 		case 2:
 			format = AL_FORMAT_STEREO16;
-			break;
-		case 3:
-			format = AL_FORMAT_BFORMAT2D_16;
-			break;
-		case 4:
-			format = AL_FORMAT_BFORMAT3D_16;
 			break;
 		}
 
