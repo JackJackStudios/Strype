@@ -179,7 +179,7 @@ namespace Strype {
 			: m_Emitter(emitter) 
 		{
 			if (!name.empty())
-				m_Emitter << YAML::Key << "Transform";
+				m_Emitter << YAML::Key << name;
 
 			m_Emitter << YAML::BeginMap;
 		}

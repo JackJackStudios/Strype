@@ -5,7 +5,7 @@
 
 #include "Strype/Asset/Asset.hpp"
 
-#include "Object.hpp"
+#include "RoomInstance.hpp"
 
 namespace Strype {
 
@@ -21,10 +21,10 @@ namespace Strype {
 	public:
 		Room();
 
-		ObjectID InstantiatePrefab(AssetHandle prefab);
+		InstanceID InstantiatePrefab(AssetHandle prefab);
 
-		bool InstanceExists(ObjectID obj) const { return obj < m_Objects.size(); }
-		void DestroyInstance(ObjectID obj) const;
+		bool InstanceExists(InstanceID obj) const { return obj < m_Objects.size(); }
+		void DestroyInstance(InstanceID obj) const;
 		void Clear() { m_Objects.clear(); }
 
 		void OnUpdate(float ts);
@@ -41,12 +41,12 @@ namespace Strype {
 
 		RoomState GetState() const { return m_RoomState; }
 		Camera& GetCamera() { return m_Camera; }
-		Object& GetObject(ObjectID id) { return m_Objects[id]; }
+		RoomInstance& GetObject(InstanceID id) { return m_Objects[id]; }
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& e);
-		void InitObject(Object& object);
+		void InitObject(RoomInstance& object);
 	private:
-		std::vector<Object> m_Objects;
+		std::vector<RoomInstance> m_Objects;
 
 		uint64_t m_Width = 720, m_Height = 360;
 		glm::vec3 m_BackgroundColour;
@@ -57,8 +57,8 @@ namespace Strype {
 		float m_CameraSpeed = 5.0f;
 		float m_ZoomLevel = 1.0f;
 
-		friend class Object;
 		friend class Prefab;
+		friend class RoomInstance;
 		friend class SceneHierachyPanel;
 		friend class RoomSerializer;
 		friend class ContentBrowserPanel;

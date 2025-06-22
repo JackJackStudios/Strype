@@ -4,8 +4,9 @@
 #include "Strype/Renderer/Renderer.hpp"
 #include "Strype/Renderer/Sprite.hpp"
 
+#include "Strype/Room/RoomInstance.hpp"
 #include "Strype/Room/Object.hpp"
-#include "Strype/Room/Prefab.hpp"
+#include "Strype/Script/ScriptEngine.hpp"
 #include "Strype/Project/Project.hpp"
 #include "Strype/Core/Input.hpp"
 
@@ -32,7 +33,7 @@ namespace Strype {
 				object.Transform.Scale,
 				object.Transform.Rotation,
 				object.Colour,
-				Project::GetAsset<Sprite>(Project::GetAsset<Prefab>(object.PrefabHandle)->TextureHandle)
+				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.PrefabHandle)->TextureHandle)
 			);
 		}
 
@@ -85,7 +86,7 @@ namespace Strype {
 
 		for (auto& object : m_Objects)
 		{
-			ScriptID scriptID = Project::GetAsset<Prefab>(object.PrefabHandle)->ClassID;
+			ScriptID scriptID = Project::GetAsset<Object>(object.PrefabHandle)->ClassID;
 
 			if (scriptEngine->IsValidScript(scriptID))
 			{
@@ -132,12 +133,12 @@ namespace Strype {
 		room->m_Objects = m_Objects;
 	}
 
-	ObjectID Room::InstantiatePrefab(AssetHandle prefab)
+	InstanceID Room::InstantiatePrefab(AssetHandle prefab)
 	{
-		return m_Objects.emplace_back(m_Objects.size(), prefab, this).m_Handle;
+		return m_Objects.emplace_back(UUID32(m_Objects.size()), prefab, this).m_Handle;
 	}
 
-	void Room::DestroyInstance(ObjectID obj) const
+	void Room::DestroyInstance(InstanceID obj) const
 	{
 	}
 

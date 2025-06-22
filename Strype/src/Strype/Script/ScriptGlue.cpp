@@ -2,7 +2,7 @@
 #include "ScriptGlue.hpp"
 
 #include "Strype/Room/Room.hpp"
-#include "Strype/Room/Object.hpp"
+#include "Strype/Room/RoomInstance.hpp"
 
 #include "Strype/Project/Project.hpp"
 
@@ -37,42 +37,42 @@ namespace Strype {
 
 	namespace InternalCalls {
 
-		bool Room_ObjectExists(ObjectID id)
+		bool Room_ObjectExists(InstanceID id)
 		{
 			return Project::GetActiveRoom()->InstanceExists(id);
 		}
 
-		void Room_DestroyObject(ObjectID id)
+		void Room_DestroyObject(InstanceID id)
 		{
 			return Project::GetActiveRoom()->DestroyInstance(id);
 		}
 
-		void Transform_GetPosition(ObjectID id, glm::vec2* outPosition)
+		void Transform_GetPosition(InstanceID id, glm::vec2* outPosition)
 		{
 			*outPosition = Project::GetActiveRoom()->GetObject(id).Transform.Position;
 		}											 
 													 
-		void Transform_SetPosition(ObjectID id, glm::vec2* inPosition)
+		void Transform_SetPosition(InstanceID id, glm::vec2* inPosition)
 		{
 			Project::GetActiveRoom()->GetObject(id).Transform.Position = *inPosition;
 		}
 
-		void Transform_GetRotation(ObjectID id, float* outRotation)
+		void Transform_GetRotation(InstanceID id, float* outRotation)
 		{
 			*outRotation = Project::GetActiveRoom()->GetObject(id).Transform.Rotation;
 		}
 
-		void Transform_SetRotation(ObjectID id, float* inRotation)
+		void Transform_SetRotation(InstanceID id, float* inRotation)
 		{
 			Project::GetActiveRoom()->GetObject(id).Transform.Rotation = *inRotation;
 		}
 
-		void Transform_GetScale(ObjectID id, glm::vec2* outScale)
+		void Transform_GetScale(InstanceID id, glm::vec2* outScale)
 		{
 			*outScale = Project::GetActiveRoom()->GetObject(id).Transform.Scale;
 		}
 
-		void Transform_SetScale(ObjectID id, glm::vec2* inScale)
+		void Transform_SetScale(InstanceID id, glm::vec2* inScale)
 		{
 			Project::GetActiveRoom()->GetObject(id).Transform.Scale = *inScale;
 		}

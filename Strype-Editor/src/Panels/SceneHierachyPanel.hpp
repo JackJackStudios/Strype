@@ -14,15 +14,15 @@ namespace Strype {
 		virtual void SetInspector(Ref<InspectorPanel> panel) { m_Inspector = panel; }
 		inline virtual void SetRoomContext(const Ref<Room>& room) { m_ActiveScene = room; m_Selection = 0; }
 
-		ObjectID GetSelected() const { return m_Selection; }
-		void SetSelected(Object obj) { m_Selection = obj; m_Inspector->SetSelected(&m_Selection); }
+		InstanceID GetSelected() const { return m_Selection; }
+		void SetSelected(InstanceID obj) { m_Selection = obj; m_Inspector->SetSelected(&m_Selection); }
 		void RemoveSelected() { m_Selection = 0; m_Inspector->RemoveSelected(); }
 	private:
-		void OnInspectorRender(Object* select);
+		void OnInspectorRender(InstanceID* select);
 	private:
 		Ref<InspectorPanel> m_Inspector;
 		Ref<Room> m_ActiveScene;
-		ObjectID m_Selection;
+		InstanceID m_Selection;
 	};
 
 }

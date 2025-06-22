@@ -8,7 +8,7 @@
 namespace Strype {
 
 	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
-		{ ".sprefab", AssetType::Prefab },
+		{ ".sprefab", AssetType::Object },
 		{ ".sroom", AssetType::Room },
 		{ ".wav", AssetType::AudioFile },
 		{ ".ogg", AssetType::AudioFile },

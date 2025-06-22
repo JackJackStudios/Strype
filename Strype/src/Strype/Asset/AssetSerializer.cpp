@@ -1,8 +1,10 @@
 #include "stypch.hpp"
 #include "AssetSerializer.hpp"
 
+#include "Strype/Script/ScriptEngine.hpp"
 #include "Strype/Project/Project.hpp"
 #include "Strype/Renderer/Sprite.hpp"
+#include "Strype/Utils/YamlHelpers.hpp"
 #include "Strype/Renderer/Renderer.hpp"
 #include "Strype/Audio/Audio.hpp"
 
@@ -53,6 +55,49 @@ namespace Strype {
 
         return file;
     }
+
+	void PrefabSerializer::SaveAsset(Ref<Asset> asset, const std::filesystem::path& path)
+	{
+		//HACK: Assume asset is prefab 
+		Object* object = (Object*)asset.get();
+
+		YAML::Emitter out;
+		{
+			ScopedMap root(out);
+
+			{
+				ScopedMap prefabMap(out, "Object");
+
+				auto& scriptEngine = Project::GetScriptEngine();
+
+				out << YAML::Key << "TexturePath" << YAML::Value
+					<< (object->TextureHandle ? Project::GetFilePath(object->TextureHandle) : "");
+				out << YAML::Key << "ClassID" << YAML::Value << object->ClassID;
+			}
+		}
+
+		std::ofstream fout(path);
+		fout << out.c_str();
+	}
+
+	Ref<Asset> PrefabSerializer::LoadAsset(const std::filesystem::path& path)
+	{
+		Ref<Object> object = CreateRef<Object>();
+		YAML::Node data = YAML::LoadFile(path.string())["Object"];
+
+		const std::filesystem::path& texturePath = data["TexturePath"].as<std::filesystem::path>();
+
+		if (!texturePath.empty())
+		{
+			AssetHandle handle = Project::ImportAsset(texturePath);
+			object->TextureHandle = handle;
+		}
+
+		auto& scriptEngine = Project::GetScriptEngine();
+		object->ClassID = data["ClassID"].as<ScriptID>();
+
+		return object;
+	}
 
 }
 

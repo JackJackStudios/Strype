@@ -4,6 +4,7 @@
 
 #include "Strype/Renderer/Sprite.hpp"
 #include "Strype/Audio/Audio.hpp"
+#include "Strype/Room/Object.hpp"
 
 namespace Strype {
 
@@ -29,6 +30,14 @@ namespace Strype {
 		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
 
 		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path) {};
+	};
+
+	class PrefabSerializer : public AssetSerializer
+	{
+	public:
+		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
+
+		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path);
 	};
 
 }

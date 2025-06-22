@@ -103,7 +103,7 @@ namespace Strype {
 			{
 				bool selected = m_Selection == obj.GetHandle();
 
-				if (ImGui::Selectable(std::format("{0}##{1}", Project::GetFilePath(obj.PrefabHandle).stem().string(), obj.GetHandle()).c_str(), &selected))
+				if (ImGui::Selectable(std::format("{0}##{1}", Project::GetFilePath(obj.PrefabHandle).stem().string(), (uint32_t)obj.GetHandle()).c_str(), &selected))
 				{
 					m_Selection = obj.GetHandle();
 					m_Inspector->SetSelected(&m_Selection);
@@ -124,28 +124,30 @@ namespace Strype {
 
 		ImGui::End();
 
-		m_Inspector->AddType<Object>(STY_BIND_EVENT_FN(SceneHierachyPanel::OnInspectorRender));
+		m_Inspector->AddType<InstanceID>(STY_BIND_EVENT_FN(SceneHierachyPanel::OnInspectorRender));
 	}
 
-	void SceneHierachyPanel::OnInspectorRender(Object* select)
+	void SceneHierachyPanel::OnInspectorRender(InstanceID* select)
 	{
-		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(Project::GetAsset<Prefab>(select->PrefabHandle)->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+		RoomInstance& obj = m_ActiveScene->GetObject(*select);
 
 		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Button(Project::GetFilePath(select->PrefabHandle).stem().string().c_str(), ImVec2(128.0f, 0));
+		ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(Project::GetAsset<Object>(obj.PrefabHandle)->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+
+		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		ImGui::Button(Project::GetFilePath(obj.PrefabHandle).stem().string().c_str(), ImVec2(128.0f, 0));
 
 		DropdownMenu("Properties", [&]() {
-			DrawVec2Control("Position", select->Transform.Position);
-			DrawVec2Control("Scale", select->Transform.Scale, 1.0f);
+			DrawVec2Control("Position", obj.Transform.Position);
+			DrawVec2Control("Scale", obj.Transform.Scale, 1.0f);
 
 			ImGui::Text("Colour");
 			ImGui::SameLine();
-			ImGui::ColorEdit4("##Colour", glm::value_ptr(select->Colour), ImGuiColorEditFlags_NoInputs);
+			ImGui::ColorEdit4("##Colour", glm::value_ptr(obj.Colour), ImGuiColorEditFlags_NoInputs);
 
 			ImGui::Text("Rotation");
 			ImGui::SameLine();
-			ImGui::DragFloat("##Rotation", &select->Transform.Rotation);
+			ImGui::DragFloat("##Rotation", &obj.Transform.Rotation);
 		});
 	}
 

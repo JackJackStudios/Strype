@@ -8,7 +8,7 @@ namespace Strype {
 
 	enum class AssetType : uint16_t
 	{
-		None = 0, Prefab, Sprite, Room, AudioFile
+		None = 0, Object, Sprite, Room, AudioFile
 	};
 
 	class Asset
@@ -26,7 +26,6 @@ namespace Strype {
 		std::filesystem::path FilePath;
 
 		void reset() { asset.reset(); }
-
 		operator bool() const { return Type != AssetType::None; }
 	};
 

@@ -1,11 +1,9 @@
 #include "stypch.hpp"
 #include "AssetManager.hpp"
 
-#include "Strype/Project/Project.hpp"
-
 #include "AssetSerializer.hpp"
-#include "Strype/Room/PrefabSerializer.hpp"
 #include "Strype/Room/RoomSerializer.hpp"
+#include "Strype/Project/Project.hpp"
 
 #define REGISTER_ASSET(a) if (Utils::GetAssetTypeFromFileExtension(path.extension()) == AssetType::a) temp = CreateRef<a>()
 #define DEREGISTER_ASSET(a) STY_CORE_VERIFY(Utils::GetAssetTypeFromFileExtension(path.extension()) != AssetType::a, "Cannot create a new instance of {}", #a)
@@ -37,8 +35,10 @@ namespace Strype {
 	{
 		Ref<Asset> temp = nullptr;
 
-		REGISTER_ASSET(Prefab);
+		REGISTER_ASSET(Object);
 		REGISTER_ASSET(Room);
+
+		// TODO: Remove sprite when added animations
 		DEREGISTER_ASSET(Sprite);
 		DEREGISTER_ASSET(AudioFile);
 
@@ -49,7 +49,7 @@ namespace Strype {
 	AssetManager::AssetManager()
 	{
 		m_Serializers.clear();
-		m_Serializers[AssetType::Prefab] = CreateScope<PrefabSerializer>();
+		m_Serializers[AssetType::Object] = CreateScope<PrefabSerializer>();
 		m_Serializers[AssetType::Sprite] = CreateScope<SpriteSerializer>();
 		m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
 		m_Serializers[AssetType::AudioFile] = CreateScope<AudioFileSerializer>();

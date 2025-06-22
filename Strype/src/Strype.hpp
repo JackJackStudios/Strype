@@ -16,9 +16,9 @@
 #include "Strype/Renderer/RenderPipeline.hpp"
 
 #include "Strype/Room/Room.hpp"
-#include "Strype/Room/Object.hpp"
+#include "Strype/Room/RoomInstance.hpp"
 #include "Strype/Room/RoomSerializer.hpp"
-#include "Strype/Room/PrefabSerializer.hpp"
+#include "Strype/Asset/AssetSerializer.hpp"
 
 #include "Strype/Asset/Asset.hpp"
 #include "Strype/Asset/AssetManager.hpp"

@@ -2,7 +2,7 @@
 #include "RoomSerializer.hpp"
 
 #include "Object.hpp"
-#include "Prefab.hpp"
+#include "RoomInstance.hpp"
 
 #include "Strype/Utils/YamlHelpers.hpp"
 #include "Strype/Project/Project.hpp"
@@ -78,7 +78,7 @@ namespace Strype {
 		YAML::Node objects = data["Objects"];
 		for (auto obj : objects)
 		{
-			ObjectID id = obj["Object"].as<ObjectID>();
+			InstanceID id = obj["Object"].as<InstanceID>();
 
 			const std::filesystem::path& path = obj["PrefabPath"].as<std::filesystem::path>();
 			if (!std::filesystem::exists(Project::GetProjectDirectory() / path))
@@ -89,7 +89,7 @@ namespace Strype {
 
 			AssetHandle handle = Project::ImportAsset(path);
 
-			Object& newobj = room->GetObject(room->InstantiatePrefab(handle));
+			RoomInstance& newobj = room->GetObject(room->InstantiatePrefab(handle));
 			newobj.PrefabHandle = handle;
 
 			YAML::Node transform = obj["Transform"];

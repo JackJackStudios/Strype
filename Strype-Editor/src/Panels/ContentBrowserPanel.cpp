@@ -136,7 +136,7 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Delete"))
 				{
-					if (Project::GetAssetType(node.Handle) == AssetType::Prefab)
+					if (Project::GetAssetType(node.Handle) == AssetType::Object)
 					{
 						STY_CORE_VERIFY(false, "Not implemented");
 					}
@@ -213,7 +213,7 @@ namespace Strype {
 					if (ImGui::MenuItem("Prefab", "Alt+P"))
 					{
 						m_InputActive = true;
-						m_InputType = AssetType::Prefab;
+						m_InputType = AssetType::Object;
 					}
 
 					if (ImGui::MenuItem("Room", "Alt+R"))

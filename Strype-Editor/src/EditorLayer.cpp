@@ -27,12 +27,12 @@ namespace Strype {
 			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Room>(Project::GetAssetHandle(metadata.FilePath)).get());
 		});
 
-		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Prefab, [this](const AssetMetadata& metadata)
+		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Object, [this](const AssetMetadata& metadata)
 		{
-			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Prefab>(Project::GetAssetHandle(metadata.FilePath)).get());
+			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Object>(Project::GetAssetHandle(metadata.FilePath)).get());
 		});
 
-		m_PanelManager.GetInspector()->AddType<Prefab>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
+		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
 		OpenProject(false, projectPath);
 	}
@@ -105,13 +105,13 @@ namespace Strype {
 			{
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
-				if (Project::GetAssetType(handle) == AssetType::Prefab)
+				if (Project::GetAssetType(handle) == AssetType::Object)
 					m_Room->InstantiatePrefab(handle);
 			}
 			ImGui::EndDragDropTarget();
 		}
 
-		if (ObjectID selected = m_SceneHierachyPanel->GetSelected())
+		if (InstanceID selected = m_SceneHierachyPanel->GetSelected())
 		{
 			ImGuizmo::SetOrthographic(true);
 			ImGuizmo::SetDrawlist();
@@ -190,24 +190,24 @@ namespace Strype {
 		OpenRoom(project->GetStartRoom());
 	}
 
-	void EditorLayer::OnInspectorRender(Prefab* prefab)
+	void EditorLayer::OnInspectorRender(Object* object)
 	{
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		if (Project::IsAssetLoaded(prefab->TextureHandle))
+		if (Project::IsAssetLoaded(object->TextureHandle))
 		{
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(prefab->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(object->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
 
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Button(Project::GetFilePath(prefab->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
+			ImGui::Button(Project::GetFilePath(object->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
 		}
 
 		DropdownMenu("Properties", [&]() 
 		{
-			if (Project::IsAssetLoaded(prefab->TextureHandle))
+			if (Project::IsAssetLoaded(object->TextureHandle))
 			{
-				ImGui::Button(Project::GetFilePath(prefab->TextureHandle).filename().string().c_str());
+				ImGui::Button(Project::GetFilePath(object->TextureHandle).filename().string().c_str());
 
 				if (ImGui::BeginDragDropTarget())
 				{
@@ -216,7 +216,7 @@ namespace Strype {
 						AssetHandle handle = *(AssetHandle*)payload->Data;
 
 						if (Project::GetAssetType(handle) == AssetType::Sprite)
-							prefab->TextureHandle = handle;
+							object->TextureHandle = handle;
 						else
 							STY_CORE_WARN("Wrong asset type!");
 					}

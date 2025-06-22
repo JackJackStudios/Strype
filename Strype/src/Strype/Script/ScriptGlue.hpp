@@ -58,15 +58,15 @@ namespace Strype {
 			Error = BIT(4),
 		};
 
-		bool Room_ObjectExists(ObjectID id);
-		void Room_DestroyObject(ObjectID id);
+		bool Room_ObjectExists(InstanceID id);
+		void Room_DestroyObject(InstanceID id);
 
-		void Transform_GetPosition(ObjectID id, glm::vec2* outTranslation);
-		void Transform_SetPosition(ObjectID id, glm::vec2* inTranslation);
-		void Transform_GetRotation(ObjectID id, float* outRotation);
-		void Transform_SetRotation(ObjectID id, float* inRotation);
-		void Transform_GetScale(ObjectID id, glm::vec2* outScale);
-		void Transform_SetScale(ObjectID id, glm::vec2* inScale);
+		void Transform_GetPosition(InstanceID id, glm::vec2* outTranslation);
+		void Transform_SetPosition(InstanceID id, glm::vec2* inTranslation);
+		void Transform_GetRotation(InstanceID id, float* outRotation);
+		void Transform_SetRotation(InstanceID id, float* inRotation);
+		void Transform_GetScale(InstanceID id, glm::vec2* outScale);
+		void Transform_SetScale(InstanceID id, glm::vec2* inScale);
 		
 		Coral::Bool32 Input_IsKeyPressed(KeyCode keycode);
 		Coral::Bool32 Input_IsKeyHeld(KeyCode keycode);

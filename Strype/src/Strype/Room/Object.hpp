@@ -1,52 +1,20 @@
 #pragma once
 
-#include "Strype/Script/CSharpObject.hpp"
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "RoomInstance.hpp"
 
 namespace Strype {
 
-	struct Transform
-	{
-		glm::vec2 Position;
-		glm::vec2 Scale;
-		float Rotation;
-
-		glm::mat4 GetTransform() const
-		{
-			return glm::translate(glm::mat4(1.0f), { Position.x, Position.y, 0.0f })
-				* glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), { 0.0f, 0.0f, 1.0f })
-				* glm::scale(glm::mat4(1.0f), { Scale.x, Scale.y, 1.0f });
-		}
-	};
-
-	using ObjectID = uint32_t;
-	class Room;
-
-	class Object
+	class Object : public Asset
 	{
 	public:
-		Object(ObjectID id, AssetHandle prefab, Room* owner)
-			: m_Handle(id), PrefabHandle(prefab), m_Owner(owner)
-		{
-		}
+		Object() = default;
+		Object(const Object& other) = default;
 
-		ObjectID GetHandle() const { return m_Handle; }
-		operator uint32_t() const { return GetHandle(); }
-
-		bool operator!=(const ObjectID& other) { return m_Handle != other; }
-		bool operator==(const ObjectID& other) { return m_Handle == other; }
+		static AssetType GetStaticType() { return AssetType::Object; }
+		virtual AssetType GetType() const override { return GetStaticType(); }
 	public:
-		Transform Transform;
-		glm::vec4 Colour{ 1.0f, 1.0f, 1.0f, 1.0f };
-		CSharpObject Instance;
-		AssetHandle PrefabHandle;
-	private:
-		ObjectID m_Handle = 0;
-		Room* m_Owner = nullptr;
-
-		friend class Room;
+		AssetHandle TextureHandle;
+		UUID ClassID;
 	};
 
 }

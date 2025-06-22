@@ -73,7 +73,7 @@ namespace Strype {
 		void OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
 		void SaveProject();
 
-		void OnInspectorRender(Prefab* prefab);
+		void OnInspectorRender(Object* object);
 
 		void UI_RoomPanel();
 	private:
