@@ -5,8 +5,9 @@
 
 #include <Coral/TypeCache.hpp>
 
-//Windows
+#ifdef STY_WINDOWS
 #include <ShlObj.h>
+#endif
 
 namespace Strype {
 
@@ -34,6 +35,7 @@ namespace Strype {
 	//Windows only
 	void ScriptEngine::BuildProject(const std::filesystem::path& path)
 	{
+#ifdef STY_WINDOWS
 		STY_CORE_INFO("Building C# project '{}'", path);
 
 		TCHAR programFilesFilePath[MAX_PATH];
@@ -42,6 +44,7 @@ namespace Strype {
 		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:restore,build > nul 2>&1", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
 		
 		system(command.c_str());
+#endif
 	}
 
 	ScriptEngine::ScriptEngine(Ref<Project> proj)
