@@ -2,8 +2,6 @@
 #include "Audio.hpp"
 
 #include <AL/al.h>
-#include <AL/alc.h>
-#include <AL\alext.h>
 #include <sndfile.h>
 
 namespace Strype {
@@ -11,7 +9,7 @@ namespace Strype {
 	AudioFile::AudioFile(uint64_t frames, uint32_t channels, uint32_t samplerate)
 	{
 		STY_CORE_VERIFY(frames >= 1, "Cannot read samples in sound file");
-		STY_CORE_VERIFY((frames >= 1 && frames <= (sf_count_t)(INT_MAX / sizeof(short)) / channels), "Bad sample count in sound file");
+		STY_CORE_VERIFY((frames <= (sf_count_t)(INT_MAX / sizeof(short)) / channels), "Bad sample count in sound file");
 		STY_CORE_VERIFY(channels <= 4, "Unsupported channel count in sound file");
 
 		ALenum format = AL_NONE;
