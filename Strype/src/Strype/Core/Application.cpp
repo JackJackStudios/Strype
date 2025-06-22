@@ -130,25 +130,25 @@ namespace Strype {
 
 	void Application::InstallCallbacks()
 	{
-		m_Window->SetWindowSizeCallback([](glm::vec2 size)
+		m_Window->SetWindowSizeCallback([](AGI::Window* window, glm::vec2 size)
 		{
 			WindowResizeEvent event(size.x, size.y);
 			Application::Get().OnEvent(event);
 		});
 
-		m_Window->SetWindowPosCallback([](glm::vec2 pos)
+		m_Window->SetWindowPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
 			WindowMoveEvent event(pos.x, pos.y);
 			Application::Get().OnEvent(event);
 		});
 
-		m_Window->SetWindowCloseCallback([]()
+		m_Window->SetWindowCloseCallback([](AGI::Window* window)
 		{
 			WindowCloseEvent event;
 			Application::Get().OnEvent(event);
 		});
 
-		m_Window->SetDropCallback([](int path_count, const char* paths[])
+		m_Window->SetDropCallback([](AGI::Window* window, int path_count, const char* paths[])
 		{
 			std::vector<std::filesystem::path> filepaths(path_count);
 			for (int i = 0; i < path_count; i++)
@@ -158,13 +158,13 @@ namespace Strype {
 			Application::Get().OnEvent(event);
 		});
 
-		m_Window->SetScrollCallback([](glm::vec2 offset)
+		m_Window->SetScrollCallback([](AGI::Window* window, glm::vec2 offset)
 		{
 			MouseScrolledEvent event((float)offset.x, (float)offset.y);
 			Application::Get().OnEvent(event);
 		});
 
-		m_Window->SetCursorPosCallback([](glm::vec2 pos)
+		m_Window->SetCursorPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
 			MouseMovedEvent event((float)pos.x, (float)pos.y);
 			Application::Get().OnEvent(event);

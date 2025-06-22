@@ -21,7 +21,6 @@ target_link_libraries(Strype PUBLIC
     agi_opengl
 
     glm
-    box2d
     ImGui
     OpenAL
     sndfile

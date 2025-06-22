@@ -3,7 +3,6 @@
 
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/Object.hpp"
-#include "Strype/Room/Components.hpp"
 
 #include "Strype/Project/Project.hpp"
 
@@ -11,39 +10,8 @@
 
 namespace Strype {
 
-	std::unordered_map<Coral::TypeId, std::function<void(Object&)>> s_CreateComponentFuncs;
-	std::unordered_map<Coral::TypeId, std::function<bool(Object&)>> s_HasComponentFuncs;
-	std::unordered_map<Coral::TypeId, std::function<void(Object&)>> s_RemoveComponentFuncs;
-
-	template<typename TComponent>
-	static void RegisterManagedComponent(Coral::ManagedAssembly& coreAssembly)
-	{
-		const TypeNameString& componentTypeName = TypeInfo<TComponent, true>().Name();
-		std::string componentName = std::format("Strype.{}", componentTypeName);
-
-		auto& type = coreAssembly.GetType(componentName);
-
-		if (type)
-		{
-			s_CreateComponentFuncs[type.GetTypeId()] = [](Object& entity) { entity.AddComponent<TComponent>(); };
-			s_HasComponentFuncs[type.GetTypeId()] = [](Object& entity) { return entity.HasComponent<TComponent>(); };
-			s_RemoveComponentFuncs[type.GetTypeId()] = [](Object& entity) { entity.RemoveComponent<TComponent>(); };
-		}
-		else
-		{
-			STY_CORE_ERROR("No C# component class found for {}!", componentName);
-		}
-	}
-
 	void ScriptGlue::RegisterGlue(Coral::ManagedAssembly& coreAssembly)
 	{
-		if (!s_CreateComponentFuncs.empty())
-		{
-			s_CreateComponentFuncs.clear();
-			s_HasComponentFuncs.clear();
-			s_RemoveComponentFuncs.clear();
-		}
-
 		RegisterComponentTypes(coreAssembly);
 		RegisterInternalCalls(coreAssembly);
 
@@ -52,14 +20,10 @@ namespace Strype {
 
 	void ScriptGlue::RegisterComponentTypes(Coral::ManagedAssembly& coreAssembly)
 	{
-		RegisterManagedComponent<Transform>(coreAssembly);
 	}
 
 	void ScriptGlue::RegisterInternalCalls(Coral::ManagedAssembly& coreAssembly)
 	{
-		STY_ADD_INTERNAL_CALL(Object_CreateComponent);
-		STY_ADD_INTERNAL_CALL(Object_HasComponent);
-		STY_ADD_INTERNAL_CALL(Object_RemoveComponent);
 		STY_ADD_INTERNAL_CALL(Room_ObjectExists);
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
 		STY_ADD_INTERNAL_CALL(Transform_GetPosition);
@@ -73,96 +37,44 @@ namespace Strype {
 
 	namespace InternalCalls {
 
-		void Object_CreateComponent(uint32_t id, Coral::ReflectionType componentType)
+		bool Room_ObjectExists(ObjectID id)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-
-			Coral::Type& type = componentType;
-
-			if (auto it = s_HasComponentFuncs.find(type.GetTypeId()); it != s_HasComponentFuncs.end() && it->second(obj))
-				return;
-
-			if (auto it = s_CreateComponentFuncs.find(type.GetTypeId()); it != s_CreateComponentFuncs.end())
-				it->second(obj);
+			return Project::GetActiveRoom()->InstanceExists(id);
 		}
 
-		bool Object_HasComponent(uint32_t id, Coral::ReflectionType componentType)
+		void Room_DestroyObject(ObjectID id)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-
-			Coral::Type& type = componentType;
-
-			if (auto it = s_HasComponentFuncs.find(type.GetTypeId()); it != s_HasComponentFuncs.end())
-			{
-				auto func = it->second;
-				return func(obj);
-			}
-
-			return false;
+			return Project::GetActiveRoom()->DestroyInstance(id);
 		}
 
-		bool Object_RemoveComponent(uint32_t id, Coral::ReflectionType componentType)
+		void Transform_GetPosition(ObjectID id, glm::vec2* outPosition)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-
-			Coral::Type& type = componentType;
-
-			if (auto it = s_HasComponentFuncs.find(type.GetTypeId()); it == s_HasComponentFuncs.end() || !it->second(obj))
-				return false;
-
-			if (auto it = s_RemoveComponentFuncs.find(type.GetTypeId()); it != s_RemoveComponentFuncs.end())
-			{
-				it->second(obj);
-				return true;
-			}
-
-			return false;
-		}
-
-		bool Room_ObjectExists(uint32_t id)
-		{
-			return Project::GetActiveRoom()->ObjectExists(Object{ (entt::entity)id, Project::GetActiveRoom() });
-		}
-
-		void Room_DestroyObject(uint32_t id)
-		{
-			return Project::GetActiveRoom()->DestroyObject(Object{ (entt::entity)id, Project::GetActiveRoom() });
-		}
-
-		void Transform_GetPosition(uint32_t id, glm::vec2* outPosition)
-		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-			*outPosition = obj.GetComponent<Transform>().Position;
+			*outPosition = Project::GetActiveRoom()->GetObject(id).Transform.Position;
 		}											 
 													 
-		void Transform_SetPosition(uint32_t id, glm::vec2* inPosition)
+		void Transform_SetPosition(ObjectID id, glm::vec2* inPosition)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-			obj.GetComponent<Transform>().Position = *inPosition;
+			Project::GetActiveRoom()->GetObject(id).Transform.Position = *inPosition;
 		}
 
-		void Transform_GetRotation(uint32_t id, float* outRotation)
+		void Transform_GetRotation(ObjectID id, float* outRotation)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-			*outRotation = obj.GetComponent<Transform>().Rotation;
+			*outRotation = Project::GetActiveRoom()->GetObject(id).Transform.Rotation;
 		}
 
-		void Transform_SetRotation(uint32_t id, float* inRotation)
+		void Transform_SetRotation(ObjectID id, float* inRotation)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-			obj.GetComponent<Transform>().Rotation = *inRotation;
+			Project::GetActiveRoom()->GetObject(id).Transform.Rotation = *inRotation;
 		}
 
-		void Transform_GetScale(uint32_t id, glm::vec2* outScale)
+		void Transform_GetScale(ObjectID id, glm::vec2* outScale)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-			*outScale = obj.GetComponent<Transform>().Scale;
+			*outScale = Project::GetActiveRoom()->GetObject(id).Transform.Scale;
 		}
 
-		void Transform_SetScale(uint32_t id, glm::vec2* inScale)
+		void Transform_SetScale(ObjectID id, glm::vec2* inScale)
 		{
-			Object obj = Object{ (entt::entity)id, Project::GetActiveRoom() };
-			obj.GetComponent<Transform>().Scale = *inScale;
+			Project::GetActiveRoom()->GetObject(id).Transform.Scale = *inScale;
 		}
 
 		void Log_LogMessage(LogLevel level, Coral::String fmt)

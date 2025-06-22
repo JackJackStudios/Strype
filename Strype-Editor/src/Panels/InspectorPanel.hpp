@@ -22,6 +22,11 @@ namespace Strype {
 			m_SelectedType = std::type_index(typeid(T));
 		}
 
+		void RemoveSelected()
+		{
+			SetSelected<void>(nullptr);
+		}
+
 		template<typename T>
 		void AddType(std::function<void(T*)> func)
 		{

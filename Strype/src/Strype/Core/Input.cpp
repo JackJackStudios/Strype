@@ -14,13 +14,13 @@ namespace Strype {
 
 		// NOTE: These callbacks enter keys into the map
 		//       so they will be tracked by Input::Update().
-		window->SetKeyCallback([](int key, int scancode, int action, int mods)
+		window->SetKeyCallback([](AGI::Window* window, int key, int scancode, int action, int mods)
 		{
 			if (action == GLFW_PRESS)
 				s_KeyStates[(KeyCode)key] = InputState::None;
 		});
 
-		window->SetMouseButtonCallback([](int button, int action, int mods)
+		window->SetMouseButtonCallback([](AGI::Window* window, int button, int action, int mods)
 		{
 			if (action == GLFW_PRESS)
 				s_MouseStates[(MouseCode)button] = InputState::None;

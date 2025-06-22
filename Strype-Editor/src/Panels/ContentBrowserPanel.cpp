@@ -138,8 +138,7 @@ namespace Strype {
 				{
 					if (Project::GetAssetType(node.Handle) == AssetType::Prefab)
 					{
-						for (auto& obj : Project::GetAsset<Prefab>(node.Handle)->GetConnectedObjects())
-							obj.RemoveSelf();
+						STY_CORE_VERIFY(false, "Not implemented");
 					}
 
 					Project::DeleteAsset(node.Handle);

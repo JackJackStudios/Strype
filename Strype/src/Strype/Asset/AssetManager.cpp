@@ -93,7 +93,7 @@ namespace Strype {
 
 	bool AssetManager::IsAssetLoaded(AssetHandle handle) const
 	{
-		return m_AssetRegistry.find(handle) != m_AssetRegistry.end();
+		return handle != 0 && m_AssetRegistry.find(handle) != m_AssetRegistry.end();
 	}
 
 	bool AssetManager::IsAssetLoaded(const std::filesystem::path& filepath) const

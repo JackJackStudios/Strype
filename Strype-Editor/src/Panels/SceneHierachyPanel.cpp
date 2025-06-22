@@ -114,8 +114,8 @@ namespace Strype {
 				{
 					if (ImGui::MenuItem("Delete Entity"))
 					{
-						m_ActiveScene->DestroyObject(temp);
 						m_Inspector->SetSelected<void>(nullptr);
+						m_Inspector->RemoveSelected();
 					}
 
 					ImGui::EndPopup();

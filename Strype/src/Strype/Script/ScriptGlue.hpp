@@ -9,6 +9,7 @@
 #include "Strype/Utils/TypeInfo.hpp"
 
 #include "Strype/Core/Input.hpp"
+#include "Strype/Room/Room.hpp"
 
 namespace Strype {
 
@@ -56,20 +57,16 @@ namespace Strype {
 			Warn = BIT(3),
 			Error = BIT(4),
 		};
-		
-		void Object_CreateComponent(uint32_t id, Coral::ReflectionType componentType);
-		bool Object_HasComponent(uint32_t id, Coral::ReflectionType componentType);
-		bool Object_RemoveComponent(uint32_t id, Coral::ReflectionType componentType);
 
-		bool Room_ObjectExists(uint32_t id);
-		void Room_DestroyObject(uint32_t id);
+		bool Room_ObjectExists(ObjectID id);
+		void Room_DestroyObject(ObjectID id);
 
-		void Transform_GetPosition(uint32_t id, glm::vec2* outTranslation);
-		void Transform_SetPosition(uint32_t id, glm::vec2* inTranslation);
-		void Transform_GetRotation(uint32_t id, float* outRotation);
-		void Transform_SetRotation(uint32_t id, float* inRotation);
-		void Transform_GetScale(uint32_t id, glm::vec2* outScale);
-		void Transform_SetScale(uint32_t id, glm::vec2* inScale);
+		void Transform_GetPosition(ObjectID id, glm::vec2* outTranslation);
+		void Transform_SetPosition(ObjectID id, glm::vec2* inTranslation);
+		void Transform_GetRotation(ObjectID id, float* outRotation);
+		void Transform_SetRotation(ObjectID id, float* inRotation);
+		void Transform_GetScale(ObjectID id, glm::vec2* outScale);
+		void Transform_SetScale(ObjectID id, glm::vec2* inScale);
 		
 		Coral::Bool32 Input_IsKeyPressed(KeyCode keycode);
 		Coral::Bool32 Input_IsKeyHeld(KeyCode keycode);

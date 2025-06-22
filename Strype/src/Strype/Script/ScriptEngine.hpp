@@ -29,9 +29,9 @@ namespace Strype {
 		{ "System.UInt32",  DataType::UInt },
 		{ "System.Int64",   DataType::Long },
 		{ "System.UInt64",  DataType::ULong },
-		{ "Hazel.Vector2",  DataType::Vector2 },
-		{ "Hazel.Vector3",  DataType::Vector3 },
-		{ "Hazel.Vector4",  DataType::Vector4 }
+		{ "Strype.Vector2",  DataType::Vector2 },
+		{ "Strype.Vector3",  DataType::Vector3 },
+		{ "Strype.Vector4",  DataType::Vector4 }
 	};
 
 	struct ScriptField

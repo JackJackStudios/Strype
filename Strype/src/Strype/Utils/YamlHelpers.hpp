@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Strype/Room/Components.hpp"
+#include "stypch.hpp"
 
 #include <yaml-cpp/yaml.h>
 #include <glm/glm.hpp>
+
+#include "Strype/Core/UUID.hpp"
 
 namespace YAML {
 
@@ -80,18 +82,61 @@ namespace YAML {
 	};
 
 	template<>
-	struct convert<std::filesystem::path> {
-		static Node encode(const std::filesystem::path& rhs) {
+	struct convert<std::filesystem::path> 
+	{
+		static Node encode(const std::filesystem::path& rhs) 
+		{
 			Node node;
 			node = rhs.string();
 			return node;
 		}
 
-		static bool decode(const Node& node, std::filesystem::path& rhs) {
-			if (!node.IsScalar()) {
+		static bool decode(const Node& node, std::filesystem::path& rhs) 
+		{
+			if (!node.IsScalar())
 				return false;
-			}
+
 			rhs = node.as<std::string>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Strype::UUID> 
+	{
+		static Node encode(const Strype::UUID& rhs) 
+		{
+			Node node;
+			node = static_cast<uint64_t>(rhs);
+			return node;
+		}
+
+		static bool decode(const Node& node, Strype::UUID& rhs) 
+		{
+			if (!node.IsScalar())
+				return false;
+
+			rhs = Strype::UUID(node.as<uint64_t>());
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Strype::UUID32>
+	{
+		static Node encode(const Strype::UUID32& rhs)
+		{
+			Node node;
+			node = static_cast<uint32_t>(rhs);
+			return node;
+		}
+
+		static bool decode(const Node& node, Strype::UUID32& rhs)
+		{
+			if (!node.IsScalar())
+				return false;
+
+			rhs = Strype::UUID32(node.as<uint32_t>());
 			return true;
 		}
 	};
@@ -126,5 +171,46 @@ namespace Strype {
 		out << path.string();
 		return out;
 	}
+
+	class ScopedMap 
+	{
+	public:
+		ScopedMap(YAML::Emitter& emitter, const std::string& name = std::string())
+			: m_Emitter(emitter) 
+		{
+			if (!name.empty())
+				m_Emitter << YAML::Key << "Transform";
+
+			m_Emitter << YAML::BeginMap;
+		}
+
+		~ScopedMap() {
+			m_Emitter << YAML::EndMap;
+		}
+
+	private:
+		YAML::Emitter& m_Emitter;
+	};
+
+	class ScopedSeq 
+	{
+	public:
+		ScopedSeq(YAML::Emitter& emitter, const std::string& name = std::string())
+			: m_Emitter(emitter) 
+		{
+			if (!name.empty())
+				m_Emitter << YAML::Key << "Objects";
+
+			m_Emitter << YAML::BeginSeq;
+		}
+
+		~ScopedSeq() 
+		{
+			m_Emitter << YAML::EndSeq;
+		}
+
+	private:
+		YAML::Emitter& m_Emitter;
+	};
 
 }
