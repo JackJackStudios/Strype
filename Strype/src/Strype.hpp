@@ -17,7 +17,6 @@
 
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/Object.hpp"
-#include "Strype/Room/Components.hpp"
 #include "Strype/Room/RoomSerializer.hpp"
 #include "Strype/Room/PrefabSerializer.hpp"
 

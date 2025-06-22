@@ -106,25 +106,20 @@ namespace Strype {
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
 				if (Project::GetAssetType(handle) == AssetType::Prefab)
-				{
-					Object newobj = Object::Copy(Project::GetAsset<Prefab>(handle)->GetObject(), m_Room);
-					newobj.AddComponent<PrefabComponent>(handle);
-					newobj.AddComponent<Transform>(glm::vec2(m_Room->GetCamera().Position));
-					Project::GetAsset<Prefab>(handle)->ConnectObject(newobj);
-				}
+					m_Room->InstantiatePrefab(handle);
 			}
 			ImGui::EndDragDropTarget();
 		}
 
-		if (Object selected = m_SceneHierachyPanel->GetSelected())
+		if (ObjectID selected = m_SceneHierachyPanel->GetSelected())
 		{
 			ImGuizmo::SetOrthographic(true);
 			ImGuizmo::SetDrawlist();
 
 			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
-			auto& tc = selected.GetComponent<Transform>();
-			glm::mat4 transform = tc.GetTransform();
+			Transform& t = m_Room->GetObject(selected).Transform;
+			glm::mat4 transform = t.GetTransform();
 
 			ImGuizmo::Manipulate(glm::value_ptr(m_Room->GetCamera().GetViewMatrix()), glm::value_ptr(m_Room->GetCamera().GetProjectionMatrix()),
 				ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform),
@@ -136,9 +131,9 @@ namespace Strype {
 				float rotation;
 				DecomposeTransform(transform, position, rotation, scale);
 
-				tc.Position = position;
-				tc.Rotation = rotation;
-				tc.Scale = scale;
+				t.Position = position;
+				t.Rotation = rotation;
+				t.Scale = scale;
 			}
 		}
 
@@ -199,10 +194,10 @@ namespace Strype {
 	{
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		if (SpriteRenderer* spr = prefab->TryGetComponent<SpriteRenderer>())
+		if (Project::IsAssetLoaded(prefab->TextureHandle))
 		{
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr->Texture)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(prefab->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
 
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
 			ImGui::Button(Project::GetFilePath(prefab->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
@@ -210,12 +205,9 @@ namespace Strype {
 
 		DropdownMenu("Properties", [&]() 
 		{
-			bool solid = prefab->HasComponent<ColliderComponent>();
-			bool physics = prefab->HasComponent<RigidBodyComponent>();
-
-			if (SpriteRenderer* spr = prefab->TryGetComponent<SpriteRenderer>())
+			if (Project::IsAssetLoaded(prefab->TextureHandle))
 			{
-				ImGui::Button(Project::GetFilePath(spr->Texture).filename().string().c_str());
+				ImGui::Button(Project::GetFilePath(prefab->TextureHandle).filename().string().c_str());
 
 				if (ImGui::BeginDragDropTarget())
 				{
@@ -224,7 +216,7 @@ namespace Strype {
 						AssetHandle handle = *(AssetHandle*)payload->Data;
 
 						if (Project::GetAssetType(handle) == AssetType::Sprite)
-							prefab->EnsureCurrent<SpriteRenderer>().Texture = handle;
+							prefab->TextureHandle = handle;
 						else
 							STY_CORE_WARN("Wrong asset type!");
 					}
@@ -234,29 +226,6 @@ namespace Strype {
 				ImGui::SameLine();
 				ImGui::Text("Sprite");
 			}
-
-			ImGui::Columns(2, nullptr, false);
-
-			if (ImGui::Checkbox("Solid", &solid))
-			{
-				if (solid)
-					prefab->AddComponent<ColliderComponent>(glm::vec2(1.0f, 1.0f));
-				else
-					prefab->RemoveComponent<ColliderComponent>();
-			}
-			ImGui::NextColumn();
-
-			if (ImGui::Checkbox("Uses Physics", &physics))
-			{
-				if (physics)
-					prefab->AddComponent<RigidBodyComponent>(BodyType::Kinematic);
-				else
-					prefab->RemoveComponent<RigidBodyComponent>();
-			}
-			ImGui::NextColumn();
-
-			ImGui::Columns(1);
-
 		});
 
 		DropdownMenu("Components", [&]() 
@@ -266,34 +235,9 @@ namespace Strype {
 
 			if (ImGui::BeginPopup("AddComponent"))
 			{
-				for (const auto& [id, metadata] : scriptEngine->GetAllScripts())
-				{
-					ScriptContainer& sc = prefab->EnsureCurrent<ScriptContainer>();
-
-					if (std::find(sc.begin(), sc.end(), ScriptComponent(id)) != sc.end())
-						continue;
-
-					if (ImGui::MenuItem(metadata.FullName.c_str()))
-						sc.emplace_back(id);
-				}
+				STY_CORE_VERIFY(false, "Not implemented");
 
 				ImGui::EndPopup();
-			}
-
-			if (ScriptContainer* sc = prefab->TryGetComponent<ScriptContainer>())
-			{
-				for (const auto& script : *sc)
-				{
-					ImGui::MenuItem(scriptEngine->GetScriptName(script.ClassID).c_str());
-
-					if (ImGui::BeginPopupContextItem())
-					{
-						if (ImGui::MenuItem("Remove component"))
-							sc->erase(std::remove(sc->begin(), sc->end(), script), sc->end());
-
-						ImGui::EndPopup();
-					}
-				}
 			}
 		});
 	}

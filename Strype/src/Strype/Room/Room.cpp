@@ -5,7 +5,7 @@
 #include "Strype/Renderer/Sprite.hpp"
 
 #include "Strype/Room/Object.hpp"
-#include "Strype/Room/Components.hpp"
+#include "Strype/Room/Prefab.hpp"
 #include "Strype/Project/Project.hpp"
 #include "Strype/Core/Input.hpp"
 
@@ -19,38 +19,22 @@ namespace Strype {
 	{
 	}
 
-	void Room::OnEvent(Event& e)
-	{
-		EventDispatcher dispatcher(e);
-
-		if (m_RoomState == RoomState::Editor)
-			dispatcher.Dispatch<MouseScrolledEvent>(STY_BIND_EVENT_FN(Room::OnMouseScrolled));
-	}
-
-	bool Room::OnMouseScrolled(MouseScrolledEvent& e)
-	{
-		m_ZoomLevel -= e.GetYOffset() * 0.25f;
-		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
-		m_Camera.SetZoomLevel(m_ZoomLevel);
-		
-		return true;
-	}
-
 	void Room::OnUpdate(float ts)
 	{
 		Renderer::BeginRoom(m_Camera);
 
 		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
 
-		m_Registry.view<Transform, SpriteRenderer>().each([](auto entity, Transform& trans, SpriteRenderer& sprite) {
+		for (auto& object : m_Objects)
+		{
 			Renderer::DrawQuad(
-				glm::make_vec3(trans.Position), 
-				trans.Scale, 
-				trans.Rotation, 
-				sprite.Colour, 
-				Project::GetAsset<Sprite>(sprite.Texture)
+				glm::make_vec3(object.Transform.Position),
+				object.Transform.Scale,
+				object.Transform.Rotation,
+				object.Colour,
+				Project::GetAsset<Sprite>(Project::GetAsset<Prefab>(object.PrefabHandle)->TextureHandle)
 			);
-		});
+		}
 
 		if (m_RoomState == RoomState::Editor)
 		{
@@ -80,23 +64,8 @@ namespace Strype {
 			auto& scriptEngine = Project::GetScriptEngine();
 			float timestep = ts;
 
-			m_Registry.view<ScriptContainer>().each([&](auto entity, ScriptContainer& container) {
-				for (auto& script : container) 
-				{
-					if (scriptEngine->IsValidScript(script.ClassID))
-						script.Instance.Invoke<float>("OnUpdate", std::move(timestep));
-				}
-			});
-
-			b2World_Step(m_PhysicsWorld, ts, m_PhysicsSubsteps);
-
-			m_Registry.view<RigidBodyComponent, Transform>().each([&](auto entity, RigidBodyComponent& rigid, Transform& transform) {
-				const auto& position = b2Body_GetPosition(rigid.RuntimeBody);
-
-				transform.Position.x = position.x;
-				transform.Position.y = position.y;
-				transform.Rotation = glm::degrees(b2Rot_GetAngle(b2Body_GetRotation(rigid.RuntimeBody)));
-			});
+			for (auto& object : m_Objects)
+				object.Instance.Invoke<float>("OnUpdate", std::move(timestep));
 		}
 
 		Renderer::EndRoom();
@@ -114,48 +83,20 @@ namespace Strype {
 
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		m_Registry.view<ScriptContainer>().each([&](auto entity, ScriptContainer& container) {
-			for (auto& script : container)
+		for (auto& object : m_Objects)
+		{
+			ScriptID scriptID = Project::GetAsset<Prefab>(object.PrefabHandle)->ClassID;
+
+			if (scriptEngine->IsValidScript(scriptID))
 			{
-				if (scriptEngine->IsValidScript(script.ClassID))
-				{
-					script.Instance = scriptEngine->CreateInstance(script.ClassID);
-					script.Instance.Invoke("OnCreate");
-				}
-				else
-					STY_CORE_WARN("Object '{}' has an invalid script id ({})", (uint32_t)entity, (uint64_t)script.ClassID);
+				object.Instance = scriptEngine->CreateInstance(scriptID);
+				object.Instance.Invoke("OnCreate");
 			}
-		});
-
-		b2WorldDef worldDef = b2DefaultWorldDef();
-		worldDef.gravity = { 0.0f, -m_Gravity };
-		m_PhysicsWorld = b2CreateWorld(&worldDef);
-		
-		m_Registry.view<Transform, RigidBodyComponent>().each([&](auto entity, Transform& transform, RigidBodyComponent& rigid) {
-			Object temp{ entity, this };
-			
-			if (!temp.HasComponent<ColliderComponent>())
+			else
 			{
-				STY_CORE_WARN("Cannot apply physics to object ({}) without collider", (uint32_t)temp);
-				return;
+				STY_CORE_WARN("Object '{}' has an invalid script id ({})", (uint32_t)object, (uint64_t)scriptID);
 			}
-
-			ColliderComponent& collider = temp.GetComponent<ColliderComponent>();
-
-			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = (b2BodyType)rigid.Type;
-			bodyDef.position = { transform.Position.x, transform.Position.y };
-			bodyDef.fixedRotation = rigid.FixedRotation;
-			bodyDef.rotation = b2MakeRot(glm::radians(transform.Rotation));
-		
-			rigid.RuntimeBody = b2CreateBody(m_PhysicsWorld, &bodyDef);
-
-			b2ShapeDef shapeDef = b2DefaultShapeDef();
-			shapeDef.density = 1.0f;
-			b2Polygon polygonShape = b2MakeBox(collider.Dimensions.x, collider.Dimensions.y);
-
-			b2CreatePolygonShape(rigid.RuntimeBody, &shapeDef, &polygonShape);
-		});
+		}
 
 		m_RoomState = RoomState::Runtime;
 	}
@@ -168,19 +109,14 @@ namespace Strype {
 			return;
 		}
 
+		auto& scriptEngine = Project::GetScriptEngine();
 		Project::SetActiveRoom(nullptr);
 
-		auto& scriptEngine = Project::GetScriptEngine();
-
-		m_Registry.view<ScriptContainer>().each([&](auto entity, ScriptContainer& container) {
-			for (auto& script : container)
-			{
-				script.Instance.Invoke("OnDestroy");
-				scriptEngine->DestroyInstance(script.Instance);
-			}
-		});
-
-		b2DestroyWorld(m_PhysicsWorld);
+		for (auto& object : m_Objects)
+		{
+			object.Instance.Invoke("OnDestroy");
+			scriptEngine->DestroyInstance(object.Instance);
+		}
 
 		m_RoomState = RoomState::Editor;
 	}
@@ -188,30 +124,43 @@ namespace Strype {
 	void Room::CopyTo(Ref<Room>& room)
 	{
 		room->Handle = Handle;
+
+		room->m_Width = m_Width;
+		room->m_Height = m_Height;
 		room->m_BackgroundColour = m_BackgroundColour;
 
-		for (auto entity : m_Registry.storage<entt::entity>())
-		{
-			Object temp{ entity, this };
-
-			Object::CopyInto(temp, room->CreateObject());
-		}
+		room->m_Objects = m_Objects;
 	}
 
-	Object Room::CreateObject()
+	ObjectID Room::InstantiatePrefab(AssetHandle prefab)
 	{
-		Object object{ m_Registry.create(), this };
-		return object;
+		return m_Objects.emplace_back(m_Objects.size(), prefab, this).m_Handle;
 	}
 
-	void Room::DestroyObject(Object entity)
+	void Room::DestroyInstance(ObjectID obj) const
 	{
-		m_Registry.destroy(entity);
 	}
 
 	void Room::OnResize(const glm::vec2& size)
 	{
 		m_Camera.SetProjection(size);
+	}
+
+	void Room::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+
+		if (m_RoomState == RoomState::Editor)
+			dispatcher.Dispatch<MouseScrolledEvent>(STY_BIND_EVENT_FN(Room::OnMouseScrolled));
+	}
+
+	bool Room::OnMouseScrolled(MouseScrolledEvent& e)
+	{
+		m_ZoomLevel -= e.GetYOffset() * 0.25f;
+		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
+		m_Camera.SetZoomLevel(m_ZoomLevel);
+
+		return true;
 	}
 
 }

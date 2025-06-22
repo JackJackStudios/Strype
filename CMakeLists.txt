@@ -51,13 +51,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(box2d)
 
 FetchContent_Declare(
-    EnTT
-    GIT_REPOSITORY https://github.com/skypjack/entt.git
-    GIT_TAG        v3.15.0
-)
-FetchContent_MakeAvailable(EnTT)
-
-FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/icaven/glm.git
     GIT_TAG        master

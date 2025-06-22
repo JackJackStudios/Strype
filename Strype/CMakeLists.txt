@@ -26,7 +26,6 @@ target_link_libraries(Strype PUBLIC
     sndfile
     ImGuizmo
     Coral.Native
-    EnTT::EnTT
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum

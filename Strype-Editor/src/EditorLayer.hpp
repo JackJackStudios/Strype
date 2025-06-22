@@ -34,18 +34,6 @@ namespace Strype {
 		return true;
     }
 
-	template<typename T>
-	static void AddComponentPopup(Prefab* selection, const std::string& entryName) {
-		if (!selection->HasComponent<T>())
-		{
-			if (ImGui::MenuItem(entryName.c_str()))
-			{
-				selection->AddComponent<T>();
-				ImGui::CloseCurrentPopup();
-			}
-		}
-	}
-
 	template<typename UIFunction>
 	static void DropdownMenu(const std::string& name, UIFunction uiFunction)
 	{

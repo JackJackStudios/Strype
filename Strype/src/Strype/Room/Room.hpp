@@ -5,13 +5,9 @@
 
 #include "Strype/Asset/Asset.hpp"
 
-#include <entt/entt.hpp>
-#include <box2d/box2d.h>
+#include "Object.hpp"
 
 namespace Strype {
-
-	class Object;
-	struct ScriptComponent;
 
 	enum class RoomState
 	{
@@ -20,57 +16,46 @@ namespace Strype {
 		Paused
 	};
 
-	using ScriptContainer = std::vector<ScriptComponent>;
-
 	class Room : public Asset
 	{
 	public:
 		Room();
 
-		Object CreateObject();
-		void DestroyObject(Object entity);
-		void Clear() { m_Registry.clear(); }
+		ObjectID InstantiatePrefab(AssetHandle prefab);
 
-		bool ObjectExists(entt::entity obj) { return m_Registry.valid(obj); }
+		bool InstanceExists(ObjectID obj) const { return obj < m_Objects.size(); }
+		void DestroyInstance(ObjectID obj) const;
+		void Clear() { m_Objects.clear(); }
 
 		void OnUpdate(float ts);
-		void OnResize(const glm::vec2& dims);
-		void OnEvent(Event& e);
 
 		void StartRuntime();
 		void StopRuntime();
 
 		void CopyTo(Ref<Room>& room);
-		RoomState GetState() const { return m_RoomState; }
-		Camera& GetCamera() { return m_Camera; }
+		void OnResize(const glm::vec2& dims);
+		void OnEvent(Event& e);
 
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 
-		template<typename TComponent>
-		static void CopyComponent(entt::entity src, entt::registry& srcreg, entt::entity dest, entt::registry& destreg)
-		{
-			if (srcreg.all_of<TComponent>(src))
-			{
-				auto& srcComponent = srcreg.get<TComponent>(src);
-				destreg.emplace_or_replace<TComponent>(dest, srcComponent);
-			}
-		}
+		RoomState GetState() const { return m_RoomState; }
+		Camera& GetCamera() { return m_Camera; }
+		Object& GetObject(ObjectID id) { return m_Objects[id]; }
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& e);
+		void InitObject(Object& object);
 	private:
+		std::vector<Object> m_Objects;
+
 		uint64_t m_Width = 720, m_Height = 360;
 		glm::vec3 m_BackgroundColour;
-		entt::registry m_Registry;
-		b2WorldId m_PhysicsWorld = {0};
+
 		RoomState m_RoomState = RoomState::Editor;
 
 		Camera m_Camera;
 		float m_CameraSpeed = 5.0f;
 		float m_ZoomLevel = 1.0f;
-
-		float m_Gravity = 10.0f;
-		uint16_t m_PhysicsSubsteps = 4;
 
 		friend class Object;
 		friend class Prefab;

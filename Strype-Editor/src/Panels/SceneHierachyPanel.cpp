@@ -99,14 +99,13 @@ namespace Strype {
 
 		if (m_ActiveScene)
 		{
-			m_ActiveScene->m_Registry.view<PrefabComponent>().each([&](auto entity, PrefabComponent& prefab) {
+			for (auto& obj : m_ActiveScene->m_Objects)
+			{
+				bool selected = m_Selection == obj.GetHandle();
 
-				Object temp{ entity, m_ActiveScene.get() };
-				bool selected = m_Selection == entity;
-
-				if (ImGui::Selectable(std::format("{0}##{1}", Project::GetFilePath(prefab.Handle).stem().string(), (uint32_t)temp).c_str(), &selected))
+				if (ImGui::Selectable(std::format("{0}##{1}", Project::GetFilePath(obj.PrefabHandle).stem().string(), obj.GetHandle()).c_str(), &selected))
 				{
-					m_Selection = temp;
+					m_Selection = obj.GetHandle();
 					m_Inspector->SetSelected(&m_Selection);
 				}
 
@@ -114,13 +113,13 @@ namespace Strype {
 				{
 					if (ImGui::MenuItem("Delete Entity"))
 					{
-						m_Inspector->SetSelected<void>(nullptr);
+						m_ActiveScene->DestroyInstance(obj.GetHandle());
 						m_Inspector->RemoveSelected();
 					}
 
 					ImGui::EndPopup();
 				}
-			});
+			};
 		}
 
 		ImGui::End();
@@ -129,28 +128,24 @@ namespace Strype {
 	}
 
 	void SceneHierachyPanel::OnInspectorRender(Object* select)
-	{	
-		Transform& trans = select->GetComponent<Transform>();
-		SpriteRenderer& spr = select->GetComponent<SpriteRenderer>();
-		PrefabComponent& prefab = select->GetComponent<PrefabComponent>();
-		
+	{
 		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(spr.Texture)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+		ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(Project::GetAsset<Prefab>(select->PrefabHandle)->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
 
 		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Button(Project::GetFilePath(prefab.Handle).stem().string().c_str(), ImVec2(128.0f, 0));
+		ImGui::Button(Project::GetFilePath(select->PrefabHandle).stem().string().c_str(), ImVec2(128.0f, 0));
 
 		DropdownMenu("Properties", [&]() {
-			DrawVec2Control("Position", trans.Position);
-			DrawVec2Control("Scale", trans.Scale, 1.0f);
+			DrawVec2Control("Position", select->Transform.Position);
+			DrawVec2Control("Scale", select->Transform.Scale, 1.0f);
 
 			ImGui::Text("Colour");
 			ImGui::SameLine();
-			ImGui::ColorEdit4("##Colour", glm::value_ptr(spr.Colour), ImGuiColorEditFlags_NoInputs);
+			ImGui::ColorEdit4("##Colour", glm::value_ptr(select->Colour), ImGuiColorEditFlags_NoInputs);
 
 			ImGui::Text("Rotation");
 			ImGui::SameLine();
-			ImGui::DragFloat("##Rotation", &trans.Rotation);
+			ImGui::DragFloat("##Rotation", &select->Transform.Rotation);
 		});
 	}
 
