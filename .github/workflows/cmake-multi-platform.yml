@@ -49,9 +49,9 @@ jobs:
       if: runner.os == 'Linux'
       run: sudo apt update
 
-    - name: Install Wayland (GLFW)
+    - name: Install X11 (GLFW)
       if: runner.os == 'Linux'
-      run: sudo apt install libwayland-dev libxkbcommon-dev wayland-protocols extra-cmake-modules
+      run: sudo apt install xorg-dev
     
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
