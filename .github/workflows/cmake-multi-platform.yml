@@ -45,9 +45,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install X11 (GLFW)
+    - name: Update apt
       if: runner.os == 'Linux'
-      run: sudo apt install xorg-dev
+      run: sudo apt update
 
     - name: Install Wayland (GLFW)
       if: runner.os == 'Linux'
