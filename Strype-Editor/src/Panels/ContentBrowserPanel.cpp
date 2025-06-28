@@ -35,7 +35,7 @@ namespace Strype {
 			return std::distance(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator{});
 		}
 
-		static std::shared_ptr<AGI::Texture> LoadTexture(const std::filesystem::path& path)
+		static AGI::Texture LoadTexture(const std::filesystem::path& path)
 		{
 			int width, height, channels;
 
@@ -49,7 +49,7 @@ namespace Strype {
 			textureSpec.Height = height;
 			textureSpec.Format = AGI::ChannelsToImageFormat(channels);
 			
-        	std::shared_ptr<AGI::Texture> texture = Renderer::GetContext()->CreateTexture(textureSpec);
+        	AGI::Texture texture = Renderer::GetContext()->CreateTexture(textureSpec);
         	texture->SetData(data, width * height * channels);
 
 			return texture;
@@ -118,7 +118,7 @@ namespace Strype {
 			TreeNode& node = m_CurrentDirectory->Nodes[i];
 
 			const std::filesystem::path& path = node.Path;
-			Ref<AGI::Texture> icon = GetIcon(node.Handle);
+			AGI::Texture icon = GetIcon(node.Handle);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::ImageButton((std::string("##") + std::to_string(node.Handle)).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
@@ -322,7 +322,7 @@ namespace Strype {
 		});
 	}
 
-	Ref<AGI::Texture> ContentBrowserPanel::GetIcon(AssetHandle handle)
+	AGI::Texture ContentBrowserPanel::GetIcon(AssetHandle handle)
 	{
 		if (handle == 0)
 			return m_DirectoryIcon;

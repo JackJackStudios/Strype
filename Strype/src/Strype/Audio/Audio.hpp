@@ -6,15 +6,6 @@
 
 namespace Strype {
 
-	class Audio
-	{
-	public:
-		static void Init();
-		static void Shutdown();
-
-		static void SetListenerPos(const glm::vec2& pos);
-	};
-
 	class AudioFile : public Asset
 	{
 	public:
@@ -24,19 +15,20 @@ namespace Strype {
 		static AssetType GetStaticType() { return AssetType::AudioFile; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 
-		void SetData(void* data, uint64_t size) const;
-		uint32_t GetNative() const { return m_RendererID; }
+		void SetData(Buffer buf);
 	private:
 		uint32_t m_RendererID = 0;
 		uint32_t m_SampleRate;
 		int m_DataFormat;
+
+		friend class AudioSource;
 	};
 
-	class Source
+	class AudioSource
 	{
 	public:
-		Source();
-		~Source();
+		AudioSource();
+		~AudioSource();
 
 		void SetGain(float vol);
 		void SetLoop(bool loop);
@@ -44,11 +36,22 @@ namespace Strype {
 		void SetPos(const glm::vec2& pos);
 
 		void Play(const Ref<AudioFile>& sound);
-
-		uint32_t GetNative() const { return m_RendererID; }
 	private:
 		uint32_t m_RendererID = 0;
 		uint32_t m_BoundBuffer = 0;
+	};
+
+	class Audio
+	{
+	public:
+		static void Init();
+		static void Shutdown();
+
+		static Ref<AudioSource> GetGlobalSource() { return s_GlobalSource; }
+
+		static void SetListenerPos(const glm::vec2& pos);
+	private:
+		inline static Ref<AudioSource> s_GlobalSource;
 	};
 
 }

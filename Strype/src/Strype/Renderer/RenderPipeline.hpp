@@ -17,10 +17,10 @@ namespace Strype {
 		std::string TextureSampler;
 		std::string ProjectionUniform;
 
-		std::shared_ptr<AGI::VertexArray> VertexArray;
-		std::shared_ptr<AGI::VertexBuffer> VertexBuffer;
-		std::shared_ptr<AGI::IndexBuffer> IndexBuffer;
-		std::shared_ptr<AGI::Shader> Shader;
+		AGI::VertexArray VertexArray;
+		AGI::VertexBuffer VertexBuffer;
+		AGI::IndexBuffer IndexBuffer;
+		AGI::Shader Shader;
 		AGI::BufferLayout Layout;
 
 		std::unordered_map<std::string, AGI::BufferElement> AttributeCache;

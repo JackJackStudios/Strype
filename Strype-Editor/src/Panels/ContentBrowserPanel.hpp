@@ -33,7 +33,7 @@ namespace Strype {
 	private:
 		void RefreshTreeNode(TreeNode& node);
 		void OnInspectorRender(Room* select);
-		Ref<AGI::Texture> GetIcon(AssetHandle handle);
+		AGI::Texture GetIcon(AssetHandle handle);
 	private:
 
 		std::unordered_map<AssetType, ItemClickCallbackFunc> m_ItemClicksCallbacks;
@@ -45,9 +45,9 @@ namespace Strype {
 		AssetType m_InputType = AssetType::Sprite; //None = folder
 		Ref<InspectorPanel> m_Inspector;
 
-		std::shared_ptr<AGI::Texture> m_DirectoryIcon;
-		std::shared_ptr<AGI::Texture> m_FileIcon;
-		std::unordered_map<AssetType, std::shared_ptr<AGI::Texture>> m_Icons;
+		AGI::Texture m_DirectoryIcon;
+		AGI::Texture m_FileIcon;
+		std::unordered_map<AssetType, AGI::Texture> m_Icons;
 	};
 
 }

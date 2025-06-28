@@ -15,6 +15,7 @@ namespace Strype {
 	{
 	public:
 		static bool StartProcess(std::string command);
+		static void OpenExternally(const std::filesystem::path& path);
 	};
 
 }

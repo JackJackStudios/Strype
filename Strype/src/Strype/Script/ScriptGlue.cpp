@@ -49,32 +49,32 @@ namespace Strype {
 
 		void Transform_GetPosition(InstanceID id, glm::vec2* outPosition)
 		{
-			*outPosition = Project::GetActiveRoom()->GetObject(id).Transform.Position;
+			*outPosition = Project::GetActiveRoom()->GetObject(id).Position;
 		}											 
 													 
 		void Transform_SetPosition(InstanceID id, glm::vec2* inPosition)
 		{
-			Project::GetActiveRoom()->GetObject(id).Transform.Position = *inPosition;
+			Project::GetActiveRoom()->GetObject(id).Position = *inPosition;
 		}
 
 		void Transform_GetRotation(InstanceID id, float* outRotation)
 		{
-			*outRotation = Project::GetActiveRoom()->GetObject(id).Transform.Rotation;
+			*outRotation = Project::GetActiveRoom()->GetObject(id).Rotation;
 		}
 
 		void Transform_SetRotation(InstanceID id, float* inRotation)
 		{
-			Project::GetActiveRoom()->GetObject(id).Transform.Rotation = *inRotation;
+			Project::GetActiveRoom()->GetObject(id).Rotation = *inRotation;
 		}
 
 		void Transform_GetScale(InstanceID id, glm::vec2* outScale)
 		{
-			*outScale = Project::GetActiveRoom()->GetObject(id).Transform.Scale;
+			*outScale = Project::GetActiveRoom()->GetObject(id).Scale;
 		}
 
 		void Transform_SetScale(InstanceID id, glm::vec2* inScale)
 		{
-			Project::GetActiveRoom()->GetObject(id).Transform.Scale = *inScale;
+			Project::GetActiveRoom()->GetObject(id).Scale = *inScale;
 		}
 
 		void Log_LogMessage(LogLevel level, Coral::String fmt)

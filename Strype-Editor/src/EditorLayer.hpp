@@ -3,7 +3,6 @@
 #include "Panels/PanelManager.hpp"
 
 #include "Panels/ContentBrowserPanel.hpp"
-#include "Panels/SceneHierachyPanel.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -77,12 +76,12 @@ namespace Strype {
 
 		void UI_RoomPanel();
 	private:
-		Ref<AGI::Framebuffer> m_Framebuffer;
+		AGI::Framebuffer m_Framebuffer;
+		InstanceID m_Selected;
 		Ref<Room> m_Room;
 
 		PanelManager m_PanelManager;
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
-		Ref<SceneHierachyPanel> m_SceneHierachyPanel;
 
 		glm::vec2 m_ViewportBounds[2];
 	};

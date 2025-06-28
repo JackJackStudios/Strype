@@ -32,12 +32,12 @@ namespace Strype {
 		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path) {};
 	};
 
-	class PrefabSerializer : public AssetSerializer
+	class ObjectSerializer : public AssetSerializer
 	{
 	public:
 		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
 
-		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path);
+		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path) {};
 	};
 
 }

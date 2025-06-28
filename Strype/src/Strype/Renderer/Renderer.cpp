@@ -24,6 +24,7 @@ namespace Strype {
 	{
 		AGI::Settings settings;
 		settings.PreferedAPI = AGI::APIType::Guess;
+		settings.LoaderFunc = AGI::Window::LoaderFunc;
 		settings.MessageFunc = OnAGIMessage;
 		settings.Blending = true;
 
@@ -145,7 +146,7 @@ namespace Strype {
 		s_TextureSlotIndex = 1;
 	}
 
-	float Renderer::GetTextureSlot(const std::shared_ptr<AGI::Texture>& texture)
+	float Renderer::GetTextureSlot(const AGI::Texture& texture)
 	{
 		if (!texture)
 			return 0.0f;
@@ -153,7 +154,7 @@ namespace Strype {
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_TextureSlotIndex; i++)
 		{
-			if (*s_TextureSlots[i] == *texture)
+			if (*s_TextureSlots[i] == texture)
 			{
 				textureIndex = (float)i;
 				break;

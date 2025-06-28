@@ -10,6 +10,7 @@
 #include <Coral/HostInstance.hpp>
 #include <Coral/Assembly.hpp>
 #include <Coral/Type.hpp>
+#include <Coral/Array.hpp>
 
 namespace Strype {
 
@@ -19,6 +20,7 @@ namespace Strype {
 		Float,
 		Int, UInt,
 		Long, ULong,
+		String,
 		Vector2, Vector3, Vector4,
 	};
 
@@ -29,15 +31,39 @@ namespace Strype {
 		{ "System.UInt32",  DataType::UInt },
 		{ "System.Int64",   DataType::Long },
 		{ "System.UInt64",  DataType::ULong },
-		{ "Strype.Vector2",  DataType::Vector2 },
-		{ "Strype.Vector3",  DataType::Vector3 },
-		{ "Strype.Vector4",  DataType::Vector4 }
+		{ "System.String",  DataType::String },
+		{ "Strype.Vector2", DataType::Vector2 },
+		{ "Strype.Vector3", DataType::Vector3 },
+		{ "Strype.Vector4", DataType::Vector4 }
 	};
 
 	struct ScriptField
 	{
 		std::string Name;
 		DataType Type;
+		Coral::Type* ManagedType;
+
+		Buffer DefaultValue;
+
+	private:
+		template<typename T>
+		void SetDefaultValue(Coral::ManagedObject& temp)
+		{
+			if (ManagedType->IsSZArray())
+			{
+				auto value = temp.GetFieldValue<Coral::Array<T>>(Name);
+				DefaultValue = Buffer::Copy(value.Data(), value.ByteLength());
+				Coral::Array<T>::Free(value);
+			}
+			else
+			{
+				DefaultValue.Allocate(sizeof(T));
+				auto value = temp.GetFieldValue<T>(Name);
+				DefaultValue.Write(&value, sizeof(T));
+			}
+		}
+
+		friend class ScriptEngine;
 	};
 
 	struct ScriptMetadata

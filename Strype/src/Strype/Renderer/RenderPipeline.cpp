@@ -55,7 +55,7 @@ namespace Strype {
 		TextureSampler = "u_Textures";
 		ProjectionUniform = "u_ViewProjection";
 
-		Shader = Renderer::GetContext()->CreateShader(AGI::Shader::ProcessSource(Utils::ReadFile((Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl").string())));
+		Shader = Renderer::GetContext()->CreateShader(AGI::ProcessSource(Utils::ReadFile((Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl").string())));
 	}
 
 	void QuadPipeline::DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex)

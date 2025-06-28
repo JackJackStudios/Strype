@@ -49,7 +49,7 @@ namespace Strype {
 	AssetManager::AssetManager()
 	{
 		m_Serializers.clear();
-		m_Serializers[AssetType::Object] = CreateScope<PrefabSerializer>();
+		m_Serializers[AssetType::Object] = CreateScope<ObjectSerializer>();
 		m_Serializers[AssetType::Sprite] = CreateScope<SpriteSerializer>();
 		m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
 		m_Serializers[AssetType::AudioFile] = CreateScope<AudioFileSerializer>();
@@ -232,7 +232,7 @@ namespace Strype {
 	{
 		for (auto& entry : std::filesystem::directory_iterator(path))
 		{
-			if (entry.is_directory())
+			if (entry.is_directory() && entry.path().filename() != HIDDEN_FOLDER)
 				LoadDirectory(entry.path());
 			else if (s_AssetExtensionMap.find(entry.path().extension()) != s_AssetExtensionMap.end())
 				ImportAsset(std::filesystem::relative(entry.path(), Project::GetProjectDirectory()));

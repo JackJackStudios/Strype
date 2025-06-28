@@ -6,15 +6,20 @@
 
 namespace Strype {
 
-	Source::Source()
+	AudioSource::AudioSource()
 	{
 		alGenSources(1, &m_RendererID);
 		alSourcei(m_RendererID, AL_BUFFER, m_BoundBuffer);
 	}
 
-	void Source::Play(const Ref<AudioFile>& sound)
+	AudioSource::~AudioSource()
 	{
-		ALuint buffer = (ALuint)sound->GetNative();
+		alDeleteSources(1, &m_RendererID);
+	}
+
+	void AudioSource::Play(const Ref<AudioFile>& sound)
+	{
+		ALuint buffer = (ALuint)sound->m_RendererID;
 
 		if (buffer != m_BoundBuffer)
 		{
@@ -25,27 +30,22 @@ namespace Strype {
 		alSourcePlay(m_RendererID);
 	}
 
-	Source::~Source()
-	{
-		alDeleteSources(1, &m_RendererID);
-	}
-
-	void Source::SetGain(float vol)
+	void AudioSource::SetGain(float vol)
 	{
 		alSourcef(m_RendererID, AL_GAIN, vol);
 	}
 
-	void Source::SetLoop(bool loop)
+	void AudioSource::SetLoop(bool loop)
 	{
 		alSourcei(m_RendererID, AL_LOOPING, loop);
 	}
 
-	void Source::SetPitch(float pitch)
+	void AudioSource::SetPitch(float pitch)
 	{
 		alSourcef(m_RendererID, AL_PITCH, pitch);
 	}
 
-	void Source::SetPos(const glm::vec2& pos)
+	void AudioSource::SetPos(const glm::vec2& pos)
 	{
 		alSource3f(m_RendererID, AL_POSITION, pos.x, pos.y, 0.0f);
 	}

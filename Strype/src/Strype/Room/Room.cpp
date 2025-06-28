@@ -26,17 +26,6 @@ namespace Strype {
 
 		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
 
-		for (auto& object : m_Objects)
-		{
-			Renderer::DrawQuad(
-				glm::make_vec3(object.Transform.Position),
-				object.Transform.Scale,
-				object.Transform.Rotation,
-				object.Colour,
-				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.PrefabHandle)->TextureHandle)
-			);
-		}
-
 		if (m_RoomState == RoomState::Editor)
 		{
 			if (Input::IsKeyHeld(KeyCode::A))
@@ -60,13 +49,23 @@ namespace Strype {
 			m_Camera.UpdateMatrix();
 		}
 
-		if (m_RoomState == RoomState::Runtime)
-		{
-			auto& scriptEngine = Project::GetScriptEngine();
-			float timestep = ts;
+		auto& scriptEngine = Project::GetScriptEngine();
 
-			for (auto& object : m_Objects)
-				object.Instance.Invoke<float>("OnUpdate", std::move(timestep));
+		for (auto& object : m_Objects)
+		{
+			Renderer::DrawQuad(
+				glm::make_vec3(object.Position),
+				object.Scale,
+				object.Rotation,
+				object.Colour,
+				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.PrefabHandle)->TextureHandle)
+			);
+
+			if (m_RoomState == RoomState::Runtime)
+			{
+				//object.Emitter->SetPos(object.Position);
+				object.Instance.Invoke("OnUpdate", ts);
+			}
 		}
 
 		Renderer::EndRoom();

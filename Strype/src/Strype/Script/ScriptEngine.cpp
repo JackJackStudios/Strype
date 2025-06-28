@@ -38,10 +38,12 @@ namespace Strype {
 #ifdef STY_WINDOWS
 		STY_CORE_INFO("Building C# project '{}'", path);
 
+		system(std::format("cd \"{}\" && premake5.exe --verbose vs2022", (path / HIDDEN_FOLDER).string()).c_str());
+
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:restore,build > nul 2>&1", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:restore,build", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
 		
 		system(command.c_str());
 #endif
@@ -70,6 +72,8 @@ namespace Strype {
 
 		for (auto& type : types)
 		{
+			auto temp = type->CreateInstance();
+
 			if (type->IsSubclassOf(objectType))
 			{
 				std::string fullName = type->GetFullName();
@@ -83,8 +87,7 @@ namespace Strype {
 				{
 					Coral::ScopedString fieldName = fieldInfo.GetName();
 					std::string fieldNameStr = fieldName;
-					auto fullFieldName = std::format("{}.{}", fullName, fieldNameStr);
-					uint32_t fieldID = Hash::GenerateFNVHash(fullFieldName);
+					uint32_t fieldID = Hash::GenerateFNVHash(fieldNameStr);
 
 					Coral::Type* fieldType = &fieldInfo.GetType();
 					Coral::ScopedString typeName = fieldType->GetFullName();
@@ -98,8 +101,44 @@ namespace Strype {
 					auto& fieldMetadata = metadata.Fields[fieldID];
 					fieldMetadata.Name = fieldName;
 					fieldMetadata.Type = s_DataTypeLookup.at(typeName);
+					fieldMetadata.ManagedType = &fieldInfo.GetType();
+					
+					switch (fieldMetadata.Type)
+					{
+					case DataType::Bool:
+						break;
+					case DataType::Int:
+						fieldMetadata.SetDefaultValue<int32_t>(temp);
+						break;
+					case DataType::UInt:
+						fieldMetadata.SetDefaultValue<uint32_t>(temp);
+						break;
+					case DataType::Long:
+						fieldMetadata.SetDefaultValue<int64_t>(temp);
+						break;
+					case DataType::ULong:
+						fieldMetadata.SetDefaultValue<uint64_t>(temp);
+						break;
+					case DataType::Float:
+						fieldMetadata.SetDefaultValue<float>(temp);
+						break;
+					case DataType::String:
+						fieldMetadata.SetDefaultValue<Coral::String>(temp);
+						break;
+					case DataType::Vector2:
+						fieldMetadata.SetDefaultValue<glm::vec2>(temp);
+						break;
+					case DataType::Vector3:
+						fieldMetadata.SetDefaultValue<glm::vec3>(temp);
+						break;
+					case DataType::Vector4:
+						fieldMetadata.SetDefaultValue<glm::vec4>(temp);
+						break;
+					}
 				}
 			}
+
+			temp.Destroy();
 		}
 	}
 

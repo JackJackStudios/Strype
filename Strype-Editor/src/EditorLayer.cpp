@@ -18,7 +18,6 @@ namespace Strype {
 		//Configure PanelManager
 		m_PanelManager.SetRoomContext(m_Room);
 
-		m_SceneHierachyPanel = m_PanelManager.AddPanel<SceneHierachyPanel>();
 		m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata)
@@ -34,7 +33,7 @@ namespace Strype {
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-		OpenProject(false, projectPath);
+		OpenProject(true, projectPath);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -111,15 +110,15 @@ namespace Strype {
 			ImGui::EndDragDropTarget();
 		}
 
-		if (InstanceID selected = m_SceneHierachyPanel->GetSelected())
+		if (m_Room->InstanceExists(m_Selected))
 		{
 			ImGuizmo::SetOrthographic(true);
 			ImGuizmo::SetDrawlist();
 
 			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
-			Transform& t = m_Room->GetObject(selected).Transform;
-			glm::mat4 transform = t.GetTransform();
+			RoomInstance& obj = m_Room->GetObject(m_Selected);
+			glm::mat4 transform = obj.GetTransform();
 
 			ImGuizmo::Manipulate(glm::value_ptr(m_Room->GetCamera().GetViewMatrix()), glm::value_ptr(m_Room->GetCamera().GetProjectionMatrix()),
 				ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform),
@@ -131,9 +130,9 @@ namespace Strype {
 				float rotation;
 				DecomposeTransform(transform, position, rotation, scale);
 
-				t.Position = position;
-				t.Rotation = rotation;
-				t.Scale = scale;
+				obj.Position = position;
+				obj.Rotation = rotation;
+				obj.Scale = scale;
 			}
 		}
 
@@ -200,46 +199,8 @@ namespace Strype {
 			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(object->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
 
 			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Button(Project::GetFilePath(object->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
+			ImGui::Button(Project::GetFilePath(object->TextureHandle).filename().string().c_str(), ImVec2(128.0f, 0));
 		}
-
-		DropdownMenu("Properties", [&]() 
-		{
-			if (Project::IsAssetLoaded(object->TextureHandle))
-			{
-				ImGui::Button(Project::GetFilePath(object->TextureHandle).filename().string().c_str());
-
-				if (ImGui::BeginDragDropTarget())
-				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-					{
-						AssetHandle handle = *(AssetHandle*)payload->Data;
-
-						if (Project::GetAssetType(handle) == AssetType::Sprite)
-							object->TextureHandle = handle;
-						else
-							STY_CORE_WARN("Wrong asset type!");
-					}
-					ImGui::EndDragDropTarget();
-				}
-
-				ImGui::SameLine();
-				ImGui::Text("Sprite");
-			}
-		});
-
-		DropdownMenu("Components", [&]() 
-		{
-			if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
-				ImGui::OpenPopup("AddComponent");
-
-			if (ImGui::BeginPopup("AddComponent"))
-			{
-				STY_CORE_VERIFY(false, "Not implemented");
-
-				ImGui::EndPopup();
-			}
-		});
 	}
 
     void EditorLayer::OnEvent(Event& e)

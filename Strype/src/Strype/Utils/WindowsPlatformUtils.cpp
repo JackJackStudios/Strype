@@ -122,5 +122,14 @@ namespace Strype {
 		return success;
 	}
 
+	void PlatformUtils::OpenExternally(const std::filesystem::path& path)
+	{
+		auto absolutePath = std::filesystem::canonical(path);
+		if (std::filesystem::exists(absolutePath))
+			return;
+
+		ShellExecute(NULL, "open", absolutePath.string().c_str(), NULL, NULL, SW_SHOWNORMAL);
+	}
+
 }
 #endif

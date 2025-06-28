@@ -3,7 +3,7 @@
 
 namespace Strype {
 
-	Sprite::Sprite(std::shared_ptr<AGI::Texture> texture)
+	Sprite::Sprite(AGI::Texture texture)
 		: m_Texture(texture)
 	{
 	}

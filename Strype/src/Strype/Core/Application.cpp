@@ -29,8 +29,8 @@ namespace Strype {
 		m_Config.WindowProps.Visible = false;
 
 		Renderer::Init();
-		Audio::Init();
 
+		Audio::Init();
 		Input::Init();
 
 		ScriptEngine::Initialize();
@@ -38,7 +38,7 @@ namespace Strype {
 		InstallCallbacks();
 
 		if (m_Config.ImGuiEnabled)
-			m_ImGuiLayer = new AGI::ImGuiLayer(m_Window);
+			m_ImGuiLayer = AGI::ImGuiLayer::Create(m_Window->GetGlfwWindow());
 	}
 
 	Application::~Application()
@@ -46,7 +46,7 @@ namespace Strype {
 		m_Window->SetVisable(false);
 
 		if (m_Config.ImGuiEnabled)
-			delete m_ImGuiLayer;
+			m_ImGuiLayer.reset();
 
 		m_LayerStack.DestroyLayers();
 

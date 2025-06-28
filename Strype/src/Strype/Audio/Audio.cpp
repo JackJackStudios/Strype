@@ -49,6 +49,8 @@ namespace Strype {
 	void Audio::SetListenerPos(const glm::vec2& pos)
 	{
 		alListener3f(AL_POSITION, pos.x, pos.y, 0.0f);
+
+		s_GlobalSource->SetPos(pos);
 	}
 
 }

@@ -38,13 +38,9 @@ namespace Strype {
 						out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(obj.PrefabHandle);
 						out << YAML::Key << "Colour" << YAML::Value << obj.Colour;
 
-						{
-							ScopedMap transformMap(out, "Transform");
-
-							out << YAML::Key << "Position" << YAML::Value << obj.Transform.Position;
-							out << YAML::Key << "Scale" << YAML::Value << obj.Transform.Scale;
-							out << YAML::Key << "Rotation" << YAML::Value << obj.Transform.Rotation;
-						}
+						out << YAML::Key << "Position" << YAML::Value << obj.Position;
+						out << YAML::Key << "Scale" << YAML::Value << obj.Scale;
+						out << YAML::Key << "Rotation" << YAML::Value << obj.Rotation;
 					}
 				}
 			}
@@ -92,11 +88,9 @@ namespace Strype {
 			RoomInstance& newobj = room->GetObject(room->InstantiatePrefab(handle));
 			newobj.PrefabHandle = handle;
 
-			YAML::Node transform = obj["Transform"];
-			newobj.Transform.Position = transform["Position"].as<glm::vec2>();
-			newobj.Transform.Scale = transform["Scale"].as<glm::vec2>();
-			newobj.Transform.Rotation = transform["Rotation"].as<float>();
-
+			newobj.Position = obj["Position"].as<glm::vec2>();
+			newobj.Scale = obj["Scale"].as<glm::vec2>();
+			newobj.Rotation = obj["Rotation"].as<float>();
 			newobj.Colour = obj["Colour"].as<glm::vec4>();
 		}
 	

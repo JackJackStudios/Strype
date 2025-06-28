@@ -64,15 +64,15 @@ namespace Strype {
 
 		static std::unique_ptr<AGI::RenderContext>& GetContext() { return s_RenderContext; }
 	private:
-		static float GetTextureSlot(const std::shared_ptr<AGI::Texture>& texture);
+		static float GetTextureSlot(const AGI::Texture& texture);
 		static void Flush();
 		static void FlushAndReset();
 		static void InitPipeline(const Ref<RenderPipeline>& pipeline);
 	private:
 		inline static std::unique_ptr<AGI::RenderContext> s_RenderContext;
 
-		inline static std::array<std::shared_ptr<AGI::Texture>, RenderCaps::MaxTextureSlots> s_TextureSlots;
-		inline static std::shared_ptr<AGI::Texture> s_WhiteTexture;
+		inline static std::array<AGI::Texture, RenderCaps::MaxTextureSlots> s_TextureSlots;
+		inline static AGI::Texture s_WhiteTexture;
 		inline static uint32_t s_TextureSlotIndex = 1; // 0 = white texture
 
 		inline static TypeMap<Ref<RenderPipeline>> s_RenderPipelines;
