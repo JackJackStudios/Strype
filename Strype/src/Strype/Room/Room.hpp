@@ -24,7 +24,7 @@ namespace Strype {
 		InstanceID InstantiatePrefab(AssetHandle prefab);
 
 		bool InstanceExists(InstanceID obj) const { return obj < m_Objects.size(); }
-		void DestroyInstance(InstanceID obj) const;
+		void DestroyInstance(InstanceID obj);
 		void Clear() { m_Objects.clear(); }
 
 		void OnUpdate(float ts);

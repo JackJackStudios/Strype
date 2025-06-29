@@ -80,6 +80,7 @@ namespace Strype {
 		}
 
 		Project::SetActiveRoom(this);
+		STY_CORE_INFO("Staring room \"{}\" ", Project::GetFilePath(Handle).stem());
 
 		auto& scriptEngine = Project::GetScriptEngine();
 
@@ -89,7 +90,7 @@ namespace Strype {
 
 			if (scriptEngine->IsValidScript(scriptID))
 			{
-				object.Instance = scriptEngine->CreateInstance(scriptID);
+				object.Instance = scriptEngine->CreateInstance(scriptID, object.m_Handle, object.PrefabHandle);
 				object.Instance.Invoke("OnCreate");
 			}
 			else
@@ -137,8 +138,9 @@ namespace Strype {
 		return m_Objects.emplace_back(UUID32(m_Objects.size()), prefab, this).m_Handle;
 	}
 
-	void Room::DestroyInstance(InstanceID obj) const
+	void Room::DestroyInstance(InstanceID obj)
 	{
+		STY_CORE_VERIFY(false, "Not implemented");
 	}
 
 	void Room::OnResize(const glm::vec2& size)

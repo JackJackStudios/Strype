@@ -24,57 +24,86 @@ namespace Strype {
 
 	void ScriptGlue::RegisterInternalCalls(Coral::ManagedAssembly& coreAssembly)
 	{
-		STY_ADD_INTERNAL_CALL(Room_ObjectExists);
+		STY_ADD_INTERNAL_CALL(Room_CreateObject);
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
-		STY_ADD_INTERNAL_CALL(Transform_GetPosition);
-		STY_ADD_INTERNAL_CALL(Transform_SetPosition);
-		STY_ADD_INTERNAL_CALL(Transform_GetRotation);
-		STY_ADD_INTERNAL_CALL(Transform_SetRotation);
-		STY_ADD_INTERNAL_CALL(Transform_GetScale);
-		STY_ADD_INTERNAL_CALL(Transform_SetScale);
+
+		STY_ADD_INTERNAL_CALL(Object_GetPosition);
+		STY_ADD_INTERNAL_CALL(Object_SetPosition);
+		STY_ADD_INTERNAL_CALL(Object_GetRotation);
+		STY_ADD_INTERNAL_CALL(Object_SetRotation);
+		STY_ADD_INTERNAL_CALL(Object_GetScale);
+		STY_ADD_INTERNAL_CALL(Object_SetScale);
+
+		STY_ADD_INTERNAL_CALL(Input_IsKeyPressed);
+		STY_ADD_INTERNAL_CALL(Input_IsKeyHeld);
+		STY_ADD_INTERNAL_CALL(Input_IsKeyDown);
+		STY_ADD_INTERNAL_CALL(Input_IsKeyReleased);
+		STY_ADD_INTERNAL_CALL(Input_IsMouseButtonPressed);
+		STY_ADD_INTERNAL_CALL(Input_IsMouseButtonHeld);
+		STY_ADD_INTERNAL_CALL(Input_IsMouseButtonDown);
+		STY_ADD_INTERNAL_CALL(Input_IsMouseButtonReleased);
+		STY_ADD_INTERNAL_CALL(Input_GetMousePosition);
+
 		STY_ADD_INTERNAL_CALL(Log_LogMessage);
 	}
 
 	namespace InternalCalls {
-
-		bool Room_ObjectExists(InstanceID id)
+		
+		InstanceID Room_CreateObject(float x, float y, AssetHandle object)
 		{
-			return Project::GetActiveRoom()->InstanceExists(id);
+			InstanceID instance = Project::GetActiveRoom()->InstantiatePrefab(object);
+			Project::GetActiveRoom()->GetObject(instance).Position = { x, y };
+
+			return instance;
 		}
 
 		void Room_DestroyObject(InstanceID id)
 		{
-			return Project::GetActiveRoom()->DestroyInstance(id);
+			Project::GetActiveRoom()->DestroyInstance(id);
 		}
 
-		void Transform_GetPosition(InstanceID id, glm::vec2* outPosition)
+		void Object_GetPosition(InstanceID id, glm::vec2* outPosition)
 		{
 			*outPosition = Project::GetActiveRoom()->GetObject(id).Position;
-		}											 
-													 
-		void Transform_SetPosition(InstanceID id, glm::vec2* inPosition)
+		}
+
+		void Object_SetPosition(InstanceID id, glm::vec2* inPosition)
 		{
 			Project::GetActiveRoom()->GetObject(id).Position = *inPosition;
 		}
 
-		void Transform_GetRotation(InstanceID id, float* outRotation)
-		{
-			*outRotation = Project::GetActiveRoom()->GetObject(id).Rotation;
-		}
-
-		void Transform_SetRotation(InstanceID id, float* inRotation)
-		{
-			Project::GetActiveRoom()->GetObject(id).Rotation = *inRotation;
-		}
-
-		void Transform_GetScale(InstanceID id, glm::vec2* outScale)
+		void Object_GetScale(InstanceID id, glm::vec2* outScale)
 		{
 			*outScale = Project::GetActiveRoom()->GetObject(id).Scale;
 		}
 
-		void Transform_SetScale(InstanceID id, glm::vec2* inScale)
+		void Object_SetScale(InstanceID id, glm::vec2* inScale)
 		{
 			Project::GetActiveRoom()->GetObject(id).Scale = *inScale;
+		}
+
+		void Object_GetRotation(InstanceID id, float* outRotation)
+		{
+			*outRotation = Project::GetActiveRoom()->GetObject(id).Rotation;
+		}
+
+		void Object_SetRotation(InstanceID id, float* inRotation)
+		{
+			Project::GetActiveRoom()->GetObject(id).Rotation = *inRotation;
+		}
+
+		Coral::Bool32 Input_IsKeyPressed(KeyCode keycode) { return Input::IsKeyPressed(keycode); }
+		Coral::Bool32 Input_IsKeyHeld(KeyCode keycode) { return Input::IsKeyHeld(keycode); }
+		Coral::Bool32 Input_IsKeyDown(KeyCode keycode) { return Input::IsKeyDown(keycode); }
+		Coral::Bool32 Input_IsKeyReleased(KeyCode keycode) { return Input::IsKeyReleased(keycode); }
+		Coral::Bool32 Input_IsMouseButtonPressed(MouseCode button) { return Input::IsMouseButtonPressed(button); }
+		Coral::Bool32 Input_IsMouseButtonHeld(MouseCode button) { return Input::IsMouseButtonHeld(button); }
+		Coral::Bool32 Input_IsMouseButtonDown(MouseCode button) { return Input::IsMouseButtonDown(button); }
+		Coral::Bool32 Input_IsMouseButtonReleased(MouseCode button) { return Input::IsMouseButtonReleased(button); }
+
+		void Input_GetMousePosition(glm::vec2* outPosition)
+		{
+			*outPosition = Input::GetMousePosition();
 		}
 
 		void Log_LogMessage(LogLevel level, Coral::String fmt)
