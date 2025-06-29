@@ -38,7 +38,7 @@ namespace Strype {
 		InstallCallbacks();
 
 		if (m_Config.ImGuiEnabled)
-			m_ImGuiLayer = AGI::ImGuiLayer::Create(m_Window->GetGlfwWindow());
+			m_ImGuiLayer = AGI::ImGuiLayer::Create(m_Window);
 	}
 
 	Application::~Application()

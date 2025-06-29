@@ -8,7 +8,6 @@
 #include "Strype/Renderer/Renderer.hpp"
 
 #include <AGI/agi.hpp>
-#include <AGI/ext/Window.hpp>
 #include <AGI/ext/ImGuiLayer.hpp>
 
 int main(int argc, char** argv);
@@ -45,13 +44,6 @@ namespace Strype {
 		std::shared_ptr<AGI::ImGuiLayer> GetImGuiLayer() { return m_ImGuiLayer; }
 
 		void OnEvent(Event& e);
-
-		template<typename T, typename... Args>
-		Application& PushPipeline(Args&&... args)
-		{
-			Renderer::PushPipeline<T>(std::forward<Args>(args)...);
-			return *this;
-		}
 
 		template<typename T, typename... Args>
 		Application& PushLayer(Args&&... args)

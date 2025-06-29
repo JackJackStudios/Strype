@@ -1,21 +1,23 @@
 #pragma once
 
 #include <AGI/agi.hpp>
-#include <any>
+
+#include "Strype/Utils/PlatformUtils.hpp"
 
 namespace Strype {
 
 	using TexCoords = std::array<glm::vec2, 4>;
 
-	class RenderPipeline
+	struct RenderPipeline
 	{
-	public:
 		uint32_t IndexCount = 0;
 		void* VBBase = nullptr;
 		void* VBPtr = nullptr;
 
 		std::string TextureSampler;
 		std::string ProjectionUniform;
+		std::filesystem::path ShaderPath;
+		int totalPoints;
 
 		AGI::VertexArray VertexArray;
 		AGI::VertexBuffer VertexBuffer;
@@ -23,23 +25,22 @@ namespace Strype {
 		AGI::Shader Shader;
 		AGI::BufferLayout Layout;
 
-		std::unordered_map<std::string, AGI::BufferElement> AttributeCache;
-		std::unordered_map<std::string, std::any> UserAttributes;
+		int nextAttr = 0;
 
-		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex) = 0;
-
-		void SubmitAttribute(const std::string& name, const std::any& value)
+		template<typename T>
+		void SubmitAttribute(const std::string& name, const T value)
 		{
-			UserAttributes[name] = value;
+			STY_CORE_VERIFY(sizeof(T) == Layout[nextAttr].Size, "Attribute and vlaue entered must be the same!");
+			std::memcpy(Utils::ShiftPtr(VBPtr, Layout[nextAttr].Offset), &value, Layout[nextAttr].Size);
+
+			nextAttr++;
 		}
-	};
 
-	class QuadPipeline : public RenderPipeline
-	{
-	public:
-		QuadPipeline();
-
-		virtual void DrawPrimitive(const glm::mat4& transform, const glm::vec4& colour, const TexCoords& texcoords, float textureIndex) override;
+		void NextPoint()
+		{
+			VBPtr = Utils::ShiftPtr(VBPtr, VertexBuffer->GetLayout().GetStride());
+			nextAttr = 0;
+		}
 	};
 
 }

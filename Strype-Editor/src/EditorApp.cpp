@@ -15,7 +15,6 @@ int main(int argc, char** argv)
 	config.WindowProps.Maximise = true;
 
 	Application(config)
-		.PushPipeline<QuadPipeline>()
 		.PushLayer<EditorLayer>(argc > 1 ? argv[1] : "")
 		.Run();
 

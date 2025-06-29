@@ -21,13 +21,13 @@ namespace Strype {
 		static void Init();
 		static void Update();
 
-		static bool IsKeyOn(KeyCode key); //GLFW
+		static bool IsKeyDown(KeyCode key); //GLFW
 
 		static bool IsKeyPressed(KeyCode key);
 		static bool IsKeyHeld(KeyCode key);
 		static bool IsKeyReleased(KeyCode key);
 
-		static bool IsMouseButtonOn(MouseCode button); //GLFW
+		static bool IsMouseButtonDown(MouseCode button); //GLFW
 
 		static bool IsMouseButtonPressed(MouseCode button);
 		static bool IsMouseButtonHeld(MouseCode button);

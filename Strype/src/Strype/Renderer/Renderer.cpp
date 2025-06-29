@@ -24,12 +24,12 @@ namespace Strype {
 	{
 		AGI::Settings settings;
 		settings.PreferedAPI = AGI::APIType::Guess;
-		settings.LoaderFunc = AGI::Window::LoaderFunc;
 		settings.MessageFunc = OnAGIMessage;
 		settings.Blending = true;
+		settings.Window = Application::Get().GetConfig().WindowProps;
 
-		s_RenderContext = AGI::RenderContext::Create(settings);
-		Application::Get().GetWindow() = AGI::Window::Create(Application::Get().GetConfig().WindowProps, s_RenderContext);
+		Application::Get().GetWindow() = AGI::Window::Create(settings);
+		s_RenderContext = AGI::RenderContext::Create(Application::Get().GetWindow());
 
 		s_RenderContext->Init();
 
@@ -42,24 +42,39 @@ namespace Strype {
 		uint32_t whiteTextureData = 0xffffffff;
 		s_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 		s_TextureSlots[0] = s_WhiteTexture;
+
+		s_QuadPipeline.Layout = {
+			{ AGI::ShaderDataType::Float4, "a_Position" },
+			{ AGI::ShaderDataType::Float4, "a_Colour" },
+			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
+			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
+		};
+		s_QuadPipeline.TextureSampler = "u_Textures";
+		s_QuadPipeline.ProjectionUniform = "u_ViewProjection";
+		s_QuadPipeline.ShaderPath = Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl";
+
+		InitPipeline(s_QuadPipeline);
 	}
 
-	void Renderer::InitPipeline(const Ref<RenderPipeline>& pipeline)
+	void Renderer::Shutdown()
 	{
-		for (const auto& attr : pipeline->Layout)
+		s_RenderContext->Shutdown();
+	}
+
+	void Renderer::InitPipeline(RenderPipeline& pipeline)
+	{
+		for (const auto& attr : pipeline.Layout)
 		{
 			auto it = std::find(RenderCaps::RequiredAttrs.begin(), RenderCaps::RequiredAttrs.end(), attr.Name);
 			if (it != RenderCaps::RequiredAttrs.end())
-				STY_CORE_VERIFY(pipeline->Layout.HasElement(std::string(*it)), "Missing layout element: {}", *it);
-
-			pipeline->AttributeCache[attr.Name] = attr;
+				STY_CORE_VERIFY(pipeline.Layout.HasElement(std::string(*it)), "Missing layout element: {}", *it);
 		}
 
-		pipeline->VertexArray = s_RenderContext->CreateVertexArray();
-		pipeline->VertexBuffer = s_RenderContext->CreateVertexBuffer(RenderCaps::MaxVertices, pipeline->Layout);
-		pipeline->VertexArray->AddVertexBuffer(pipeline->VertexBuffer);
+		pipeline.VertexArray = s_RenderContext->CreateVertexArray();
+		pipeline.VertexBuffer = s_RenderContext->CreateVertexBuffer(RenderCaps::MaxVertices, pipeline.Layout);
+		pipeline.VertexArray->AddVertexBuffer(pipeline.VertexBuffer);
 
-		pipeline->VBBase = malloc(pipeline->VertexBuffer->GetSize());
+		pipeline.VBBase = malloc(pipeline.VertexBuffer->GetSize());
 
 		std::vector<uint32_t> quadIndices(RenderCaps::MaxIndices);
 		uint32_t offset = 0;
@@ -76,46 +91,36 @@ namespace Strype {
 			offset += 4;
 		}
 
-		pipeline->IndexBuffer = s_RenderContext->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
-		pipeline->VertexArray->SetIndexBuffer(pipeline->IndexBuffer);
+		pipeline.IndexBuffer = s_RenderContext->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
+		pipeline.VertexArray->SetIndexBuffer(pipeline.IndexBuffer);
 
-		if (!pipeline->TextureSampler.empty())
+		pipeline.Shader = s_RenderContext->CreateShader(AGI::ProcessSource(Utils::ReadFile(pipeline.ShaderPath)));
+
+		if (!pipeline.TextureSampler.empty())
 		{
 			int32_t samplers[RenderCaps::MaxTextureSlots];
 			for (uint32_t i = 0; i < RenderCaps::MaxTextureSlots; i++)
 				samplers[i] = i;
 
-			pipeline->Shader->Bind();
-			pipeline->Shader->SetIntArray(pipeline->TextureSampler, samplers, RenderCaps::MaxTextureSlots);
+			pipeline.Shader->SetIntArray(pipeline.TextureSampler, samplers, RenderCaps::MaxTextureSlots);
 		}
-	}
-
-	void Renderer::Shutdown()
-	{
-		s_RenderContext->Shutdown();
 	}
 	
 	void Renderer::BeginRoom(Camera& camera)
 	{
-		for (auto& [type, pipeline] : s_RenderPipelines)
-		{
-			pipeline->Shader->Bind();
-			pipeline->Shader->SetMat4(pipeline->ProjectionUniform, camera.GetViewProjectionMatrix());
-
-			pipeline->IndexCount = 0;
-			pipeline->VBPtr = pipeline->VBBase;
-		}
+		s_QuadPipeline.nextAttr = 0;
+		s_QuadPipeline.Shader->SetMat4(s_QuadPipeline.ProjectionUniform, camera.GetViewProjectionMatrix());
+		
+		s_QuadPipeline.IndexCount = 0;
+		s_QuadPipeline.VBPtr = s_QuadPipeline.VBBase;
 
 		s_TextureSlotIndex = 1;
 	}
 
 	void Renderer::EndRoom()
 	{
-		for (auto& [type, pipeline] : s_RenderPipelines)
-		{
-			uint32_t dataSize = (uint32_t)((uint8_t*)pipeline->VBPtr - (uint8_t*)pipeline->VBBase);
-			pipeline->VertexBuffer->SetData(pipeline->VBBase, dataSize);
-		}
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_QuadPipeline.VBPtr - (uint8_t*)s_QuadPipeline.VBBase);
+		s_QuadPipeline.VertexBuffer->SetData(s_QuadPipeline.VBBase, dataSize);
 
 		Flush();
 	}
@@ -125,23 +130,17 @@ namespace Strype {
 		for (uint32_t i = 0; i < s_TextureSlotIndex; ++i)
 			s_TextureSlots[i]->Bind(i);
 
-		for (auto& [type, pipeline] : s_RenderPipelines)
-		{
-			if (pipeline->IndexCount == 0) continue;
-			pipeline->Shader->Bind();
-			s_RenderContext->DrawIndexed(pipeline->VertexArray, pipeline->IndexCount);
-		}
+		if (s_QuadPipeline.IndexCount == 0) return;
+		s_QuadPipeline.Shader->Bind();
+		s_RenderContext->DrawIndexed(s_QuadPipeline.VertexArray, s_QuadPipeline.IndexCount);
 	}
 
 	void Renderer::FlushAndReset()
 	{
 		EndRoom();
 
-		for (auto& [type, pipeline] : s_RenderPipelines)
-		{
-			pipeline->IndexCount = 0;
-			pipeline->VBPtr = pipeline->VBBase;
-		}
+		s_QuadPipeline.IndexCount = 0;
+		s_QuadPipeline.VBPtr = s_QuadPipeline.VBBase;
 
 		s_TextureSlotIndex = 1;
 	}

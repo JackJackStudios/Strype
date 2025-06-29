@@ -32,8 +32,6 @@ namespace Strype {
 		});
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
-
-		OpenProject(true, projectPath);
 	}
 
 	EditorLayer::~EditorLayer()

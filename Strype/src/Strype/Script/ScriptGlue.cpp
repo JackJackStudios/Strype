@@ -4,6 +4,7 @@
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/RoomInstance.hpp"
 
+#include "Strype/Core/Input.hpp"
 #include "Strype/Project/Project.hpp"
 
 #define STY_ADD_INTERNAL_CALL(icall) coreAssembly.AddInternalCall("Strype.InternalCalls", #icall, (void*)InternalCalls::icall)

@@ -37,7 +37,7 @@ namespace Strype {
 			if (data == InputState::Released)
 				s_KeyStates[key] = InputState::None;
 
-			if (data == InputState::Held && !Input::IsKeyOn(key))
+			if (data == InputState::Held && !Input::IsKeyDown(key))
 			{
 				KeyReleasedEvent event(key);
 				Application::Get().OnEvent(event);
@@ -45,7 +45,7 @@ namespace Strype {
 				s_KeyStates[key] = InputState::Released;
 			}
 
-			if (data == InputState::None && Input::IsKeyOn(key))
+			if (data == InputState::None && Input::IsKeyDown(key))
 			{
 				KeyPressedEvent event(key);
 				Application::Get().OnEvent(event);
@@ -68,7 +68,7 @@ namespace Strype {
 			if (data == InputState::Released)
 				s_MouseStates[button] = InputState::None;
 		
-			if (data == InputState::Held && !Input::IsMouseButtonOn(button))
+			if (data == InputState::Held && !Input::IsMouseButtonDown(button))
 			{
 				MouseButtonReleasedEvent event(button);
 				Application::Get().OnEvent(event);
@@ -76,7 +76,7 @@ namespace Strype {
 				s_MouseStates[button] = InputState::Released;
 			}
 		
-			if (data == InputState::None && Input::IsMouseButtonOn(button))
+			if (data == InputState::None && Input::IsMouseButtonDown(button))
 			{
 				MouseButtonPressedEvent event(button);
 				Application::Get().OnEvent(event);
@@ -92,7 +92,7 @@ namespace Strype {
 		}
 	}
 
-	bool Input::IsKeyOn(const KeyCode key)
+	bool Input::IsKeyDown(const KeyCode key)
 	{
 		GLFWwindow* window = Application::Get().GetWindow()->GetGlfwWindow();
 		int state = glfwGetKey(window, static_cast<int32_t>(key));
@@ -114,7 +114,7 @@ namespace Strype {
 		return s_KeyStates[key] == InputState::Released;
 	}
 
-	bool Input::IsMouseButtonOn(const MouseCode button)
+	bool Input::IsMouseButtonDown(const MouseCode button)
 	{
 		GLFWwindow* window = Application::Get().GetWindow()->GetGlfwWindow();
 		int state = glfwGetMouseButton(window, static_cast<int32_t>(button));

@@ -4,7 +4,7 @@
 #include "Sprite.hpp"
 
 #include "RenderPipeline.hpp"
-#include "Strype/Utils/TypeMap.hpp"
+#include "Strype/Utils/PlatformUtils.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -42,32 +42,13 @@ namespace Strype {
 
 		// Primitives
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr);
-		
-		template<typename T>
-		static void SubmitAttribute(const std::string& name, const std::any& value)
-		{
-			s_RenderPipelines.Get<T>()->SubmitAttribute(name, value);
-		}
-
-		template<typename T>
-		static Ref<T> GetPipeline()
-		{
-			return std::dynamic_pointer_cast<T>(s_RenderPipelines.Get<T>());
-		}
-
-		template<typename T, typename... Args>
-		static void PushPipeline(Args&&... args)
-		{
-			static_assert(std::is_base_of<RenderPipeline, T>::value, "T must derive from RenderPipeline");
-			InitPipeline(s_RenderPipelines.Set<T>(CreateRef<T>(std::forward<Args>(args)...)));
-		}
 
 		static std::unique_ptr<AGI::RenderContext>& GetContext() { return s_RenderContext; }
 	private:
 		static float GetTextureSlot(const AGI::Texture& texture);
 		static void Flush();
 		static void FlushAndReset();
-		static void InitPipeline(const Ref<RenderPipeline>& pipeline);
+		static void InitPipeline(RenderPipeline& pipeline);
 	private:
 		inline static std::unique_ptr<AGI::RenderContext> s_RenderContext;
 
@@ -75,7 +56,7 @@ namespace Strype {
 		inline static AGI::Texture s_WhiteTexture;
 		inline static uint32_t s_TextureSlotIndex = 1; // 0 = white texture
 
-		inline static TypeMap<Ref<RenderPipeline>> s_RenderPipelines;
+		inline static RenderPipeline s_QuadPipeline;
 
 		friend class Font;
 	};
