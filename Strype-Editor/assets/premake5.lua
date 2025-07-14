@@ -24,9 +24,8 @@ workspace "EmptyProject"
 		files  { "../**.cs", }
 		removefiles { "./**.cs" }
 
-		links {
-			"Strype-StrypeCore",
+		links 
+		{
+			"%{StrypeDirectory}/master/DotNet/Strype-ScriptCore.dll",
+			"%{StrypeDirectory}/master/DotNet/Coral.Managed.dll",
 		}
-
-	include "ScriptCore/Coral"
-	include "ScriptCore/Strype-ScriptCore"

@@ -3,14 +3,19 @@
 
 using namespace Strype;
 
+#include <iostream>
+
 int main(int argc, char** argv)
 {
+#ifndef STY_WINDOWS
+	std::cerr << "Strype-Editor currently only supportes Windows." << std::endl;
+	STY_DEBUGBREAK();
+#endif
+
 	AppConfig config;
 	config.AppName = "Strype-Editor";
-	config.WorkingDir = std::string(getenv("STRYPE_DIR")) + "\\Strype-Editor\\";
 	config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
 	config.DockspaceEnabled = true;
-	config.ImGuizmoEnabled = true;
 
 	config.WindowProps.Maximise = true;
 

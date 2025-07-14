@@ -3,10 +3,12 @@
 
 #include "ScriptGlue.hpp"
 
+#include "Strype/Core/Application.hpp"
+
 #include <Coral/TypeCache.hpp>
 
 #ifdef STY_WINDOWS
-#include <ShlObj.h>
+#	include <ShlObj.h>
 #endif
 
 namespace Strype {
@@ -153,7 +155,7 @@ namespace Strype {
 		s_Host = std::make_unique<Coral::HostInstance>();
 
 		Coral::HostSettings settings;
-		settings.CoralDirectory = (std::filesystem::path(getenv("STRYPE_DIR")) / "Strype\\master" / "DotNet").string();
+		settings.CoralDirectory = (Application::Get().GetConfig().MasterDir / "DotNet").string();
 		settings.MessageCallback = OnCoralMessage;
 		settings.ExceptionCallback = OnCSharpException;
 		Coral::CoralInitStatus initStatus = s_Host->Initialize(settings);
@@ -162,7 +164,7 @@ namespace Strype {
 		{
 			s_LoadContext = std::make_unique<Coral::AssemblyLoadContext>(std::move(s_Host->CreateAssemblyLoadContext("StrypeLoadContext")));
 
-			auto scriptCorePath = (std::filesystem::path(getenv("STRYPE_DIR")) / "Strype\\master" / "DotNet" / "Strype-ScriptCore.dll").string();
+			auto scriptCorePath = (Application::Get().GetConfig().MasterDir / "DotNet" / "Strype-ScriptCore.dll").string();
 			s_CoreAssembly = CreateRef<Coral::ManagedAssembly>(s_LoadContext->LoadAssembly(scriptCorePath));
 
 			ScriptGlue::RegisterGlue(*s_CoreAssembly);

@@ -10,12 +10,12 @@ namespace Strype {
 		m_Room = CreateRef<Room>();
 
 		AGI::FramebufferSpecification framebufferSpec;
-		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8 };
+		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8, AGI::FramebufferTextureFormat::RED_FLOAT };
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
 		m_Framebuffer = Renderer::GetContext()->CreateFramebuffer(framebufferSpec);
 		
-		//Configure PanelManager
+		// Configure PanelManager
 		m_PanelManager.SetRoomContext(m_Room);
 
 		m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
@@ -32,6 +32,8 @@ namespace Strype {
 		});
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
+
+		OpenProject(false, projectPath);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -61,21 +63,17 @@ namespace Strype {
 		}
 
 		m_Framebuffer->Bind();
-		Renderer::SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
-		Renderer::Clear();
 		
 		m_Room->OnUpdate(ts);
 		
-		//if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
-		//{
-		//	int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY) >> 29;
-		//	Object obj = Object((entt::entity)pixelData, m_Room.get());
-		//
-		//	if (pixelData != -1 && obj.IsValid())
-		//		m_SceneHierachyPanel->SetSelected(obj);
-		//	else
-		//		m_SceneHierachyPanel->RemoveSelected();
-		//}
+		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		{
+			float pixelData = *(float*)m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			InstanceID id = pixelData-1;
+
+			if (pixelData != 0 && m_Room->InstanceExists(id))
+				m_Selected = id;
+		}
 
 		m_Framebuffer->Unbind();
 
@@ -87,6 +85,9 @@ namespace Strype {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Room");
 
+		ImGuizmo::SetOrthographic(true);
+		ImGuizmo::SetDrawlist();
+
 		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		auto viewportOffset = ImGui::GetWindowPos();
@@ -94,6 +95,9 @@ namespace Strype {
 		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 		ImVec2 viewportSize = { m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y };
 
+		ImGui::InvisibleButton("Viewport", ImGui::GetContentRegionAvail(), ImGuiButtonFlags_None);
+
+		ImGui::SetCursorScreenPos(ImGui::GetItemRectMin());
 		ImGui::Image(m_Framebuffer->GetAttachmentID(), viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		if (ImGui::BeginDragDropTarget())
@@ -101,7 +105,7 @@ namespace Strype {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 			{
 				AssetHandle handle = *(AssetHandle*)payload->Data;
-
+		
 				if (Project::GetAssetType(handle) == AssetType::Object)
 					m_Room->InstantiatePrefab(handle);
 			}
@@ -110,9 +114,6 @@ namespace Strype {
 
 		if (m_Room->InstanceExists(m_Selected))
 		{
-			ImGuizmo::SetOrthographic(true);
-			ImGuizmo::SetDrawlist();
-
 			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
 			RoomInstance& obj = m_Room->GetObject(m_Selected);
@@ -242,8 +243,8 @@ namespace Strype {
 				{
 					SaveProject();
 
-					std::filesystem::path runtimeExe = std::filesystem::path(std::getenv("STRYPE_DIR")) / "Strype" / "master" / "Strype-Runtime.exe";
-					std::filesystem::path projectPath = std::filesystem::path(Project::GetProjectDirectory()) / (Project::GetProjectName() + ".sproj");
+					std::filesystem::path runtimeExe = Application::Get().GetConfig().MasterDir / "Strype-Runtime.exe";
+					std::filesystem::path projectPath = Project::GetProjectDirectory() / (Project::GetProjectName() + ".sproj");
 					
 					PlatformUtils::StartProcess(std::format("\"{}\" \"{}\"", runtimeExe.string(), projectPath.string()));
 				}

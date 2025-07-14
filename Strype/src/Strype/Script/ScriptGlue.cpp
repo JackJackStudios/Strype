@@ -110,21 +110,15 @@ namespace Strype {
 		void Log_LogMessage(LogLevel level, Coral::String fmt)
 		{
 			std::string message = fmt;
+
 			switch (level)
 			{
-			case LogLevel::Trace:
-				STY_TRACE(message);
-				break;
-			case LogLevel::Info:
-				STY_INFO(message);
-				break;
-			case LogLevel::Warn:
-				STY_WARN(message);
-				break;
-			case LogLevel::Error:
-				STY_ERROR(message);
-				break;
+			case LogLevel::Trace: STY_TRACE(message); break;
+			case LogLevel::Info:  STY_INFO(message); break;
+			case LogLevel::Warn:  STY_WARN(message); break;
+			case LogLevel::Error: STY_ERROR(message); break;
 			}
+
 			Coral::String::Free(fmt);
 		}
 

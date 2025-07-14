@@ -32,6 +32,13 @@ namespace Strype {
 			return result;
 		}
 
+		static void WriteFile(const std::filesystem::path& filepath, const std::string& content)
+		{
+			std::ofstream out(filepath.string(), std::ios::out | std::ios::binary);
+			out << content;
+			out.close();
+		}
+
 		static void* ShiftPtr(void* origin, uint32_t shift)
 		{
 			return (uint8_t*)origin + shift;

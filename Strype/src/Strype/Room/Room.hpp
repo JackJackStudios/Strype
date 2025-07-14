@@ -44,7 +44,6 @@ namespace Strype {
 		RoomInstance& GetObject(InstanceID id) { return m_Objects[id]; }
 	private:
 		bool OnMouseScrolled(MouseScrolledEvent& e);
-		void InitObject(RoomInstance& object);
 	private:
 		std::vector<RoomInstance> m_Objects;
 

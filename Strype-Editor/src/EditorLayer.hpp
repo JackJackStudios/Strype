@@ -84,6 +84,7 @@ namespace Strype {
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
 
 		glm::vec2 m_ViewportBounds[2];
+		glm::mat4 m_GuizmoTransform;
 	};
 
 }

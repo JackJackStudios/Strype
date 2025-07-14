@@ -24,7 +24,7 @@ namespace Strype {
 	{
 		Renderer::BeginRoom(m_Camera);
 
-		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
+		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour), nullptr, Buffer(0));
 
 		if (m_RoomState == RoomState::Editor)
 		{
@@ -58,7 +58,8 @@ namespace Strype {
 				object.Scale,
 				object.Rotation,
 				object.Colour,
-				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.PrefabHandle)->TextureHandle)
+				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.PrefabHandle)->TextureHandle),
+				Buffer((float)(object.m_Handle+1))
 			);
 
 			if (m_RoomState == RoomState::Runtime)

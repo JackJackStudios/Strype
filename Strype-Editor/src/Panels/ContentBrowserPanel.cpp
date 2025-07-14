@@ -42,12 +42,12 @@ namespace Strype {
         	stbi_set_flip_vertically_on_load(1);
         	stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
 
-			STY_VERIFY(data, "Failed to load sprite \"{}\" ", path);
+			STY_VERIFY(data, "Failed to load texture \"{}\" ", path);
 
 			AGI::TextureSpecification textureSpec;
 			textureSpec.Width = width;
 			textureSpec.Height = height;
-			textureSpec.Format = AGI::ChannelsToImageFormat(channels);
+			textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
 			
         	AGI::Texture texture = Renderer::GetContext()->CreateTexture(textureSpec);
         	texture->SetData(data, width * height * channels);
