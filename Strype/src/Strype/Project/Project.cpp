@@ -1,6 +1,8 @@
 #include "stypch.hpp"
 #include "Project.hpp"
 
+#include "Strype/Utils/PlatformUtils.hpp"
+
 #include "Strype/Project/ProjectSerializer.hpp"
 #include "Strype/Script/ScriptEngine.hpp"
 
@@ -37,34 +39,6 @@ namespace Strype {
 			}
 		}
 
-		static std::string ReadFile(const std::filesystem::path& filepath)
-		{
-			std::string result;
-			std::ifstream in(filepath, std::ios::in | std::ios::binary);
-			if (in)
-			{
-				in.seekg(0, std::ios::end);
-				size_t size = in.tellg();
-				if (size != -1)
-				{
-					result.resize(size);
-					in.seekg(0, std::ios::beg);
-					in.read(&result[0], size);
-					in.close();
-				}
-				else
-				{
-					STY_CORE_ERROR("Could not read from file '{0}'", filepath);
-				}
-			}
-			else
-			{
-				STY_CORE_ERROR("Could not open file '{0}'", filepath);
-			}
-
-			return result;
-		}
-
 	}
 
 	Project::Project()
@@ -81,26 +55,20 @@ namespace Strype {
 		std::string content = Utils::ReadFile("assets/premake5.lua");
 		Utils::ReplaceKeyWord(content, std::filesystem::path(EMPTY_PROJECT).stem().string(), path.stem().string());
 
-		std::ofstream out((path / HIDDEN_FOLDER / "premake5.lua").string(), std::ios::out | std::ios::binary);
-		out << content;
-		out.close();
+		Utils::WriteFile(path / HIDDEN_FOLDER / "premake5.lua", content);
 
 		// Build C# project
-		std::filesystem::current_path(path / HIDDEN_FOLDER);
-		system("%STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1");
-
-		std::filesystem::current_path(workingdir);
+		system(std::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / HIDDEN_FOLDER).string()).c_str());
 	}
 
 	void Project::GenerateNew(const std::filesystem::path& path)
 	{
 		// Create nessacry folders
-		std::filesystem::create_directories(path / HIDDEN_FOLDER / "ScriptCore");
+		std::filesystem::create_directories(path / HIDDEN_FOLDER);
 
 		// Copy empty project
 		std::filesystem::path templateDir = std::filesystem::path(EMPTY_PROJECT).parent_path();
 		Utils::CopyDirectory(templateDir, path);
-		Utils::CopyDirectory("assets/ScriptCore", path / HIDDEN_FOLDER / "ScriptCore");
 
 		BuildProjectFiles(path);
 

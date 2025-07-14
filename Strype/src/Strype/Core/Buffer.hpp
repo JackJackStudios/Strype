@@ -6,14 +6,27 @@ namespace Strype {
 
 	struct Buffer
 	{
-		void* Data = nullptr;
+		void* Data = 0; // Pointer
 		uint64_t Size = 0;
 
 		Buffer() = default;
 
-		Buffer(const void* data, uint64_t size = 0)
+		Buffer(const void* data, uint64_t size)
 			: Data((void*)data), Size(size) 
 		{
+		}
+
+		template<typename T>
+		Buffer(const T& value)
+			: Data((void*)&value), Size(sizeof(T))
+		{
+		}
+
+		Buffer(uint64_t size)
+			: Size(size)
+		{
+			Allocate(Size);
+			ZeroInitialize();
 		}
 
 		static Buffer Copy(const Buffer& other)
@@ -34,19 +47,19 @@ namespace Strype {
 
 		void Allocate(uint64_t size)
 		{
-			delete[](uint8_t*)Data;
-			Data = nullptr;
-			Size = size;
+			Release();
 
 			if (size == 0)
 				return;
 
-			Data = new uint8_t[size];
+			Size = size;
+			Data = malloc(size);
 		}
 
 		void Release()
 		{
-			delete[](uint8_t*)Data;
+			free(Data);
+
 			Data = nullptr;
 			Size = 0;
 		}
@@ -55,6 +68,14 @@ namespace Strype {
 		{
 			if (Data)
 				memset(Data, 0, Size);
+		}
+
+		bool Empty() const
+		{
+			if (!Data || Size == 0)
+				return true;
+
+			return false;
 		}
 
 		template<typename T>

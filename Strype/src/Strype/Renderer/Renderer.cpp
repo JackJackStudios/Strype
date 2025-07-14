@@ -23,7 +23,7 @@ namespace Strype {
 	void Renderer::Init()
 	{
 		AGI::Settings settings;
-		settings.PreferedAPI = AGI::APIType::Guess;
+		settings.PreferedAPI = AGI::BestAPI();
 		settings.MessageFunc = OnAGIMessage;
 		settings.Blending = true;
 		settings.Window = Application::Get().GetConfig().WindowProps;
@@ -45,13 +45,14 @@ namespace Strype {
 
 		s_QuadPipeline.Layout = {
 			{ AGI::ShaderDataType::Float4, "a_Position" },
-			{ AGI::ShaderDataType::Float4, "a_Colour" },
+			{ AGI::ShaderDataType::Float4, "a_Colour"   },
 			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
 			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
+			{ AGI::ShaderDataType::Float,  "a_ObjectID" },
 		};
 		s_QuadPipeline.TextureSampler = "u_Textures";
 		s_QuadPipeline.ProjectionUniform = "u_ViewProjection";
-		s_QuadPipeline.ShaderPath = Application::Get().GetConfig().MasterDir / "shaders" / "QuadShader.glsl";
+		s_QuadPipeline.ShaderPath = "QuadShader.glsl";
 
 		InitPipeline(s_QuadPipeline);
 	}
@@ -63,11 +64,21 @@ namespace Strype {
 
 	void Renderer::InitPipeline(RenderPipeline& pipeline)
 	{
+		pipeline.Shader = s_RenderContext->CreateShader(AGI::Utils::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / pipeline.ShaderPath)));
+
 		for (const auto& attr : pipeline.Layout)
 		{
 			auto it = std::find(RenderCaps::RequiredAttrs.begin(), RenderCaps::RequiredAttrs.end(), attr.Name);
 			if (it != RenderCaps::RequiredAttrs.end())
 				STY_CORE_VERIFY(pipeline.Layout.HasElement(std::string(*it)), "Missing layout element: {}", *it);
+		}
+
+		if (pipeline.Layout.GetSize() > RenderCaps::RequiredAttrs.size())
+		{
+			std::string userAttr = pipeline.Layout[RenderCaps::RequiredAttrs.size()].Name;
+
+			STY_CORE_TRACE("Detected user attribute in {}: \"{}\" ", pipeline.ShaderPath.filename(),  pipeline.Layout[RenderCaps::RequiredAttrs.size()].Name);
+			pipeline.UserAttribute = userAttr;
 		}
 
 		pipeline.VertexArray = s_RenderContext->CreateVertexArray();
@@ -93,8 +104,6 @@ namespace Strype {
 
 		pipeline.IndexBuffer = s_RenderContext->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
 		pipeline.VertexArray->SetIndexBuffer(pipeline.IndexBuffer);
-
-		pipeline.Shader = s_RenderContext->CreateShader(AGI::ProcessSource(Utils::ReadFile(pipeline.ShaderPath)));
 
 		if (!pipeline.TextureSampler.empty())
 		{

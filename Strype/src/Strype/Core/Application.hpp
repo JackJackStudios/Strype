@@ -23,7 +23,6 @@ namespace Strype {
 		AGI::WindowProps WindowProps;
 
 		bool DockspaceEnabled = false;
-		bool ImGuizmoEnabled = false;
 		bool ImGuiEnabled = true;
 		int StartupFrames = 10;
 	};

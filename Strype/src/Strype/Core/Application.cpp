@@ -9,6 +9,8 @@
 
 #include "Strype/Utils/PlatformUtils.hpp"
 
+#include <ImGuizmo.h>
+
 namespace Strype {
 
 	Application* Application::s_Instance = nullptr;
@@ -38,7 +40,16 @@ namespace Strype {
 		InstallCallbacks();
 
 		if (m_Config.ImGuiEnabled)
+		{
 			m_ImGuiLayer = AGI::ImGuiLayer::Create(m_Window);
+
+			ImGuiIO& io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			io.IniFilename = "assets/imgui.ini";
+
+			if (config.DockspaceEnabled)
+				io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		}
 	}
 
 	Application::~Application()
@@ -92,11 +103,37 @@ namespace Strype {
 
 			if (m_Config.ImGuiEnabled)
 			{
-				m_ImGuiLayer->BeginFrame(m_Config.DockspaceEnabled);
+				m_ImGuiLayer->BeginFrame(false);
+				ImGuizmo::BeginFrame();
+
+				if (m_Config.DockspaceEnabled)
+				{
+					ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar;
+
+					ImGuiViewport* viewport = ImGui::GetMainViewport();
+					ImGui::SetNextWindowPos(viewport->Pos);
+					ImGui::SetNextWindowSize(viewport->Size);
+					ImGui::SetNextWindowViewport(viewport->ID);
+					ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+					ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+					window_flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+					window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+					ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+					ImGui::Begin("DockSpace", 0, window_flags);
+
+					ImGui::PopStyleVar(3);
+
+					ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+					ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f));
+				}
 
 				for (Layer* layer : m_LayerStack)
 					layer->OnImGuiRender();
-					
+				
+				if (m_Config.DockspaceEnabled)
+					ImGui::End();
+
 				m_ImGuiLayer->EndFrame();
 			}
 			
