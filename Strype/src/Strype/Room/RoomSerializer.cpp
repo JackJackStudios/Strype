@@ -35,7 +35,7 @@ namespace Strype {
 						ScopedMap objMap(out);
 
 						out << YAML::Key << "Object" << YAML::Value << static_cast<uint32_t>(obj);
-						out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(obj.PrefabHandle);
+						out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(obj.ObjectHandle);
 						out << YAML::Key << "Colour" << YAML::Value << obj.Colour;
 
 						out << YAML::Key << "Position" << YAML::Value << obj.Position;
@@ -86,7 +86,7 @@ namespace Strype {
 			AssetHandle handle = Project::ImportAsset(path);
 
 			RoomInstance& newobj = room->GetObject(room->InstantiatePrefab(handle));
-			newobj.PrefabHandle = handle;
+			newobj.ObjectHandle = handle;
 
 			newobj.Position = obj["Position"].as<glm::vec2>();
 			newobj.Scale = obj["Scale"].as<glm::vec2>();

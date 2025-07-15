@@ -2,10 +2,11 @@
 
 #include "Strype/Core/Event.hpp"
 #include "Strype/Renderer/Camera.hpp"
-
 #include "Strype/Asset/Asset.hpp"
 
 #include "RoomInstance.hpp"
+
+#include <box2d/box2d.h>
 
 namespace Strype {
 
@@ -46,6 +47,9 @@ namespace Strype {
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 	private:
 		std::vector<RoomInstance> m_Objects;
+
+		b2WorldId m_Physics;
+		float m_Gravity = 10.0f;
 
 		uint64_t m_Width = 720, m_Height = 360;
 		glm::vec3 m_BackgroundColour;

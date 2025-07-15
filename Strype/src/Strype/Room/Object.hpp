@@ -2,8 +2,17 @@
 
 #include "RoomInstance.hpp"
 
+#include <box2d/box2d.h>
+
 namespace Strype {
 
+	enum class PhysicsType
+	{
+		Static = b2_staticBody,
+		Kinematic = b2_kinematicBody,
+		Dynamic = b2_dynamicBody,
+	};
+	
 	class Object : public Asset
 	{
 	public:
@@ -14,6 +23,7 @@ namespace Strype {
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	public:
 		AssetHandle TextureHandle;
+		PhysicsType m_PhysicsType;
 		UUID ClassID;
 	};
 

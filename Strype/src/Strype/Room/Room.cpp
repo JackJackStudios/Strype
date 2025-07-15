@@ -58,7 +58,7 @@ namespace Strype {
 				object.Scale,
 				object.Rotation,
 				object.Colour,
-				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.PrefabHandle)->TextureHandle),
+				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.ObjectHandle)->TextureHandle),
 				Buffer((float)(object.m_Handle+1))
 			);
 
@@ -83,20 +83,35 @@ namespace Strype {
 		Project::SetActiveRoom(this);
 		STY_CORE_INFO("Staring room \"{}\" ", Project::GetFilePath(Handle).stem());
 
+		b2WorldDef worldDef = b2DefaultWorldDef();
+		worldDef.gravity = { 0.0f, -m_Gravity };
+		m_Physics = b2CreateWorld(&worldDef);
+
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		for (auto& object : m_Objects)
+		for (auto& instance : m_Objects)
 		{
-			ScriptID scriptID = Project::GetAsset<Object>(object.PrefabHandle)->ClassID;
+			auto object = Project::GetAsset<Object>(instance.ObjectHandle);
+
+			b2BodyDef bodyDef = b2DefaultBodyDef();
+			bodyDef.type = (b2BodyType)object->m_PhysicsType;
+			bodyDef.position = { instance.Position.x, instance.Position.y };
+			instance.RuntimeBody = b2CreateBody(m_Physics, &bodyDef);
+
+			b2ShapeDef shapeDef = b2DefaultShapeDef(); shapeDef.density = 1.0f;
+			b2Polygon polygonShape = b2MakeBox(instance.Scale.x, instance.Scale.y);
+			b2CreatePolygonShape(instance.RuntimeBody, &shapeDef, &polygonShape);
+
+			ScriptID scriptID = Project::GetAsset<Object>(instance.ObjectHandle)->ClassID;
 
 			if (scriptEngine->IsValidScript(scriptID))
 			{
-				object.Instance = scriptEngine->CreateInstance(scriptID, object.m_Handle, object.PrefabHandle);
-				object.Instance.Invoke("OnCreate");
+				instance.Instance = scriptEngine->CreateInstance(scriptID, instance.m_Handle, instance.ObjectHandle);
+				instance.Instance.Invoke("OnCreate");
 			}
 			else
 			{
-				STY_CORE_WARN("Object '{}' has an invalid script id ({})", (uint32_t)object, (uint64_t)scriptID);
+				STY_CORE_WARN("Object '{}' has an invalid script id ({})", instance.m_Handle, scriptID);
 			}
 		}
 
@@ -119,6 +134,8 @@ namespace Strype {
 			object.Instance.Invoke("OnDestroy");
 			scriptEngine->DestroyInstance(object.Instance);
 		}
+
+		b2DestroyWorld(m_Physics);
 
 		m_RoomState = RoomState::Editor;
 	}

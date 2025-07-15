@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <box2d/box2d.h>
 
 namespace Strype {
 
@@ -14,8 +15,8 @@ namespace Strype {
 	class RoomInstance
 	{
 	public:
-		RoomInstance(InstanceID id, AssetHandle prefab, Room* owner)
-			: m_Handle(id), PrefabHandle(prefab), m_Owner(owner)
+		RoomInstance(InstanceID id, AssetHandle derived, Room* owner)
+			: m_Handle(id), ObjectHandle(derived), m_Owner(owner)
 		{
 		}
 
@@ -38,8 +39,9 @@ namespace Strype {
 		glm::vec2 Scale{ 1.0f, 1.0f };
 		float Rotation = 0.0f;
 
-		AssetHandle PrefabHandle;
+		AssetHandle ObjectHandle;
 		CSharpObject Instance;
+		b2BodyId RuntimeBody;
 		//Ref<AudioSource> Emitter;
 	private:
 		InstanceID m_Handle = 0;
