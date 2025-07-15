@@ -2,7 +2,9 @@
 
 #include "InspectorPanel.hpp"
 
+#define STBI_NO_SIMD
 #include <stb_image.h>
+
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Strype {

@@ -9,8 +9,10 @@
 #include "Strype/Audio/Audio.hpp"
 
 #include <AGI/agi.hpp>
-#include <stb_image.h>
 #include <sndfile.h>
+
+#define STBI_NO_SIMD
+#include <stb_image.h>
 
 namespace Strype {
 
