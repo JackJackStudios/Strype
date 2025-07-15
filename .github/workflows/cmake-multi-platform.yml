@@ -59,4 +59,4 @@ jobs:
         -S ${{ github.workspace }}
 
     - name: Build
-        run: cmake --build "${{ github.workspace }}/build" --config ${{ matrix.build_type }}
+      run: cmake --build "${{ github.workspace }}/build" --config ${{ matrix.build_type }}
