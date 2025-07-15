@@ -66,6 +66,8 @@ namespace Strype {
 			{
 				//object.Emitter->SetPos(object.Position);
 				object.Instance.Invoke("OnUpdate", ts);
+
+				b2World_Step(m_Physics, ts, 4);
 			}
 		}
 
