@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Panels/PanelManager.hpp"
-
 #include "Panels/ContentBrowserPanel.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <ImGuizmo.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_decompose.hpp>
@@ -28,7 +28,7 @@ namespace Strype {
 		if (scale.y != 0) col1 /= scale.y;
 
 		// Compute rotation (angle from X axis)
-		rotation = atan2(col0.y, col0.x); // in radians
+		rotation = glm::degrees(atan2(col0.y, col0.x)); // in radians
 
 		return true;
     }
@@ -69,7 +69,7 @@ namespace Strype {
 		void OpenRoom(const std::filesystem::path& path);
 
 		void NewProject(const std::filesystem::path& path = std::filesystem::path());
-		void OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
+		bool OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
 		void SaveProject();
 
 		void OnInspectorRender(Object* object);
@@ -84,7 +84,8 @@ namespace Strype {
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
 
 		glm::vec2 m_ViewportBounds[2];
-		glm::mat4 m_GuizmoTransform;
+		ImGuizmo::OPERATION m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+		
 	};
 
 }

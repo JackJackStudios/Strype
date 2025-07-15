@@ -66,9 +66,15 @@ namespace Strype {
 			return std::static_pointer_cast<T>(assetManager->GetAsset(handle));
 		}
 
-		static void NewAsset(const std::filesystem::path& path)
+		static void CreateAsset(const std::filesystem::path& path)
 		{
-			Project::GetAssetManager()->NewAsset(path);
+			Project::GetAssetManager()->CreateAsset(path);
+		}
+
+		static bool CanCreateAsset(AssetType type)
+		{
+			static Ref<Asset> nullAsset = nullptr;
+			return Project::GetAssetManager()->CanCreateAsset(type, false, nullAsset);
 		}
 
 		static void DeleteAsset(AssetHandle handle)

@@ -9,27 +9,6 @@ namespace Strype {
 
 	namespace Utils {
 
-		template<typename UIFunction>
-		static void DropdownMenu(const std::string& name, UIFunction uiFunction)
-		{
-			const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
-				ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
-				ImGuiTreeNodeFlags_FramePadding;
-
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
-			bool open = ImGui::TreeNodeEx(name.c_str(), treeNodeFlags, "%s", name.c_str());
-			ImGui::PopStyleVar();
-
-			if (open)
-			{
-				uiFunction();
-				ImGui::TreePop();
-			}
-		}
-
 		static int NumOfFileOrDirs(const std::filesystem::path& path)
 		{
 			return std::distance(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator{});
@@ -81,6 +60,7 @@ namespace Strype {
 
 			m_Icons[typeEnum.value()] = Utils::LoadTexture(entry.path());
 		}
+	
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -113,11 +93,9 @@ namespace Strype {
 			ImGui::NextColumn();
 		}
 		
-		for (size_t i=0; i < m_CurrentDirectory->Nodes.size();)
+		for (size_t i = 0; i < m_CurrentDirectory->Nodes.size();)
 		{
 			TreeNode& node = m_CurrentDirectory->Nodes[i];
-
-			const std::filesystem::path& path = node.Path;
 			AGI::Texture icon = GetIcon(node.Handle);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
@@ -153,55 +131,58 @@ namespace Strype {
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
-				if (std::filesystem::is_directory(path))
+				if (std::filesystem::is_directory(node.Path))
 				{
 					m_CurrentDirectory = &node;
 				}
-				else if (AssetType type = Utils::GetAssetTypeFromFileExtension(path.extension()); m_ItemClicksCallbacks.find(type) != m_ItemClicksCallbacks.end())
+				else if (AssetType type = Utils::GetAssetTypeFromFileExtension(node.Path.extension()); m_ItemClicksCallbacks.find(type) != m_ItemClicksCallbacks.end())
 				{
 					AssetMetadata metadata;
-					metadata.FilePath = path;
+					metadata.FilePath = node.Path;
 					m_ItemClicksCallbacks[type](metadata);
 				}
 			}
 
-			ImGui::TextWrapped(path.stem().string().c_str());
+			ImGui::TextWrapped(node.Path.stem().string().c_str());
 
 			ImGui::NextColumn();
 			++i;
 		}
 
-		if (m_InputActive)
+		if (m_InputType != AssetType::None)
 		{
-			ImGui::OpenPopup("TextInput");
+			AGI::Texture icon = GetIcon(m_InputType);
+			ImGui::Image((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
-			if (ImGui::BeginPopup("TextInput"))
+			std::filesystem::path path = std::string(m_InputText) + Utils::GetFileExtensionFromAssetType(m_InputType).string();
+			bool overwriting = std::filesystem::exists(m_CurrentDirectory->Path / path);
+
+			if (overwriting) ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+			ImGui::SetNextItemWidth(thumbnailSize);
+			ImGui::InputText("##Input", m_InputText, sizeof(m_InputText));
+			if (overwriting) ImGui::PopStyleColor();
+
+			if (ImGui::IsItemActivated())
+				m_InputActivated = true;
+
+			if (ImGui::IsItemDeactivated() && !overwriting)
 			{
-				char inputText[256] = ""; 
-
-				ImGui::Text("Name"); ImGui::SameLine();
-				ImGui::InputText("##Input", inputText, sizeof(inputText));
-
-				if (ImGui::IsItemDeactivated())
+				if (m_InputActivated && Input::IsKeyDown(KeyCode::Enter))
 				{
-					m_InputActive = false;
-
-					if (m_InputType != AssetType::None)
-					{
-						std::string file = std::filesystem::path(inputText).stem().string() + Utils::GetFileExtensionFromAssetType(m_InputType).string();
-						Project::NewAsset(m_CurrentDirectory->Path / file);
-					}
-					else
-						std::filesystem::create_directory(m_CurrentDirectory->Path / inputText);
-
+					Project::CreateAsset(m_CurrentDirectory->Path / path);
 					RefreshAssetTree();
 				}
 
-				if (Input::IsKeyPressed(KeyCode::Escape))
-					m_InputActive = false;
-
-				ImGui::EndPopup();
+				m_InputType = AssetType::None;
+				m_InputActivated = false;
 			}
+
+			ImGui::NextColumn();
+		}
+		else
+		{
+			m_InputActivated = false;
+			memset(m_InputText, 0, sizeof(m_InputText));
 		}
 
 		if (!popupOpen)
@@ -210,34 +191,38 @@ namespace Strype {
 			{
 				if (ImGui::BeginMenu("Create"))
 				{
-					if (ImGui::MenuItem("Prefab", "Alt+P"))
+					constexpr auto assetTypes = magic_enum::enum_entries<AssetType>();
+					for (const auto& entry : assetTypes)
 					{
-						m_InputActive = true;
-						m_InputType = AssetType::Object;
-					}
+						const AssetType& type = entry.first;
+						const std::string_view& name = entry.second;
 
-					if (ImGui::MenuItem("Room", "Alt+R"))
-					{
-						m_InputActive = true;
-						m_InputType = AssetType::Room;
-					}
+						if (type == AssetType::None)
+							continue;
+						
+						//INFO: This tells us whetever the asset can be created
+						//      completely empty like a Object/Room but a Sprite/AudioFile
+						//      must be based off a file.
+						bool canCreate = Project::CanCreateAsset(type);
 
-					if (ImGui::MenuItem("Sprite", "Alt+S"))
-					{
-						const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sprite (.png, .jpg, .jpeg)\0*.png\0*.jpg\0*.jpeg\0");
-						std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
+						if (!ImGui::MenuItem(name.data(), ""))
+							continue;
 
-						Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
-						RefreshAssetTree();
-					}
+						if (canCreate)
+						{
+							m_InputType = type;
+						}
+						else
+						{
+							const std::filesystem::path& path = FileDialogs::OpenFile(GetDialogMessage(type).data());
+							if (path.empty())
+								continue;
 
-					if (ImGui::MenuItem("Sound", "Alt+U"))
-					{
-						const std::filesystem::path& path = FileDialogs::OpenFile("Strype Sound (.wav)\0*.wav\0");
-						std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
+							std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
+							Project::ImportAsset(m_CurrentDirectory->Path / path.filename());
 
-						Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
-						RefreshAssetTree();
+							RefreshAssetTree();
+						}
 					}
 
 					ImGui::EndMenu();
@@ -245,8 +230,7 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Create Folder"))
 				{
-					m_InputActive = true;
-					m_InputType = AssetType::None;
+					STY_CORE_VERIFY(false, "Not implemented");
 				}
 
 				ImGui::EndPopup();
@@ -328,16 +312,44 @@ namespace Strype {
 			return m_DirectoryIcon;
 
 		AssetType type = Project::GetAssetType(handle);
+
 		if (type == AssetType::Sprite)
 			return Project::GetAsset<Sprite>(handle)->GetTexture();
 
+		return GetIcon(type);
+	}
+
+	AGI::Texture ContentBrowserPanel::GetIcon(AssetType type)
+	{
 		if (m_Icons.find(type) == m_Icons.end() || type == AssetType::None)
 		{
-			STY_CORE_WARN("No available icons from AssetHandle: {}", (uint64_t)handle);
+			STY_CORE_WARN("No available icons for AssetType: {}", magic_enum::enum_name(type));
 			return m_FileIcon;
 		}
 
 		return m_Icons.at(type);
+	}
+
+	std::vector<char> ContentBrowserPanel::GetDialogMessage(AssetType type)
+	{
+		std::vector<std::string> message;
+		message.emplace_back(std::string("Strype ") + std::string(magic_enum::enum_name(type)));
+
+		for (const auto& [ext, assetType] : s_AssetExtensionMap)
+		{
+			if (assetType == type)
+				message.push_back("*" + ext.string());
+		}
+
+		std::vector<char> buffer;
+		for (const auto& ext : message)
+		{
+			buffer.insert(buffer.end(), ext.begin(), ext.end());
+			buffer.push_back('\0');
+		}
+
+		buffer.push_back('\0');
+		return buffer;
 	}
 
 }

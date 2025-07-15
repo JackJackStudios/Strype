@@ -57,7 +57,9 @@ namespace Strype {
 
 		AssetHandle GetHandle(const std::filesystem::path& path) const;
 
-		void NewAsset(const std::filesystem::path& path);
+		void CreateAsset(const std::filesystem::path& path);
+		bool CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset);
+
 		void SaveAsset(AssetHandle handle, const std::filesystem::path& path);
 		void DeleteAsset(AssetHandle handle);
 

@@ -5,8 +5,8 @@
 #include "Strype/Room/RoomSerializer.hpp"
 #include "Strype/Project/Project.hpp"
 
-#define REGISTER_ASSET(a) if (Utils::GetAssetTypeFromFileExtension(path.extension()) == AssetType::a) temp = CreateRef<a>()
-#define DEREGISTER_ASSET(a) STY_CORE_VERIFY(Utils::GetAssetTypeFromFileExtension(path.extension()) != AssetType::a, "Cannot create a new instance of {}", #a)
+#define REGISTER_ASSET(a) if (type == AssetType::a) { if (createAsset) { createdAsset = CreateRef<a>(); } return true; }
+#define DEREGISTER_ASSET(a) if (type == AssetType::a) return false
 
 namespace Strype {
 
@@ -31,16 +31,29 @@ namespace Strype {
 
 	}
 
-	void AssetManager::NewAsset(const std::filesystem::path& path)
+	bool AssetManager::CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset)
 	{
-		Ref<Asset> temp = nullptr;
-
 		REGISTER_ASSET(Object);
 		REGISTER_ASSET(Room);
 
 		// TODO: Remove sprite when added animations
 		DEREGISTER_ASSET(Sprite);
 		DEREGISTER_ASSET(AudioFile);
+
+		STY_CORE_VERIFY(false, "Unknown AssetType");
+		return false;
+	}
+
+	void AssetManager::CreateAsset(const std::filesystem::path& path)
+	{
+		Ref<Asset> temp = nullptr;
+		AssetType type = Utils::GetAssetTypeFromFileExtension(path.extension());
+		
+		bool canCreate = CanCreateAsset(type, true, temp);
+		if (!canCreate || temp == nullptr)
+		{
+			STY_CORE_WARN("Cannot create new instance of {}", magic_enum::enum_name(type));
+		}
 
 		m_Serializers[temp->GetType()]->SaveAsset(temp, Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
 		ImportAsset(Utils::ToAssetSysPath(path));
@@ -157,7 +170,7 @@ namespace Strype {
 		m_AssetRegistry.erase(handle);
 		m_LoadedFiles.erase(path);
 
-		//std::filesystem::remove(Project::GetProjectDirectory() / path);
+		std::filesystem::remove(Project::GetProjectDirectory() / path);
     }
 
     AssetSerializer* AssetManager::GetSerializer(AssetType type)

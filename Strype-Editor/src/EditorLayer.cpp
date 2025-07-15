@@ -1,7 +1,6 @@
 #include "EditorLayer.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
-#include <ImGuizmo.h>
 
 namespace Strype {
 
@@ -33,7 +32,8 @@ namespace Strype {
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-		OpenProject(false, projectPath);
+		if (!OpenProject(false, projectPath))
+			exit(0);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -71,10 +71,16 @@ namespace Strype {
 			float pixelData = *(float*)m_Framebuffer->ReadPixel(1, mouseX, mouseY);
 			InstanceID id = pixelData-1;
 
-			if (pixelData != 0 && m_Room->InstanceExists(id))
-				m_Selected = id;
-		}
+			if (pixelData == 0)
+				m_Selected = -1;
 
+			if (pixelData != 0 && m_Room->InstanceExists(id))
+			{
+				m_Selected = id;
+				m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			}
+		}
+		
 		m_Framebuffer->Unbind();
 
 		m_PanelManager.OnUpdate(ts);
@@ -87,6 +93,7 @@ namespace Strype {
 
 		ImGuizmo::SetOrthographic(true);
 		ImGuizmo::SetDrawlist();
+		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
 
 		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
@@ -95,9 +102,6 @@ namespace Strype {
 		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 		ImVec2 viewportSize = { m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y };
 
-		ImGui::InvisibleButton("Viewport", ImGui::GetContentRegionAvail(), ImGuiButtonFlags_None);
-
-		ImGui::SetCursorScreenPos(ImGui::GetItemRectMin());
 		ImGui::Image(m_Framebuffer->GetAttachmentID(), viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
 
 		if (ImGui::BeginDragDropTarget())
@@ -119,9 +123,27 @@ namespace Strype {
 			RoomInstance& obj = m_Room->GetObject(m_Selected);
 			glm::mat4 transform = obj.GetTransform();
 
-			ImGuizmo::Manipulate(glm::value_ptr(m_Room->GetCamera().GetViewMatrix()), glm::value_ptr(m_Room->GetCamera().GetProjectionMatrix()),
-				ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform),
-				nullptr, nullptr);
+			ImGuizmo::Manipulate(
+				glm::value_ptr(m_Room->GetCamera().GetViewMatrix()), 
+				glm::value_ptr(m_Room->GetCamera().GetProjectionMatrix()),
+				m_GuizmoType, 
+				ImGuizmo::LOCAL, 
+				glm::value_ptr(transform),
+				nullptr, nullptr
+			);
+
+			if (Input::IsKeyDown(KeyCode::I))
+			{
+				m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			} 
+			else if (Input::IsKeyDown(KeyCode::O))
+			{
+				m_GuizmoType = ImGuizmo::OPERATION::SCALE;
+			}
+			else if (Input::IsKeyDown(KeyCode::P))
+			{
+				m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
+			}
 
 			if (ImGuizmo::IsUsing())
 			{
@@ -165,12 +187,12 @@ namespace Strype {
 		Project::SaveAllAssets();
 	}
 
-	void EditorLayer::OpenProject(bool buildProject, const std::filesystem::path& path)
+	bool EditorLayer::OpenProject(bool buildProject, const std::filesystem::path& path)
 	{
 		std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0") : path;
 
 		if (dialog.empty())
-			return; // User click off of file dialog
+			return false; // User click off of file dialog
 
 		if (Project::GetActive())
 			SaveProject();
@@ -186,6 +208,7 @@ namespace Strype {
 		m_PanelManager.OnProjectChanged();
 
 		OpenRoom(project->GetStartRoom());
+		return true;
 	}
 
 	void EditorLayer::OnInspectorRender(Object* object)
