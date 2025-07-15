@@ -45,7 +45,7 @@ FetchContent_MakeAvailable(AGI)
 
 FetchContent_Declare(
     glm
-    GIT_REPOSITORY https://github.com/icaven/glm.git
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
     GIT_TAG        master
 )
 FetchContent_MakeAvailable(glm)
@@ -91,6 +91,13 @@ FetchContent_Declare(
     GIT_TAG        1.24.3
 )
 FetchContent_MakeAvailable(OpenAL)
+
+FetchContent_Declare(
+    box2d
+    GIT_REPOSITORY https://github.com/erincatto/box2d.git
+    GIT_TAG        v3.1.1
+)
+FetchContent_MakeAvailable(box2d)
 
 FetchContent_Declare(
     ImGuizmo

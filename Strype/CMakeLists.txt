@@ -20,6 +20,7 @@ target_link_libraries(Strype PUBLIC
 
     glm
     ImGui
+    box2d
     OpenAL
     sndfile
     ImGuizmo
