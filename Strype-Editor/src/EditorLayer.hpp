@@ -69,10 +69,11 @@ namespace Strype {
 		void OpenRoom(const std::filesystem::path& path);
 
 		void NewProject(const std::filesystem::path& path = std::filesystem::path());
-		bool OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
+		void OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
 		void SaveProject();
 
 		void OnInspectorRender(Object* object);
+		bool OnWindowDrop(WindowDropEvent& e);
 
 		void UI_RoomPanel();
 	private:

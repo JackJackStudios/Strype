@@ -32,7 +32,9 @@ namespace Strype {
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-		if (!OpenProject(false, projectPath))
+		OpenProject(false, projectPath);
+
+		if (!Project::GetActive())
 			exit(0);
 	}
 
@@ -189,12 +191,12 @@ namespace Strype {
 		Project::SaveAllAssets();
 	}
 
-	bool EditorLayer::OpenProject(bool buildProject, const std::filesystem::path& path)
+	void EditorLayer::OpenProject(bool buildProject, const std::filesystem::path& path)
 	{
 		std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0") : path;
 
 		if (dialog.empty())
-			return false; // User click off of file dialog
+			return; // User click off of file dialog
 
 		if (Project::GetActive())
 			SaveProject();
@@ -210,7 +212,6 @@ namespace Strype {
 		m_PanelManager.OnProjectChanged();
 
 		OpenRoom(project->GetStartRoom());
-		return true;
 	}
 
 	void EditorLayer::OnInspectorRender(Object* object)
@@ -231,6 +232,27 @@ namespace Strype {
 	{
 		m_PanelManager.OnEvent(e);
 		m_Room->OnEvent(e);
+
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorLayer::OnWindowDrop));
+	}
+
+	bool EditorLayer::OnWindowDrop(WindowDropEvent& e)
+	{
+		for (const auto& filepath : e.GetPaths())
+		{
+			const auto& ext = filepath.extension();
+			AssetType type = Utils::GetAssetTypeFromFileExtension(ext);
+
+			std::filesystem::path newPath = m_ContentBrowserPanel->GetCurrentPath() / filepath.filename();
+			if (!std::filesystem::exists(newPath) && type != AssetType::None)
+			{
+				std::filesystem::copy_file(filepath, newPath);
+				Project::ImportAsset(newPath);
+			}
+		}
+
+		return false;
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -253,7 +275,7 @@ namespace Strype {
 				if (ImGui::MenuItem("Build C# Assembly", "Ctrl+B"))
 					ScriptEngine::BuildProject(Project::GetActive()->GetProjectDirectory());
 
-				if (ImGui::MenuItem("Build C# Project", ""))
+				if (ImGui::MenuItem("Restore C# Project", ""))
 					Project::BuildProjectFiles(Project::GetProjectDirectory());
 
 				if (ImGui::MenuItem("Exit"))

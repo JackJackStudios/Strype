@@ -32,11 +32,11 @@ namespace Strype {
 
 		const ProjectConfig& GetConfig() const { return m_Config; }
 
-		static Ref<AssetManager> GetAssetManager() { return s_AssetManager; }
-		static Ref<ScriptEngine>& GetScriptEngine() { return s_ScriptEngine; }
-		static Room* GetActiveRoom() { return s_ActiveRoom; }
+		static Ref<AssetManager> GetAssetManager() { return GetActive()->m_AssetManager; }
+		static Ref<ScriptEngine>& GetScriptEngine() { return GetActive()->m_ScriptEngine; }
+		static Room* GetActiveRoom() { return GetActive()->m_ActiveRoom; }
 
-		static void SetActiveRoom(Room* room) { s_ActiveRoom = room; }
+		static void SetActiveRoom(Room* room) { GetActive()->m_ActiveRoom = room; }
 
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
@@ -62,8 +62,7 @@ namespace Strype {
 		template<typename T>
 		static Ref<T> GetAsset(AssetHandle handle)
 		{
-			Ref<AssetManager> assetManager = Project::GetAssetManager();
-			return std::static_pointer_cast<T>(assetManager->GetAsset(handle));
+			return std::static_pointer_cast<T>(Project::GetAssetManager()->GetAsset(handle));
 		}
 
 		static void CreateAsset(const std::filesystem::path& path)
@@ -82,9 +81,9 @@ namespace Strype {
 			Project::GetAssetManager()->DeleteAsset(handle);
 		}
 
-		static void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path)
+		static void SaveAsset(AssetHandle handle, const std::filesystem::path& path = std::filesystem::path())
 		{
-			Project::GetAssetManager()->GetSerializer(asset->GetType())->SaveAsset(asset, path);
+			Project::GetAssetManager()->SaveAsset(handle, path.empty() ? Project::GetFilePath(handle) : path);
 		}
 
 		static bool IsAssetLoaded(AssetHandle handle)
@@ -127,18 +126,13 @@ namespace Strype {
 			Project::GetAssetManager()->SaveAllAssets();
 		}
 
-		static void SaveAsset(AssetHandle handle, const std::filesystem::path& path = std::filesystem::path())
-		{
-			Project::GetAssetManager()->SaveAsset(handle, path.empty() ? Project::GetFilePath(handle) : path);
-		}
-
 	private:
-		inline static Ref<AssetManager> s_AssetManager;
-		inline static Ref<ScriptEngine> s_ScriptEngine;
-		inline static Room* s_ActiveRoom;
+		inline static Ref<Project> s_ActiveProject = nullptr;
 
 		ProjectConfig m_Config;
-		inline static Ref<Project> s_ActiveProject;
+		Ref<AssetManager> m_AssetManager;
+		Ref<ScriptEngine> m_ScriptEngine;
+		Room* m_ActiveRoom;
 
 		friend class ProjectSerializer;
 	};

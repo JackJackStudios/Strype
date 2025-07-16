@@ -55,6 +55,8 @@ namespace Strype {
 		virtual void SetInspector(Ref<InspectorPanel> panel) { m_Inspector = panel; }
 		void SetItemClickCallback(AssetType type, ItemClickCallbackFunc func) { m_ItemClicksCallbacks[type] = func; }
 		void RefreshAssetTree();
+
+		std::filesystem::path GetCurrentPath() const { return m_CurrentDirectory->Path; }
 	private:
 		void RefreshTreeNode(TreeNode& node);
 		void OnInspectorRender(Room* select);
