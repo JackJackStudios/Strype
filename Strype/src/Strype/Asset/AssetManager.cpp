@@ -33,8 +33,10 @@ namespace Strype {
 
 	bool AssetManager::CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset)
 	{
-		REGISTER_ASSET(Object);
 		REGISTER_ASSET(Room);
+
+		// TODO: Create object with template
+		DEREGISTER_ASSET(Object);
 
 		// TODO: Remove sprite when added animations
 		DEREGISTER_ASSET(Sprite);

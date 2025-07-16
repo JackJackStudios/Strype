@@ -4,6 +4,8 @@ namespace Strype {
 
 	RuntimeLayer::RuntimeLayer(const std::filesystem::path& path)
 	{
+		ScriptEngine::BuildProject(path.parent_path());
+
 		OpenProject(path);
 		m_Room->StartRuntime();
 	}
@@ -25,7 +27,6 @@ namespace Strype {
 		serializer.Deserialize(path);
 
 		Project::SetActive(project);
-		ScriptEngine::BuildProject(project->GetProjectDirectory());
 
 		m_Room = Project::GetAsset<Room>(Project::GetAssetHandle(project->GetStartRoom()));
 

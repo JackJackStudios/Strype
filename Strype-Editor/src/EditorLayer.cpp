@@ -132,19 +132,6 @@ namespace Strype {
 				nullptr, nullptr
 			);
 
-			if (Input::IsKeyDown(KeyCode::I))
-			{
-				m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
-			} 
-			else if (Input::IsKeyDown(KeyCode::O))
-			{
-				m_GuizmoType = ImGuizmo::OPERATION::SCALE;
-			}
-			else if (Input::IsKeyDown(KeyCode::P))
-			{
-				m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
-			}
-
 			if (ImGuizmo::IsUsing())
 			{
 				glm::vec2 position, scale;
@@ -154,6 +141,21 @@ namespace Strype {
 				obj.Position = position;
 				obj.Rotation = rotation;
 				obj.Scale = scale;
+			}
+			else
+			{
+				if (Input::IsKeyDown(KeyCode::I))
+				{
+					m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				}
+				else if (Input::IsKeyDown(KeyCode::O))
+				{
+					m_GuizmoType = ImGuizmo::OPERATION::SCALE;
+				}
+				else if (Input::IsKeyDown(KeyCode::P))
+				{
+					m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
+				}
 			}
 		}
 

@@ -41,6 +41,7 @@ namespace Strype {
 		STY_CORE_INFO("Building C# project '{}'", path);
 
 		system(std::format("cd \"{}\" && premake5.exe --verbose vs2022", (path / HIDDEN_FOLDER).string()).c_str());
+		std::filesystem::remove_all(path / HIDDEN_FOLDER / "bin");
 
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
