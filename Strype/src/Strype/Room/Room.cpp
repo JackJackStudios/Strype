@@ -51,21 +51,21 @@ namespace Strype {
 
 		auto& scriptEngine = Project::GetScriptEngine();
 
-		for (auto& object : m_Objects)
+		for (auto& instance : m_Objects)
 		{
 			Renderer::DrawQuad(
-				glm::make_vec3(object.Position),
-				object.Scale,
-				object.Rotation,
-				object.Colour,
-				Project::GetAsset<Sprite>(Project::GetAsset<Object>(object.ObjectHandle)->TextureHandle),
-				Buffer((float)(object.m_Handle+1))
+				glm::make_vec3(instance.Position),
+				instance.Scale,
+				instance.Rotation,
+				instance.Colour,
+				Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle),
+				Buffer((float)(instance.m_Handle+1))
 			);
 
 			if (m_RoomState == RoomState::Runtime)
 			{
-				//object.Emitter->SetPos(object.Position);
-				object.Instance.Invoke("OnUpdate", ts);
+				//object.Emitter->SetPos(instance.Position);
+				instance.CSharp->InvokeMethod("OnUpdate", ts);
 
 				b2World_Step(m_Physics, ts, 4);
 			}
@@ -108,8 +108,11 @@ namespace Strype {
 
 			if (scriptEngine->IsValidScript(scriptID))
 			{
-				instance.Instance = scriptEngine->CreateInstance(scriptID, instance.m_Handle, instance.ObjectHandle);
-				instance.Instance.Invoke("OnCreate");
+				instance.CSharp = scriptEngine->CreateInstance(scriptID);
+				instance.CSharp->SetFieldValueRaw("ID",     &instance.m_Handle);
+				instance.CSharp->SetFieldValueRaw("Handle", &instance.ObjectHandle);
+
+				instance.CSharp->InvokeMethod("OnCreate");
 			}
 			else
 			{
@@ -131,10 +134,10 @@ namespace Strype {
 		auto& scriptEngine = Project::GetScriptEngine();
 		Project::SetActiveRoom(nullptr);
 
-		for (auto& object : m_Objects)
+		for (auto& instance : m_Objects)
 		{
-			object.Instance.Invoke("OnDestroy");
-			scriptEngine->DestroyInstance(object.Instance);
+			instance.CSharp->InvokeMethod("OnDestroy");
+			scriptEngine->DestroyInstance(instance.CSharp);
 		}
 
 		b2DestroyWorld(m_Physics);

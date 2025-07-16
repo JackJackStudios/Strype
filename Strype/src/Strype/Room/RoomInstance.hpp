@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Strype/Script/CSharpObject.hpp"
 #include "Strype/Audio/Audio.hpp"
 
 #include <glm/glm.hpp>
+#include <Coral/ManagedObject.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <box2d/box2d.h>
 
@@ -40,7 +40,7 @@ namespace Strype {
 		float Rotation = 0.0f;
 
 		AssetHandle ObjectHandle;
-		CSharpObject Instance;
+		Coral::ManagedObject* CSharp;
 		b2BodyId RuntimeBody;
 		//Ref<AudioSource> Emitter;
 	private:

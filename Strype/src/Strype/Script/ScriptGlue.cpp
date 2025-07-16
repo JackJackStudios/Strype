@@ -50,45 +50,45 @@ namespace Strype {
 
 	namespace InternalCalls {
 		
-		InstanceID Room_CreateObject(float x, float y, AssetHandle object)
+		uint32_t Room_CreateObject(float x, float y, uint64_t object)
 		{
-			InstanceID instance = Project::GetActiveRoom()->InstantiatePrefab(object);
+			auto instance = Project::GetActiveRoom()->InstantiatePrefab(object);
 			Project::GetActiveRoom()->GetObject(instance).Position = { x, y };
 
 			return instance;
 		}
 
-		void Room_DestroyObject(InstanceID id)
+		void Room_DestroyObject(uint32_t id)
 		{
 			Project::GetActiveRoom()->DestroyInstance(id);
 		}
 
-		void Object_GetPosition(InstanceID id, glm::vec2* outPosition)
+		void Object_GetPosition(uint32_t id, glm::vec2* outPosition)
 		{
 			*outPosition = Project::GetActiveRoom()->GetObject(id).Position;
 		}
 
-		void Object_SetPosition(InstanceID id, glm::vec2* inPosition)
+		void Object_SetPosition(uint32_t id, glm::vec2* inPosition)
 		{
 			Project::GetActiveRoom()->GetObject(id).Position = *inPosition;
 		}
 
-		void Object_GetScale(InstanceID id, glm::vec2* outScale)
+		void Object_GetScale(uint32_t id, glm::vec2* outScale)
 		{
 			*outScale = Project::GetActiveRoom()->GetObject(id).Scale;
 		}
 
-		void Object_SetScale(InstanceID id, glm::vec2* inScale)
+		void Object_SetScale(uint32_t id, glm::vec2* inScale)
 		{
 			Project::GetActiveRoom()->GetObject(id).Scale = *inScale;
 		}
 
-		void Object_GetRotation(InstanceID id, float* outRotation)
+		void Object_GetRotation(uint32_t id, float* outRotation)
 		{
 			*outRotation = Project::GetActiveRoom()->GetObject(id).Rotation;
 		}
 
-		void Object_SetRotation(InstanceID id, float* inRotation)
+		void Object_SetRotation(uint32_t id, float* inRotation)
 		{
 			Project::GetActiveRoom()->GetObject(id).Rotation = *inRotation;
 		}

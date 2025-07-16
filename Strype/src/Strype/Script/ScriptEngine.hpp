@@ -5,8 +5,6 @@
 #include "Strype/Core/UUID.hpp"
 #include "Strype/Core/Hash.hpp"
 
-#include "CSharpObject.hpp"
-
 #include <Coral/HostInstance.hpp>
 #include <Coral/Assembly.hpp>
 #include <Coral/Type.hpp>
@@ -100,21 +98,18 @@ namespace Strype {
 		const ScriptID GetIDByName(const std::string& name) const { return Hash::GenerateFNVHash(name); }
 
 		template<typename... TArgs>
-		CSharpObject CreateInstance(ScriptID scriptID, TArgs&&... args)
+		Coral::ManagedObject* CreateInstance(ScriptID scriptID, TArgs&&... args)
 		{
 			auto* type = m_ScriptMetadata[scriptID].Type;
 			auto instance = type->CreateInstance(std::forward<TArgs>(args)...);
 			auto [index, handle] = m_ManagedObjects.Insert(std::move(instance));
 
-			CSharpObject result;
-			result.m_Handle = &handle;
-			return result;
+			return &handle;
 		}
 
-		void DestroyInstance(CSharpObject& instance)
+		void DestroyInstance(Coral::ManagedObject* instance)
 		{
-			instance.m_Handle->Destroy();
-			instance.m_Handle = nullptr;
+			instance->Destroy();
 		}
 	private:
 		void BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly);
