@@ -21,7 +21,7 @@ jobs:
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-latest, windows-latest]
-        build_type: [Debug, Release, MinSizeRel]
+        build_type: [RelWithDebInfo, Release, MinSizeRel]
         c_compiler: [gcc, clang, cl]
         include:
           - os: windows-latest
