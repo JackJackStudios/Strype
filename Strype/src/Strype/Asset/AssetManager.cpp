@@ -4,6 +4,7 @@
 #include "AssetSerializer.hpp"
 #include "Strype/Room/RoomSerializer.hpp"
 #include "Strype/Project/Project.hpp"
+#include "Strype/Core/Application.hpp"
 
 #define REGISTER_ASSET(a) if (type == AssetType::a) { if (createAsset) { createdAsset = CreateRef<a>(); } return true; }
 #define DEREGISTER_ASSET(a) if (type == AssetType::a) return false
@@ -156,7 +157,7 @@ namespace Strype {
 		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
 	}
 
-    void AssetManager::DeleteAsset(AssetHandle handle)
+    void AssetManager::RemoveAsset(AssetHandle handle)
     {
 		if (m_LoadedFiles.find(GetFilePath(handle)) == m_LoadedFiles.end())
 		{
@@ -164,15 +165,16 @@ namespace Strype {
 			return;
 		}
 
-		STY_CORE_TRACE("Deleting asset \"{}\" ", GetFilePath(handle));
+		STY_CORE_TRACE("Removing asset from AssetManager: \"{}\" ", GetFilePath(handle));
+
+		AssetRemovedEvent e(handle);
+		Application::Get().OnEvent(e);
 
 		std::filesystem::path path = GetFilePath(handle);
 		m_AssetRegistry[handle].reset();
 
 		m_AssetRegistry.erase(handle);
 		m_LoadedFiles.erase(path);
-
-		std::filesystem::remove(Project::GetProjectDirectory() / path);
     }
 
     AssetSerializer* AssetManager::GetSerializer(AssetType type)
@@ -210,6 +212,9 @@ namespace Strype {
 
 			m_AssetRegistry[handle] = metadata;
 			m_LoadedFiles[metadata.FilePath] = handle;
+
+			AssetImportedEvent e(handle);
+			Application::Get().OnEvent(e);
 		}
 		else
 		{

@@ -12,7 +12,9 @@ namespace Strype {
 		WindowClose, WindowResize, WindowMove, WindowDrop,
 		KeyPressed, KeyReleased, KeyHeld,
 		MouseButtonPressed, MouseButtonReleased, MouseButtonHeld,
-		MouseMoved, MouseScrolled
+		MouseMoved, MouseScrolled,
+
+		AssetImported, AssetRemoved,
 	};
 
 	enum EventCategory
@@ -22,7 +24,8 @@ namespace Strype {
 		EventCategoryInput = BIT(1),
 		EventCategoryKeyboard = BIT(2),
 		EventCategoryMouse = BIT(3),
-		EventCategoryMouseButton = BIT(4)
+		EventCategoryMouseButton = BIT(4),
+		EventCategoryAsset = BIT(5)
 	};
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
@@ -70,6 +73,52 @@ namespace Strype {
 		Event& m_Event;
 	};
 
+	class AssetImportedEvent : public Event
+	{
+	public:
+		AssetImportedEvent(uint64_t handle)
+			: m_Handle(handle) 
+		{
+		}
+
+		uint64_t GetHandle() const { return m_Handle; }
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "AssetImportedEvent: " << m_Handle;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(AssetImported)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+	private:
+		uint64_t m_Handle;
+	};
+
+	class AssetRemovedEvent : public Event
+	{
+	public:
+		AssetRemovedEvent(uint64_t handle)
+			: m_Handle(handle)
+		{
+		}
+
+		uint64_t GetHandle() const { return m_Handle; }
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "AssetRemovedEvent: " << m_Handle;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(AssetRemoved)
+			EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+	private:
+		uint64_t m_Handle;
+	};
+
 	class WindowResizeEvent : public Event
 	{
 	public:
@@ -87,7 +136,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(WindowResize)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
 		unsigned int m_Width, m_Height;
 	};
@@ -98,7 +147,7 @@ namespace Strype {
 		WindowCloseEvent() {}
 
 		EVENT_CLASS_TYPE(WindowClose)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
 	class WindowMoveEvent : public Event
@@ -125,7 +174,7 @@ namespace Strype {
 		const std::vector<std::filesystem::path>& GetPaths() const { return m_Paths; }
 
 		EVENT_CLASS_TYPE(WindowDrop)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
 		std::vector<std::filesystem::path> m_Paths;
 	};
@@ -208,7 +257,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
-			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	private:
 		float m_MouseX, m_MouseY;
 	};
@@ -230,7 +279,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
-			EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	private:
 		float m_XOffset, m_YOffset;
 	};

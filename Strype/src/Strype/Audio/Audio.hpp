@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Strype/Core/Buffer.hpp"
+
 #include <glm/glm.hpp>
 
 #include "Strype/Asset/Asset.hpp"

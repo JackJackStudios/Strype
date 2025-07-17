@@ -121,9 +121,9 @@ namespace Strype {
 						STY_CORE_VERIFY(false, "Not implemented");
 					}
 
-					Project::DeleteAsset(node.Handle);
+					Project::RemoveAsset(node.Handle);
+					std::filesystem::remove(Project::GetProjectDirectory() / Project::GetFilePath(node.Handle));
 
-					RefreshAssetTree();
 					ImGui::EndPopup();
 					continue;
 				}
@@ -172,7 +172,6 @@ namespace Strype {
 				if (m_InputActivated && Input::IsKeyDown(KeyCode::Enter))
 				{
 					Project::CreateAsset(m_CurrentDirectory->Path / path);
-					RefreshAssetTree();
 				}
 
 				m_InputType = AssetType::None;
@@ -222,8 +221,6 @@ namespace Strype {
 
 							std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
 							Project::ImportAsset(m_CurrentDirectory->Path / path.filename());
-
-							RefreshAssetTree();
 						}
 					}
 
@@ -243,6 +240,19 @@ namespace Strype {
 		ImGui::End();
 
 		m_Inspector->AddType<Room>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnInspectorRender));
+	}
+
+	void ContentBrowserPanel::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<AssetImportedEvent>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnAssetsUpdated));
+		dispatcher.Dispatch<AssetRemovedEvent>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnAssetsUpdated));
+	}
+
+	bool ContentBrowserPanel::OnAssetsUpdated(Event& e)
+	{
+		RefreshAssetTree();
+		return false;
 	}
 
 	void ContentBrowserPanel::RefreshAssetTree()

@@ -13,10 +13,7 @@ namespace Strype {
 		std::string Name;
 		std::string StartRoom;
 
-		//NOTE: Project directiory is folder .styproj is in to find assets etc.
-		//		Working directiory is for editor-only assets like BaseShader
 		std::filesystem::path ProjectDirectory;
-		std::string ProjectFileName;
 	};
 
 	// Relative to working directory
@@ -76,9 +73,9 @@ namespace Strype {
 			return Project::GetAssetManager()->CanCreateAsset(type, false, nullAsset);
 		}
 
-		static void DeleteAsset(AssetHandle handle)
+		static void RemoveAsset(AssetHandle handle)
 		{
-			Project::GetAssetManager()->DeleteAsset(handle);
+			Project::GetAssetManager()->RemoveAsset(handle);
 		}
 
 		static void SaveAsset(AssetHandle handle, const std::filesystem::path& path = std::filesystem::path())

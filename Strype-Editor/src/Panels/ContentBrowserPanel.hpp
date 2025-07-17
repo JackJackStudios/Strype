@@ -50,6 +50,7 @@ namespace Strype {
 		ContentBrowserPanel();
 
 		virtual void OnImGuiRender();
+		virtual void OnEvent(Event& event);
 		virtual void OnProjectChanged() { RefreshAssetTree(); }
 
 		virtual void SetInspector(Ref<InspectorPanel> panel) { m_Inspector = panel; }
@@ -61,6 +62,7 @@ namespace Strype {
 		void RefreshTreeNode(TreeNode& node);
 		void OnInspectorRender(Room* select);
 		std::vector<char> GetDialogMessage(AssetType type);
+		bool OnAssetsUpdated(Event& e);
 
 		AGI::Texture GetIcon(AssetHandle handle);
 		AGI::Texture GetIcon(AssetType type);

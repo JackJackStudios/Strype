@@ -1,5 +1,7 @@
 #pragma once
 
+#include "stypch.hpp"
+
 #include "Asset.hpp"
 #include "AssetSerializer.hpp"
 
@@ -61,7 +63,7 @@ namespace Strype {
 		bool CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset);
 
 		void SaveAsset(AssetHandle handle, const std::filesystem::path& path);
-		void DeleteAsset(AssetHandle handle);
+		void RemoveAsset(AssetHandle handle);
 
 		AssetSerializer* GetSerializer(AssetType type);
 	private:
