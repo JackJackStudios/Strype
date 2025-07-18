@@ -21,12 +21,11 @@ namespace Strype {
 
 	struct AssetMetadata
 	{
-		Ref<Asset> asset;
-		AssetType Type = AssetType::None;
+		Ref<Asset> Asset;
 		std::filesystem::path FilePath;
 
-		void reset() { asset.reset(); }
-		operator bool() const { return Type != AssetType::None; }
+		void reset() { Asset.reset(); }
+		operator bool() const { return Asset->GetType() != AssetType::None; }
 	};
 
 }

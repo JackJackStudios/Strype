@@ -1,26 +1,11 @@
 #pragma once
 
 #include "stypch.hpp"
-#include "Strype/Core/Event.hpp"
-#include "Strype/Core/UUID.hpp"
+
+#include <glm/glm.hpp>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
-
-template <>
-struct fmt::formatter<Strype::Event>
-{
-    constexpr auto parse(format_parse_context& ctx)
-    {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const Strype::Event& e, FormatContext& ctx) const
-    {
-        return fmt::format_to(ctx.out(), "{}", e.ToString());
-    }
-};
 
 template <>
 struct fmt::formatter<std::filesystem::path>
@@ -38,7 +23,7 @@ struct fmt::formatter<std::filesystem::path>
 };
 
 template <>
-struct fmt::formatter<Strype::UUID>
+struct fmt::formatter<glm::vec2>
 {
     constexpr auto parse(format_parse_context& ctx)
     {
@@ -46,14 +31,14 @@ struct fmt::formatter<Strype::UUID>
     }
 
     template <typename FormatContext>
-    auto format(const Strype::UUID& u, FormatContext& ctx) const
+    auto format(const glm::vec2& v, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "{}", (uint64_t)u);
+        return fmt::format_to(ctx.out(), "({}, {})", v.x, v.y);
     }
 };
 
 template <>
-struct fmt::formatter<Strype::UUID32>
+struct fmt::formatter<glm::vec3>
 {
     constexpr auto parse(format_parse_context& ctx)
     {
@@ -61,8 +46,23 @@ struct fmt::formatter<Strype::UUID32>
     }
 
     template <typename FormatContext>
-    auto format(const Strype::UUID32& u, FormatContext& ctx) const
+    auto format(const glm::vec3& v, FormatContext& ctx) const
     {
-        return fmt::format_to(ctx.out(), "{}", (uint32_t)u);
+        return fmt::format_to(ctx.out(), "({}, {}, {})", v.x, v.y, v.z);
+    }
+};
+
+template <>
+struct fmt::formatter<glm::vec4>
+{
+    constexpr auto parse(format_parse_context& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const glm::vec4& v, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "({}, {}, {}, {})", v.x, v.y, v.z, v.w);
     }
 };

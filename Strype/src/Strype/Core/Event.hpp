@@ -2,7 +2,7 @@
 
 #include "stypch.hpp"
 
-#include "Strype/Core/InputCodes.hpp"
+#include "Strype/Core/Input.hpp"
 
 namespace Strype {
 
@@ -14,7 +14,7 @@ namespace Strype {
 		MouseButtonPressed, MouseButtonReleased, MouseButtonHeld,
 		MouseMoved, MouseScrolled,
 
-		AssetImported, AssetRemoved,
+		AssetImported, AssetRemoved, AssetMoved
 	};
 
 	enum EventCategory
@@ -85,9 +85,7 @@ namespace Strype {
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "AssetImportedEvent: " << m_Handle;
-			return ss.str();
+			return fmt::format("AssetImportedEvent: {}", m_Handle);
 		}
 
 		EVENT_CLASS_TYPE(AssetImported)
@@ -108,37 +106,55 @@ namespace Strype {
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "AssetRemovedEvent: " << m_Handle;
-			return ss.str();
+			return fmt::format("AssetRemovedEvent: {}", m_Handle);
 		}
 
 		EVENT_CLASS_TYPE(AssetRemoved)
-			EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
 	private:
 		uint64_t m_Handle;
+	};
+
+	class AssetMovedEvent : public Event
+	{
+	public:
+		AssetMovedEvent(uint64_t handle, std::filesystem::path newpath)
+			: m_Handle(handle), m_NewPath(newpath)
+		{
+		}
+
+		uint64_t GetHandle() const { return m_Handle; }
+		const std::filesystem::path& GetNewPath() const { return m_NewPath; }
+
+		std::string ToString() const override
+		{
+			return fmt::format("AssetMovedEvent: {}", m_NewPath);
+		}
+
+		EVENT_CLASS_TYPE(AssetMoved)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+	private:
+		uint64_t m_Handle;
+		std::filesystem::path m_NewPath;
 	};
 
 	class WindowResizeEvent : public Event
 	{
 	public:
-		WindowResizeEvent(unsigned int width, unsigned int height)
-			: m_Width(width), m_Height(height) {}
+		WindowResizeEvent(glm::vec2 size)
+			: m_Size(size) {}
 
-		inline unsigned int GetWidth() const { return m_Width; }
-		inline unsigned int GetHeight() const { return m_Height; }
+		glm::vec2 GetSize() const { return m_Size; }
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "WindowResizeEvent: " << m_Width << ", " << m_Height;
-			return ss.str();
+			return fmt::format("WindowResizeEvent: {}", m_Size);
 		}
 
 		EVENT_CLASS_TYPE(WindowResize)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
-		unsigned int m_Width, m_Height;
+		glm::vec2 m_Size;
 	};
 
 	class WindowCloseEvent : public Event
@@ -153,13 +169,20 @@ namespace Strype {
 	class WindowMoveEvent : public Event
 	{
 	public:
-		WindowMoveEvent(int xpos, int ypos)
-			: x(xpos), y(ypos) {}
+		WindowMoveEvent(glm::vec2 position)
+			: m_Position(position) {}
+
+		glm::vec2 GetPosition() const { return m_Position; }
+
+		std::string ToString() const override
+		{
+			return fmt::format("WindowMoveEvent: {}", m_Position);
+		}
 
 		EVENT_CLASS_TYPE(WindowMove)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	private:
-		int x, y;
+		glm::vec2 m_Position;
 	};
 
 	class WindowDropEvent : public Event
@@ -167,9 +190,6 @@ namespace Strype {
 	public:
 		WindowDropEvent(const std::vector<std::filesystem::path>& paths)
 			: m_Paths(paths) {}
-
-		WindowDropEvent(std::vector<std::filesystem::path>&& paths)
-			: m_Paths(std::move(paths)) {}
 
 		const std::vector<std::filesystem::path>& GetPaths() const { return m_Paths; }
 
@@ -182,7 +202,12 @@ namespace Strype {
 	class KeyEvent : public Event
 	{
 	public:
-		inline KeyCode GetKeyCode() const { return m_KeyCode; }
+		KeyCode GetKeyCode() const { return m_KeyCode; }
+
+		std::string ToString() const override
+		{
+			return fmt::format("{}: {}", GetName(), (uint16_t)m_KeyCode);
+		}
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
@@ -198,13 +223,6 @@ namespace Strype {
 		KeyPressedEvent(KeyCode keycode)
 			: KeyEvent(keycode) {}
 
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "KeyPressedEvent: " << (uint16_t)m_KeyCode;
-			return ss.str();
-		}
-
 		EVENT_CLASS_TYPE(KeyPressed)
 	};
 
@@ -213,13 +231,6 @@ namespace Strype {
 	public:
 		KeyReleasedEvent(KeyCode keycode)
 			: KeyEvent(keycode) {}
-
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "KeyReleasedEvent: " << (uint16_t)m_KeyCode;
-			return ss.str();
-		}
 
 		EVENT_CLASS_TYPE(KeyReleased)
 	};
@@ -230,64 +241,56 @@ namespace Strype {
 		KeyHeldEvent(KeyCode keycode)
 			: KeyEvent(keycode) {}
 
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "KeyHeldEvent: " << (uint16_t)m_KeyCode;
-			return ss.str();
-		}
-
 		EVENT_CLASS_TYPE(KeyHeld)
 	};
 
 	class MouseMovedEvent : public Event
 	{
 	public:
-		MouseMovedEvent(float x, float y)
-			: m_MouseX(x), m_MouseY(y) {}
+		MouseMovedEvent(glm::vec2 position)
+			: m_Position(position) {}
 
-		inline float GetX() const { return m_MouseX; }
-		inline float GetY() const { return m_MouseY; }
+		glm::vec2 GetPosition() const { return m_Position; }
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "MouseMovedEvent: " << m_MouseX << ", " << m_MouseY;
-			return ss.str();
+			return fmt::format("MouseMovedEvent: {}", m_Position);
 		}
 
 		EVENT_CLASS_TYPE(MouseMoved)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	private:
-		float m_MouseX, m_MouseY;
+		glm::vec2 m_Position;
 	};
 
 	class MouseScrolledEvent : public Event
 	{
 	public:
-		MouseScrolledEvent(float xOffset, float yOffset)
-			: m_XOffset(xOffset), m_YOffset(yOffset) {}
+		MouseScrolledEvent(glm::vec2 offset)
+			: m_Offset(offset) {}
 
-		inline float GetXOffset() const { return m_XOffset; }
-		inline float GetYOffset() const { return m_YOffset; }
+		glm::vec2 GetOffset() const { return m_Offset; }
 
 		std::string ToString() const override
 		{
-			std::stringstream ss;
-			ss << "MouseScrolledEvent: " << GetXOffset() << ", " << GetYOffset();
-			return ss.str();
+			return fmt::format("MouseScrolledEvent: {}", m_Offset);
 		}
 
 		EVENT_CLASS_TYPE(MouseScrolled)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	private:
-		float m_XOffset, m_YOffset;
+		glm::vec2 m_Offset;
 	};
 
 	class MouseButtonEvent : public Event
 	{
 	public:
-		inline MouseCode GetMouseButton() const { return m_Button; }
+		MouseCode GetMouseButton() const { return m_Button; }
+
+		std::string ToString() const override
+		{
+			return fmt::format("{}: {}", GetName(), (uint16_t)m_Button);
+		}
 
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	protected:
@@ -303,13 +306,6 @@ namespace Strype {
 		MouseButtonPressedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "MouseButtonPressedEvent: " << (uint16_t)m_Button;
-			return ss.str();
-		}
-
 		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
@@ -318,13 +314,6 @@ namespace Strype {
 	public:
 		MouseButtonHeldEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
-
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "MouseButtonPressedEvent: " << (uint16_t)m_Button;
-			return ss.str();
-		}
 
 		EVENT_CLASS_TYPE(MouseButtonHeld)
 	};
@@ -335,15 +324,22 @@ namespace Strype {
 		MouseButtonReleasedEvent(MouseCode button)
 			: MouseButtonEvent(button) {}
 
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "MouseButtonReleasedEvent: " << (uint16_t)m_Button;
-			return ss.str();
-		}
-
 		EVENT_CLASS_TYPE(MouseButtonReleased)
 	};
 
 }
 
+template <>
+struct fmt::formatter<Strype::Event>
+{
+	constexpr auto parse(format_parse_context& ctx)
+	{
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const Strype::Event& e, FormatContext& ctx) const
+	{
+		return fmt::format_to(ctx.out(), "{}", e.ToString());
+	}
+};

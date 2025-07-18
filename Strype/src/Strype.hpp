@@ -3,6 +3,7 @@
 #include "stypch.hpp"
 
 #include "Strype/Core/Application.hpp"
+#include "Strype/Core/Event.hpp"
 #include "Strype/Core/Layer.hpp"
 #include "Strype/Core/Log.hpp"
 

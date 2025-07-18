@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FileWatch.hpp"
 #include "Panels/PanelManager.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
 
@@ -34,7 +35,7 @@ namespace Strype {
     }
 
 	template<typename UIFunction>
-	static void DropdownMenu(const std::string& name, UIFunction uiFunction)
+	void DropdownMenu(const std::string& name, UIFunction uiFunction)
 	{
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
@@ -65,21 +66,22 @@ namespace Strype {
 
 		void OnEvent(Event& e) override;
 
-		//void NewRoom();
 		void OpenRoom(const std::filesystem::path& path);
 
 		void NewProject(const std::filesystem::path& path = std::filesystem::path());
 		void OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
 		void SaveProject();
-
-		void OnInspectorRender(Object* object);
+	private:
 		bool OnWindowDrop(WindowDropEvent& e);
+		void OnInspectorRender(Object* object);
 
 		void UI_RoomPanel();
+		void FilewatcherFunc(const std::string& path, const filewatch::Event event);
 	private:
 		AGI::Framebuffer m_Framebuffer;
 		InstanceID m_Selected;
 		Ref<Room> m_Room;
+		Ref<filewatch::FileWatch<std::string>> m_FileWatcher;
 
 		PanelManager m_PanelManager;
 		Ref<ContentBrowserPanel> m_ContentBrowserPanel;

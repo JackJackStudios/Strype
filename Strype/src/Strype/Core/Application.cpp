@@ -154,14 +154,14 @@ namespace Strype {
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
-		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		if (e.GetSize().x == 0 || e.GetSize().y == 0)
 		{
 			m_Minimized = true;
 			return false;
 		}
 
 		m_Minimized = false;
-		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
+		Renderer::OnWindowResize(e.GetSize());
 
 		return false;
 	}
@@ -170,13 +170,13 @@ namespace Strype {
 	{
 		m_Window->SetWindowSizeCallback([](AGI::Window* window, glm::vec2 size)
 		{
-			WindowResizeEvent event(size.x, size.y);
+			WindowResizeEvent event(size);
 			Application::Get().OnEvent(event);
 		});
 
 		m_Window->SetWindowPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
-			WindowMoveEvent event(pos.x, pos.y);
+			WindowMoveEvent event(pos);
 			Application::Get().OnEvent(event);
 		});
 
@@ -198,13 +198,13 @@ namespace Strype {
 
 		m_Window->SetScrollCallback([](AGI::Window* window, glm::vec2 offset)
 		{
-			MouseScrolledEvent event((float)offset.x, (float)offset.y);
+			MouseScrolledEvent event(offset);
 			Application::Get().OnEvent(event);
 		});
 
 		m_Window->SetCursorPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
-			MouseMovedEvent event((float)pos.x, (float)pos.y);
+			MouseMovedEvent event(pos);
 			Application::Get().OnEvent(event);
 		});
 	}

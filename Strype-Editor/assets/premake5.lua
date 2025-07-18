@@ -26,6 +26,6 @@ workspace "EmptyProject"
 
 		links 
 		{
-			"%{StrypeDirectory}/master/DotNet/Strype-ScriptCore.dll",
-			"%{StrypeDirectory}/master/DotNet/Coral.Managed.dll",
+			"%{StrypeDirectory}/Strype/master/DotNet/Strype-ScriptCore.dll",
+			"%{StrypeDirectory}/Strype/master/DotNet/Coral.Managed.dll",
 		}

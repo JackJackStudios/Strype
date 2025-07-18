@@ -60,10 +60,12 @@ namespace Strype {
 		AssetHandle GetHandle(const std::filesystem::path& path) const;
 
 		void CreateAsset(const std::filesystem::path& path);
-		bool CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset);
+		bool CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset) const;
 
 		void SaveAsset(AssetHandle handle, const std::filesystem::path& path);
 		void RemoveAsset(AssetHandle handle);
+
+		void MoveAsset(AssetHandle handle, const std::filesystem::path& path);
 
 		AssetSerializer* GetSerializer(AssetType type);
 	private:

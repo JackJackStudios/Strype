@@ -35,7 +35,9 @@ namespace Strype {
 		OpenProject(false, projectPath);
 
 		if (!Project::GetActive())
+		{
 			exit(0);
+		}
 	}
 
 	EditorLayer::~EditorLayer()
@@ -201,6 +203,8 @@ namespace Strype {
 		if (Project::GetActive())
 			SaveProject();
 
+		m_FileWatcher.reset();
+
 		Ref<Project> project = CreateRef<Project>();
 		ProjectSerializer serializer(project);
 		serializer.Deserialize(dialog);
@@ -212,6 +216,23 @@ namespace Strype {
 		m_PanelManager.OnProjectChanged();
 
 		OpenRoom(project->GetStartRoom());
+		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorLayer::FilewatcherFunc));
+	}
+
+	void EditorLayer::FilewatcherFunc(const std::string& str, const filewatch::Event event)
+	{
+		std::filesystem::path filepath = std::filesystem::path(str);
+
+		switch (event)
+		{
+		case filewatch::Event::added:
+			Project::ImportAsset(filepath);
+			break;
+
+		case filewatch::Event::removed:
+			Project::RemoveAsset(Project::GetAssetHandle(filepath));
+			break;
+		}
 	}
 
 	void EditorLayer::OnInspectorRender(Object* object)

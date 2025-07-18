@@ -32,7 +32,7 @@ namespace Strype {
 	public:
 		static void Init();
 		static void Shutdown();
-		static void OnWindowResize(uint32_t width, uint32_t height);
+		static void OnWindowResize(const glm::vec2& size);
 
 		static void SetClearColour(const glm::vec4& colour);
 		static void Clear();

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Strype/Core/InputCodes.hpp"
-#include "Strype/Core/Event.hpp"
 
 #include <glm/glm.hpp>
 

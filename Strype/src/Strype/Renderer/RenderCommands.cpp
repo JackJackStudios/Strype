@@ -6,9 +6,9 @@
 
 namespace Strype {
 
-	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+	void Renderer::OnWindowResize(const glm::vec2& size)
 	{
-		s_RenderContext->SetViewport(0, 0, width, height);
+		s_RenderContext->SetViewport(0, 0, size.x, size.y);
 	}
 
 	void Renderer::Clear()

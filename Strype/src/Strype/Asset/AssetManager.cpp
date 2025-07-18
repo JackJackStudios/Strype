@@ -32,7 +32,7 @@ namespace Strype {
 
 	}
 
-	bool AssetManager::CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset)
+	bool AssetManager::CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset) const
 	{
 		REGISTER_ASSET(Room);
 
@@ -93,15 +93,14 @@ namespace Strype {
 		Ref<Asset> asset;
 		if (IsAssetLoaded(handle))
 		{
-			asset = m_AssetRegistry.at(handle).asset;
+			asset = m_AssetRegistry.at(handle).Asset;
 		}
 		else
 		{
 			const AssetMetadata& metadata = GetMetadata(handle);
 			asset = ImportAsset(handle, metadata);
 
-			m_AssetRegistry[handle].asset = asset;
-			m_AssetRegistry[handle].Type = asset->GetType();
+			m_AssetRegistry[handle].Asset = asset;
 		}
 
 		return asset;
@@ -125,7 +124,7 @@ namespace Strype {
 			return AssetType::None;
 		}
 
-		return m_AssetRegistry.at(handle).Type;
+		return m_AssetRegistry.at(handle).Asset->GetType();
 	}
 
 	const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
@@ -177,6 +176,30 @@ namespace Strype {
 		m_LoadedFiles.erase(path);
     }
 
+	void AssetManager::MoveAsset(AssetHandle handle, const std::filesystem::path& path)
+	{
+		const auto& newpath = Utils::ToAssetSysPath(path);
+		if (std::filesystem::exists(Project::GetProjectDirectory() / newpath))
+		{
+			STY_CORE_WARN("Cannot override other files with moving asset \"{}\" ", path);
+			return;
+		}
+
+		if (GetFilePath(handle).extension() != newpath.extension())
+		{
+			STY_CORE_WARN("Cannot change file extension, this may corrupt data! ({} -> {})", GetFilePath(handle).extension(), newpath.extension());
+			return;
+		}
+
+		AssetMovedEvent e(handle, newpath);
+		Application::Get().OnEvent(e);
+
+		m_LoadedFiles.erase(GetFilePath(handle));
+		m_LoadedFiles[newpath] = handle;
+
+		m_AssetRegistry[handle].FilePath = newpath;
+	}
+
     AssetSerializer* AssetManager::GetSerializer(AssetType type)
 	{
 		if (m_Serializers.find(type) == m_Serializers.end())
@@ -195,9 +218,8 @@ namespace Strype {
 		AssetHandle handle;
 		AssetMetadata metadata;
 		metadata.FilePath = Utils::ToAssetSysPath(filepath);
-		metadata.Type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
-		if (metadata.Type == AssetType::None)
+		if (Utils::GetAssetTypeFromFileExtension(filepath.extension()) == AssetType::None)
 		{
 			STY_CORE_WARN("Could not import Asset \"{}\" ", filepath);
 			return 0;
@@ -208,7 +230,7 @@ namespace Strype {
 		if (asset)
 		{
 			asset->Handle = handle;
-			metadata.asset = asset;
+			metadata.Asset = asset;
 
 			m_AssetRegistry[handle] = metadata;
 			m_LoadedFiles[metadata.FilePath] = handle;
@@ -226,15 +248,16 @@ namespace Strype {
 
 	Ref<Asset> AssetManager::ImportAsset(AssetHandle handle, const AssetMetadata& metadata)
 	{
-		if (m_Serializers.find(metadata.Type) == m_Serializers.end())
+		AssetType type = Utils::GetAssetTypeFromFileExtension(metadata.FilePath.extension());
+
+		if (m_Serializers.find(type) == m_Serializers.end())
 		{
-			STY_CORE_WARN("No serializer available for Type: {}", magic_enum::enum_name(metadata.Type));
+			STY_CORE_WARN("No serializer available for Type: {}", magic_enum::enum_name(type));
 			return nullptr;
 		}
 
 		STY_CORE_TRACE("Deserializing asset \"{}\" ", metadata.FilePath);
-
-		return m_Serializers.at(metadata.Type)->LoadAsset(Project::GetProjectDirectory() / metadata.FilePath);
+		return m_Serializers.at(type)->LoadAsset(Project::GetProjectDirectory() / metadata.FilePath);
 	}
 
 	const AssetMetadata& AssetManager::GetMetadata(AssetHandle handle) const
