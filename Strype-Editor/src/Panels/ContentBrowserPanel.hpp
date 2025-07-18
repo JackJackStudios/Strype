@@ -42,7 +42,7 @@ namespace Strype {
 			: Path(path), Parent(parent), Handle(handle) {}
 	};
 
-	using ItemClickCallbackFunc = std::function<void(const AssetMetadata&)>;
+	using ItemClickCallbackFunc = std::function<void(Ref<Asset>)>;
 
 	class ContentBrowserPanel : public EditorPanel
 	{

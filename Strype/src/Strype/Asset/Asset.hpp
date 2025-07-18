@@ -15,17 +15,9 @@ namespace Strype {
 	{
 	public:
 		AssetHandle Handle;
-
-		virtual AssetType GetType() const = 0;
-	};
-
-	struct AssetMetadata
-	{
-		Ref<Asset> Asset;
 		std::filesystem::path FilePath;
 
-		void reset() { Asset.reset(); }
-		operator bool() const { return Asset->GetType() != AssetType::None; }
+		virtual AssetType GetType() const = 0;
 	};
 
 }

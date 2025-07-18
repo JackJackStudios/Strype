@@ -34,7 +34,7 @@ namespace Strype {
 	}
 	
 	using AssetFileSystem = std::map<std::filesystem::path, AssetHandle>;
-	using AssetRegistry = std::map<AssetHandle, AssetMetadata>;
+	using AssetRegistry = std::map<AssetHandle, Ref<Asset>>;
 	
 	class AssetManager
 	{
@@ -48,13 +48,12 @@ namespace Strype {
 		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
 
 		AssetHandle ImportAsset(const std::filesystem::path& filepath);
-		Ref<Asset> ImportAsset(AssetHandle handle, const AssetMetadata& metadata);
+		Ref<Asset> ImportAsset(AssetHandle handle, const std::filesystem::path& filepath);
 
 		void ReloadAssets();
 		void SaveAllAssets();
 
-		const AssetMetadata& GetMetadata(AssetHandle handle) const;
-		const std::filesystem::path& GetFilePath(AssetHandle handle) const;
+		const std::filesystem::path& GetFilePath(AssetHandle handle);
 		const AssetType GetAssetType(AssetHandle handle) const;
 
 		AssetHandle GetHandle(const std::filesystem::path& path) const;

@@ -19,15 +19,15 @@ namespace Strype {
 
 		m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
 
-		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](const AssetMetadata& metadata)
+		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](Ref<Asset> asset)
 		{
-			OpenRoom(metadata.FilePath);
-			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Room>(Project::GetAssetHandle(metadata.FilePath)).get());
+			OpenRoom(asset->FilePath);
+			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Room>(Project::GetAssetHandle(asset->FilePath)).get());
 		});
 
-		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Object, [this](const AssetMetadata& metadata)
+		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Object, [this](Ref<Asset> asset)
 		{
-			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Object>(Project::GetAssetHandle(metadata.FilePath)).get());
+			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Object>(Project::GetAssetHandle(asset->FilePath)).get());
 		});
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));

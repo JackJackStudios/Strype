@@ -103,11 +103,6 @@ namespace Strype {
 			return Project::GetAssetManager()->GetAssetType(handle);
 		}
 
-		static const AssetMetadata& GetMetadata(AssetHandle handle)
-		{
-			return Project::GetAssetManager()->GetMetadata(handle);
-		}
-
 		static const AssetHandle GetAssetHandle(const std::filesystem::path& path)
 		{
 			return Project::GetAssetManager()->GetHandle(path);

@@ -139,9 +139,7 @@ namespace Strype {
 				}
 				else if (AssetType type = Utils::GetAssetTypeFromFileExtension(node.Path.extension()); m_ItemClicksCallbacks.find(type) != m_ItemClicksCallbacks.end())
 				{
-					AssetMetadata metadata;
-					metadata.FilePath = node.Path;
-					m_ItemClicksCallbacks[type](metadata);
+					m_ItemClicksCallbacks[type](Project::GetAsset<Asset>(node.Handle));
 				}
 			}
 
