@@ -28,7 +28,7 @@ namespace Strype {
 
 		Project::SetActive(project);
 
-		m_Room = Project::GetAsset<Room>(Project::GetAssetHandle(project->GetStartRoom()));
+		m_Room = Project::GetAsset<Room>(Project::GetHandle(project->GetStartRoom()));
 
 	}
 

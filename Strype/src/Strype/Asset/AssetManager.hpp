@@ -29,12 +29,24 @@ namespace Strype {
 			return s_AssetExtensionMap.at(extension);
 		}
 
-		const std::filesystem::path& GetFileExtensionFromAssetType(AssetType type);
+		static const std::filesystem::path& GetFileExtensionFromAssetType(AssetType type)
+		{
+			for (const auto& [extension, assetType] : s_AssetExtensionMap)
+			{
+				if (assetType == type)
+					return extension;
+			}
+
+			STY_CORE_WARN("Could not find file extension for \"{}\" ", magic_enum::enum_name(type));
+			return "";
+		}
 
 	}
 	
 	using AssetFileSystem = std::map<std::filesystem::path, AssetHandle>;
 	using AssetRegistry = std::map<AssetHandle, Ref<Asset>>;
+
+	using ForEachFunc = std::function<void(AssetHandle)>;
 	
 	class AssetManager
 	{
@@ -47,8 +59,8 @@ namespace Strype {
 		bool IsAssetLoaded(AssetHandle handle) const;
 		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
 
-		AssetHandle ImportAsset(const std::filesystem::path& filepath);
-		Ref<Asset> ImportAsset(AssetHandle handle, const std::filesystem::path& filepath);
+		AssetHandle ImportAsset(std::filesystem::path filepath);
+		Ref<Asset> LoadAsset(const std::filesystem::path& filepath);
 
 		void ReloadAssets();
 		void SaveAllAssets();
@@ -65,6 +77,7 @@ namespace Strype {
 		void RemoveAsset(AssetHandle handle);
 
 		void MoveAsset(AssetHandle handle, const std::filesystem::path& path);
+		void ForEach(ForEachFunc func);
 
 		AssetSerializer* GetSerializer(AssetType type);
 	private:

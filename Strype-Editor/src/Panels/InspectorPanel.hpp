@@ -22,6 +22,12 @@ namespace Strype {
 			m_SelectedType = std::type_index(typeid(T));
 		}
 
+		template<typename T>
+		void SetSelected(AssetHandle handle)
+		{
+			SetSelected<T>(Project::GetAsset<T>(handle).get());
+		}
+
 		void RemoveSelected()
 		{
 			SetSelected<void>(nullptr);

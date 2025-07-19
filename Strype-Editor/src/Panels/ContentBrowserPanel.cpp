@@ -29,6 +29,7 @@ namespace Strype {
 			textureSpec.Width = width;
 			textureSpec.Height = height;
 			textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
+			textureSpec.LinearFiltering = true;
 			
         	AGI::Texture texture = Renderer::GetContext()->CreateTexture(textureSpec);
         	texture->SetData(data, width * height * channels);
@@ -95,20 +96,18 @@ namespace Strype {
 			ImGui::NextColumn();
 		}
 		
-		for (size_t i = 0; i < m_CurrentDirectory->Nodes.size();)
+		for (size_t i = 0; i < m_CurrentDirectory->Children.size();)
 		{
-			TreeNode& node = m_CurrentDirectory->Nodes[i];
+			TreeNode& node = m_CurrentDirectory->Children[i];
 			AGI::Texture icon = GetIcon(node.Handle);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-			ImGui::ImageButton((std::string("##") + std::to_string(node.Handle)).c_str(), (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
-			ImGui::PopStyleColor();
+			ImGui::PushID(i);
 
-			if (ImGui::BeginDragDropSource())
-			{
-				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", &node.Handle, sizeof(AssetHandle));
-				ImGui::EndDragDropSource();
-			}
+			ImGui::ImageButton("", (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			
+			ImGui::PopID();
+			ImGui::PopStyleColor();
 			
 			if (ImGui::BeginPopupContextItem())
 			{
@@ -116,11 +115,6 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Delete"))
 				{
-					if (Project::GetAssetType(node.Handle) == AssetType::Object)
-					{
-						STY_CORE_VERIFY(false, "Not implemented");
-					}
-
 					Project::RemoveAsset(node.Handle);
 					std::filesystem::remove(Project::GetProjectDirectory() / Project::GetFilePath(node.Handle));
 
@@ -133,20 +127,21 @@ namespace Strype {
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
-				if (std::filesystem::is_directory(node.Path))
+				if (!node.Handle)
 				{
 					m_CurrentDirectory = &node;
+					break;
 				}
-				else if (AssetType type = Utils::GetAssetTypeFromFileExtension(node.Path.extension()); m_ItemClicksCallbacks.find(type) != m_ItemClicksCallbacks.end())
+				else
 				{
-					m_ItemClicksCallbacks[type](Project::GetAsset<Asset>(node.Handle));
+					auto asset = Project::GetAsset<Asset>(node.Handle);
+					m_ItemClicksCallbacks[asset->GetType()](asset);
 				}
 			}
 
 			ImGui::TextWrapped(node.Path.stem().string().c_str());
 
-			ImGui::NextColumn();
-			++i;
+			ImGui::NextColumn(); ++i;
 		}
 
 		if (m_InputType != AssetType::None)
@@ -157,10 +152,14 @@ namespace Strype {
 			std::filesystem::path path = std::string(m_InputText) + Utils::GetFileExtensionFromAssetType(m_InputType).string();
 			bool overwriting = std::filesystem::exists(m_CurrentDirectory->Path / path);
 
-			if (overwriting) ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+			if (overwriting) 
+				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+
 			ImGui::SetNextItemWidth(thumbnailSize);
 			ImGui::InputText("##Input", m_InputText, sizeof(m_InputText));
-			if (overwriting) ImGui::PopStyleColor();
+
+			if (overwriting) 
+				ImGui::PopStyleColor();
 
 			if (ImGui::IsItemActivated())
 				m_InputActivated = true;
@@ -218,7 +217,7 @@ namespace Strype {
 								continue;
 
 							std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
-							Project::ImportAsset(m_CurrentDirectory->Path / path.filename());
+							Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
 						}
 					}
 
@@ -255,42 +254,34 @@ namespace Strype {
 
 	void ContentBrowserPanel::RefreshAssetTree()
 	{
-		m_RootDirectory = TreeNode(Project::GetProjectDirectory(), nullptr);
+		m_RootDirectory.Path = Project::GetProjectDirectory();
 		m_CurrentDirectory = &m_RootDirectory;
 		
-		RefreshTreeNode(m_RootDirectory);
-	}
-
-	void ContentBrowserPanel::RefreshTreeNode(TreeNode& node)
-	{
-		if (!Utils::NumOfFileOrDirs(Project::GetProjectDirectory() / node.Path))
-			return;
-
-		for (const auto& entry : std::filesystem::directory_iterator(Project::GetProjectDirectory() / node.Path))
+		auto manager = Project::GetAssetManager();
+		manager->ForEach([this](AssetHandle handle)
 		{
-			std::filesystem::path relativePath = std::filesystem::relative(entry.path(), m_RootDirectory.Path);
-			bool isDirectory = entry.is_directory();
+			// sSellChest.png
+			// Folder1/sSellChest.png
+			// Folder1/Folder2/sSellChest.png
 
-			if (!isDirectory && (s_AssetExtensionMap.find(relativePath.extension()) == s_AssetExtensionMap.end()))
-				continue; // Not a valid asset
+			TreeNode* currentFolder = &m_RootDirectory;
+			const auto& filepath = Project::GetFilePath(handle);
 
-			if (isDirectory)
+			std::filesystem::path currentPath;
+			for (auto it = filepath.begin(); it != filepath.end(); ++it)
 			{
-				if (entry.path().filename() != HIDDEN_FOLDER)
+				currentPath /= *it;
+
+				// Is file?
+				if (std::next(it) == filepath.end())
 				{
-					node.Nodes.emplace_back(entry.path(), &node);
-					RefreshTreeNode(node.Nodes.back());
+					currentFolder->AddNode(currentPath, handle);
+				}
+				else
+				{
+					currentFolder = &currentFolder->AddNode(currentPath);
 				}
 			}
-			else if (Project::IsAssetLoaded(relativePath))
-			{
-				node.Nodes.emplace_back(entry.path(), &node, Project::GetAssetHandle(relativePath));
-			}
-		}
-
-		std::stable_partition(node.Nodes.begin(), node.Nodes.end(), [this](const TreeNode& node) 
-		{
-			return std::filesystem::is_directory(Project::GetProjectDirectory() / node.Path);
 		});
 	}
 
@@ -300,7 +291,7 @@ namespace Strype {
 		ImGui::Image(m_Icons[AssetType::Room]->GetRendererID(), ImVec2(128.0f, 128.0f), {0, 1}, {1, 0});
 
 		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Button(Project::GetFilePath(select->Handle).filename().string().c_str(), ImVec2(128.0f, 0));
+		ImGui::Button(select->FilePath.filename().string().c_str(), ImVec2(128.0f, 0));
 
 		Utils::DropdownMenu("Properties", [&]() {
 			ImGui::Columns(2, nullptr, false);

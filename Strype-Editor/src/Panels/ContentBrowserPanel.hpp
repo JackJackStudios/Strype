@@ -31,15 +31,27 @@ namespace Strype {
 
 	struct TreeNode
 	{
-		TreeNode* Parent;
+		TreeNode* Parent = nullptr;
 		std::filesystem::path Path;
-		AssetHandle Handle;
-		std::vector<TreeNode> Nodes;
 
-		TreeNode()
-			: Path(), Parent(nullptr), Handle(0) {}
-		TreeNode(std::filesystem::path path, TreeNode* parent, AssetHandle handle = (uint64_t)0)
-			: Path(path), Parent(parent), Handle(handle) {}
+		std::vector<TreeNode> Children;
+		AssetHandle Handle = 0;
+
+		TreeNode& AddNode(std::filesystem::path filepath, AssetHandle handle = 0)
+		{
+			for (auto& child : Children)
+			{
+				if (child.Path == filepath)
+					return child;
+			}
+
+			TreeNode node;
+			node.Parent = this;
+			node.Path = filepath;
+			node.Handle = handle;
+
+			return Children.emplace_back(node);
+		}
 	};
 
 	using ItemClickCallbackFunc = std::function<void(Ref<Asset>)>;
@@ -59,7 +71,6 @@ namespace Strype {
 
 		std::filesystem::path GetCurrentPath() const { return m_CurrentDirectory->Path; }
 	private:
-		void RefreshTreeNode(TreeNode& node);
 		void OnInspectorRender(Room* select);
 		std::vector<char> GetDialogMessage(AssetType type);
 		bool OnAssetsUpdated(Event& e);

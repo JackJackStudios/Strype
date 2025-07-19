@@ -22,12 +22,12 @@ namespace Strype {
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](Ref<Asset> asset)
 		{
 			OpenRoom(asset->FilePath);
-			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Room>(Project::GetAssetHandle(asset->FilePath)).get());
+			m_PanelManager.GetInspector()->SetSelected<Room>(Project::GetHandle(asset->FilePath));
 		});
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Object, [this](Ref<Asset> asset)
 		{
-			m_PanelManager.GetInspector()->SetSelected(Project::GetAsset<Object>(Project::GetAssetHandle(asset->FilePath)).get());
+			m_PanelManager.GetInspector()->SetSelected<Object>(Project::GetHandle(asset->FilePath));
 		});
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
@@ -169,7 +169,7 @@ namespace Strype {
 
 	void EditorLayer::OpenRoom(const std::filesystem::path& path)
 	{
-		m_Room = Project::GetAsset<Room>(Project::GetAssetHandle(path));
+		m_Room = Project::GetAsset<Room>(Project::GetHandle(path));
 		m_PanelManager.SetRoomContext(m_Room);
 	}
 
@@ -230,7 +230,7 @@ namespace Strype {
 			break;
 
 		case filewatch::Event::removed:
-			Project::RemoveAsset(Project::GetAssetHandle(filepath));
+			Project::RemoveAsset(Project::GetHandle(filepath));
 			break;
 		}
 	}

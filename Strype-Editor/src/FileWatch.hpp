@@ -208,10 +208,6 @@ namespace filewatch {
 			return *this;
 		}
 
-		// Const memeber varibles don't let me implent moves nicely, if moves are really wanted std::unique_ptr should be used and move that.
-		FileWatch<StringType>(FileWatch<StringType>&&) = delete;
-		FileWatch<StringType>& operator=(FileWatch<StringType>&&) & = delete;
-
 	private:
 		static constexpr C _regex_all[] = { '.', '*', '\0' };
 		static constexpr C _this_directory[] = { '.', '/', '\0' };
