@@ -2,10 +2,10 @@
 
 #include "InspectorPanel.hpp"
 
-#define STBI_NO_SIMD
 #include <stb_image.h>
 
 #include <glm/gtc/type_ptr.hpp>
+#include <imgui_internal.h>
 
 namespace Strype {
 
@@ -99,12 +99,14 @@ namespace Strype {
 		for (size_t i = 0; i < m_CurrentDirectory->Children.size();)
 		{
 			TreeNode& node = m_CurrentDirectory->Children[i];
-			AGI::Texture icon = GetIcon(node.Handle);
+
+			TexCoords tx = RenderCaps::TextureCoords;
+			AGI::Texture icon = GetIcon(node.Handle, &tx);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::PushID(i);
 
-			ImGui::ImageButton("", (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+			ImGui::ImageButton("", (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, ImVec2(tx[3].x, tx[3].y), ImVec2(tx[1].x, tx[1].y));
 			
 			ImGui::PopID();
 			ImGui::PopStyleColor();
@@ -132,10 +134,15 @@ namespace Strype {
 					m_CurrentDirectory = &node;
 					break;
 				}
-				else
+				else 
 				{
 					auto asset = Project::GetAsset<Asset>(node.Handle);
-					m_ItemClicksCallbacks[asset->GetType()](asset);
+					AssetType type = asset->GetType();
+
+					if (m_ItemClicksCallbacks.find(type) != m_ItemClicksCallbacks.end())
+					{
+						m_ItemClicksCallbacks[type](asset);
+					}
 				}
 			}
 
@@ -151,19 +158,17 @@ namespace Strype {
 
 			std::filesystem::path path = std::string(m_InputText) + Utils::GetFileExtensionFromAssetType(m_InputType).string();
 			bool overwriting = std::filesystem::exists(m_CurrentDirectory->Path / path);
-
+			
 			if (overwriting) 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 
 			ImGui::SetNextItemWidth(thumbnailSize);
 			ImGui::InputText("##Input", m_InputText, sizeof(m_InputText));
 
-			if (overwriting) 
+			if (ImGui::GetCurrentContext()->ColorStack.Size > 0)
 				ImGui::PopStyleColor();
 
-			if (ImGui::IsItemActivated())
-				m_InputActivated = true;
-
+			if (ImGui::IsItemActivated()) m_InputActivated = true;
 			if (ImGui::IsItemDeactivated() && !overwriting)
 			{
 				if (m_InputActivated && Input::IsKeyDown(KeyCode::Enter))
@@ -307,7 +312,7 @@ namespace Strype {
 		});
 	}
 
-	AGI::Texture ContentBrowserPanel::GetIcon(AssetHandle handle)
+	AGI::Texture ContentBrowserPanel::GetIcon(AssetHandle handle, TexCoords* tx)
 	{
 		if (handle == 0)
 			return m_DirectoryIcon;
@@ -315,7 +320,14 @@ namespace Strype {
 		AssetType type = Project::GetAssetType(handle);
 
 		if (type == AssetType::Sprite)
-			return Project::GetAsset<Sprite>(handle)->GetTexture();
+		{
+			auto sprite = Project::GetAsset<Sprite>(handle);
+
+			if (sprite->FrameCount() > 1)
+				*tx = Utils::FlipTexCoords(sprite->GetTexCoords());
+
+			return sprite->GetTexture();
+		}
 
 		return GetIcon(type);
 	}

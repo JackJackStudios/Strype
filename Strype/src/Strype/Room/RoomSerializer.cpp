@@ -13,7 +13,7 @@ namespace Strype {
 
 	void RoomSerializer::SaveAsset(Ref<Asset> asset, const std::filesystem::path& path)
 	{
-		//HACK: Assume asset is prefab 
+		//HACK: Assume asset is room 
 		Room* room = (Room*)asset.get();
 
 		YAML::Emitter out;
@@ -34,7 +34,7 @@ namespace Strype {
 					{
 						ScopedMap objMap(out);
 
-						out << YAML::Key << "Object" << YAML::Value << static_cast<uint32_t>(obj);
+						out << YAML::Key << "Object" << YAML::Value << obj.GetHandle();
 						out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(obj.ObjectHandle);
 						out << YAML::Key << "Colour" << YAML::Value << obj.Colour;
 
@@ -77,12 +77,6 @@ namespace Strype {
 			InstanceID id = obj["Object"].as<InstanceID>();
 
 			const std::filesystem::path& path = obj["PrefabPath"].as<std::filesystem::path>();
-			if (!std::filesystem::exists(Project::GetProjectDirectory() / path))
-			{
-				STY_CORE_WARN("Could not find specifed path: \"{}\" ", path);
-				continue;
-			}
-
 			AssetHandle handle = Project::ImportAsset(path);
 
 			RoomInstance& newobj = room->GetObject(room->InstantiatePrefab(handle));

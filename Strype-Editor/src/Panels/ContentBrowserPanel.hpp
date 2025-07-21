@@ -75,7 +75,7 @@ namespace Strype {
 		std::vector<char> GetDialogMessage(AssetType type);
 		bool OnAssetsUpdated(Event& e);
 
-		AGI::Texture GetIcon(AssetHandle handle);
+		AGI::Texture GetIcon(AssetHandle handle, TexCoords* tx);
 		AGI::Texture GetIcon(AssetType type);
 	private:
 		std::unordered_map<AssetType, ItemClickCallbackFunc> m_ItemClicksCallbacks;

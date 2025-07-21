@@ -10,30 +10,38 @@
 
 #include <AGI/agi.hpp>
 #include <sndfile.h>
-
-#define STBI_NO_SIMD
 #include <stb_image.h>
+
+#include <regex>
 
 namespace Strype {
 
     Ref<Asset> SpriteSerializer::LoadAsset(const std::filesystem::path& path)
     {
+        int frameCount = 1;
         int width, height, channels;
 
         stbi_set_flip_vertically_on_load(1);
         stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
-
         STY_VERIFY(data, "Failed to load sprite \"{}\" ", path);
 
         AGI::TextureSpecification textureSpec;
         textureSpec.Width = width;
         textureSpec.Height = height;
         textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
-
         AGI::Texture texture = Renderer::GetContext()->CreateTexture(textureSpec);
-        texture->SetData(data, width * height * channels);
 
-        return CreateRef<Sprite>(texture);
+        texture->SetData(data, width * height * channels);
+        stbi_image_free(data);
+
+        std::regex pattern("_strip(\\d+)");
+        std::smatch match;
+
+        std::string pathStr = path.string();
+        if (std::regex_search(pathStr, match, pattern))
+            frameCount = std::stoi(match[1].str());
+
+        return CreateRef<Sprite>(texture, frameCount);
     }
 
     Ref<Asset> AudioFileSerializer::LoadAsset(const std::filesystem::path& path)

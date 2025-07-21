@@ -43,8 +43,8 @@ namespace Strype {
 
 	}
 	
-	using AssetFileSystem = std::map<std::filesystem::path, AssetHandle>;
-	using AssetRegistry = std::map<AssetHandle, Ref<Asset>>;
+	using AssetFileSystem = std::unordered_map<std::filesystem::path, AssetHandle>;
+	using AssetRegistry = std::unordered_map<AssetHandle, Ref<Asset>>;
 
 	using ForEachFunc = std::function<void(AssetHandle)>;
 	

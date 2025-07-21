@@ -41,7 +41,7 @@ namespace Strype {
 		static void EndRoom();
 
 		// Primitives
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr, const Buffer& buf = Buffer());
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr, const Buffer& buf = Buffer(0));
 
 		static std::unique_ptr<AGI::RenderContext>& GetContext() { return s_RenderContext; }
 	private:

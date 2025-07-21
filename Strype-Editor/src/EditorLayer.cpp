@@ -22,12 +22,12 @@ namespace Strype {
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](Ref<Asset> asset)
 		{
 			OpenRoom(asset->FilePath);
-			m_PanelManager.GetInspector()->SetSelected<Room>(Project::GetHandle(asset->FilePath));
+			m_PanelManager.GetInspector()->SetSelected<Room>(asset->Handle);
 		});
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Object, [this](Ref<Asset> asset)
 		{
-			m_PanelManager.GetInspector()->SetSelected<Object>(Project::GetHandle(asset->FilePath));
+			m_PanelManager.GetInspector()->SetSelected<Object>(asset->Handle);
 		});
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));

@@ -83,17 +83,16 @@ namespace Strype {
 	AssetHandle AssetManager::ImportAsset(std::filesystem::path filepath)
 	{
 		if (filepath.is_absolute() && Utils::IsFileInsideFolder(filepath, Project::GetProjectDirectory()))
-		{
 			filepath = std::filesystem::relative(filepath, Project::GetProjectDirectory());
-		}
-		else if (!std::filesystem::exists(Project::GetProjectDirectory() / filepath))
+
+		auto name = filepath.parent_path() / filepath.stem();
+		if (IsAssetLoaded(name)) return GetHandle(name);
+
+		if (!std::filesystem::exists(Project::GetProjectDirectory() / filepath))
 		{
 			STY_CORE_WARN("Asset import failed \"{}\" ", filepath);
 			return 0;
 		}
-
-		auto name = filepath.parent_path() / filepath.stem();
-		if (IsAssetLoaded(name)) return GetHandle(name);
 
 		AssetHandle handle;
 		Ref<Asset> asset = LoadAsset(filepath);

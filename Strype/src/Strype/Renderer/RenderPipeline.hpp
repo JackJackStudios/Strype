@@ -8,6 +8,15 @@ namespace Strype {
 
 	using TexCoords = std::array<glm::vec2, 4>;
 
+	namespace Utils {
+
+		static constexpr TexCoords FlipTexCoords(const TexCoords& tex)
+		{
+			return { tex[3], tex[2], tex[1], tex[0] };
+		}
+
+	};
+
 	struct RenderPipeline
 	{
 		uint32_t IndexCount = 0;
@@ -25,33 +34,34 @@ namespace Strype {
 		AGI::Shader Shader;
 		AGI::BufferLayout Layout;
 
-		int nextAttr = 0;
-
-		template<typename T>
-		void SubmitAttribute(const std::string& name, const T value)
-		{
-			STY_CORE_VERIFY(sizeof(T) == Layout[nextAttr].Size, "Attribute and value entered must be the same!");
-			std::memcpy(Utils::ShiftPtr(VBPtr, Layout[nextAttr].Offset), &value, Layout[nextAttr].Size);
-
-			nextAttr++;
-		}
+		int NextAttr = 0;
 
 		void SubmitAttribute(const std::string& name, const Buffer& buf)
 		{
 			if (buf.Empty())
 				return;
 
-			STY_CORE_VERIFY(buf.Size == Layout[nextAttr].Size, "Attribute and buffer entered must be the same!");
-			std::memcpy(Utils::ShiftPtr(VBPtr, Layout[nextAttr].Offset), buf.Data, Layout[nextAttr].Size);
+			STY_CORE_VERIFY(buf.Size == Layout[NextAttr].Size, "Size of attribute and buffer entered must be the same!");
+			std::memcpy(Utils::ShiftPtr(VBPtr, Layout[NextAttr].Offset), buf.Data, Layout[NextAttr].Size);
 
-			nextAttr++;
+			NextAttr++;
 		}
 
 		void NextPoint()
 		{
 			VBPtr = Utils::ShiftPtr(VBPtr, VertexBuffer->GetLayout().GetStride());
-			nextAttr = 0;
+			NextAttr = 0;
 		}
+
+		void NextFrame()
+		{
+			IndexCount = 0;
+			VBPtr = VBBase;
+			NextAttr = 0;
+		}
+
+		template<typename T>
+		void SubmitAttribute(const std::string& name, const T value) { SubmitAttribute(name, Buffer(value)); }
 	};
 
 }

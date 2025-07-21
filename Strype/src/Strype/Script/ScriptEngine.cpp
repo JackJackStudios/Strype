@@ -147,6 +147,14 @@ namespace Strype {
 
 	ScriptEngine::~ScriptEngine()
 	{
+		for (auto& [scriptID, metadata] : m_ScriptMetadata)
+		{
+			for (auto& [fieldID, fieldMetadata] : metadata.Fields)
+			{
+				fieldMetadata.DefaultValue.Release();
+			}
+		}
+
 		m_ScriptMetadata.clear();
 		m_AppAssembly.reset();
 	}

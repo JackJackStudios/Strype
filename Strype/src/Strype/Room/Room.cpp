@@ -24,7 +24,7 @@ namespace Strype {
 	{
 		Renderer::BeginRoom(m_Camera);
 
-		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour), nullptr, Buffer(0));
+		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
 
 		if (m_RoomState == RoomState::Editor)
 		{
@@ -53,12 +53,15 @@ namespace Strype {
 
 		for (auto& instance : m_Objects)
 		{
+			auto sprite = Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle);
+
 			Renderer::DrawQuad(
 				glm::make_vec3(instance.Position),
 				instance.Scale,
 				instance.Rotation,
 				instance.Colour,
-				Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle),
+				sprite,
+
 				Buffer((float)(instance.m_Handle+1))
 			);
 
@@ -96,7 +99,7 @@ namespace Strype {
 			auto object = Project::GetAsset<Object>(instance.ObjectHandle);
 
 			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = (b2BodyType)object->m_PhysicsType;
+			bodyDef.type = (b2BodyType)object->PhysicsType;
 			bodyDef.position = { instance.Position.x, instance.Position.y };
 			instance.RuntimeBody = b2CreateBody(m_Physics, &bodyDef);
 

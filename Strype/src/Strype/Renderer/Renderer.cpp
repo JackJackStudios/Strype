@@ -117,12 +117,9 @@ namespace Strype {
 	
 	void Renderer::BeginRoom(Camera& camera)
 	{
-		s_QuadPipeline.nextAttr = 0;
+		s_QuadPipeline.NextFrame();
 		s_QuadPipeline.Shader->SetMat4(s_QuadPipeline.ProjectionUniform, camera.GetViewProjectionMatrix());
 		
-		s_QuadPipeline.IndexCount = 0;
-		s_QuadPipeline.VBPtr = s_QuadPipeline.VBBase;
-
 		s_TextureSlotIndex = 1;
 	}
 
