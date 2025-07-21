@@ -99,7 +99,7 @@ namespace Strype {
 			auto object = Project::GetAsset<Object>(instance.ObjectHandle);
 
 			b2BodyDef bodyDef = b2DefaultBodyDef();
-			bodyDef.type = (b2BodyType)object->PhysicsType;
+			bodyDef.type = (b2BodyType)object->BodyType;
 			bodyDef.position = { instance.Position.x, instance.Position.y };
 			instance.RuntimeBody = b2CreateBody(m_Physics, &bodyDef);
 

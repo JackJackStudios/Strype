@@ -23,7 +23,7 @@ namespace Strype {
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	public:
 		AssetHandle TextureHandle;
-		PhysicsType PhysicsType = PhysicsType::Kinematic;
+		PhysicsType BodyType = PhysicsType::Kinematic;
 		UUID ClassID;
 	};
 
