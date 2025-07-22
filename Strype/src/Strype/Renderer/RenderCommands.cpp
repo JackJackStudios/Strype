@@ -29,7 +29,7 @@ namespace Strype {
 		transform = transform * glm::scale(glm::mat4(1.0f), glm::make_vec3(size));
 
 		auto texCoords = RenderCaps::TextureCoords;
-		if (sprite) texCoords = Utils::FlipTexCoords(sprite->GetTexCoords());
+		if (sprite) texCoords = sprite->GetTexCoords();
 
 		for (size_t i = 0; i < 4; i++)
 		{

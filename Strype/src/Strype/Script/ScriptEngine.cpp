@@ -7,10 +7,6 @@
 
 #include <Coral/TypeCache.hpp>
 
-#ifdef STY_WINDOWS
-#	include <ShlObj.h>
-#endif
-
 namespace Strype {
 
 	static void OnCSharpException(std::string_view message)
@@ -32,24 +28,6 @@ namespace Strype {
 			STY_CORE_ERROR("{}", std::string(message));
 			break;
 		}
-	}
-
-	//Windows only
-	void ScriptEngine::BuildProject(const std::filesystem::path& path)
-	{
-#ifdef STY_WINDOWS
-		STY_CORE_INFO("Building C# project '{}'", path);
-
-		system(std::format("cd \"{}\" && premake5.exe --verbose vs2022", (path / HIDDEN_FOLDER).string()).c_str());
-		std::filesystem::remove_all(path / HIDDEN_FOLDER / "bin");
-
-		TCHAR programFilesFilePath[MAX_PATH];
-		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
-		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:restore,build", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
-		
-		system(command.c_str());
-#endif
 	}
 
 	ScriptEngine::ScriptEngine(Ref<Project> proj)
@@ -147,6 +125,8 @@ namespace Strype {
 
 	ScriptEngine::~ScriptEngine()
 	{
+		m_ManagedObjects.Clear();
+
 		for (auto& [scriptID, metadata] : m_ScriptMetadata)
 		{
 			for (auto& [fieldID, fieldMetadata] : metadata.Fields)
@@ -156,6 +136,7 @@ namespace Strype {
 		}
 
 		m_ScriptMetadata.clear();
+		
 		m_AppAssembly.reset();
 	}
 
@@ -202,7 +183,9 @@ namespace Strype {
 	void ScriptEngine::Shutdown()
 	{
 		s_CoreAssembly.reset();
+
 		s_Host->UnloadAssemblyLoadContext(*s_LoadContext);
+		s_LoadContext.reset();
 
 		s_Host->Shutdown();
 		s_Host.reset();

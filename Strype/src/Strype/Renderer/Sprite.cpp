@@ -1,6 +1,8 @@
 #include "stypch.hpp"
 #include "Sprite.hpp"
 
+#include "Renderer.hpp"
+
 namespace Strype {
 
 	namespace Utils {
@@ -40,7 +42,10 @@ namespace Strype {
 			return {};
 		}
 
-		return Utils::BoxToTextureCoords({ frame * GetFrameSize(), 0.0f }, GetFrameSize(), GetFrameSize(), { m_Texture->GetWidth(), m_Texture->GetHeight() });
+		if (m_FrameCount == 1)
+			return RenderCaps::TextureCoords;
+
+		return Utils::FlipTexCoords(Utils::BoxToTextureCoords({ frame * GetFrameSize(), 0.0f }, GetFrameSize(), m_Texture->GetHeight(), { m_Texture->GetWidth(), m_Texture->GetHeight() }));
 	}
 
 }

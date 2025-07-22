@@ -23,7 +23,7 @@ namespace Strype {
 
         stbi_set_flip_vertically_on_load(1);
         stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
-        STY_VERIFY(data, "Failed to load sprite \"{}\" ", path);
+        if (!data) return nullptr;
 
         AGI::TextureSpecification textureSpec;
         textureSpec.Width = width;
@@ -48,7 +48,7 @@ namespace Strype {
     {
         SF_INFO sfinfo;
         SNDFILE* sndfile = sf_open(path.string().c_str(), SFM_READ, &sfinfo);
-        STY_CORE_VERIFY(sndfile, "Could not open sound file");
+        if (!sndfile) return nullptr;
 
 		Buffer membuf;
 		membuf.Allocate(sfinfo.frames * sfinfo.channels * sizeof(short));
@@ -71,12 +71,15 @@ namespace Strype {
 
 		auto& scriptEngine = Project::GetScriptEngine();
         ScriptID script = scriptEngine->GetIDByName(path.stem().string());
-        const ScriptField& textureField = scriptEngine->GetField(script, "TexturePath");
+        if (!scriptEngine->IsValidScript(script))
+            return nullptr;
 
+        const ScriptField& textureField = scriptEngine->GetField(script, "TexturePath");
         std::string coralName = std::string(*textureField.DefaultValue.As<Coral::String>());
 
 		object->ClassID = script;
         object->TextureHandle = Project::ImportAsset(coralName);
+        if (!Project::IsAssetLoaded(object->TextureHandle)) return nullptr;
 
 		return object;
 	}

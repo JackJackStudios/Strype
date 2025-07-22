@@ -1,6 +1,6 @@
 Room:
   Width: 100
   Height: 100
-  BackgroundColour: [1.0, 1.0, 1.0]
+  BackgroundColour: [0.0, 0.0, 0.0]
   Objects:
     []

@@ -1,18 +1,6 @@
-bin/
-bin-int/
-obj/
-build/
-
+﻿.vs/
+build
 DotNet/
-Binaries/
-Intermediates/
-
-x64/
-x32/
-out/
-
-.vs/
-.vscode/
 
 **.sln
 **.vcxproj
@@ -20,7 +8,5 @@ out/
 **.vcxproj.user
 **.csproj
 
-*.log
-Strype-ScriptCore/coral-src
-Strype/master/Strype-Runtime.exe
-Strype-Editor/assets/ScriptCore
+**.log
+**.exe

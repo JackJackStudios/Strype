@@ -66,11 +66,13 @@ namespace Strype {
 
 		void OnEvent(Event& e) override;
 
-		void OpenRoom(const std::filesystem::path& path);
+		void OpenRoom(AssetHandle handle);
 
 		void NewProject(const std::filesystem::path& path = std::filesystem::path());
-		void OpenProject(bool buildProject, const std::filesystem::path& path = std::filesystem::path());
 		void SaveProject();
+
+		void OpenProject(const std::filesystem::path& path = std::filesystem::path());
+		void OpenProject(Ref<Project> project);
 	private:
 		bool OnWindowDrop(WindowDropEvent& e);
 		void OnInspectorRender(Object* object);

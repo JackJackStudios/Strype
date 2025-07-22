@@ -110,6 +110,12 @@ namespace Strype {
 			
 			ImGui::PopID();
 			ImGui::PopStyleColor();
+
+			if (ImGui::BeginDragDropSource())
+			{
+				ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", &node.Handle, sizeof(AssetHandle));
+				ImGui::EndDragDropSource();
+			}
 			
 			if (ImGui::BeginPopupContextItem())
 			{
@@ -222,7 +228,7 @@ namespace Strype {
 								continue;
 
 							std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
-							Project::ImportAsset(std::filesystem::relative(m_CurrentDirectory->Path / path.filename(), Project::GetProjectDirectory()));
+							Project::ImportAsset(m_CurrentDirectory->Path / path.filename());
 						}
 					}
 
@@ -260,15 +266,12 @@ namespace Strype {
 	void ContentBrowserPanel::RefreshAssetTree()
 	{
 		m_RootDirectory.Path = Project::GetProjectDirectory();
+		m_RootDirectory.Children.clear();
 		m_CurrentDirectory = &m_RootDirectory;
 		
 		auto manager = Project::GetAssetManager();
 		manager->ForEach([this](AssetHandle handle)
 		{
-			// sSellChest.png
-			// Folder1/sSellChest.png
-			// Folder1/Folder2/sSellChest.png
-
 			TreeNode* currentFolder = &m_RootDirectory;
 			const auto& filepath = Project::GetFilePath(handle);
 
@@ -322,9 +325,7 @@ namespace Strype {
 		if (type == AssetType::Sprite)
 		{
 			auto sprite = Project::GetAsset<Sprite>(handle);
-
-			if (sprite->FrameCount() > 1)
-				*tx = Utils::FlipTexCoords(sprite->GetTexCoords());
+			*tx = sprite->GetTexCoords();
 
 			return sprite->GetTexture();
 		}

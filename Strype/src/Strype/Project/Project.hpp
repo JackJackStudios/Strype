@@ -9,10 +9,9 @@ namespace Strype {
 
 	struct ProjectConfig
 	{
-		//Serializated fields
 		std::string Name;
-		std::string StartRoom;
 
+		std::filesystem::path StartRoom;
 		std::filesystem::path ProjectDirectory;
 	};
 
@@ -38,17 +37,14 @@ namespace Strype {
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
 
-		static void BuildProjectFiles(const std::filesystem::path& path);
-		static void GenerateNew(const std::filesystem::path& path);
+		static void BuildCSharp(Ref<Project> project);
+		static void RestoreCSharp(Ref<Project> project);
+
+		static Ref<Project> GenerateNew(const std::filesystem::path& path);
 
 		static const std::string& GetProjectName()
 		{
 			return s_ActiveProject->GetConfig().Name;
-		}
-
-		static const std::string& GetStartRoom()
-		{
-			return s_ActiveProject->GetConfig().StartRoom;
 		}
 
 		static std::filesystem::path GetProjectDirectory()
@@ -81,6 +77,11 @@ namespace Strype {
 		static void SaveAsset(AssetHandle handle, const std::filesystem::path& path = std::filesystem::path())
 		{
 			Project::GetAssetManager()->SaveAsset(handle, path.empty() ? Project::GetFilePath(handle) : path);
+		}
+
+		static void ReloadAsset(AssetHandle handle)
+		{
+			Project::GetAssetManager()->ImportAsset(Project::GetFilePath(handle), handle);
 		}
 
 		static bool IsAssetLoaded(AssetHandle handle)

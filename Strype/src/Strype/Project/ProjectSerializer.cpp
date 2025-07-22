@@ -44,7 +44,7 @@ namespace Strype {
 
 		ProjectConfig& config = m_Project->m_Config;
 		config.Name = filepath.stem().string();
-		config.StartRoom = root["StartRoom"].as<std::string>();
+		config.StartRoom = root["StartRoom"].as<std::filesystem::path>();
 		config.ProjectDirectory = filepath.parent_path();
 	}
 

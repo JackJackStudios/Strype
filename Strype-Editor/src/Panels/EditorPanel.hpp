@@ -14,10 +14,12 @@ namespace Strype {
 		virtual void OnUpdate(float ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
-		virtual void SetRoomContext(const Ref<Room>& room) {};
 		virtual void OnProjectChanged() {};
+	protected:
+		Ref<Room> m_CurrentRoom;
+		Ref<InspectorPanel> m_Inspector;
 
-		virtual void SetInspector(Ref<InspectorPanel> panel) {}
+		friend class PanelManager;
 	};
 
 }

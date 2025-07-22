@@ -26,8 +26,8 @@ namespace Strype {
 		Ref<TPanel> AddPanel(TArgs&&... args)
 		{
 			Ref<TPanel> temp = CreateRef<TPanel>(std::forward<TArgs>(args)...);
-			temp->SetRoomContext(m_ActiveRoom);
-			temp->SetInspector(m_Inspector);
+			temp->m_CurrentRoom = this->m_ActiveRoom;
+			temp->m_Inspector = this->m_Inspector;
 			m_Panels.emplace_back(temp);
 			return temp;
 		}

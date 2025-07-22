@@ -7,7 +7,7 @@ namespace Strype {
 		m_Inspector = AddPanel<InspectorPanel>();
 
 		for (const Ref<EditorPanel>& panel : m_Panels)
-			panel->SetInspector(m_Inspector);
+			panel->m_Inspector = m_Inspector;
 	}
 
 	PanelManager::~PanelManager()
@@ -36,7 +36,7 @@ namespace Strype {
 	void PanelManager::SetRoomContext(const Ref<Room>& context)
 	{
 		for (const Ref<EditorPanel>& panel : m_Panels)
-			panel->SetRoomContext(context);
+			panel->m_CurrentRoom = context;
 
 		m_ActiveRoom = context;
 	}

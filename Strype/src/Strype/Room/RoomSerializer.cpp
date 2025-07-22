@@ -77,7 +77,10 @@ namespace Strype {
 			InstanceID id = obj["Object"].as<InstanceID>();
 
 			const std::filesystem::path& path = obj["PrefabPath"].as<std::filesystem::path>();
+
 			AssetHandle handle = Project::ImportAsset(path);
+			if (!Project::IsAssetLoaded(handle))
+				continue;
 
 			RoomInstance& newobj = room->GetObject(room->InstantiatePrefab(handle));
 			newobj.ObjectHandle = handle;

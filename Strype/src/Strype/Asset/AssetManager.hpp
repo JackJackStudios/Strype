@@ -43,8 +43,8 @@ namespace Strype {
 
 	}
 	
-	using AssetFileSystem = std::unordered_map<std::filesystem::path, AssetHandle>;
-	using AssetRegistry = std::unordered_map<AssetHandle, Ref<Asset>>;
+	using AssetRegistry = std::unordered_map<std::filesystem::path, AssetHandle>;
+	using AssetMap = std::unordered_map<AssetHandle, Ref<Asset>>;
 
 	using ForEachFunc = std::function<void(AssetHandle)>;
 	
@@ -59,32 +59,36 @@ namespace Strype {
 		bool IsAssetLoaded(AssetHandle handle) const;
 		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
 
-		AssetHandle ImportAsset(std::filesystem::path filepath);
+		AssetHandle ImportAsset(std::filesystem::path filepath, AssetHandle handle = AssetHandle());
 		Ref<Asset> LoadAsset(const std::filesystem::path& filepath);
 
 		void ReloadAssets();
 		void SaveAllAssets();
 
 		const std::filesystem::path& GetFilePath(AssetHandle handle);
-		const AssetType GetAssetType(AssetHandle handle) const;
+		AssetType GetAssetType(AssetHandle handle) const;
 
-		AssetHandle GetHandle(const std::filesystem::path& path) const;
+		AssetHandle GetHandle(const std::filesystem::path& filepath) const;
 
-		void CreateAsset(const std::filesystem::path& path);
+		void CreateAsset(const std::filesystem::path& filepath);
 		bool CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset) const;
 
-		void SaveAsset(AssetHandle handle, const std::filesystem::path& path);
+		void SaveAsset(AssetHandle handle, const std::filesystem::path& filepath);
 		void RemoveAsset(AssetHandle handle);
 
-		void MoveAsset(AssetHandle handle, const std::filesystem::path& path);
-		void ForEach(ForEachFunc func);
+		void MoveAsset(AssetHandle handle, const std::filesystem::path& filepath);
 
 		AssetSerializer* GetSerializer(AssetType type);
+		void ForEach(ForEachFunc func)
+		{
+			for (const auto& [handle, asset] : m_AssetRegistry)
+			{
+				func(handle);
+			}
+		}
 	private:
-		void LoadDirectory(const std::filesystem::path& path);
-
-		AssetFileSystem m_LoadedFiles;
-		AssetRegistry m_AssetRegistry;
+		AssetRegistry m_LoadedFiles;
+		AssetMap m_AssetRegistry;
 
 		std::unordered_map<AssetType, Scope<AssetSerializer>> m_Serializers;
 	};

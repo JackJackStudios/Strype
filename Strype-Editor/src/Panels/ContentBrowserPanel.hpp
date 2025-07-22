@@ -65,7 +65,6 @@ namespace Strype {
 		virtual void OnEvent(Event& event);
 		virtual void OnProjectChanged() { RefreshAssetTree(); }
 
-		virtual void SetInspector(Ref<InspectorPanel> panel) { m_Inspector = panel; }
 		void SetItemClickCallback(AssetType type, ItemClickCallbackFunc func) { m_ItemClicksCallbacks[type] = func; }
 		void RefreshAssetTree();
 
@@ -87,7 +86,6 @@ namespace Strype {
 
 		TreeNode m_RootDirectory;
 		TreeNode* m_CurrentDirectory;
-		Ref<InspectorPanel> m_Inspector;
 
 		AGI::Texture m_DirectoryIcon;
 		AGI::Texture m_FileIcon;

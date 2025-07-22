@@ -21,7 +21,7 @@ namespace Strype {
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](Ref<Asset> asset)
 		{
-			OpenRoom(asset->FilePath);
+			OpenRoom(asset->Handle);
 			m_PanelManager.GetInspector()->SetSelected<Room>(asset->Handle);
 		});
 
@@ -32,12 +32,8 @@ namespace Strype {
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-		OpenProject(false, projectPath);
-
-		if (!Project::GetActive())
-		{
-			exit(0);
-		}
+		OpenProject(projectPath);
+		if (!Project::GetActive()) exit(0);
 	}
 
 	EditorLayer::~EditorLayer()
@@ -48,6 +44,7 @@ namespace Strype {
 		//      besause the project is static, destorying the project also
 		//      destroys assets which must happen before Application shutdown
 		//      or Windows/VCRuntime gets involved.
+		m_FileWatcher.reset();
 		Project::SetActive(nullptr);
 	}
 
@@ -167,9 +164,9 @@ namespace Strype {
 		ImGui::PopStyleVar();
 	}
 
-	void EditorLayer::OpenRoom(const std::filesystem::path& path)
+	void EditorLayer::OpenRoom(AssetHandle handle)
 	{
-		m_Room = Project::GetAsset<Room>(Project::GetHandle(path));
+		m_Room = Project::GetAsset<Room>(handle);
 		m_PanelManager.SetRoomContext(m_Room);
 	}
 
@@ -179,11 +176,7 @@ namespace Strype {
 		if (dialog.empty())
 			return;
 
-		// NOTE: This function will copy a template project into
-		//       the new directory. This is because a Project cannot exist
-		//       without a folder or default room (you must deserialize the project yourself)
-		Project::GenerateNew(dialog);
-		OpenProject(true, dialog / (dialog.filename().string() + ".sproj"));
+		OpenProject(Project::GenerateNew(dialog));
 	}
 
 	void EditorLayer::SaveProject()
@@ -193,35 +186,39 @@ namespace Strype {
 		Project::SaveAllAssets();
 	}
 
-	void EditorLayer::OpenProject(bool buildProject, const std::filesystem::path& path)
+	void EditorLayer::OpenProject(const std::filesystem::path& path)
 	{
 		std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0") : path;
 
 		if (dialog.empty())
 			return; // User click off of file dialog
 
-		if (Project::GetActive())
-			SaveProject();
-
-		m_FileWatcher.reset();
-
 		Ref<Project> project = CreateRef<Project>();
 		ProjectSerializer serializer(project);
 		serializer.Deserialize(dialog);
 
-		if (buildProject)
-			ScriptEngine::BuildProject(project->GetConfig().ProjectDirectory);
+		OpenProject(project);
+	}
+
+	void EditorLayer::OpenProject(Ref<Project> project)
+	{
+		if (Project::GetActive())
+			SaveProject();
 
 		Project::SetActive(project);
 		m_PanelManager.OnProjectChanged();
 
-		OpenRoom(project->GetStartRoom());
+		m_FileWatcher.reset();
 		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorLayer::FilewatcherFunc));
+
+		OpenRoom(Project::GetHandle(project->GetConfig().StartRoom));
 	}
 
 	void EditorLayer::FilewatcherFunc(const std::string& str, const filewatch::Event event)
 	{
-		std::filesystem::path filepath = std::filesystem::path(str);
+		std::filesystem::path filepath = str;
+		if (s_AssetExtensionMap.find(filepath.extension()) == s_AssetExtensionMap.end())
+			return;
 
 		switch (event)
 		{
@@ -286,7 +283,7 @@ namespace Strype {
 					NewProject();
 
 				if (ImGui::MenuItem("Open Project...", "Ctrl+O"))
-					OpenProject(false);
+					OpenProject();
 
 				if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S"))
 					SaveProject();
@@ -294,10 +291,10 @@ namespace Strype {
 				ImGui::Separator();
 
 				if (ImGui::MenuItem("Build C# Assembly", "Ctrl+B"))
-					ScriptEngine::BuildProject(Project::GetActive()->GetProjectDirectory());
+					Project::BuildCSharp(Project::GetActive());
 
 				if (ImGui::MenuItem("Restore C# Project", ""))
-					Project::BuildProjectFiles(Project::GetProjectDirectory());
+					Project::RestoreCSharp(Project::GetActive());
 
 				if (ImGui::MenuItem("Exit"))
 					Application::Get().Close();

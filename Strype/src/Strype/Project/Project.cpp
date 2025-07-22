@@ -6,6 +6,10 @@
 #include "Strype/Project/ProjectSerializer.hpp"
 #include "Strype/Script/ScriptEngine.hpp"
 
+#ifdef STY_WINDOWS
+#	include <ShlObj.h>
+#endif
+
 namespace Strype {
 
 	namespace Utils {
@@ -49,9 +53,31 @@ namespace Strype {
 	{
 	}
 
-	void Project::BuildProjectFiles(const std::filesystem::path& path)
+	// Windows only
+	void Project::BuildCSharp(Ref<Project> project)
 	{
-		std::filesystem::path workingdir = std::filesystem::current_path();
+		RestoreCSharp(project);
+		auto& path = project->GetConfig().ProjectDirectory;
+
+#ifdef STY_WINDOWS
+		STY_CORE_INFO("Building C# project '{}'", path);
+
+		system(std::format("cd \"{}\" && premake5.exe --verbose vs2022", (path / HIDDEN_FOLDER).string()).c_str());
+		std::filesystem::remove_all(path / HIDDEN_FOLDER / "bin");
+
+		TCHAR programFilesFilePath[MAX_PATH];
+		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
+		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
+		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:restore,build", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+
+		system(command.c_str());
+#endif
+	}
+
+	void Project::RestoreCSharp(Ref<Project> project)
+	{
+		auto& path = project->GetConfig().ProjectDirectory;
+
 		std::string content = Utils::ReadFile("assets/premake5.lua");
 		Utils::ReplaceKeyWord(content, std::filesystem::path(EMPTY_PROJECT).stem().string(), path.stem().string());
 
@@ -61,7 +87,7 @@ namespace Strype {
 		system(std::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / HIDDEN_FOLDER).string()).c_str());
 	}
 
-	void Project::GenerateNew(const std::filesystem::path& path)
+	Ref<Project> Project::GenerateNew(const std::filesystem::path& path)
 	{
 		// Create nessacry folders
 		std::filesystem::create_directories(path / HIDDEN_FOLDER);
@@ -70,10 +96,15 @@ namespace Strype {
 		std::filesystem::path templateDir = std::filesystem::path(EMPTY_PROJECT).parent_path();
 		Utils::CopyDirectory(templateDir, path);
 
-		BuildProjectFiles(path);
-
 		//Change empty project to fit new project name
 		std::filesystem::rename(path / std::filesystem::path(EMPTY_PROJECT).filename(), path / (path.filename().string() + ".sproj"));
+
+		Ref<Project> project = CreateRef<Project>();
+		ProjectSerializer serializer(project);
+		serializer.Deserialize(path / (path.filename().string() + ".sproj"));
+
+		Project::BuildCSharp(project);
+		return project;
 	}
 
 	void Project::SetActive(Ref<Project> project)
