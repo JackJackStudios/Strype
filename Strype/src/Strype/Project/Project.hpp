@@ -37,7 +37,7 @@ namespace Strype {
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
 
-		static void BuildCSharp(Ref<Project> project);
+		static void BuildCSharp(Ref<Project> project, bool restore = true);
 		static void RestoreCSharp(Ref<Project> project);
 
 		static Ref<Project> GenerateNew(const std::filesystem::path& path);

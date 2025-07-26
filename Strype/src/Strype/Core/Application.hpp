@@ -33,13 +33,12 @@ namespace Strype {
 		virtual ~Application();
 
 		static Application& Get() { return *s_Instance; }
-
-		void Close();
-		
 		const AppConfig& GetConfig() const { return m_Config; }
-		std::unique_ptr<AGI::Window>& GetWindow() { return m_Window; }
+
+		AGI::Window*& GetWindow() { return m_Window; }
 
 		void OnEvent(Event& e);
+		void Close();
 
 		template<typename T, typename... Args>
 		Application& PushLayer(Args&&... args)
@@ -48,25 +47,24 @@ namespace Strype {
 			return *this;
 		}
 	private:
-		void Run();
+		void ThreadFunc(Layer* context);
+
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
-		void InstallCallbacks();
+		void InstallCallbacks(AGI::Window* window);
 	private:
 		AppConfig m_Config;
 
-		std::unique_ptr<AGI::Window> m_Window;
-		std::unique_ptr<AGI::ImGuiLayer> m_ImGuiLayer;
-
-		bool m_Running = true;
-		bool m_Minimized = false;
-
 		int m_StartupFrames;
 		float m_LastFrameTime = 0.0f;
-		std::vector<Layer*> m_LayerStack;
-	private:
-		static Application* s_Instance;
 
+		std::vector<Layer*> m_LayerStack;
+		std::vector<std::thread> m_ActiveThreads;
+	private:
+		inline static Application* s_Instance = nullptr;
+		inline static thread_local AGI::Window* m_Window;
+
+		void Run();
 		friend int ::main(int argc, char** argv);
 	};
 

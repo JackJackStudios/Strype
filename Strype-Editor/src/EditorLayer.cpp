@@ -4,7 +4,7 @@
 
 namespace Strype {
 
-	EditorLayer::EditorLayer(const std::filesystem::path& projectPath)
+	void EditorLayer::OnAttach()
 	{
 		m_Room = CreateRef<Room>();
 
@@ -12,7 +12,7 @@ namespace Strype {
 		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8, AGI::FramebufferTextureFormat::RED_FLOAT };
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
-		m_Framebuffer = Renderer::GetContext()->CreateFramebuffer(framebufferSpec);
+		m_Framebuffer = Renderer->GetContext()->CreateFramebuffer(framebufferSpec);
 		
 		// Configure PanelManager
 		m_PanelManager.SetRoomContext(m_Room);
@@ -32,7 +32,7 @@ namespace Strype {
 
 		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
-		OpenProject(projectPath);
+		OpenProject(m_ProjectPath);
 		if (!Project::GetActive()) exit(0);
 	}
 

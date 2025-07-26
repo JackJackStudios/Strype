@@ -54,9 +54,9 @@ namespace Strype {
 	}
 
 	// Windows only
-	void Project::BuildCSharp(Ref<Project> project)
+	void Project::BuildCSharp(Ref<Project> project, bool restore)
 	{
-		RestoreCSharp(project);
+		if (restore) RestoreCSharp(project);
 		auto& path = project->GetConfig().ProjectDirectory;
 
 #ifdef STY_WINDOWS

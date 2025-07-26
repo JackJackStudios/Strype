@@ -58,9 +58,11 @@ namespace Strype {
 	class EditorLayer : public Layer
 	{
 	public:
-		EditorLayer(const std::filesystem::path& projectPath);
+		EditorLayer(const std::filesystem::path& projectPath)
+			: m_ProjectPath(projectPath) {}
 		~EditorLayer();
 
+		void OnAttach() override;
 		void OnUpdate(float ts) override;
 		void OnImGuiRender() override;
 
@@ -90,7 +92,7 @@ namespace Strype {
 
 		glm::vec2 m_ViewportBounds[2];
 		ImGuizmo::OPERATION m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
-		
+		std::filesystem::path m_ProjectPath;
 	};
 
 }

@@ -1,70 +1,55 @@
 #include "stypch.hpp"
-#include "Strype/Renderer/Renderer.hpp"
+#include "Renderer.hpp"
 
 #include "Strype/Core/Application.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <numeric>
-#include <GLFW/glfw3.h>
 
 namespace Strype {
 
-	static void OnAGIMessage(std::string_view message, AGI::LogLevel level)
-	{
-		switch (level)
-		{
-			case AGI::LogLevel::Trace:   STY_CORE_TRACE("{}", std::string(message)); break;
-			case AGI::LogLevel::Info:    STY_CORE_INFO("{}", std::string(message)); break;
-			case AGI::LogLevel::Warning: STY_CORE_WARN("{}", std::string(message)); break;
-			case AGI::LogLevel::Error:   STY_CORE_ERROR("{}", std::string(message)); break;
-		}
+	Renderer::Renderer(AGI::Window* window)
+	{ 
+		m_RenderContext = AGI::RenderContext::Create(window);
 	}
 
 	void Renderer::Init()
 	{
-		AGI::Settings settings;
-		settings.PreferedAPI = AGI::BestAPI();
-		settings.MessageFunc = OnAGIMessage;
-		settings.Blending = true;
-		settings.Window = Application::Get().GetConfig().WindowProps;
-
-		Application::Get().GetWindow() = AGI::Window::Create(settings);
-		s_RenderContext = AGI::RenderContext::Create(Application::Get().GetWindow());
-
-		s_RenderContext->Init();
+		m_RenderContext->Init();
+		m_CurrentContext = this;
 
 		AGI::TextureSpecification textureSpec;
 		textureSpec.Format = AGI::ImageFormat::RGBA;
 		textureSpec.Width = 1;
 		textureSpec.Height = 1;
-		s_WhiteTexture = s_RenderContext->CreateTexture(textureSpec);
+		m_WhiteTexture = m_RenderContext->CreateTexture(textureSpec);
 
 		uint32_t whiteTextureData = 0xffffffff;
-		s_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-		s_TextureSlots[0] = s_WhiteTexture;
+		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
+		m_TextureSlots[0] = m_WhiteTexture;
 
-		s_QuadPipeline.Layout = {
+		m_QuadPipeline.Layout = {
 			{ AGI::ShaderDataType::Float4, "a_Position" },
 			{ AGI::ShaderDataType::Float4, "a_Colour"   },
 			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
 			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
 			{ AGI::ShaderDataType::Float,  "a_ObjectID" },
 		};
-		s_QuadPipeline.TextureSampler = "u_Textures";
-		s_QuadPipeline.ProjectionUniform = "u_ViewProjection";
-		s_QuadPipeline.ShaderPath = "QuadShader.glsl";
+		m_QuadPipeline.TextureSampler = "u_Textures";
+		m_QuadPipeline.ProjectionUniform = "u_ViewProjection";
+		m_QuadPipeline.ShaderPath = "QuadShader.glsl";
 
-		InitPipeline(s_QuadPipeline);
+		InitPipeline(m_QuadPipeline);
 	}
 
 	void Renderer::Shutdown()
 	{
-		s_RenderContext->Shutdown();
+		m_RenderContext->Shutdown();
+		delete m_RenderContext;
 	}
 
 	void Renderer::InitPipeline(RenderPipeline& pipeline)
 	{
-		pipeline.Shader = s_RenderContext->CreateShader(AGI::Utils::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / pipeline.ShaderPath)));
+		pipeline.Shader = m_RenderContext->CreateShader(AGI::Utils::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / pipeline.ShaderPath)));
 
 		for (const auto& attr : pipeline.Layout)
 		{
@@ -81,8 +66,8 @@ namespace Strype {
 			pipeline.UserAttribute = userAttr;
 		}
 
-		pipeline.VertexArray = s_RenderContext->CreateVertexArray();
-		pipeline.VertexBuffer = s_RenderContext->CreateVertexBuffer(RenderCaps::MaxVertices, pipeline.Layout);
+		pipeline.VertexArray = m_RenderContext->CreateVertexArray();
+		pipeline.VertexBuffer = m_RenderContext->CreateVertexBuffer(RenderCaps::MaxVertices, pipeline.Layout);
 		pipeline.VertexArray->AddVertexBuffer(pipeline.VertexBuffer);
 
 		pipeline.VBBase = malloc(pipeline.VertexBuffer->GetSize());
@@ -102,7 +87,7 @@ namespace Strype {
 			offset += 4;
 		}
 
-		pipeline.IndexBuffer = s_RenderContext->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
+		pipeline.IndexBuffer = m_RenderContext->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
 		pipeline.VertexArray->SetIndexBuffer(pipeline.IndexBuffer);
 
 		if (!pipeline.TextureSampler.empty())
@@ -117,38 +102,38 @@ namespace Strype {
 	
 	void Renderer::BeginRoom(Camera& camera)
 	{
-		s_QuadPipeline.NextFrame();
-		s_QuadPipeline.Shader->SetMat4(s_QuadPipeline.ProjectionUniform, camera.GetViewProjectionMatrix());
+		m_QuadPipeline.NextFrame();
+		m_QuadPipeline.Shader->SetMat4(m_QuadPipeline.ProjectionUniform, camera.GetViewProjectionMatrix());
 		
-		s_TextureSlotIndex = 1;
+		m_TextureSlotIndex = 1;
 	}
 
 	void Renderer::EndRoom()
 	{
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_QuadPipeline.VBPtr - (uint8_t*)s_QuadPipeline.VBBase);
-		s_QuadPipeline.VertexBuffer->SetData(s_QuadPipeline.VBBase, dataSize);
+		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadPipeline.VBPtr - (uint8_t*)m_QuadPipeline.VBBase);
+		m_QuadPipeline.VertexBuffer->SetData(m_QuadPipeline.VBBase, dataSize);
 
 		Flush();
 	}
 
 	void Renderer::Flush()
 	{
-		for (uint32_t i = 0; i < s_TextureSlotIndex; ++i)
-			s_TextureSlots[i]->Bind(i);
+		for (uint32_t i = 0; i < m_TextureSlotIndex; ++i)
+			m_TextureSlots[i]->Bind(i);
 
-		if (s_QuadPipeline.IndexCount == 0) return;
-		s_QuadPipeline.Shader->Bind();
-		s_RenderContext->DrawIndexed(s_QuadPipeline.VertexArray, s_QuadPipeline.IndexCount);
+		if (m_QuadPipeline.IndexCount == 0) return;
+		m_QuadPipeline.Shader->Bind();
+		m_RenderContext->DrawIndexed(m_QuadPipeline.VertexArray, m_QuadPipeline.IndexCount);
 	}
 
 	void Renderer::FlushAndReset()
 	{
 		EndRoom();
 
-		s_QuadPipeline.IndexCount = 0;
-		s_QuadPipeline.VBPtr = s_QuadPipeline.VBBase;
+		m_QuadPipeline.IndexCount = 0;
+		m_QuadPipeline.VBPtr = m_QuadPipeline.VBBase;
 
-		s_TextureSlotIndex = 1;
+		m_TextureSlotIndex = 1;
 	}
 
 	float Renderer::GetTextureSlot(const AGI::Texture& texture)
@@ -157,9 +142,9 @@ namespace Strype {
 			return 0.0f;
 
 		float textureIndex = 0.0f;
-		for (uint32_t i = 1; i < s_TextureSlotIndex; i++)
+		for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
 		{
-			if (*s_TextureSlots[i] == texture)
+			if (*m_TextureSlots[i] == texture)
 			{
 				textureIndex = (float)i;
 				break;
@@ -168,11 +153,11 @@ namespace Strype {
 
 		if (textureIndex == 0.0f)
 		{
-			if (s_TextureSlotIndex >= RenderCaps::MaxTextureSlots)
+			if (m_TextureSlotIndex >= RenderCaps::MaxTextureSlots)
 				FlushAndReset();
 
-			textureIndex = (float)(s_TextureSlotIndex);
-			s_TextureSlots[s_TextureSlotIndex++] = texture;
+			textureIndex = (float)(m_TextureSlotIndex);
+			m_TextureSlots[m_TextureSlotIndex++] = texture;
 		}
 
 		return textureIndex;

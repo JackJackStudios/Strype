@@ -22,9 +22,9 @@ namespace Strype {
 
 	void Room::OnUpdate(float ts)
 	{
-		Renderer::BeginRoom(m_Camera);
+		Renderer::GetCurrent()->BeginRoom(m_Camera);
 
-		Renderer::DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
+		Renderer::GetCurrent()->DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
 
 		if (m_RoomState == RoomState::Editor)
 		{
@@ -55,7 +55,7 @@ namespace Strype {
 		{
 			auto sprite = Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle);
 
-			Renderer::DrawQuad(
+			Renderer::GetCurrent()->DrawQuad(
 				glm::make_vec3(instance.Position),
 				instance.Scale,
 				instance.Rotation,
@@ -74,7 +74,7 @@ namespace Strype {
 			}
 		}
 
-		Renderer::EndRoom();
+		Renderer::GetCurrent()->EndRoom();
 	}
 
 	void Room::StartRuntime()

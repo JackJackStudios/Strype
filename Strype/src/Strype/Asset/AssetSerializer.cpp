@@ -29,7 +29,7 @@ namespace Strype {
         textureSpec.Width = width;
         textureSpec.Height = height;
         textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
-        AGI::Texture texture = Renderer::GetContext()->CreateTexture(textureSpec);
+        AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
 
         texture->SetData(data, width * height * channels);
         stbi_image_free(data);

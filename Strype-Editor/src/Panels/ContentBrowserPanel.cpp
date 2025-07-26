@@ -31,7 +31,7 @@ namespace Strype {
 			textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
 			textureSpec.LinearFiltering = true;
 			
-        	AGI::Texture texture = Renderer::GetContext()->CreateTexture(textureSpec);
+        	AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
         	texture->SetData(data, width * height * channels);
 
 			return texture;

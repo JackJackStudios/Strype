@@ -30,35 +30,37 @@ namespace Strype {
 	class Renderer
 	{
 	public:
-		static void Init();
-		static void Shutdown();
-		static void OnWindowResize(const glm::vec2& size);
+		Renderer(AGI::Window* window);
 
-		static void SetClearColour(const glm::vec4& colour);
-		static void Clear();
+		void Init();
+		void Shutdown();
+		void OnWindowResize(const glm::vec2& size);
 
-		static void BeginRoom(Camera& camera);
-		static void EndRoom();
+		void SetClearColour(const glm::vec4& colour);
+		void Clear();
+
+		void BeginRoom(Camera& camera);
+		void EndRoom();
 
 		// Primitives
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr, const Buffer& buf = Buffer(0));
+		void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr, const Buffer& buf = Buffer(0));
 
-		static std::unique_ptr<AGI::RenderContext>& GetContext() { return s_RenderContext; }
+		AGI::RenderContext* GetContext() { return m_RenderContext; }
+		static Renderer* GetCurrent() { return m_CurrentContext; }
 	private:
-		static float GetTextureSlot(const AGI::Texture& texture);
-		static void Flush();
-		static void FlushAndReset();
-		static void InitPipeline(RenderPipeline& pipeline);
+		float GetTextureSlot(const AGI::Texture& texture);
+		void Flush();
+		void FlushAndReset();
+		void InitPipeline(RenderPipeline& pipeline);
 	private:
-		inline static std::unique_ptr<AGI::RenderContext> s_RenderContext;
+		AGI::RenderContext* m_RenderContext;
+		RenderPipeline m_QuadPipeline;
 
-		inline static std::array<AGI::Texture, RenderCaps::MaxTextureSlots> s_TextureSlots;
-		inline static AGI::Texture s_WhiteTexture;
-		inline static uint32_t s_TextureSlotIndex = 1; // 0 = white texture
+		std::array<AGI::Texture, RenderCaps::MaxTextureSlots> m_TextureSlots;
+		AGI::Texture m_WhiteTexture;
+		uint32_t m_TextureSlotIndex = 1; // 0 = white texture
 
-		inline static RenderPipeline s_QuadPipeline;
-
-		friend class Font;
+		inline static thread_local Renderer* m_CurrentContext;
 	};
 
 }

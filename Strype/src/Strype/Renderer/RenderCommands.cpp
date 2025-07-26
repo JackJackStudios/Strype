@@ -8,17 +8,17 @@ namespace Strype {
 
 	void Renderer::OnWindowResize(const glm::vec2& size)
 	{
-		s_RenderContext->SetViewport(0, 0, size.x, size.y);
+		m_RenderContext->SetViewport(0, 0, size.x, size.y);
 	}
 
 	void Renderer::Clear()
 	{
-		s_RenderContext->Clear();
+		m_RenderContext->Clear();
 	}
 
 	void Renderer::SetClearColour(const glm::vec4& colour)
 	{
-		s_RenderContext->SetClearColour(colour);
+		m_RenderContext->SetClearColour(colour);
 	}
 
 	// Simple functions
@@ -33,27 +33,27 @@ namespace Strype {
 
 		for (size_t i = 0; i < 4; i++)
 		{
-			s_QuadPipeline.SubmitAttribute("a_Position", transform * RenderCaps::VertexPositions[i]);
-			s_QuadPipeline.SubmitAttribute("a_Colour", colour);
-			s_QuadPipeline.SubmitAttribute("a_TexCoord", texCoords[i]);
-			s_QuadPipeline.SubmitAttribute("a_TexIndex", sprite ? GetTextureSlot(sprite->GetTexture()) : 0.0f);
+			m_QuadPipeline.SubmitAttribute("a_Position", transform * RenderCaps::VertexPositions[i]);
+			m_QuadPipeline.SubmitAttribute("a_Colour", colour);
+			m_QuadPipeline.SubmitAttribute("a_TexCoord", texCoords[i]);
+			m_QuadPipeline.SubmitAttribute("a_TexIndex", sprite ? GetTextureSlot(sprite->GetTexture()) : 0.0f);
 
-			if (!s_QuadPipeline.UserAttribute.empty())
+			if (!m_QuadPipeline.UserAttribute.empty())
 			{
 				if (buf.Empty())
 				{
-					STY_CORE_WARN("Forgot to enter user data while drawing quad? \"{}\" ", s_QuadPipeline.UserAttribute);
+					STY_CORE_WARN("Forgot to enter user data while drawing quad? \"{}\" ", m_QuadPipeline.UserAttribute);
 				}
 				else
 				{
-					s_QuadPipeline.SubmitAttribute(s_QuadPipeline.UserAttribute, buf);
+					m_QuadPipeline.SubmitAttribute(m_QuadPipeline.UserAttribute, buf);
 				}
 			}
 
-			s_QuadPipeline.NextPoint();
+			m_QuadPipeline.NextPoint();
 		}
 
-		s_QuadPipeline.IndexCount += 6;
+		m_QuadPipeline.IndexCount += 6;
 	}
 
 }

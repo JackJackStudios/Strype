@@ -2,9 +2,9 @@
 
 namespace Strype {
 
-	RuntimeLayer::RuntimeLayer(const std::filesystem::path& path)
+	void RuntimeLayer::OnAttach()
 	{
-		OpenProject(path);
+		OpenProject(m_ProjectPath);
 		m_Room->StartRuntime();
 	}
 
@@ -24,7 +24,7 @@ namespace Strype {
 		ProjectSerializer serializer(project);
 		serializer.Deserialize(path);
 
-		Project::BuildCSharp(project);
+		Project::BuildCSharp(project, false);
 		Project::SetActive(project);
 
 		m_Room = Project::GetAsset<Room>(Project::GetHandle(project->GetConfig().StartRoom));
