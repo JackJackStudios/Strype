@@ -46,6 +46,8 @@ namespace Strype {
 		void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr, const Buffer& buf = Buffer(0));
 
 		AGI::RenderContext* GetContext() { return m_RenderContext; }
+		AGI::Window* GetWindow() { return m_RenderContext->GetBoundWindow(); }
+
 		static Renderer* GetCurrent() { return m_CurrentContext; }
 	private:
 		float GetTextureSlot(const AGI::Texture& texture);

@@ -35,8 +35,6 @@ namespace Strype {
 		if (!m_Config.WorkingDir.empty())
 			std::filesystem::current_path(m_Config.WorkingDir);
 
-		m_StartupFrames = m_Config.StartupFrames;
-
 		Audio::Init();
 		ScriptEngine::Initialize();
 	}
@@ -69,11 +67,12 @@ namespace Strype {
 		m_Window->SetVisable(false);
 	}
 
-	void Application::ThreadFunc(Layer* layer)
+	void Application::ThreadFunc(int index)
 	{
+		Layer* layer = m_LayerStack[index];
 		layer->Renderer->Init();
 
-		m_Window = layer->Renderer->GetContext()->GetBoundWindow();
+		m_Window = layer->Renderer->GetWindow();
 		InstallCallbacks();
 
 		layer->OnAttach();
@@ -83,103 +82,44 @@ namespace Strype {
 
 			layer->Renderer->SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			layer->Renderer->Clear();
-
-			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate(timestep);
-
-			if (m_Config.ImGuiEnabled)
-			{
-				layer->ImGuiLayer->BeginFrame(false);
-				ImGuizmo::BeginFrame();
 			
-				if (m_Config.DockspaceEnabled)
-				{
-					ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar;
-					window_flags |= ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-					window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-			
-					ImGuiViewport* viewport = ImGui::GetMainViewport();
-					ImGui::SetNextWindowPos(viewport->Pos);
-					ImGui::SetNextWindowSize(viewport->Size);
-					ImGui::SetNextWindowViewport(viewport->ID);
-			
-					ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-					ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-					ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-			
-					ImGui::Begin("DockSpace", 0, window_flags);
-			
-					ImGui::PopStyleVar(3);
-			
-					ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-					ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f));
-				}
-			
-				for (Layer* layer : m_LayerStack)
-					layer->OnImGuiRender();
-			
-				if (m_Config.DockspaceEnabled)
-					ImGui::End();
-			
-				layer->ImGuiLayer->EndFrame();
-			}
+			layer->OnUpdate(timestep);
 
 			m_Window->OnUpdate();
-
-			if (--m_StartupFrames == 0)
-				m_Window->SetVisable(true);
 		}
 
-		m_Window->SetVisable(false);
-
-		if (m_Config.ImGuiEnabled)
-			layer->ImGuiLayer.reset();
-
+		Close();
 		layer->Renderer->Shutdown();
+
 		delete layer;
+		m_LayerStack.erase(m_LayerStack.begin() + index);
+	}
+
+	void Application::InitLayer(Layer* layer)
+	{
+		AGI::Settings settings;
+		settings.PreferedAPI = AGI::BestAPI();
+		settings.MessageFunc = OnAGIMessage;
+		settings.Blending = true;
+
+		auto* window = AGI::Window::Create(settings, layer->WindowProps);
+		layer->Renderer = CreateScope<Renderer>(window);
 	}
 
 	void Application::Run()
 	{
-		for (int i=m_LayerStack.size()-1; i >= 0; i--)
+		for (size_t i = m_LayerStack.size(); i-- > 0; )
 		{
-			Layer* layer = m_LayerStack[i];
-
-			AGI::Settings settings;
-			settings.PreferedAPI = AGI::BestAPI();
-			settings.MessageFunc = OnAGIMessage;
-			settings.Blending = true;
-
-			settings.Window = m_Config.WindowProps;
-			auto* window = AGI::Window::Create(settings);
-
-			layer->Renderer = CreateScope<Renderer>(window);
-			layer->Renderer->Init();
-
-			InstallCallbacks(window);
-
-			if (m_Config.ImGuiEnabled)
+			if (i == 0)
 			{
-				layer->ImGuiLayer = AGI::ImGuiLayer::Create(window);
-
-				ImGuiIO& io = ImGui::GetIO();
-				io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-				io.IniFilename = "assets/imgui.ini";
-
-				if (m_Config.DockspaceEnabled)
-					io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-			}
-
-			if (i > 0)
-			{
-				// Spawn thread
-				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), layer);
+				ThreadFunc(i);
 			}
 			else
 			{
-				ThreadFunc(layer);
+				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), i);
 			}
 		}
+
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

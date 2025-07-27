@@ -40,19 +40,18 @@ namespace Strype {
 		template<typename T, typename... Args>
 		Application& PushLayer(Args&&... args)
 		{
-			m_LayerStack.emplace_back(new T(std::forward<Args>(args)...));
+			InitLayer(m_LayerStack.emplace_back(new T(std::forward<Args>(args)...)));
 			return *this;
 		}
 	private:
-		void ThreadFunc(Layer* context);
+		void InitLayer(Layer* layer);
+		void ThreadFunc(int index);
 
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 		void InstallCallbacks();
 	private:
 		AppConfig m_Config;
-
-		int m_StartupFrames;
 
 		std::vector<Layer*> m_LayerStack;
 		std::vector<std::thread> m_ActiveThreads;
