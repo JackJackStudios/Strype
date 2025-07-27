@@ -7,9 +7,12 @@ namespace Strype {
 	class RuntimeLayer : public Layer
 	{
 	public:
-		RuntimeLayer(const std::filesystem::path& path)
-			: m_ProjectPath(path) {}
 		~RuntimeLayer();
+		RuntimeLayer(const std::filesystem::path& path)
+			: m_ProjectPath(path) 
+		{
+			WindowProps.Title = "Strype-Runtime";
+		}
 
 		void OnAttach();
 		void OnUpdate(float ts) override;

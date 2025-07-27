@@ -4,6 +4,8 @@
 #include "Strype/Core/Event.hpp"
 
 #include "Strype/Renderer/Renderer.hpp"
+
+#include <AGI/agi.hpp>
 #include <AGI/ext/ImGuiLayer.hpp>
 
 namespace Strype {
@@ -20,6 +22,8 @@ namespace Strype {
 	public:
 		std::unique_ptr<AGI::ImGuiLayer> ImGuiLayer;
 		Scope<Renderer> Renderer;
+
+		AGI::WindowProps WindowProps;
 	};
 
 }

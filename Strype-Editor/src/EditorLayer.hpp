@@ -58,9 +58,13 @@ namespace Strype {
 	class EditorLayer : public Layer
 	{
 	public:
-		EditorLayer(const std::filesystem::path& projectPath)
-			: m_ProjectPath(projectPath) {}
 		~EditorLayer();
+		EditorLayer(const std::filesystem::path& projectPath)
+			: m_ProjectPath(projectPath) 
+		{
+			WindowProps.Title = "Strype-Editor";
+			WindowProps.Maximise = true;
+		}
 
 		void OnAttach() override;
 		void OnUpdate(float ts) override;

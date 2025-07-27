@@ -10,7 +10,7 @@ namespace Strype {
 
 	void Input::Init()
 	{
-		auto& window = Application::Get().GetWindow();
+		auto window = Application::Get().GetWindow();
 
 		// NOTE: These callbacks enter keys into the map
 		//       so they will be tracked by Input::Update().

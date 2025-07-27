@@ -36,8 +36,6 @@ namespace Strype {
 			std::filesystem::current_path(m_Config.WorkingDir);
 
 		m_StartupFrames = m_Config.StartupFrames;
-		m_Config.WindowProps.Title = config.WindowProps.Title != AGI::WindowProps().Title ? config.WindowProps.Title : config.AppName;
-		m_Config.WindowProps.Visible = false;
 
 		Audio::Init();
 		ScriptEngine::Initialize();
@@ -54,16 +52,15 @@ namespace Strype {
 
 	void Application::OnEvent(Event& e)
 	{
+		for (auto it = m_LayerStack.begin(); it != m_LayerStack.end(); ++it)
+		{
+			if (e.Handled) break;
+			(*it)->OnEvent(e);
+		}
+
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(STY_BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(Application::OnWindowResize));
-
-		for (auto it = m_LayerStack.begin(); it != m_LayerStack.end(); ++it)
-		{
-			if (e.Handled)
-				break;
-			(*it)->OnEvent(e);
-		}
 	}
 
 	void Application::Close()
@@ -75,16 +72,14 @@ namespace Strype {
 	void Application::ThreadFunc(Layer* layer)
 	{
 		layer->Renderer->Init();
+
 		m_Window = layer->Renderer->GetContext()->GetBoundWindow();
+		InstallCallbacks();
 
-		InstallCallbacks(m_Window);
 		layer->OnAttach();
-
 		while (!m_Window->ShouldClose())
 		{
-			float time = m_Window->GetTime();
-			float timestep = time - m_LastFrameTime;
-			m_LastFrameTime = time;
+			float timestep = m_Window->GetDelta();
 
 			layer->Renderer->SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
 			layer->Renderer->Clear();
@@ -202,27 +197,27 @@ namespace Strype {
 		return false;
 	}
 
-	void Application::InstallCallbacks(AGI::Window* window)
+	void Application::InstallCallbacks()
 	{
-		window->SetWindowSizeCallback([](AGI::Window* _window, glm::vec2 size)
+		m_Window->SetWindowSizeCallback([](AGI::Window* window, glm::vec2 size)
 		{
 			WindowResizeEvent event(size);
 			Application::Get().OnEvent(event);
 		});
 
-		window->SetWindowPosCallback([](AGI::Window* _window, glm::vec2 pos)
+		m_Window->SetWindowPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
 			WindowMoveEvent event(pos);
 			Application::Get().OnEvent(event);
 		});
 
-		window->SetWindowCloseCallback([](AGI::Window* _window)
+		m_Window->SetWindowCloseCallback([](AGI::Window* window)
 		{
 			WindowCloseEvent event;
 			Application::Get().OnEvent(event);
 		});
 
-		window->SetDropCallback([](AGI::Window* _window, int path_count, const char* paths[])
+		m_Window->SetDropCallback([](AGI::Window* window, int path_count, const char* paths[])
 		{
 			std::vector<std::filesystem::path> filepaths(path_count);
 			for (int i = 0; i < path_count; i++)
@@ -232,13 +227,13 @@ namespace Strype {
 			Application::Get().OnEvent(event);
 		});
 
-		window->SetScrollCallback([](AGI::Window* _window, glm::vec2 offset)
+		m_Window->SetScrollCallback([](AGI::Window* window, glm::vec2 offset)
 		{
 			MouseScrolledEvent event(offset);
 			Application::Get().OnEvent(event);
 		});
 
-		window->SetCursorPosCallback([](AGI::Window* _window, glm::vec2 pos)
+		m_Window->SetCursorPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
 			MouseMovedEvent event(pos);
 			Application::Get().OnEvent(event);

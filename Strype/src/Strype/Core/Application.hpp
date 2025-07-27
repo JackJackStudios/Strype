@@ -15,11 +15,8 @@ namespace Strype {
 
 	struct AppConfig
 	{
-		std::string AppName;
 		std::filesystem::path MasterDir;
 		std::filesystem::path WorkingDir;
-
-		AGI::WindowProps WindowProps;
 
 		bool DockspaceEnabled = false;
 		bool ImGuiEnabled = true;
@@ -35,7 +32,7 @@ namespace Strype {
 		static Application& Get() { return *s_Instance; }
 		const AppConfig& GetConfig() const { return m_Config; }
 
-		AGI::Window*& GetWindow() { return m_Window; }
+		AGI::Window* GetWindow() { return m_Window; }
 
 		void OnEvent(Event& e);
 		void Close();
@@ -51,12 +48,11 @@ namespace Strype {
 
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
-		void InstallCallbacks(AGI::Window* window);
+		void InstallCallbacks();
 	private:
 		AppConfig m_Config;
 
 		int m_StartupFrames;
-		float m_LastFrameTime = 0.0f;
 
 		std::vector<Layer*> m_LayerStack;
 		std::vector<std::thread> m_ActiveThreads;
