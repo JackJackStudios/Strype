@@ -19,7 +19,6 @@ namespace Strype {
 		std::filesystem::path WorkingDir;
 
 		bool DockspaceEnabled = false;
-		bool ImGuiEnabled = true;
 		int StartupFrames = 10;
 	};
 

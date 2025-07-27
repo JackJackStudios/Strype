@@ -7,7 +7,6 @@ int main(int argc, char** argv)
 {
 	AppConfig config;
 	config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
-	config.ImGuiEnabled = false;
 	
 	Application(config)
 		.PushLayer<RuntimeLayer>(argv[1])

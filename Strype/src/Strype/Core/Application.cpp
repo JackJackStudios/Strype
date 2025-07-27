@@ -5,9 +5,10 @@
 #include "Strype/Audio/Audio.hpp"
 #include "Strype/Core/Input.hpp"
 
-#include "Strype/Script/ScriptEngine.hpp"
-
 #include "Strype/Utils/PlatformUtils.hpp"
+#include "Strype/Utils/ScopedDockspace.hpp"
+
+#include "Strype/Script/ScriptEngine.hpp"
 
 #include <ImGuizmo.h>
 
@@ -75,7 +76,22 @@ namespace Strype {
 		m_Window = layer->Renderer->GetWindow();
 		InstallCallbacks();
 
+		Input::Init();
+
+		if (layer->ImGuiEnabled)
+		{
+			layer->ImGuiLayer = AGI::ImGuiLayer::Create(m_Window);
+
+			ImGuiIO& io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			io.IniFilename = "assets/imgui.ini";
+
+			if (m_Config.DockspaceEnabled)
+				io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		}
+
 		layer->OnAttach();
+
 		while (!m_Window->ShouldClose())
 		{
 			float timestep = m_Window->GetDelta();
@@ -85,10 +101,26 @@ namespace Strype {
 			
 			layer->OnUpdate(timestep);
 
+			if (layer->ImGuiEnabled)
+			{
+				layer->ImGuiLayer->BeginFrame();
+				ImGuizmo::BeginFrame();
+
+				{
+					ScopedDockspace dockspace(m_Config.DockspaceEnabled);
+					layer->OnImGuiRender();
+				}
+
+				layer->ImGuiLayer->EndFrame();
+			}
+
 			m_Window->OnUpdate();
+			Input::Update();
 		}
 
 		Close();
+
+		layer->ImGuiLayer.reset();
 		layer->Renderer->Shutdown();
 
 		delete layer;

@@ -36,7 +36,7 @@ namespace Strype {
 		static float GetMouseX(); //GLFW
 		static float GetMouseY(); //GLFW
 	private:
-		inline static std::unordered_map<KeyCode, InputState> s_KeyStates;
-		inline static std::unordered_map<MouseCode, InputState> s_MouseStates;
+		inline static thread_local std::unordered_map<KeyCode, InputState> s_KeyStates;
+		inline static thread_local std::unordered_map<MouseCode, InputState> s_MouseStates;
 	};
 }

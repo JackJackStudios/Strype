@@ -24,6 +24,7 @@ namespace Strype {
 		Scope<Renderer> Renderer;
 
 		AGI::WindowProps WindowProps;
+		bool ImGuiEnabled = false;
 	};
 
 }

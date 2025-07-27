@@ -64,6 +64,8 @@ namespace Strype {
 		{
 			WindowProps.Title = "Strype-Editor";
 			WindowProps.Maximise = true;
+			
+			ImGuiEnabled = true;
 		}
 
 		void OnAttach() override;
