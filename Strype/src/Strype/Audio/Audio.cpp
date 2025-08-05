@@ -17,11 +17,7 @@ namespace Strype {
 	void Audio::Init()
 	{
 		s_AudioData.m_Device = alcOpenDevice(nullptr);
-		STY_CORE_VERIFY(s_AudioData.m_Device, "Could not find audio device");
-
 		s_AudioData.m_Context = alcCreateContext(s_AudioData.m_Device, nullptr);
-		STY_CORE_VERIFY(s_AudioData.m_Context, "Could not create  context");
-
 		STY_CORE_VERIFY(alcMakeContextCurrent(s_AudioData.m_Context), "Could not load audio context")
 
 		const ALCchar* extensions = alcGetString(s_AudioData.m_Device, ALC_EXTENSIONS);

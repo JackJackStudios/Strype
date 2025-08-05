@@ -9,6 +9,7 @@ namespace Strype {
 	enum class EventType
 	{
 		None = 0,
+		ApplicationQuit,
 		WindowClose, WindowResize, WindowMove, WindowDrop,
 		KeyPressed, KeyReleased, KeyHeld,
 		MouseButtonPressed, MouseButtonReleased, MouseButtonHeld,
@@ -34,6 +35,8 @@ namespace Strype {
 
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
+#define EVENT_CLASS_GLOBAL(enabled) virtual bool IsGlobal() const override { return enabled; }
+
 	class Event
 	{
 	public:
@@ -42,6 +45,7 @@ namespace Strype {
 		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
+		virtual bool IsGlobal() const = 0;
 		virtual std::string ToString() const { return GetName(); }
 
 		inline bool IsInCategory(EventCategory category) const
@@ -73,6 +77,16 @@ namespace Strype {
 		Event& m_Event;
 	};
 
+	class ApplicationQuitEvent : public Event
+	{
+	public:
+		ApplicationQuitEvent() {}
+
+		EVENT_CLASS_TYPE(ApplicationQuit)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_GLOBAL(true)
+	};
+
 	class AssetImportedEvent : public Event
 	{
 	public:
@@ -90,6 +104,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(AssetImported)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+		EVENT_CLASS_GLOBAL(true)
 	private:
 		uint64_t m_Handle;
 	};
@@ -111,6 +126,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(AssetRemoved)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+		EVENT_CLASS_GLOBAL(true)
 	private:
 		uint64_t m_Handle;
 	};
@@ -133,6 +149,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(AssetMoved)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+		EVENT_CLASS_GLOBAL(true)
 	private:
 		uint64_t m_Handle;
 		std::filesystem::path m_NewPath;
@@ -153,6 +170,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(WindowResize)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_GLOBAL(false)
 	private:
 		glm::vec2 m_Size;
 	};
@@ -164,6 +182,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(WindowClose)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_GLOBAL(false)
 	};
 
 	class WindowMoveEvent : public Event
@@ -181,6 +200,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(WindowMove)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_GLOBAL(false)
 	private:
 		glm::vec2 m_Position;
 	};
@@ -195,6 +215,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(WindowDrop)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_GLOBAL(false)
 	private:
 		std::vector<std::filesystem::path> m_Paths;
 	};
@@ -210,6 +231,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
+		EVENT_CLASS_GLOBAL(false)
 	protected:
 		KeyEvent(KeyCode keycode)
 			: m_KeyCode(keycode) {}
@@ -259,6 +281,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(MouseMoved)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_GLOBAL(false)
 	private:
 		glm::vec2 m_Position;
 	};
@@ -278,6 +301,7 @@ namespace Strype {
 
 		EVENT_CLASS_TYPE(MouseScrolled)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_GLOBAL(false)
 	private:
 		glm::vec2 m_Offset;
 	};
@@ -293,6 +317,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+		EVENT_CLASS_GLOBAL(false)
 	protected:
 		MouseButtonEvent(MouseCode button)
 			: m_Button(button) {}
