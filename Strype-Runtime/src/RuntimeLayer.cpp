@@ -1,5 +1,8 @@
 #include "RuntimeLayer.hpp"
 
+#include "Strype/Project/Project.hpp"
+#include "Strype/Project/ProjectSerializer.hpp"
+
 namespace Strype {
 
 	void RuntimeLayer::OnAttach()
@@ -24,7 +27,6 @@ namespace Strype {
 		ProjectSerializer serializer(project);
 		serializer.Deserialize(path);
 
-		Project::BuildCSharp(project, false);
 		Project::SetActive(project);
 
 		m_Room = Project::GetAsset<Room>(Project::GetHandle(project->GetConfig().StartRoom));

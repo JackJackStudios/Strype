@@ -25,19 +25,11 @@ namespace Strype {
 
 		uint32_t whiteTextureData = 0xffffffff;
 		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-		m_TextureSlots[0] = m_WhiteTexture;
+		m_TextureSlots[0] = { nullptr, m_WhiteTexture };
 
-		m_QuadPipeline.Layout = {
-			{ AGI::ShaderDataType::Float4, "a_Position" },
-			{ AGI::ShaderDataType::Float4, "a_Colour"   },
-			{ AGI::ShaderDataType::Float2, "a_TexCoord" },
-			{ AGI::ShaderDataType::Float,  "a_TexIndex" },
-			{ AGI::ShaderDataType::Float,  "a_ObjectID" },
-		};
 		m_QuadPipeline.TextureSampler = "u_Textures";
 		m_QuadPipeline.ProjectionUniform = "u_ViewProjection";
 		m_QuadPipeline.ShaderPath = "QuadShader.glsl";
-
 		InitPipeline(m_QuadPipeline);
 	}
 
@@ -50,6 +42,7 @@ namespace Strype {
 	void Renderer::InitPipeline(RenderPipeline& pipeline)
 	{
 		pipeline.Shader = m_RenderContext->CreateShader(AGI::Utils::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / pipeline.ShaderPath)));
+		pipeline.Layout = pipeline.Shader->GetLayout();
 
 		for (const auto& attr : pipeline.Layout)
 		{
@@ -62,7 +55,7 @@ namespace Strype {
 		{
 			std::string userAttr = pipeline.Layout[RenderCaps::RequiredAttrs.size()].Name;
 
-			STY_CORE_TRACE("Detected user attribute in {}: \"{}\" ", pipeline.ShaderPath.filename(),  pipeline.Layout[RenderCaps::RequiredAttrs.size()].Name);
+			STY_CORE_TRACE("Detected user attribute in {}: \"{}\" ", pipeline.ShaderPath.filename(), userAttr);
 			pipeline.UserAttribute = userAttr;
 		}
 
@@ -119,7 +112,7 @@ namespace Strype {
 	void Renderer::Flush()
 	{
 		for (uint32_t i = 0; i < m_TextureSlotIndex; ++i)
-			m_TextureSlots[i]->Bind(i);
+			m_TextureSlots[i].Texture->Bind(i);
 
 		if (m_QuadPipeline.IndexCount == 0) return;
 		m_QuadPipeline.Shader->Bind();
@@ -136,31 +129,66 @@ namespace Strype {
 		m_TextureSlotIndex = 1;
 	}
 
-	float Renderer::GetTextureSlot(const AGI::Texture& texture)
+	float Renderer::GetTextureSlot(Ref<Sprite> sprite)
 	{
-		if (!texture)
-			return 0.0f;
+		if (!sprite) return 0.0f;
 
-		float textureIndex = 0.0f;
+		float slotIndex = 0.0f;
 		for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
 		{
-			if (*m_TextureSlots[i] == texture)
+			if (m_TextureSlots[i].Sprite == sprite)
 			{
-				textureIndex = (float)i;
+				slotIndex = (float)i;
 				break;
 			}
 		}
 
-		if (textureIndex == 0.0f)
+		if (slotIndex == 0.0f)
 		{
 			if (m_TextureSlotIndex >= RenderCaps::MaxTextureSlots)
 				FlushAndReset();
+			
+			slotIndex = (float)m_TextureSlotIndex;
 
-			textureIndex = (float)(m_TextureSlotIndex);
-			m_TextureSlots[m_TextureSlotIndex++] = texture;
+			TextureSlot slot;
+			slot.Sprite = sprite;
+			slot.Texture = m_RenderContext->CreateTexture(sprite->GetSpecs());
+			m_TextureSlots[m_TextureSlotIndex++] = slot;
 		}
 
-		return textureIndex;
+		return slotIndex;
 	}
+
+	AGI::Texture Renderer::GetTexture(Ref<Sprite> sprite)
+	{
+		return m_TextureSlots[GetTextureSlot(sprite)].Texture;
+	}
+
+	//float Renderer::GetTextureSlot(const AGI::Texture& texture)
+	//{
+	//	if (!texture)
+	//		return 0.0f;
+	//
+	//	float textureIndex = 0.0f;
+	//	for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
+	//	{
+	//		if (*m_TextureSlots[i] == texture)
+	//		{
+	//			textureIndex = (float)i;
+	//			break;
+	//		}
+	//	}
+	//
+	//	if (textureIndex == 0.0f)
+	//	{
+	//		if (m_TextureSlotIndex >= RenderCaps::MaxTextureSlots)
+	//			FlushAndReset();
+	//
+	//		textureIndex = (float)(m_TextureSlotIndex);
+	//		m_TextureSlots[m_TextureSlotIndex++] = texture;
+	//	}
+	//
+	//	return textureIndex;
+	//}
 
 }

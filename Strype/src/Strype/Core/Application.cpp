@@ -71,16 +71,16 @@ namespace Strype {
 	void Application::ThreadFunc(int index)
 	{
 		Layer* layer = m_LayerStack[index];
-		layer->Renderer->Init();
+		layer->Render->Init();
 
-		m_Window = layer->Renderer->GetWindow();
+		m_Window = layer->Render->GetWindow();
 		InstallCallbacks();
 
 		Input::Init();
 
 		if (layer->ImGuiEnabled)
 		{
-			layer->ImGuiLayer = AGI::ImGuiLayer::Create(m_Window);
+			layer->m_ImGuiLayer = AGI::ImGuiLayer::Create(m_Window);
 
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -96,14 +96,14 @@ namespace Strype {
 		{
 			float timestep = m_Window->GetDelta();
 
-			layer->Renderer->SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
-			layer->Renderer->Clear();
+			layer->Render->SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
+			layer->Render->Clear();
 			
 			layer->OnUpdate(timestep);
 
 			if (layer->ImGuiEnabled)
 			{
-				layer->ImGuiLayer->BeginFrame();
+				layer->m_ImGuiLayer->BeginFrame();
 				ImGuizmo::BeginFrame();
 
 				{
@@ -111,17 +111,20 @@ namespace Strype {
 					layer->OnImGuiRender();
 				}
 
-				layer->ImGuiLayer->EndFrame();
+				layer->m_ImGuiLayer->EndFrame();
 			}
 
 			m_Window->OnUpdate();
 			Input::Update();
+
+			if (--layer->m_StartupFrames == 0)
+				m_Window->SetVisable(true);
 		}
 
 		Close();
 
-		layer->ImGuiLayer.reset();
-		layer->Renderer->Shutdown();
+		layer->m_ImGuiLayer.reset();
+		layer->Render->Shutdown();
 
 		delete layer;
 		m_LayerStack.erase(m_LayerStack.begin() + index);
@@ -134,12 +137,17 @@ namespace Strype {
 		settings.MessageFunc = OnAGIMessage;
 		settings.Blending = true;
 
+		layer->WindowProps.Visible = false;
+
 		auto* window = AGI::Window::Create(settings, layer->WindowProps);
-		layer->Renderer = CreateScope<Renderer>(window);
+		layer->Render = CreateScope<Renderer>(window);
+
+		layer->m_StartupFrames = m_Config.StartupFrames;
 	}
 
 	void Application::Run()
 	{
+		m_IsRunning = true;
 		for (size_t i = m_LayerStack.size(); i-- > 0; )
 		{
 			if (i == 0)
@@ -151,7 +159,6 @@ namespace Strype {
 				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), i);
 			}
 		}
-
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

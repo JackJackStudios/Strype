@@ -2,6 +2,7 @@
 #include "Sprite.hpp"
 
 #include "Renderer.hpp"
+#include <stb_image.h>
 
 namespace Strype {
 
@@ -24,19 +25,25 @@ namespace Strype {
 
 	};
 
-	Sprite::Sprite(AGI::Texture texture, int frames)
-		: m_Texture(texture), m_FrameCount(frames)
+	Sprite::Sprite(AGI::TextureSpecification spec, int frames)
+		: m_Specification(spec), m_FrameCount(frames)
 	{
+	}
+
+	Sprite::~Sprite()
+	{
+		stbi_image_free(m_Specification.Data);
 	}
 
 	float Sprite::GetFrameSize() const
 	{
-		return m_Texture->GetWidth() / m_FrameCount;
+		return (float)m_Specification.Width / m_FrameCount;
 	}
 
-	TexCoords Sprite::GetTexCoords(int frame)
+	TexCoords Sprite::GetTexCoords(float frame)
 	{
-		if (frame + 1 * GetFrameSize() > m_Texture->GetWidth())
+		frame = std::floor(frame);
+		if (frame + 1 * GetFrameSize() > m_Specification.Width)
 		{
 			STY_CORE_WARN("Frame goes out of bounds (Frame: {})", frame);
 			return {};
@@ -45,7 +52,7 @@ namespace Strype {
 		if (m_FrameCount == 1)
 			return RenderCaps::TextureCoords;
 
-		return Utils::FlipTexCoords(Utils::BoxToTextureCoords({ frame * GetFrameSize(), 0.0f }, GetFrameSize(), m_Texture->GetHeight(), { m_Texture->GetWidth(), m_Texture->GetHeight() }));
+		return Utils::FlipTexCoords(Utils::BoxToTextureCoords({ frame * GetFrameSize(), 0.0f }, GetFrameSize(), m_Specification.Height, { m_Specification.Width, m_Specification.Height }));
 	}
 
 }

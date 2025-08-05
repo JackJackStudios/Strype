@@ -40,6 +40,10 @@ namespace Strype {
 		Application& PushLayer(Args&&... args)
 		{
 			InitLayer(m_LayerStack.emplace_back(new T(std::forward<Args>(args)...)));
+			if (m_IsRunning)
+			{
+				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_LayerStack.size() - 1);
+			}
 			return *this;
 		}
 	private:
@@ -51,6 +55,7 @@ namespace Strype {
 		void InstallCallbacks();
 	private:
 		AppConfig m_Config;
+		bool m_IsRunning = false;
 
 		std::vector<Layer*> m_LayerStack;
 		std::vector<std::thread> m_ActiveThreads;

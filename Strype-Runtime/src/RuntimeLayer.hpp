@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Strype.hpp>
+#include "Strype.hpp"
 
 namespace Strype {
 

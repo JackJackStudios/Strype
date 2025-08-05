@@ -61,6 +61,7 @@ namespace Strype {
 				instance.Rotation,
 				instance.Colour,
 				sprite,
+				instance.CurrentFrame,
 
 				Buffer((float)(instance.m_Handle+1))
 			);
@@ -69,11 +70,14 @@ namespace Strype {
 			{
 				//object.Emitter->SetPos(instance.Position);
 				instance.CSharp->InvokeMethod("OnUpdate", ts);
-
-				b2World_Step(m_Physics, ts, 4);
+				instance.CurrentFrame += sprite->GetFrameDelta();
+				
+				if (instance.CurrentFrame > sprite->FrameCount())
+					instance.CurrentFrame = instance.CurrentFrame - (float)sprite->FrameCount();
 			}
 		}
 
+		if (m_RoomState == RoomState::Runtime) b2World_Step(m_Physics, ts, 4);
 		Renderer::GetCurrent()->EndRoom();
 	}
 
@@ -86,7 +90,7 @@ namespace Strype {
 		}
 
 		Project::SetActiveRoom(this);
-		STY_CORE_INFO("Staring room \"{}\" ", FilePath.stem());
+		STY_CORE_TRACE("Staring room \"{}\" ", FilePath.stem());
 
 		b2WorldDef worldDef = b2DefaultWorldDef();
 		worldDef.gravity = { 0.0f, -m_Gravity };
@@ -148,15 +152,20 @@ namespace Strype {
 		m_RoomState = RoomState::Editor;
 	}
 
-	void Room::CopyTo(Ref<Room>& room)
+	Ref<Room> Room::CopyTo()
 	{
+		Ref<Room> room = CreateRef<Room>();
+
 		room->Handle = Handle;
+		room->FilePath = FilePath;
 
 		room->m_Width = m_Width;
 		room->m_Height = m_Height;
 		room->m_BackgroundColour = m_BackgroundColour;
 
 		room->m_Objects = m_Objects;
+
+		return room;
 	}
 
 	InstanceID Room::InstantiatePrefab(AssetHandle prefab)

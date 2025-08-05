@@ -4,6 +4,37 @@
 
 namespace Strype {
 
+	// Layer for running runtime for projects 
+	// that are already loaded by the editor.
+	class EditorRuntime : public Layer
+	{
+	public:
+		EditorRuntime(Ref<Project> proj)
+			: m_ActiveProject(proj)
+		{
+			WindowProps.Title = proj->GetConfig().Name;
+		}
+
+		void OnAttach() override
+		{
+			m_Room = Project::GetAsset<Room>(Project::GetHandle(m_ActiveProject->GetConfig().StartRoom))->CopyTo();
+			m_Room->StartRuntime();
+		}
+
+		~EditorRuntime()
+		{
+			m_Room->StopRuntime();
+		}
+
+		void OnUpdate(float ts) override
+		{
+			m_Room->OnUpdate(ts);
+		}
+	private:
+		Ref<Project> m_ActiveProject;
+		Ref<Room> m_Room;
+	};
+
 	void EditorLayer::OnAttach()
 	{
 		m_Room = CreateRef<Room>();
@@ -12,7 +43,7 @@ namespace Strype {
 		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8, AGI::FramebufferTextureFormat::RED_FLOAT };
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
-		m_Framebuffer = Renderer->GetContext()->CreateFramebuffer(framebufferSpec);
+		m_Framebuffer = Render->GetContext()->CreateFramebuffer(framebufferSpec);
 		
 		// Configure PanelManager
 		m_PanelManager.SetRoomContext(m_Room);
@@ -217,7 +248,7 @@ namespace Strype {
 	void EditorLayer::FilewatcherFunc(const std::string& str, const filewatch::Event event)
 	{
 		std::filesystem::path filepath = str;
-		if (s_AssetExtensionMap.find(filepath.extension()) == s_AssetExtensionMap.end())
+		if (s_AssetExtensionMap.find(filepath.extension()) == s_AssetExtensionMap.end() || !Project::IsAssetLoaded(filepath))
 			return;
 
 		switch (event)
@@ -234,16 +265,16 @@ namespace Strype {
 
 	void EditorLayer::OnInspectorRender(Object* object)
 	{
-		auto& scriptEngine = Project::GetScriptEngine();
-
-		if (Project::IsAssetLoaded(object->TextureHandle))
-		{
-			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(object->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
-
-			ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-			ImGui::Button(Project::GetFilePath(object->TextureHandle).filename().string().c_str(), ImVec2(128.0f, 0));
-		}
+		//auto& scriptEngine = Project::GetScriptEngine();
+		//
+		//if (Project::IsAssetLoaded(object->TextureHandle))
+		//{
+		//	ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		//	ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(object->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
+		//
+		//	ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
+		//	ImGui::Button(Project::GetFilePath(object->TextureHandle).filename().string().c_str(), ImVec2(128.0f, 0));
+		//}
 	}
 
     void EditorLayer::OnEvent(Event& e)
@@ -296,23 +327,13 @@ namespace Strype {
 				if (ImGui::MenuItem("Restore C# Project", ""))
 					Project::RestoreCSharp(Project::GetActive());
 
-				if (ImGui::MenuItem("Exit"))
-					Application::Get().Close();
-
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Runtime"))
 			{
 				if (ImGui::MenuItem("Start Runtime", ""))
-				{
-					SaveProject();
-
-					std::filesystem::path runtimeExe = Application::Get().GetConfig().MasterDir / "Strype-Runtime.exe";
-					std::filesystem::path projectPath = Project::GetProjectDirectory() / (Project::GetProjectName() + ".sproj");
-					
-					PlatformUtils::StartProcess(std::format("\"{}\" \"{}\"", runtimeExe.string(), projectPath.string()));
-				}
+					Application::Get().PushLayer<EditorRuntime>(Project::GetActive());
 
 				ImGui::EndMenu();
 			}

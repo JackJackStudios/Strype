@@ -34,6 +34,7 @@ namespace Strype {
 		bool operator==(const InstanceID& other) { return m_Handle == other; }
 	public:
 		glm::vec4 Colour{ 1.0f, 1.0f, 1.0f, 1.0f };
+		float CurrentFrame = 0.0f;
 
 		glm::vec2 Position{ 0.0f, 0.0f };
 		glm::vec2 Scale{ 1.0f, 1.0f };

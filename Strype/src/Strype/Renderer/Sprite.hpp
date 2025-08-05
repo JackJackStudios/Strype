@@ -10,21 +10,21 @@ namespace Strype {
 	class Sprite : public Asset
 	{
 	public:
-		Sprite(AGI::Texture texture, int frames = 1);
+		Sprite(AGI::TextureSpecification spec, int frames = 1);
+		~Sprite();
 
-		AGI::Texture& GetTexture() { return m_Texture; }
+		const AGI::TextureSpecification& GetSpecs() { return m_Specification; }
 		int FrameCount() const { return m_FrameCount; }
 		float GetFrameDelta() const { return 1 / m_FPS; }
 
 		float GetFrameSize() const;
-		TexCoords GetTexCoords(int frame = 0);
+
+		TexCoords GetTexCoords(float frame = 0);
 
 		static AssetType GetStaticType() { return AssetType::Sprite; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
-
-		bool operator==(const Sprite& other) const { return m_Texture == other.m_Texture; }
 	private:
-		AGI::Texture m_Texture;
+		AGI::TextureSpecification m_Specification;
 		int m_FrameCount;
 
 		float m_FPS = 60;

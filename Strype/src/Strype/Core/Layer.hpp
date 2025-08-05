@@ -20,11 +20,15 @@ namespace Strype {
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
 	public:
-		std::unique_ptr<AGI::ImGuiLayer> ImGuiLayer;
-		Scope<Renderer> Renderer;
+		Scope<Renderer> Render;
 
 		AGI::WindowProps WindowProps;
 		bool ImGuiEnabled = false;
+	private:
+		std::unique_ptr<AGI::ImGuiLayer> m_ImGuiLayer;
+		int m_StartupFrames;
+
+		friend class Application;
 	};
 
 }

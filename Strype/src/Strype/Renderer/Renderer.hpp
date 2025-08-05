@@ -43,24 +43,33 @@ namespace Strype {
 		void EndRoom();
 
 		// Primitives
-		void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, const Ref<Sprite>& sprite = nullptr, const Buffer& buf = Buffer(0));
+		void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, Ref<Sprite> sprite = nullptr, float frame = 0, const Buffer& buf = Buffer(0));
+		AGI::Texture GetTexture(Ref<Sprite> sprite);
 
 		AGI::RenderContext* GetContext() { return m_RenderContext; }
 		AGI::Window* GetWindow() { return m_RenderContext->GetBoundWindow(); }
 
 		static Renderer* GetCurrent() { return m_CurrentContext; }
 	private:
-		float GetTextureSlot(const AGI::Texture& texture);
+		float GetTextureSlot(Ref<Sprite> sprite);
+
 		void Flush();
 		void FlushAndReset();
 		void InitPipeline(RenderPipeline& pipeline);
 	private:
 		AGI::RenderContext* m_RenderContext;
-		RenderPipeline m_QuadPipeline;
+		struct TextureSlot
+		{
+			Ref<Sprite> Sprite = nullptr; // Sprites can be held across Renderer's.
+			AGI::Texture Texture;         // Textures are stored per-Renderer and are bound to a render context.
+		};
 
-		std::array<AGI::Texture, RenderCaps::MaxTextureSlots> m_TextureSlots;
+		std::array<TextureSlot, RenderCaps::MaxTextureSlots> m_TextureSlots;
 		AGI::Texture m_WhiteTexture;
 		uint32_t m_TextureSlotIndex = 1; // 0 = white texture
+
+		// Enter other pipelines here...
+		RenderPipeline m_QuadPipeline;
 
 		inline static thread_local Renderer* m_CurrentContext;
 	};

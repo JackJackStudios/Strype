@@ -33,7 +33,7 @@ namespace Strype {
 		void StartRuntime();
 		void StopRuntime();
 
-		void CopyTo(Ref<Room>& room);
+		Ref<Room> CopyTo();
 		void OnResize(const glm::vec2& dims);
 		void OnEvent(Event& e);
 

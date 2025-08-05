@@ -29,11 +29,10 @@ namespace Strype {
         textureSpec.Width = width;
         textureSpec.Height = height;
         textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
-        AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
 
-        texture->SetData(data, width * height * channels);
-        stbi_image_free(data);
-
+        textureSpec.Data = data;
+        textureSpec.Datasize = width * height * channels;
+        
         std::regex pattern("_strip(\\d+)");
         std::smatch match;
 
@@ -41,7 +40,7 @@ namespace Strype {
         if (std::regex_search(pathStr, match, pattern))
             frameCount = std::stoi(match[1].str());
 
-        return CreateRef<Sprite>(texture, frameCount);
+        return CreateRef<Sprite>(textureSpec, frameCount);
     }
 
     Ref<Asset> AudioFileSerializer::LoadAsset(const std::filesystem::path& path)

@@ -327,7 +327,7 @@ namespace Strype {
 			auto sprite = Project::GetAsset<Sprite>(handle);
 			*tx = sprite->GetTexCoords();
 
-			return sprite->GetTexture();
+			return Renderer::GetCurrent()->GetTexture(sprite);
 		}
 
 		return GetIcon(type);

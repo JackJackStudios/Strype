@@ -19,7 +19,7 @@ namespace Strype {
 		switch (level)
 		{
 		case Coral::MessageLevel::Info:
-			STY_CORE_INFO("{}", std::string(message));
+			STY_CORE_TRACE("{}", std::string(message));
 			break;
 		case Coral::MessageLevel::Warning:
 			STY_CORE_WARN("{}", std::string(message));
