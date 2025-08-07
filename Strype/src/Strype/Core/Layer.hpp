@@ -25,6 +25,8 @@ namespace Strype {
 		AGI::WindowProps WindowProps;
 		bool ImGuiEnabled = false;
 	private:
+		int m_StackIndex;
+
 		std::unique_ptr<AGI::ImGuiLayer> m_ImGuiLayer;
 		int m_StartupFrames;
 

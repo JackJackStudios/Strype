@@ -4,31 +4,6 @@
 
 namespace Strype {
 
-	namespace Utils {
-
-		template<typename UIFunction>
-		static void DropdownMenu(const std::string& name, UIFunction uiFunction)
-		{
-			const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
-				ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
-				ImGuiTreeNodeFlags_FramePadding;
-
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-			float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
-			bool open = ImGui::TreeNodeEx(name.c_str(), treeNodeFlags, "%s", name.c_str());
-			ImGui::PopStyleVar();
-
-			if (open)
-			{
-				uiFunction();
-				ImGui::TreePop();
-			}
-		}
-
-	}
-
 	struct TreeNode
 	{
 		TreeNode* Parent = nullptr;
@@ -72,7 +47,7 @@ namespace Strype {
 	private:
 		void OnInspectorRender(Room* select);
 		std::vector<char> GetDialogMessage(AssetType type);
-		bool OnAssetsUpdated(Event& e);
+		void OnAssetsUpdated(Event& e);
 
 		AGI::Texture GetIcon(AssetHandle handle, TexCoords* tx);
 		AGI::Texture GetIcon(AssetType type);

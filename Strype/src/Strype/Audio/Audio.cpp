@@ -29,9 +29,8 @@ namespace Strype {
 		if (!device || alcGetError(s_AudioData.m_Device) != AL_NO_ERROR)
 			device = alcGetString(s_AudioData.m_Device, ALC_DEVICE_SPECIFIER);
 
-		STY_CORE_INFO("OpenAL Info:");
-		STY_CORE_INFO("   Device: {0}", device ? device : "Unknown");
-		STY_CORE_INFO("   Extensions: {0}", extensions ? extensions : "None");
+		STY_CORE_INFO("Using audio device: {}", device);
+		STY_CORE_TRACE("OpenAL extensions: {}", extensions);
 	}
 
 	void Audio::Shutdown()

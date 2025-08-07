@@ -3,6 +3,7 @@
 #include "FileWatch.hpp"
 #include "Panels/PanelManager.hpp"
 #include "Panels/ContentBrowserPanel.hpp"
+#include "Panels/ProjectSettingsPanel.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <ImGuizmo.h>
@@ -34,27 +35,6 @@ namespace Strype {
 		return true;
     }
 
-	template<typename UIFunction>
-	void DropdownMenu(const std::string& name, UIFunction uiFunction)
-	{
-		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
-			ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
-			ImGuiTreeNodeFlags_FramePadding;
-
-		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-		float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
-		bool open = ImGui::TreeNodeEx(name.c_str(), treeNodeFlags, "%s", name.c_str());
-		ImGui::PopStyleVar();
-
-		if (open)
-		{
-			uiFunction();
-			ImGui::TreePop();
-		}
-	}
-
 	class EditorLayer : public Layer
 	{
 	public:
@@ -63,7 +43,7 @@ namespace Strype {
 			: m_ProjectPath(projectPath) 
 		{
 			WindowProps.Title = "Strype-Editor";
-			WindowProps.Maximise = true;
+			WindowProps.Mode = AGI::WindowMode::Maximized;
 			
 			ImGuiEnabled = true;
 		}
@@ -82,8 +62,7 @@ namespace Strype {
 		void OpenProject(const std::filesystem::path& path = std::filesystem::path());
 		void OpenProject(Ref<Project> project);
 	private:
-		bool OnWindowDrop(WindowDropEvent& e);
-		void OnInspectorRender(Object* object);
+		void OnWindowDrop(WindowDropEvent& e);
 
 		void UI_RoomPanel();
 		void FilewatcherFunc(const std::string& str, const filewatch::Event event);

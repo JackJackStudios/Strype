@@ -34,7 +34,6 @@ namespace Strype {
 		AGI::Window* GetWindow() { return m_Window; }
 
 		void OnEvent(Event& e);
-		void Close();
 
 		template<typename T, typename... Args>
 		Application& PushLayer(Args&&... args)
@@ -42,16 +41,18 @@ namespace Strype {
 			InitLayer(m_LayerStack.emplace_back(new T(std::forward<Args>(args)...)));
 			if (m_IsRunning)
 			{
-				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_LayerStack.size() - 1);
+				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_LayerStack[m_LayerStack.size() - 1]);
 			}
 			return *this;
 		}
 	private:
 		void InitLayer(Layer* layer);
-		void ThreadFunc(int index);
+		void ThreadFunc(Layer* layer);
 
-		bool OnWindowClose(WindowCloseEvent& e);
-		bool OnWindowResize(WindowResizeEvent& e);
+		void OnApplicationQuit(ApplicationQuitEvent& e);
+		
+		void OnWindowClose(WindowCloseEvent& e);
+		void OnWindowResize(WindowResizeEvent& e);
 		void InstallCallbacks();
 	private:
 		AppConfig m_Config;

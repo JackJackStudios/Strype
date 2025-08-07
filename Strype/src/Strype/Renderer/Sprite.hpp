@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Strype/Asset/Asset.hpp"
+#include "Strype/Project/Asset.hpp"
 #include "RenderPipeline.hpp"
 
 #include <AGI/agi.hpp>
@@ -17,7 +17,7 @@ namespace Strype {
 		int FrameCount() const { return m_FrameCount; }
 		float GetFrameDelta() const { return 1 / m_FPS; }
 
-		float GetFrameSize() const;
+		glm::vec2 GetFrameSize() const;
 
 		TexCoords GetTexCoords(float frame = 0);
 

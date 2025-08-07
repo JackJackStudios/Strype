@@ -191,13 +191,11 @@ namespace Strype {
 			dispatcher.Dispatch<MouseScrolledEvent>(STY_BIND_EVENT_FN(Room::OnMouseScrolled));
 	}
 
-	bool Room::OnMouseScrolled(MouseScrolledEvent& e)
+	void Room::OnMouseScrolled(MouseScrolledEvent& e)
 	{
 		m_ZoomLevel -= e.GetOffset().y * 0.25f;
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
 		m_Camera.SetZoomLevel(m_ZoomLevel);
-
-		return true;
 	}
 
 }

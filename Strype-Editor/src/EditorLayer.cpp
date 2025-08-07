@@ -12,7 +12,10 @@ namespace Strype {
 		EditorRuntime(Ref<Project> proj)
 			: m_ActiveProject(proj)
 		{
+			WindowProps = proj->GetConfig().RuntimeProps;
 			WindowProps.Title = proj->GetConfig().Name;
+
+			Project::BuildCSharp(proj, false);
 		}
 
 		void OnAttach() override
@@ -60,8 +63,6 @@ namespace Strype {
 		{
 			m_PanelManager.GetInspector()->SetSelected<Object>(asset->Handle);
 		});
-
-		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
 		OpenProject(m_ProjectPath);
 		if (!Project::GetActive()) exit(0);
@@ -228,6 +229,7 @@ namespace Strype {
 		ProjectSerializer serializer(project);
 		serializer.Deserialize(dialog);
 
+		Project::RestoreCSharp(project);
 		OpenProject(project);
 	}
 
@@ -235,13 +237,13 @@ namespace Strype {
 	{
 		if (Project::GetActive())
 			SaveProject();
-
+		
 		Project::SetActive(project);
 		m_PanelManager.OnProjectChanged();
 
 		m_FileWatcher.reset();
 		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorLayer::FilewatcherFunc));
-
+		
 		OpenRoom(Project::GetHandle(project->GetConfig().StartRoom));
 	}
 
@@ -263,20 +265,6 @@ namespace Strype {
 		}
 	}
 
-	void EditorLayer::OnInspectorRender(Object* object)
-	{
-		//auto& scriptEngine = Project::GetScriptEngine();
-		//
-		//if (Project::IsAssetLoaded(object->TextureHandle))
-		//{
-		//	ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		//	ImGui::Image((ImTextureID)Project::GetAsset<Sprite>(object->TextureHandle)->GetTexture()->GetRendererID(), ImVec2(128.0f, 128.0f), { 0, 1 }, { 1, 0 });
-		//
-		//	ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		//	ImGui::Button(Project::GetFilePath(object->TextureHandle).filename().string().c_str(), ImVec2(128.0f, 0));
-		//}
-	}
-
     void EditorLayer::OnEvent(Event& e)
 	{
 		m_PanelManager.OnEvent(e);
@@ -286,7 +274,7 @@ namespace Strype {
 		dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorLayer::OnWindowDrop));
 	}
 
-	bool EditorLayer::OnWindowDrop(WindowDropEvent& e)
+	void EditorLayer::OnWindowDrop(WindowDropEvent& e)
 	{
 		for (const auto& filepath : e.GetPaths())
 		{
@@ -300,8 +288,6 @@ namespace Strype {
 				Project::ImportAsset(newPath);
 			}
 		}
-
-		return false;
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -313,26 +299,35 @@ namespace Strype {
 				if (ImGui::MenuItem("New Project"))
 					NewProject();
 
-				if (ImGui::MenuItem("Open Project...", "Ctrl+O"))
+				if (ImGui::MenuItem("Open Project"))
 					OpenProject();
 
-				if (ImGui::MenuItem("Save Project", "Ctrl+Shift+S"))
+				if (ImGui::MenuItem("Save Project"))
 					SaveProject();
 
-				ImGui::Separator();
-
-				if (ImGui::MenuItem("Build C# Assembly", "Ctrl+B"))
-					Project::BuildCSharp(Project::GetActive());
-
-				if (ImGui::MenuItem("Restore C# Project", ""))
-					Project::RestoreCSharp(Project::GetActive());
+				if (ImGui::MenuItem("Exit"))
+				{
+					ApplicationQuitEvent e;
+					Application::Get().OnEvent(e);
+				}
 
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Runtime"))
+			if (ImGui::BeginMenu("Project"))
 			{
-				if (ImGui::MenuItem("Start Runtime", ""))
+				if (ImGui::MenuItem("Settings"))
+					m_PanelManager.AddPanel<ProjectSettingsPanel>();
+
+				if (ImGui::MenuItem("Build C# Assembly"))
+					Project::BuildCSharp(Project::GetActive());
+
+				if (ImGui::MenuItem("Restore C# Project"))
+					Project::RestoreCSharp(Project::GetActive());
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Start Runtime"))
 					Application::Get().PushLayer<EditorRuntime>(Project::GetActive());
 
 				ImGui::EndMenu();

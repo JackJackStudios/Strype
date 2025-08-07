@@ -56,8 +56,6 @@ namespace Strype {
 		YAML::Node data = YAML::LoadFile(path.string())["Room"];
 
 		STY_CORE_VERIFY(data, "Could not load room")
-		STY_CORE_VERIFY(data["Objects"], "Could not load room");
-		STY_CORE_VERIFY(data["BackgroundColour"], "Could not load room");
 
 		YAML::Node width = data["Width"];
 		YAML::Node height = data["Height"];

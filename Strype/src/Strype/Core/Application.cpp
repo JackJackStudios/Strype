@@ -53,7 +53,6 @@ namespace Strype {
 	{
 		for (auto it = m_LayerStack.begin(); it != m_LayerStack.end(); ++it)
 		{
-			if (e.Handled) break;
 			if (e.IsGlobal())
 			{
 				(*it)->OnEvent(e);
@@ -70,15 +69,8 @@ namespace Strype {
 		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(Application::OnWindowResize));
 	}
 
-	void Application::Close()
+	void Application::ThreadFunc(Layer* layer)
 	{
-		m_Window->ShouldClose(true);
-		m_Window->SetVisable(false);
-	}
-
-	void Application::ThreadFunc(int index)
-	{
-		Layer* layer = m_LayerStack[index];
 		layer->Render->Init();
 
 		m_Window = layer->Render->GetWindow();
@@ -129,12 +121,12 @@ namespace Strype {
 				m_Window->SetVisable(true);
 		}
 
-		Close();
-
 		layer->m_ImGuiLayer.reset();
 		layer->Render->Shutdown();
 
+		int index = layer->m_StackIndex;
 		delete layer;
+
 		m_LayerStack.erase(m_LayerStack.begin() + index);
 	}
 
@@ -151,6 +143,7 @@ namespace Strype {
 		layer->Render = CreateScope<Renderer>(window);
 
 		layer->m_StartupFrames = m_Config.StartupFrames;
+		layer->m_StackIndex = m_LayerStack.size() - 1;
 	}
 
 	void Application::Run()
@@ -160,28 +153,32 @@ namespace Strype {
 		{
 			if (i == 0)
 			{
-				ThreadFunc(i);
+				ThreadFunc(m_LayerStack[i]);
 			}
 			else
 			{
-				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), i);
+				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_LayerStack[i]);
 			}
 		}
 	}
 
-	bool Application::OnWindowClose(WindowCloseEvent& e)
+	void Application::OnWindowClose(WindowCloseEvent& e)
 	{
-		Close();
-		return true;
+		m_Window->ShouldClose(true);
+		m_Window->SetVisable(false);
 	}
 
-	bool Application::OnWindowResize(WindowResizeEvent& e)
+	void Application::OnApplicationQuit(ApplicationQuitEvent& e)
+	{
+		 
+	}
+
+	void Application::OnWindowResize(WindowResizeEvent& e)
 	{
 		if (e.GetSize().x == 0 || e.GetSize().y == 0)
-			return false;
+			return;
 
 		Renderer::GetCurrent()->OnWindowResize(e.GetSize());
-		return false;
 	}
 
 	void Application::InstallCallbacks()

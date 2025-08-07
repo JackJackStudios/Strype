@@ -35,15 +35,15 @@ namespace Strype {
 		stbi_image_free(m_Specification.Data);
 	}
 
-	float Sprite::GetFrameSize() const
+	glm::vec2 Sprite::GetFrameSize() const
 	{
-		return (float)m_Specification.Width / m_FrameCount;
+		return { (float)m_Specification.Width / m_FrameCount, m_Specification.Height };
 	}
 
 	TexCoords Sprite::GetTexCoords(float frame)
 	{
 		frame = std::floor(frame);
-		if (frame + 1 * GetFrameSize() > m_Specification.Width)
+		if (frame + 1 * GetFrameSize().x > m_Specification.Width)
 		{
 			STY_CORE_WARN("Frame goes out of bounds (Frame: {})", frame);
 			return {};
@@ -52,7 +52,7 @@ namespace Strype {
 		if (m_FrameCount == 1)
 			return RenderCaps::TextureCoords;
 
-		return Utils::FlipTexCoords(Utils::BoxToTextureCoords({ frame * GetFrameSize(), 0.0f }, GetFrameSize(), m_Specification.Height, { m_Specification.Width, m_Specification.Height }));
+		return Utils::FlipTexCoords(Utils::BoxToTextureCoords({ frame * GetFrameSize().x, 0.0f }, GetFrameSize().x, GetFrameSize().y, { m_Specification.Width, m_Specification.Height }));
 	}
 
 }

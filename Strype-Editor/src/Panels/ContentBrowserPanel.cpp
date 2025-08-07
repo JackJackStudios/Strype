@@ -1,6 +1,7 @@
 #include "ContentBrowserPanel.hpp"
 
 #include "InspectorPanel.hpp"
+#include "Strype/Utils/ImguiUtils.hpp"
 
 #include <stb_image.h>
 
@@ -41,6 +42,8 @@ namespace Strype {
 
 	ContentBrowserPanel::ContentBrowserPanel()
 	{
+		Title = "Content Browser";
+
 		m_DirectoryIcon = Utils::LoadTexture("assets/icons/DirectoryIcon.png");
 		m_FileIcon = Utils::LoadTexture("assets/icons/FileIcon.png");
 
@@ -68,8 +71,6 @@ namespace Strype {
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
-		ImGui::Begin("Content Browser");
-
 		float padding = 16.0f;
 		float thumbnailSize = 90.0f;
 		float cellSize = thumbnailSize + padding;
@@ -245,7 +246,6 @@ namespace Strype {
 		}
 
 		ImGui::Columns(1);
-		ImGui::End();
 
 		m_Inspector->AddType<Room>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnInspectorRender));
 	}
@@ -257,10 +257,10 @@ namespace Strype {
 		dispatcher.Dispatch<AssetRemovedEvent>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnAssetsUpdated));
 	}
 
-	bool ContentBrowserPanel::OnAssetsUpdated(Event& e)
+	void ContentBrowserPanel::OnAssetsUpdated(Event& e)
 	{
-		RefreshAssetTree();
-		return false;
+		if (e.IsInCategory(EventCategoryAsset))
+			RefreshAssetTree();
 	}
 
 	void ContentBrowserPanel::RefreshAssetTree()
@@ -295,24 +295,23 @@ namespace Strype {
 
 	void ContentBrowserPanel::OnInspectorRender(Room* select)
 	{
-		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Image(m_Icons[AssetType::Room]->GetRendererID(), ImVec2(128.0f, 128.0f), {0, 1}, {1, 0});
+		ImVec2 size = ImVec2(128.0f, 128.0f);
 
-		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - 128.0f) * 0.5f);
-		ImGui::Button(select->FilePath.filename().string().c_str(), ImVec2(128.0f, 0));
+		UI::CenterWidget(size);
+		ImGui::Image(m_Icons[AssetType::Room]->GetRendererID(), size, { 0, 1 }, { 1, 0 });
 
-		Utils::DropdownMenu("Properties", [&]() {
-			ImGui::Columns(2, nullptr, false);
+		UI::CenterWidget(size);
+		ImGui::Button(select->FilePath.filename().string().c_str(), ImVec2(size.x, 0));
 
+		if (UI::DropdownMenu("Properties"))
+		{
 			ImGui::DragScalar("Width", ImGuiDataType_U64, &select->m_Width);
-			ImGui::NextColumn();
-			
 			ImGui::DragScalar("Height", ImGuiDataType_U64, &select->m_Height);
-			ImGui::NextColumn();
 
-			ImGui::Columns(1);
 			ImGui::ColorEdit3("Background Colour", glm::value_ptr(select->m_BackgroundColour), ImGuiColorEditFlags_NoInputs);
-		});
+
+			ImGui::TreePop();
+		}
 	}
 
 	AGI::Texture ContentBrowserPanel::GetIcon(AssetHandle handle, TexCoords* tx)

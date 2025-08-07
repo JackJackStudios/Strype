@@ -53,25 +53,36 @@ namespace Strype {
 	{
 	}
 
-	// Windows only
-	void Project::BuildCSharp(Ref<Project> project, bool restore)
+	std::string Project::GetMSbuildCommand(std::vector<const char*> commands)
 	{
-		if (restore) RestoreCSharp(project);
-		auto& path = project->GetConfig().ProjectDirectory;
-
-#ifdef STY_WINDOWS
-		STY_CORE_INFO("Building C# project '{}'", path);
-
-		system(std::format("cd \"{}\" && premake5.exe --verbose vs2022", (path / HIDDEN_FOLDER).string()).c_str());
-		std::filesystem::remove_all(path / HIDDEN_FOLDER / "bin");
+		auto& path = m_Config.ProjectDirectory;
 
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:restore,build", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		
+		for (int i = 0; i < commands.size(); ++i)
+		{
+			command.append(commands[i]);
 
+			if (i != commands.size() - 1)
+				command.append(",");
+		}
+		
+		command.append(" > nul 2>&1");
+		return command;
+	}
+
+	void Project::BuildCSharp(Ref<Project> project, bool restore)
+	{
+		STY_CORE_TRACE("Building C# project '{}'", project->GetConfig().ProjectDirectory);
+
+		if (restore) RestoreCSharp(project);
+		std::filesystem::remove_all(project->GetConfig().ProjectDirectory / HIDDEN_FOLDER / "bin");
+
+		std::string command = project->GetMSbuildCommand({ "build" });
 		system(command.c_str());
-#endif
 	}
 
 	void Project::RestoreCSharp(Ref<Project> project)
@@ -82,9 +93,10 @@ namespace Strype {
 		Utils::ReplaceKeyWord(content, std::filesystem::path(EMPTY_PROJECT).stem().string(), path.stem().string());
 
 		Utils::WriteFile(path / HIDDEN_FOLDER / "premake5.lua", content);
-
-		// Build C# project
 		system(std::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / HIDDEN_FOLDER).string()).c_str());
+
+		std::string command = project->GetMSbuildCommand({ "restore" });
+		system(command.c_str());
 	}
 
 	Ref<Project> Project::GenerateNew(const std::filesystem::path& path)

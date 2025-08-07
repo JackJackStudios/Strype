@@ -2,7 +2,7 @@
 
 #include "Strype/Core/Event.hpp"
 #include "Strype/Renderer/Camera.hpp"
-#include "Strype/Asset/Asset.hpp"
+#include "Strype/Project/Asset.hpp"
 
 #include "RoomInstance.hpp"
 
@@ -44,7 +44,7 @@ namespace Strype {
 		Camera& GetCamera() { return m_Camera; }
 		RoomInstance& GetObject(InstanceID id) { return m_Objects[id]; }
 	private:
-		bool OnMouseScrolled(MouseScrolledEvent& e);
+		void OnMouseScrolled(MouseScrolledEvent& e);
 	private:
 		std::vector<RoomInstance> m_Objects;
 

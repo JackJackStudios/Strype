@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Strype/Asset/AssetManager.hpp"
+#include "AssetManager.hpp"
 
 namespace Strype {
 
@@ -10,6 +10,8 @@ namespace Strype {
 	struct ProjectConfig
 	{
 		std::string Name;
+		glm::ivec2 ViewportSize = { 640, 360 };
+		AGI::WindowProps RuntimeProps;
 
 		std::filesystem::path StartRoom;
 		std::filesystem::path ProjectDirectory;
@@ -26,7 +28,7 @@ namespace Strype {
 		Project();
 		~Project();
 
-		const ProjectConfig& GetConfig() const { return m_Config; }
+		ProjectConfig& GetConfig() { return m_Config; }
 
 		static Ref<AssetManager> GetAssetManager() { return GetActive()->m_AssetManager; }
 		static Ref<ScriptEngine>& GetScriptEngine() { return GetActive()->m_ScriptEngine; }
@@ -119,6 +121,8 @@ namespace Strype {
 			Project::GetAssetManager()->SaveAllAssets();
 		}
 
+	private:
+		std::string GetMSbuildCommand(std::vector<const char*> commands);
 	private:
 		inline static Ref<Project> s_ActiveProject = nullptr;
 

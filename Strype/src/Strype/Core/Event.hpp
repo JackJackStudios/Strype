@@ -40,8 +40,6 @@ namespace Strype {
 	class Event
 	{
 	public:
-		bool Handled = false;
-
 		virtual EventType GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
@@ -55,7 +53,7 @@ namespace Strype {
 	};
 
 	template<typename T>
-	using EventCallback = std::function<bool(T&)>;
+	using EventCallback = std::function<void(T&)>;
 
 	class EventDispatcher
 	{
@@ -68,7 +66,7 @@ namespace Strype {
 		{
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
-				m_Event.Handled = func(*(T*)&m_Event);
+				func(*(T*)&m_Event);
 				return true;
 			}
 			return false;

@@ -23,8 +23,24 @@ namespace Strype {
 
 	void PanelManager::OnImGuiRender()
 	{
-		for (const Ref<EditorPanel>& panel : m_Panels)
-			panel->OnImGuiRender();
+		for (int i=0; i<m_Panels.size(); ++i)
+		{
+			Ref<EditorPanel> panel = m_Panels[i];
+			if (panel->m_IsOpen)
+			{
+				if (panel->Closing)
+					ImGui::Begin(panel->Title.c_str(), &panel->m_IsOpen, panel->Flags);
+				else
+					ImGui::Begin(panel->Title.c_str(), 0, panel->Flags);
+
+				panel->OnImGuiRender();
+				ImGui::End();
+			}
+			else
+			{
+				m_Panels.erase(m_Panels.begin() + i);
+			}
+		}
 	}
 
 	void PanelManager::OnEvent(Event& e)

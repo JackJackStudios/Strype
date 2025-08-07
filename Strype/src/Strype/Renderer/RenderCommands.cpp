@@ -31,12 +31,13 @@ namespace Strype {
 		auto texCoords = RenderCaps::TextureCoords;
 		if (sprite) texCoords = sprite->GetTexCoords(frame);
 
+		auto slotIndex = sprite ? GetTextureSlot(sprite) : 0.0f;
 		for (size_t i = 0; i < 4; i++)
 		{
 			m_QuadPipeline.SubmitAttribute("a_Position", transform * RenderCaps::VertexPositions[i]);
-			m_QuadPipeline.SubmitAttribute("a_Colour", colour);
+			m_QuadPipeline.SubmitAttribute("a_Colour",   colour);
 			m_QuadPipeline.SubmitAttribute("a_TexCoord", texCoords[i]);
-			m_QuadPipeline.SubmitAttribute("a_TexIndex", sprite ? GetTextureSlot(sprite) : 0.0f);
+			m_QuadPipeline.SubmitAttribute("a_TexIndex", slotIndex);
 
 			if (!m_QuadPipeline.UserAttribute.empty())
 			{

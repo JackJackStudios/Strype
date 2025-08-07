@@ -28,19 +28,10 @@ namespace Strype {
 
 	void ProjectSerializer::Deserialize(const std::filesystem::path& filepath)
 	{
-		std::ifstream fstream(filepath);
-
-		STY_CORE_VERIFY(fstream.is_open(), "Error opening file");
-
-		std::stringstream stream;
-		stream << fstream.rdbuf();
-
-		YAML::Node data = YAML::Load(stream.str());
-		YAML::Node root = data["Project"];
-
+		YAML::Node root = YAML::LoadFile(filepath.string())["Project"];
 		STY_CORE_VERIFY(root, "Could not open project");
 
-		STY_CORE_TRACE("Deserializing project '{0}'", filepath.stem());
+		STY_CORE_INFO("Loading project '{}'", filepath.stem());
 
 		ProjectConfig& config = m_Project->m_Config;
 		config.Name = filepath.stem().string();

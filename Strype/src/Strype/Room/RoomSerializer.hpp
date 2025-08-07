@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Strype/Asset/AssetSerializer.hpp"
+#include "Strype/Project/AssetSerializer.hpp"
 
 #include "Room.hpp"
 
