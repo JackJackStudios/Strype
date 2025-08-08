@@ -27,6 +27,8 @@ namespace Strype {
 	{
 		STY_ADD_INTERNAL_CALL(Room_CreateObject);
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
+		STY_ADD_INTERNAL_CALL(Camera_Move);
+		STY_ADD_INTERNAL_CALL(Camera_Zoom);
 
 		STY_ADD_INTERNAL_CALL(Object_GetPosition);
 		STY_ADD_INTERNAL_CALL(Object_SetPosition);
@@ -61,6 +63,20 @@ namespace Strype {
 		void Room_DestroyObject(uint32_t id)
 		{
 			Project::GetActiveRoom()->DestroyInstance(id);
+		}
+
+		void Camera_Move(glm::vec2* inPosition)
+		{
+			auto& camera = Project::GetActiveRoom()->GetCamera();
+
+			camera.Position = *inPosition;
+			camera.UpdateMatrix();
+		}
+
+		void Camera_Zoom(float* inZoomLevel)
+		{
+			auto& camera = Project::GetActiveRoom()->GetCamera();
+			camera.SetZoomLevel(*inZoomLevel);
 		}
 
 		void Object_GetPosition(uint32_t id, glm::vec2* outPosition)

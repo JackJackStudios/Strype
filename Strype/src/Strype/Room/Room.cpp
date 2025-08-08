@@ -193,7 +193,7 @@ namespace Strype {
 
 	void Room::OnMouseScrolled(MouseScrolledEvent& e)
 	{
-		m_ZoomLevel -= e.GetOffset().y * 0.25f;
+		m_ZoomLevel += e.GetOffset().y * 0.25f;
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
 		m_Camera.SetZoomLevel(m_ZoomLevel);
 	}

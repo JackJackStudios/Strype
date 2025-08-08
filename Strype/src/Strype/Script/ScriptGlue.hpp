@@ -60,6 +60,8 @@ namespace Strype {
 
 		uint32_t Room_CreateObject(float x, float y, uint64_t object);
 		void Room_DestroyObject(uint32_t id);
+		void Camera_Move(glm::vec2* inPosition);
+		void Camera_Zoom(float* inZoomLevel);
 
 		void Object_GetPosition(uint32_t id, glm::vec2* outPosition);
 		void Object_SetPosition(uint32_t id, glm::vec2* inPosition);

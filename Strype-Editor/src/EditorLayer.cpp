@@ -21,6 +21,8 @@ namespace Strype {
 		void OnAttach() override
 		{
 			m_Room = Project::GetAsset<Room>(Project::GetHandle(m_ActiveProject->GetConfig().StartRoom))->CopyTo();
+			m_Room->OnResize(m_ActiveProject->GetConfig().ViewportSize);
+
 			m_Room->StartRuntime();
 		}
 
@@ -96,7 +98,9 @@ namespace Strype {
 		}
 
 		m_Framebuffer->Bind();
-		
+		Render->SetClearColour({ 0.1f, 0.1f, 0.1f });
+		Render->Clear();
+
 		m_Room->OnUpdate(ts);
 		
 		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
