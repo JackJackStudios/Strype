@@ -20,23 +20,26 @@ namespace Strype {
 		static void Init();
 		static void Update();
 
-		static bool IsKeyDown(KeyCode key); //GLFW
+		static bool IsKeyDown(KeyCode key);
 
 		static bool IsKeyPressed(KeyCode key);
 		static bool IsKeyHeld(KeyCode key);
 		static bool IsKeyReleased(KeyCode key);
 
-		static bool IsMouseButtonDown(MouseCode button); //GLFW
+		static bool IsMouseButtonDown(MouseCode button);
 
 		static bool IsMouseButtonPressed(MouseCode button);
 		static bool IsMouseButtonHeld(MouseCode button);
 		static bool IsMouseButtonReleased(MouseCode button);
 
-		static glm::vec2 GetMousePosition(); //GLFW
-		static float GetMouseX(); //GLFW
-		static float GetMouseY(); //GLFW
-	private:
-		inline static thread_local std::unordered_map<KeyCode, InputState> s_KeyStates;
-		inline static thread_local std::unordered_map<MouseCode, InputState> s_MouseStates;
+		static bool IsGamepadButtonDown(ButtonCode button);
+
+		static bool IsGamepadButtonPressed(ButtonCode button);
+		static bool IsGamepadButtonHeld(ButtonCode button);
+		static bool IsGamepadButtonReleased(ButtonCode button);
+
+		static glm::vec2 GetMousePosition();
+		static float GetMouseX();
+		static float GetMouseY();
 	};
 }

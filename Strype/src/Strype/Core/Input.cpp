@@ -4,9 +4,40 @@
 #include "Strype/Core/Application.hpp"
 #include "Strype/Core/Event.hpp"
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 namespace Strype {
+
+	struct InputData
+	{
+		std::map<KeyCode, InputState> Keys;
+		std::map<MouseCode, InputState> MouseButtons;
+		std::map<ButtonCode, InputState> GamepadButtons;
+
+		bool ConnectedGamepad = false;
+		int GamepadID = 0; // jid
+
+		GLFWgamepadstate GamepadState;
+	};
+
+	static thread_local InputData s_InputState;
+
+	void OnConnectGamepad(int jid, int event)
+	{
+		if (event == GLFW_CONNECTED && glfwJoystickIsGamepad(jid))
+		{
+			s_InputState.ConnectedGamepad = true;
+			s_InputState.GamepadID = jid;
+
+			STY_CORE_INFO("Gamepad connected: \"{}\" (GUID = {})", glfwGetJoystickName(jid), glfwGetJoystickGUID(jid));
+		}
+		else if (event == GLFW_DISCONNECTED)
+		{
+			s_InputState.ConnectedGamepad = false;
+			s_InputState.GamepadID = 0;
+		}
+	}
 
 	void Input::Init()
 	{
@@ -17,119 +48,195 @@ namespace Strype {
 		window->SetKeyCallback([](AGI::Window* window, int key, int scancode, int action, int mods)
 		{
 			if (action == GLFW_PRESS)
-				s_KeyStates[(KeyCode)key] = InputState::None;
+				s_InputState.Keys[(KeyCode)key] = InputState::None;
 		});
 
 		window->SetMouseButtonCallback([](AGI::Window* window, int button, int action, int mods)
 		{
 			if (action == GLFW_PRESS)
-				s_MouseStates[(MouseCode)button] = InputState::None;
+				s_InputState.MouseButtons[(MouseCode)button] = InputState::None;
 		});
+
+		glfwSetJoystickCallback(OnConnectGamepad);
+		if (glfwJoystickPresent(GLFW_JOYSTICK_1)) OnConnectGamepad(GLFW_JOYSTICK_1, GLFW_CONNECTED);
 	}
 
 	void Input::Update()
 	{
-		for (const auto& [key, data] : s_KeyStates)
+		for (auto& [key, state] : s_InputState.Keys)
 		{
-			if (data == InputState::Pressed)
-				s_KeyStates[key] = InputState::Held;
+			if (state == InputState::Pressed)
+				state = InputState::Held;
 
-			if (data == InputState::Released)
-				s_KeyStates[key] = InputState::None;
+			if (state == InputState::Released)
+				state = InputState::None;
 
-			if (data == InputState::Held && !Input::IsKeyDown(key))
+			if (state == InputState::Held && !Input::IsKeyDown(key))
 			{
 				KeyReleasedEvent event(key);
 				Application::Get().OnEvent(event);
 
-				s_KeyStates[key] = InputState::Released;
+				state = InputState::Released;
 			}
 
-			if (data == InputState::None && Input::IsKeyDown(key))
+			if (state == InputState::None && Input::IsKeyDown(key))
 			{
 				KeyPressedEvent event(key);
 				Application::Get().OnEvent(event);
 
-				s_KeyStates[key] = InputState::Pressed;
+				state = InputState::Pressed;
 			}
 
-			if (data == InputState::Held)
+			if (state == InputState::Held)
 			{
 				KeyHeldEvent event(key);
 				Application::Get().OnEvent(event);
 			}
 		}
 
-		for (const auto& [button, data] : s_MouseStates)
+		for (auto& [button, state] : s_InputState.MouseButtons)
 		{
-			if (data == InputState::Pressed)
-				s_MouseStates[button] = InputState::Held;
+			if (state == InputState::Pressed)
+				state = InputState::Held;
 		
-			if (data == InputState::Released)
-				s_MouseStates[button] = InputState::None;
+			if (state == InputState::Released)
+				state = InputState::None;
 		
-			if (data == InputState::Held && !Input::IsMouseButtonDown(button))
+			if (state == InputState::Held && !Input::IsMouseButtonDown(button))
 			{
 				MouseButtonReleasedEvent event(button);
 				Application::Get().OnEvent(event);
 		
-				s_MouseStates[button] = InputState::Released;
+				state = InputState::Released;
 			}
 		
-			if (data == InputState::None && Input::IsMouseButtonDown(button))
+			if (state == InputState::None && Input::IsMouseButtonDown(button))
 			{
 				MouseButtonPressedEvent event(button);
 				Application::Get().OnEvent(event);
 		
-				s_MouseStates[button] = InputState::Pressed;
+				state = InputState::Pressed;
 			}
 		
-			if (data == InputState::Held)
+			if (state == InputState::Held)
 			{
 				MouseButtonHeldEvent event(button);
 				Application::Get().OnEvent(event);
 			}
 		}
+
+		if (s_InputState.ConnectedGamepad)
+		{
+			if (glfwGetGamepadState(s_InputState.GamepadID, &s_InputState.GamepadState))
+			{
+				for (int i = 0; i < 15; i++)
+				{
+					ButtonCode button = (ButtonCode)i;
+					bool buttonDown = s_InputState.GamepadState.buttons[i] == GLFW_PRESS;
+
+					auto it = s_InputState.GamepadButtons.find(button);
+					InputState state = (it == s_InputState.GamepadButtons.end()) ? InputState::None : it->second;
+
+					if (state == InputState::None && !buttonDown)
+					{
+						if (it != s_InputState.GamepadButtons.end())
+							s_InputState.GamepadButtons.erase(button);
+
+						continue;
+					}
+		
+					if (state == InputState::Pressed)
+						s_InputState.GamepadButtons[button] = InputState::Held;
+		
+					if (state == InputState::Released)
+						s_InputState.GamepadButtons[button] = InputState::None;
+		
+					if (state == InputState::Held && !buttonDown)
+						s_InputState.GamepadButtons[button] = InputState::Released;
+		
+					if (state == InputState::None && buttonDown)
+						s_InputState.GamepadButtons[button] = InputState::Pressed;
+				}
+			}
+		}
 	}
 
-	bool Input::IsKeyDown(const KeyCode key)
+	bool Input::IsKeyDown(KeyCode key)
 	{
-		return Application::Get().GetWindow()->IsKeyOn(static_cast<int32_t>(key));;
+		auto window = Application::Get().GetWindow();
+		return glfwGetKey(window->GetGlfwWindow(), (int32_t)key) == GLFW_PRESS;
 	}
 
-	bool Input::IsKeyPressed(const KeyCode key)
+	bool Input::IsMouseButtonDown(MouseCode button)
 	{
-		return s_KeyStates[key] == InputState::Pressed;
+		auto window = Application::Get().GetWindow();
+		return glfwGetMouseButton(window->GetGlfwWindow(), (int32_t)button) == GLFW_PRESS;
 	}
 
-	bool Input::IsKeyHeld(const KeyCode key)
+	bool Input::IsGamepadButtonDown(ButtonCode button)
 	{
-		return s_KeyStates[key] == InputState::Held;
+		if (s_InputState.GamepadButtons.find(button) != s_InputState.GamepadButtons.end())
+			if (s_InputState.GamepadButtons[button] != InputState::Released) // Released is the frame after the button is let go
+				return true;
+
+		return false;
 	}
 
-	bool Input::IsKeyReleased(const KeyCode key)
+	bool Input::IsKeyPressed(KeyCode key)
 	{
-		return s_KeyStates[key] == InputState::Released;
+		if (s_InputState.Keys.find(key) == s_InputState.Keys.end()) return false;
+		return s_InputState.Keys[key] == InputState::Pressed;
 	}
 
-	bool Input::IsMouseButtonDown(const MouseCode button)
+	bool Input::IsKeyHeld(KeyCode key)
 	{
-		return Application::Get().GetWindow()->IsMouseButtonOn(static_cast<int32_t>(button));;
+		if (s_InputState.Keys.find(key) == s_InputState.Keys.end()) return false;
+		return s_InputState.Keys[key] == InputState::Held;
+	}
+
+	bool Input::IsKeyReleased(KeyCode key)
+	{
+		if (s_InputState.Keys.find(key) == s_InputState.Keys.end()) return false;
+		return s_InputState.Keys[key] == InputState::Released;
 	}
 
 	bool Input::IsMouseButtonPressed(MouseCode button)
 	{
-		return s_MouseStates[button] == InputState::Released;
+		if (s_InputState.MouseButtons.find(button) == s_InputState.MouseButtons.end()) return false;
+		return s_InputState.MouseButtons[button] == InputState::Pressed;
 	}
 
 	bool Input::IsMouseButtonHeld(MouseCode button)
 	{
-		return s_MouseStates[button] == InputState::Released;
+		if (s_InputState.MouseButtons.find(button) == s_InputState.MouseButtons.end()) return false;
+		return s_InputState.MouseButtons[button] == InputState::Held;
 	}
 
 	bool Input::IsMouseButtonReleased(MouseCode button)
 	{
-		return s_MouseStates[button] == InputState::Released;
+		if (s_InputState.MouseButtons.find(button) == s_InputState.MouseButtons.end()) return false;
+		return s_InputState.MouseButtons[button] == InputState::Released;
+	}
+
+	bool Input::IsGamepadButtonPressed(ButtonCode button)
+	{
+		if (!s_InputState.ConnectedGamepad) return false;
+		if (s_InputState.GamepadButtons.find(button) == s_InputState.GamepadButtons.end()) return false;
+		return s_InputState.GamepadButtons[button] == InputState::Pressed;
+	}
+
+	bool Input::IsGamepadButtonHeld(ButtonCode button)
+	{
+		if (!s_InputState.ConnectedGamepad) return false;
+		if (s_InputState.GamepadButtons.find(button) == s_InputState.GamepadButtons.end()) return false;
+		return s_InputState.GamepadButtons[button] == InputState::Held;
+	}
+
+	bool Input::IsGamepadButtonReleased(ButtonCode button)
+	{
+		if (!s_InputState.ConnectedGamepad) return false;
+		if (s_InputState.GamepadButtons.find(button) == s_InputState.GamepadButtons.end()) return false;
+		return s_InputState.GamepadButtons[button] == InputState::Released;
 	}
 
 	glm::vec2 Input::GetMousePosition()
