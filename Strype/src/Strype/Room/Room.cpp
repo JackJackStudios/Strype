@@ -28,20 +28,20 @@ namespace Strype {
 
 		if (m_RoomState == RoomState::Editor)
 		{
-			if (Input::IsKeyHeld(KeyCode::A))
+			if (Input::IsKeyDown(KeyCode::A))
 			{
 				m_Camera.Position.x -= m_CameraSpeed * ts;
 			}
-			else if (Input::IsKeyHeld(KeyCode::D))
+			else if (Input::IsKeyDown(KeyCode::D))
 			{
 				m_Camera.Position.x += m_CameraSpeed * ts;
 			}
 
-			if (Input::IsKeyHeld(KeyCode::W))
+			if (Input::IsKeyDown(KeyCode::W))
 			{
 				m_Camera.Position.y += m_CameraSpeed * ts;
 			}
-			else if (Input::IsKeyHeld(KeyCode::S))
+			else if (Input::IsKeyDown(KeyCode::S))
 			{
 				m_Camera.Position.y -= m_CameraSpeed * ts;
 			}

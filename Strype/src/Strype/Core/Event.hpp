@@ -11,8 +11,8 @@ namespace Strype {
 		None = 0,
 		ApplicationQuit,
 		WindowClose, WindowResize, WindowMove, WindowDrop,
-		KeyPressed, KeyReleased, KeyHeld,
-		MouseButtonPressed, MouseButtonReleased, MouseButtonHeld,
+		KeyPressed, KeyReleased,
+		MouseButtonPressed, MouseButtonReleased,
 		MouseMoved, MouseScrolled,
 
 		AssetImported, AssetRemoved, AssetMoved
@@ -255,15 +255,6 @@ namespace Strype {
 		EVENT_CLASS_TYPE(KeyReleased)
 	};
 
-	class KeyHeldEvent : public KeyEvent
-	{
-	public:
-		KeyHeldEvent(KeyCode keycode)
-			: KeyEvent(keycode) {}
-
-		EVENT_CLASS_TYPE(KeyHeld)
-	};
-
 	class MouseMovedEvent : public Event
 	{
 	public:
@@ -330,15 +321,6 @@ namespace Strype {
 			: MouseButtonEvent(button) {}
 
 		EVENT_CLASS_TYPE(MouseButtonPressed)
-	};
-
-	class MouseButtonHeldEvent : public MouseButtonEvent
-	{
-	public:
-		MouseButtonHeldEvent(MouseCode button)
-			: MouseButtonEvent(button) {}
-
-		EVENT_CLASS_TYPE(MouseButtonHeld)
 	};
 
 	class MouseButtonReleasedEvent : public MouseButtonEvent

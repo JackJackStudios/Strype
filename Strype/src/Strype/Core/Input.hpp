@@ -14,6 +14,28 @@ namespace Strype {
 		Released,
 	};
 
+	enum class BindingType : uint16_t
+	{
+		Keyboard,
+		MouseButton,
+		GamepadButton,
+		GamepadAxis,
+	};
+
+	struct InputBinding
+	{
+		union {
+			KeyCode Keyboard;
+			MouseCode MouseButton;
+			ButtonCode GamepadButton;
+			GamepadAxis GamepadAxis;
+		} Value;
+
+		BindingType Type;
+	};
+
+	constexpr float GAMEPAD_DEADZONE = 0.5;
+
 	class Input
 	{
 	public:
@@ -37,6 +59,14 @@ namespace Strype {
 		static bool IsGamepadButtonPressed(ButtonCode button);
 		static bool IsGamepadButtonHeld(ButtonCode button);
 		static bool IsGamepadButtonReleased(ButtonCode button);
+
+		static bool IsGamepadAxisActive(GamepadAxis axis);
+
+		// Binding API
+		static bool IsBindingDown(InputBinding binding);
+		static bool IsBindingPressed(InputBinding binding);
+		static bool IsBindingHeld(InputBinding binding);
+		static bool IsBindingReleased(InputBinding binding);
 
 		static glm::vec2 GetMousePosition();
 		static float GetMouseX();

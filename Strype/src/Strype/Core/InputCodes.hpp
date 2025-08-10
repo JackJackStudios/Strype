@@ -166,6 +166,19 @@ namespace Strype {
 		Triangle = Y,
 	};
 
+	enum class GamepadAxis : uint16_t
+	{
+		LeftLeft,
+		LeftRight,
+		LeftUp,
+		LeftDown,
+
+		RightLeft,
+		RightRight,
+		RightUp,
+		RightDown,
+	};
+
 	enum class MouseCode : uint16_t
 	{
 		// From glfw3.h

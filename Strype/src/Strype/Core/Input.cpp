@@ -47,18 +47,22 @@ namespace Strype {
 		//       so they will be tracked by Input::Update().
 		window->SetKeyCallback([](AGI::Window* window, int key, int scancode, int action, int mods)
 		{
-			if (action == GLFW_PRESS)
+			if (action == GLFW_PRESS || action == GLFW_RELEASE)
 				s_InputState.Keys[(KeyCode)key] = InputState::None;
 		});
 
 		window->SetMouseButtonCallback([](AGI::Window* window, int button, int action, int mods)
 		{
-			if (action == GLFW_PRESS)
+			if (action == GLFW_PRESS || action == GLFW_RELEASE)
 				s_InputState.MouseButtons[(MouseCode)button] = InputState::None;
 		});
 
 		glfwSetJoystickCallback(OnConnectGamepad);
-		if (glfwJoystickPresent(GLFW_JOYSTICK_1)) OnConnectGamepad(GLFW_JOYSTICK_1, GLFW_CONNECTED);
+		for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
+		{
+			if (glfwJoystickPresent(jid))
+				OnConnectGamepad(jid, GLFW_CONNECTED);
+		}
 	}
 
 	void Input::Update()
@@ -86,42 +90,30 @@ namespace Strype {
 
 				state = InputState::Pressed;
 			}
-
-			if (state == InputState::Held)
-			{
-				KeyHeldEvent event(key);
-				Application::Get().OnEvent(event);
-			}
 		}
 
 		for (auto& [button, state] : s_InputState.MouseButtons)
 		{
 			if (state == InputState::Pressed)
 				state = InputState::Held;
-		
+
 			if (state == InputState::Released)
 				state = InputState::None;
-		
+
 			if (state == InputState::Held && !Input::IsMouseButtonDown(button))
 			{
 				MouseButtonReleasedEvent event(button);
 				Application::Get().OnEvent(event);
-		
+
 				state = InputState::Released;
 			}
-		
+
 			if (state == InputState::None && Input::IsMouseButtonDown(button))
 			{
 				MouseButtonPressedEvent event(button);
 				Application::Get().OnEvent(event);
-		
+
 				state = InputState::Pressed;
-			}
-		
-			if (state == InputState::Held)
-			{
-				MouseButtonHeldEvent event(button);
-				Application::Get().OnEvent(event);
 			}
 		}
 
@@ -129,6 +121,7 @@ namespace Strype {
 		{
 			if (glfwGetGamepadState(s_InputState.GamepadID, &s_InputState.GamepadState))
 			{
+				// NOTE: 15 is the total size of GLFWgamepadstate::buttons
 				for (int i = 0; i < 15; i++)
 				{
 					ButtonCode button = (ButtonCode)i;
@@ -144,16 +137,16 @@ namespace Strype {
 
 						continue;
 					}
-		
+
 					if (state == InputState::Pressed)
 						s_InputState.GamepadButtons[button] = InputState::Held;
-		
+
 					if (state == InputState::Released)
 						s_InputState.GamepadButtons[button] = InputState::None;
-		
+
 					if (state == InputState::Held && !buttonDown)
 						s_InputState.GamepadButtons[button] = InputState::Released;
-		
+
 					if (state == InputState::None && buttonDown)
 						s_InputState.GamepadButtons[button] = InputState::Pressed;
 				}
@@ -237,6 +230,90 @@ namespace Strype {
 		if (!s_InputState.ConnectedGamepad) return false;
 		if (s_InputState.GamepadButtons.find(button) == s_InputState.GamepadButtons.end()) return false;
 		return s_InputState.GamepadButtons[button] == InputState::Released;
+	}
+
+	bool Input::IsGamepadAxisActive(GamepadAxis axis)
+	{
+		if (!s_InputState.ConnectedGamepad) return false;
+		int axisIndex = -1;
+		bool positiveDir = false;
+
+		switch (axis)
+		{
+		case GamepadAxis::LeftLeft:  axisIndex = GLFW_GAMEPAD_AXIS_LEFT_X;  positiveDir = false; break;
+		case GamepadAxis::LeftRight: axisIndex = GLFW_GAMEPAD_AXIS_LEFT_X;  positiveDir = true;  break;
+		case GamepadAxis::LeftUp:    axisIndex = GLFW_GAMEPAD_AXIS_LEFT_Y;  positiveDir = false; break;
+		case GamepadAxis::LeftDown:  axisIndex = GLFW_GAMEPAD_AXIS_LEFT_Y;  positiveDir = true;  break;
+
+		case GamepadAxis::RightLeft:  axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_X; positiveDir = false; break;
+		case GamepadAxis::RightRight: axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_X; positiveDir = true;  break;
+		case GamepadAxis::RightUp:    axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_Y; positiveDir = false; break;
+		case GamepadAxis::RightDown:  axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_Y; positiveDir = true;  break;
+		}
+
+		float value = s_InputState.GamepadState.axes[axisIndex];
+
+		// NEW: clamp deadzone both directions
+		if (fabs(value) < GAMEPAD_DEADZONE)
+			return false;
+
+		return positiveDir ? (value > 0) : (value < 0);
+	}
+
+	bool Input::IsBindingDown(InputBinding binding) 
+	{
+		switch (binding.Type)
+		{
+		case BindingType::Keyboard:      return IsKeyDown(binding.Value.Keyboard);
+		case BindingType::MouseButton:   return IsMouseButtonDown(binding.Value.MouseButton);
+		case BindingType::GamepadButton: return IsGamepadButtonDown(binding.Value.GamepadButton);
+		case BindingType::GamepadAxis:   return IsGamepadAxisActive(binding.Value.GamepadAxis);
+		}
+
+		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		return false;
+	}
+
+	bool Input::IsBindingPressed(InputBinding binding) 
+	{
+		switch (binding.Type)
+		{
+		case BindingType::Keyboard:      return IsKeyPressed(binding.Value.Keyboard);
+		case BindingType::MouseButton:   return IsMouseButtonPressed(binding.Value.MouseButton);
+		case BindingType::GamepadButton: return IsGamepadButtonPressed(binding.Value.GamepadButton);
+		case BindingType::GamepadAxis:   return IsGamepadAxisActive(binding.Value.GamepadAxis);
+		}
+
+		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		return false;
+	}
+
+	bool Input::IsBindingHeld(InputBinding binding) 
+	{
+		switch (binding.Type)
+		{
+		case BindingType::Keyboard:      return IsKeyHeld(binding.Value.Keyboard);
+		case BindingType::MouseButton:   return IsMouseButtonHeld(binding.Value.MouseButton);
+		case BindingType::GamepadButton: return IsGamepadButtonHeld(binding.Value.GamepadButton);
+		case BindingType::GamepadAxis:   return IsGamepadAxisActive(binding.Value.GamepadAxis);
+		}
+
+		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		return false;
+	}
+
+	bool Input::IsBindingReleased(InputBinding binding) 
+	{
+		switch (binding.Type)
+		{
+		case BindingType::Keyboard:      return IsKeyReleased(binding.Value.Keyboard);
+		case BindingType::MouseButton:   return IsMouseButtonReleased(binding.Value.MouseButton);
+		case BindingType::GamepadButton: return IsGamepadButtonReleased(binding.Value.GamepadButton);
+		case BindingType::GamepadAxis:   return !IsGamepadAxisActive(binding.Value.GamepadAxis);
+		}
+
+		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		return false;
 	}
 
 	glm::vec2 Input::GetMousePosition()
