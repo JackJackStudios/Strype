@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetManager.hpp"
+#include "Strype/Core/Input.hpp"
 
 namespace Strype {
 
@@ -10,7 +11,7 @@ namespace Strype {
 	struct ProjectConfig
 	{
 		std::string Name;
-		glm::ivec2 ViewportSize = { 640, 360 };
+		glm::ivec2 ViewportSize;
 		AGI::WindowProps RuntimeProps;
 
 		std::filesystem::path StartRoom;
@@ -127,6 +128,8 @@ namespace Strype {
 		inline static Ref<Project> s_ActiveProject = nullptr;
 
 		ProjectConfig m_Config;
+		std::unordered_map<std::string, std::vector<InputBinding>> m_Bindings;
+
 		Ref<AssetManager> m_AssetManager;
 		Ref<ScriptEngine> m_ScriptEngine;
 		Room* m_ActiveRoom;

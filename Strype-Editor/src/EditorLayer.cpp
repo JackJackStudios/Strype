@@ -12,10 +12,10 @@ namespace Strype {
 		EditorRuntime(Ref<Project> proj)
 			: m_ActiveProject(proj)
 		{
-			WindowProps = proj->GetConfig().RuntimeProps;
-			WindowProps.Title = proj->GetConfig().Name;
+			WindowProps = m_ActiveProject->GetConfig().RuntimeProps;
+			WindowProps.Title = m_ActiveProject->GetConfig().Name;
 
-			Project::BuildCSharp(proj, false);
+			Project::BuildCSharp(m_ActiveProject, false);
 		}
 
 		void OnAttach() override
@@ -106,11 +106,9 @@ namespace Strype {
 		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			float pixelData = *(float*)m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-			InstanceID id = pixelData-1;
+			InstanceID id = pixelData - 1;
 
-			if (pixelData == 0)
-				m_Selected = -1;
-
+			if (pixelData == 0) m_Selected = -1;
 			if (pixelData != 0 && m_Room->InstanceExists(id))
 			{
 				m_Selected = id;

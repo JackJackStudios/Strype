@@ -57,26 +57,14 @@ namespace Strype {
 
 		STY_CORE_VERIFY(data, "Could not load room")
 
-		YAML::Node width = data["Width"];
-		YAML::Node height = data["Height"];
-		if (width && height)
-		{
-			room->m_Width = data["Width"].as<uint64_t>();
-			room->m_Height = data["Height"].as<uint64_t>();
-		}
-
+		room->m_Width = data["Width"].as<uint64_t>();
+		room->m_Height = data["Height"].as<uint64_t>();
 		room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
-
-		room->Clear();
 
 		YAML::Node objects = data["Objects"];
 		for (auto obj : objects)
 		{
-			InstanceID id = obj["Object"].as<InstanceID>();
-
-			const std::filesystem::path& path = obj["PrefabPath"].as<std::filesystem::path>();
-
-			AssetHandle handle = Project::ImportAsset(path);
+			AssetHandle handle = Project::ImportAsset(obj["PrefabPath"].as<std::filesystem::path>());
 			if (!Project::IsAssetLoaded(handle))
 				continue;
 

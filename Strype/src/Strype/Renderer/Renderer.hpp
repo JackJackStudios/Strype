@@ -36,7 +36,7 @@ namespace Strype {
 		void Shutdown();
 		void OnWindowResize(const glm::vec2& size);
 
-		void SetClearColour(const glm::vec4& colour);
+		void SetClearColour(const glm::vec3& colour);
 		void Clear();
 
 		void BeginRoom(Camera& camera);

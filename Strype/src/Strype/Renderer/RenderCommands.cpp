@@ -16,9 +16,9 @@ namespace Strype {
 		m_RenderContext->Clear();
 	}
 
-	void Renderer::SetClearColour(const glm::vec4& colour)
+	void Renderer::SetClearColour(const glm::vec3& colour)
 	{
-		m_RenderContext->SetClearColour(colour);
+		m_RenderContext->SetClearColour({ colour.x, colour.y, colour.z, 1.0f });
 	}
 
 	// Simple functions

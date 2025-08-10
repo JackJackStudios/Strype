@@ -96,7 +96,7 @@ namespace Strype {
 		{
 			float timestep = m_Window->GetDelta();
 
-			layer->Render->SetClearColour({ 0.1f, 0.1f, 0.1f, 1 });
+			layer->Render->SetClearColour({ 0.1f, 0.1f, 0.1f });
 			layer->Render->Clear();
 			
 			layer->OnUpdate(timestep);

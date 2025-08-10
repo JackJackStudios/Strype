@@ -9,17 +9,19 @@ namespace Strype {
 
 	namespace UI {
 
-		static bool DropdownMenu(const std::string& name)
+		static bool DropdownMenu(const std::string& name, ImGuiTreeNodeFlags flags = 0)
 		{
 			const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 				ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap |
-				ImGuiTreeNodeFlags_FramePadding;
+				ImGuiTreeNodeFlags_FramePadding | flags;
 
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 			float lineHeight = ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f;
+			ImGui::PushID(name.c_str());
 			bool open = ImGui::TreeNodeEx(name.c_str(), treeNodeFlags, "%s", name.c_str());
+			ImGui::PopID();
 			ImGui::PopStyleVar();
 
 			return open;
