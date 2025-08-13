@@ -23,11 +23,6 @@ namespace Strype {
 		void* VBBase = nullptr;
 		void* VBPtr = nullptr;
 
-		std::string TextureSampler;
-		std::string ProjectionUniform;
-		std::string UserAttribute;
-		std::filesystem::path ShaderPath;
-
 		AGI::VertexArray VertexArray;
 		AGI::VertexBuffer VertexBuffer;
 		AGI::IndexBuffer IndexBuffer;
@@ -35,6 +30,7 @@ namespace Strype {
 		AGI::BufferLayout Layout;
 
 		int NextAttr = 0;
+		std::string UserAttribute;
 
 		void SubmitAttribute(const std::string& name, const Buffer& buf)
 		{

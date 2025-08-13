@@ -1,4 +1,4 @@
-#include "stypch.hpp"
+ #include "stypch.hpp"
 #include "Renderer.hpp"
 
 #include "Strype/Core/Application.hpp"
@@ -27,10 +27,7 @@ namespace Strype {
 		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 		m_TextureSlots[0] = { nullptr, m_WhiteTexture };
 
-		m_QuadPipeline.TextureSampler = "u_Textures";
-		m_QuadPipeline.ProjectionUniform = "u_ViewProjection";
-		m_QuadPipeline.ShaderPath = "QuadShader.glsl";
-		InitPipeline(m_QuadPipeline);
+		InitPipeline(m_QuadPipeline, "QuadShader.glsl");
 	}
 
 	void Renderer::Shutdown()
@@ -39,9 +36,9 @@ namespace Strype {
 		delete m_RenderContext;
 	}
 
-	void Renderer::InitPipeline(RenderPipeline& pipeline)
+	void Renderer::InitPipeline(RenderPipeline& pipeline, const std::filesystem::path& filepath)
 	{
-		pipeline.Shader = m_RenderContext->CreateShader(AGI::Utils::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / pipeline.ShaderPath)));
+		pipeline.Shader = m_RenderContext->CreateShader(AGI::Utils::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / filepath)));
 		pipeline.Layout = pipeline.Shader->GetLayout();
 
 		for (const auto& attr : pipeline.Layout)
@@ -55,7 +52,7 @@ namespace Strype {
 		{
 			std::string userAttr = pipeline.Layout[RenderCaps::RequiredAttrs.size()].Name;
 
-			STY_CORE_TRACE("Detected user attribute in {}: \"{}\" ", pipeline.ShaderPath.filename(), userAttr);
+			STY_CORE_TRACE("Detected user attribute in {}: \"{}\" ", filepath.filename(), userAttr);
 			pipeline.UserAttribute = userAttr;
 		}
 
@@ -83,20 +80,17 @@ namespace Strype {
 		pipeline.IndexBuffer = m_RenderContext->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
 		pipeline.VertexArray->SetIndexBuffer(pipeline.IndexBuffer);
 
-		if (!pipeline.TextureSampler.empty())
-		{
-			int32_t samplers[RenderCaps::MaxTextureSlots];
-			for (uint32_t i = 0; i < RenderCaps::MaxTextureSlots; i++)
-				samplers[i] = i;
+		int32_t samplers[RenderCaps::MaxTextureSlots];
+		for (uint32_t i = 0; i < RenderCaps::MaxTextureSlots; i++)
+			samplers[i] = i;
 
-			pipeline.Shader->SetIntArray(pipeline.TextureSampler, samplers, RenderCaps::MaxTextureSlots);
-		}
+		pipeline.Shader->SetIntArray("u_Textures", samplers, RenderCaps::MaxTextureSlots);
 	}
 	
 	void Renderer::BeginRoom(Camera& camera)
 	{
 		m_QuadPipeline.NextFrame();
-		m_QuadPipeline.Shader->SetMat4(m_QuadPipeline.ProjectionUniform, camera.GetViewProjectionMatrix());
+		m_QuadPipeline.Shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		
 		m_TextureSlotIndex = 1;
 	}
@@ -136,7 +130,7 @@ namespace Strype {
 		float slotIndex = 0.0f;
 		for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
 		{
-			if (m_TextureSlots[i].Sprite == sprite)
+			if (m_TextureSlots[i].SpriteRef == sprite)
 			{
 				slotIndex = (float)i;
 				break;
@@ -151,7 +145,7 @@ namespace Strype {
 			slotIndex = (float)m_TextureSlotIndex;
 
 			TextureSlot slot;
-			slot.Sprite = sprite;
+			slot.SpriteRef = sprite;
 			slot.Texture = m_RenderContext->CreateTexture(sprite->GetSpecs());
 			m_TextureSlots[m_TextureSlotIndex++] = slot;
 		}
@@ -163,32 +157,5 @@ namespace Strype {
 	{
 		return m_TextureSlots[GetTextureSlot(sprite)].Texture;
 	}
-
-	//float Renderer::GetTextureSlot(const AGI::Texture& texture)
-	//{
-	//	if (!texture)
-	//		return 0.0f;
-	//
-	//	float textureIndex = 0.0f;
-	//	for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
-	//	{
-	//		if (*m_TextureSlots[i] == texture)
-	//		{
-	//			textureIndex = (float)i;
-	//			break;
-	//		}
-	//	}
-	//
-	//	if (textureIndex == 0.0f)
-	//	{
-	//		if (m_TextureSlotIndex >= RenderCaps::MaxTextureSlots)
-	//			FlushAndReset();
-	//
-	//		textureIndex = (float)(m_TextureSlotIndex);
-	//		m_TextureSlots[m_TextureSlotIndex++] = texture;
-	//	}
-	//
-	//	return textureIndex;
-	//}
 
 }

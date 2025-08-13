@@ -11,3 +11,5 @@ DotNet/
 **.log
 **.exe
 CMakeSettings.json
+
+!premake5.exe

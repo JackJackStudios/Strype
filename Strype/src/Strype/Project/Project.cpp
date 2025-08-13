@@ -55,12 +55,13 @@ namespace Strype {
 
 	std::string Project::GetMSbuildCommand(std::vector<const char*> commands)
 	{
+#ifdef STY_WINDOWS
 		auto& path = m_Config.ProjectDirectory;
 
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = std::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
 		
 		for (int i = 0; i < commands.size(); ++i)
 		{
@@ -72,6 +73,8 @@ namespace Strype {
 		
 		command.append(" > nul 2>&1");
 		return command;
+#endif
+		return "";
 	}
 
 	void Project::BuildCSharp(Ref<Project> project, bool restore)
@@ -93,10 +96,11 @@ namespace Strype {
 		Utils::ReplaceKeyWord(content, std::filesystem::path(EMPTY_PROJECT).stem().string(), path.stem().string());
 
 		Utils::WriteFile(path / HIDDEN_FOLDER / "premake5.lua", content);
-		system(std::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / HIDDEN_FOLDER).string()).c_str());
 
-		std::string command = project->GetMSbuildCommand({ "restore" });
-		system(command.c_str());
+#ifdef STY_WINDOWS
+		system(fmt::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / HIDDEN_FOLDER).string()).c_str());
+		system(project->GetMSbuildCommand({ "restore" }).c_str());
+#endif
 	}
 
 	Ref<Project> Project::GenerateNew(const std::filesystem::path& path)

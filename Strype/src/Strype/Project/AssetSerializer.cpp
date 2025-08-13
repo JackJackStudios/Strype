@@ -9,7 +9,6 @@
 #include "Strype/Audio/Audio.hpp"
 
 #include <AGI/agi.hpp>
-#include <sndfile.h>
 #include <stb_image.h>
 
 #include <regex>
@@ -45,23 +44,11 @@ namespace Strype {
 
     Ref<Asset> AudioFileSerializer::LoadAsset(const std::filesystem::path& path)
     {
-        SF_INFO sfinfo;
-        SNDFILE* sndfile = sf_open(path.string().c_str(), SFM_READ, &sfinfo);
-        if (!sndfile) return nullptr;
+        ma_decoder decoder;
+        ma_result result = ma_decoder_init_file(path.string().c_str(), nullptr, &decoder);
+        if (result != MA_SUCCESS) return nullptr;
 
-		Buffer membuf;
-		membuf.Allocate(sfinfo.frames * sfinfo.channels * sizeof(short));
-
-        sf_count_t num_frames = sf_readf_short(sndfile, (short*)membuf.Data, sfinfo.frames);
-        STY_CORE_VERIFY(num_frames == sfinfo.frames, "Error reading audio file data");
-
-        Ref<AudioFile> file = CreateRef<AudioFile>(sfinfo.frames, sfinfo.channels, sfinfo.samplerate);
-        file->SetData(membuf);
-		
-        sf_close(sndfile);
-		membuf.Release();
-
-        return file;
+        return CreateRef<AudioFile>(decoder);
     }
 
 	Ref<Asset> ObjectSerializer::LoadAsset(const std::filesystem::path& path)

@@ -1,51 +1,43 @@
 #include "stypch.hpp"
 #include "Strype/Audio/Audio.hpp"
 
-#include <AL/al.h>
-#include <AL/alc.h>
-
 namespace Strype {
+
+	static void AudioCallback(void* pUserData, ma_uint32 level, const char* pMessage)
+	{
+		switch (level)
+		{
+		case MA_LOG_LEVEL_DEBUG:   STY_CORE_TRACE(pMessage); break;
+		case MA_LOG_LEVEL_INFO:    STY_CORE_INFO(pMessage); break;
+		case MA_LOG_LEVEL_WARNING: STY_CORE_WARN(pMessage); break;
+		case MA_LOG_LEVEL_ERROR:   STY_CORE_ERROR(pMessage); break;
+		}
+	}
 
 	struct AudioData
 	{
-		ALCdevice* m_Device = nullptr;
-		ALCcontext* m_Context = nullptr;
+		ma_engine AudioEngine;
+		ma_context Context;
 	};
 
 	static AudioData s_AudioData;
 
 	void Audio::Init()
 	{
-		s_AudioData.m_Device = alcOpenDevice(nullptr);
-		s_AudioData.m_Context = alcCreateContext(s_AudioData.m_Device, nullptr);
-		STY_CORE_VERIFY(alcMakeContextCurrent(s_AudioData.m_Context), "Could not load audio context")
+		ma_result result = ma_engine_init(nullptr, &s_AudioData.AudioEngine);
+		STY_CORE_VERIFY(result == MA_SUCCESS, "Failed to initialize audio engine");
 
-		const ALCchar* extensions = alcGetString(s_AudioData.m_Device, ALC_EXTENSIONS);
-		const ALCchar* device = nullptr;
-
-		if (alcIsExtensionPresent(s_AudioData.m_Device, "ALC_ENUMERATE_ALL_EXT"))
-			device = alcGetString(s_AudioData.m_Device, ALC_ALL_DEVICES_SPECIFIER);
-
-		if (!device || alcGetError(s_AudioData.m_Device) != AL_NO_ERROR)
-			device = alcGetString(s_AudioData.m_Device, ALC_DEVICE_SPECIFIER);
-
-		STY_CORE_INFO("Using audio device: {}", device);
-		STY_CORE_TRACE("OpenAL extensions: {}", extensions);
+		STY_CORE_INFO("Using audio device: {}", ma_engine_get_device(&s_AudioData.AudioEngine)->playback.name);
 	}
 
 	void Audio::Shutdown()
 	{
-		alcMakeContextCurrent(nullptr);
-		alcDestroyContext(s_AudioData.m_Context);
-
-		alcCloseDevice(s_AudioData.m_Device);
+		ma_engine_uninit(&s_AudioData.AudioEngine);
 	}
 
-	void Audio::SetListenerPos(const glm::vec2& pos)
+	ma_engine* Audio::GetAudioEngine()
 	{
-		alListener3f(AL_POSITION, pos.x, pos.y, 0.0f);
-
-		s_GlobalSource->SetPos(pos);
+		return &s_AudioData.AudioEngine;
 	}
 
 }

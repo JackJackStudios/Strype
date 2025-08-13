@@ -15,11 +15,11 @@ namespace Strype {
 
 		constexpr TexCoords BoxToTextureCoords(const glm::vec2& pos, int width, int height, const glm::vec2& atlas_size)
 		{
-			return { 
-				PixelToTexcoords({ pos.x + width, pos.y + height }, atlas_size.x, atlas_size.y), 
-				PixelToTexcoords({ pos.x, pos.y + height }, atlas_size.x, atlas_size.y),
+			return {
+				PixelToTexcoords({ pos.x + width, pos.y }, atlas_size.x, atlas_size.y),
 				PixelToTexcoords(pos, atlas_size.x, atlas_size.y),
-				PixelToTexcoords({ pos.x + width, pos.y }, atlas_size.x, atlas_size.y)
+				PixelToTexcoords({ pos.x, pos.y + height }, atlas_size.x, atlas_size.y),
+				PixelToTexcoords({ pos.x + width, pos.y + height }, atlas_size.x, atlas_size.y),
 			};
 		}
 
@@ -52,7 +52,7 @@ namespace Strype {
 		if (m_FrameCount == 1)
 			return RenderCaps::TextureCoords;
 
-		return Utils::FlipTexCoords(Utils::BoxToTextureCoords({ frame * GetFrameSize().x, 0.0f }, GetFrameSize().x, GetFrameSize().y, { m_Specification.Width, m_Specification.Height }));
+		return Utils::BoxToTextureCoords({ frame * GetFrameSize().x, 0.0f }, GetFrameSize().x, GetFrameSize().y, { m_Specification.Width, m_Specification.Height });
 	}
 
 }

@@ -55,13 +55,13 @@ namespace Strype {
 
 		void Flush();
 		void FlushAndReset();
-		void InitPipeline(RenderPipeline& pipeline);
+		void InitPipeline(RenderPipeline& pipeline, const std::filesystem::path& filepath);
 	private:
 		AGI::RenderContext* m_RenderContext;
 		struct TextureSlot
 		{
-			Ref<Sprite> Sprite = nullptr; // Sprites can be held across Renderer's.
-			AGI::Texture Texture;         // Textures are stored per-Renderer and are bound to a render context.
+			Ref<Sprite> SpriteRef = nullptr; // Sprites can be held across Renderer's.
+			AGI::Texture Texture;            // Textures are stored per-Renderer and are bound to a render context.
 		};
 
 		std::array<TextureSlot, RenderCaps::MaxTextureSlots> m_TextureSlots;

@@ -21,8 +21,7 @@ target_link_libraries(Strype PUBLIC
     glm
     ImGui
     box2d
-    OpenAL
-    sndfile
+    miniaudio
     ImGuizmo
     Coral.Native
     spdlog::spdlog

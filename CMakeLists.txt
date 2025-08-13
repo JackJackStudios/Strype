@@ -79,18 +79,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(ImGui)
 
 FetchContent_Declare(
-    libsndfile 
-    GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
-    GIT_TAG        1.2.2
+    miniaudio
+    GIT_REPOSITORY https://github.com/mackron/miniaudio.git
+    GIT_TAG        master
 )
-FetchContent_MakeAvailable(libsndfile)
-
-FetchContent_Declare(
-    OpenAL 
-    GIT_REPOSITORY https://github.com/kcat/openal-soft.git
-    GIT_TAG        1.24.3
-)
-FetchContent_MakeAvailable(OpenAL)
+FetchContent_MakeAvailable(miniaudio)
 
 FetchContent_Declare(
     box2d

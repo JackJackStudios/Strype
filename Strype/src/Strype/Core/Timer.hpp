@@ -41,7 +41,7 @@ public:
 
 	std::string FormatTime() const
 	{
-		return std::format("{}:{}.{}", glm::floor(ElapsedMinutes()), glm::floor(ElapsedSeconds()), glm::floor(ElapsedMilliseconds()));
+		return fmt::format("{}:{}.{}", glm::floor(ElapsedMinutes()), glm::floor(ElapsedSeconds()), glm::floor(ElapsedMilliseconds()));
 	}
 
 private:
