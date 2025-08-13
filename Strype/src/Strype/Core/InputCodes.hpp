@@ -2,7 +2,7 @@
 
 namespace Strype {
 
-	enum class KeyCode : uint16_t
+	enum class KeyCode : int32_t
 	{
 		// From glfw3.h
 		Space = 32,
@@ -137,7 +137,7 @@ namespace Strype {
 		Menu = 348
 	};
 
-	enum class ButtonCode : uint16_t
+	enum class ButtonCode : int32_t
 	{
 		// From glfw3.h
 		A = 0,
@@ -166,9 +166,10 @@ namespace Strype {
 		Triangle = Y,
 	};
 
-	enum class GamepadAxis : uint16_t
+	enum class GamepadAxis : int32_t
 	{
-		LeftLeft,
+		// Don't change these values (Input::IsGamepadAxisActive)
+		LeftLeft = 0,
 		LeftRight,
 		LeftUp,
 		LeftDown,
@@ -177,24 +178,16 @@ namespace Strype {
 		RightRight,
 		RightUp,
 		RightDown,
+
+		SIZE
 	};
 
-	enum class MouseCode : uint16_t
+	enum class MouseCode : int32_t
 	{
 		// From glfw3.h
-		Button0 = 0,
-		Button1 = 1,
-		Button2 = 2,
-		Button3 = 3,
-		Button4 = 4,
-		Button5 = 5,
-		Button6 = 6,
-		Button7 = 7,
-
-		ButtonLast = Button7,
-		ButtonLeft = Button0,
-		ButtonRight = Button1,
-		ButtonMiddle = Button2
+		Left = 0,
+		Right = 1,
+		Middle = 2
 	};
 
 }

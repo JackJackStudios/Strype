@@ -164,33 +164,14 @@ namespace YAML {
 		}
 	};
 
-#define ENCODE_BINDING_TYPE(type) case Strype::BindingType::type: str.append(magic_enum::enum_name(binding.Value.type)); break
-#define DECODE_BINDING_TYPE(type, codetype) case Strype::BindingType::type: rhs.Value.type = magic_enum::enum_cast<Strype::codetype>(enumValue).value(); break
-
-	std::string BindingToString(const Strype::InputBinding& binding)
-	{
-		std::string str = magic_enum::enum_name(binding.Type).data();
-		str.append("::");
-
-		switch (binding.Type)
-		{
-		ENCODE_BINDING_TYPE(Keyboard);
-		ENCODE_BINDING_TYPE(MouseButton);
-		ENCODE_BINDING_TYPE(GamepadButton);
-		ENCODE_BINDING_TYPE(GamepadAxis);
-
-		default: STY_CORE_VERIFY(false, "Undefined InputBinding");
-		}
-
-		return str;
-	}
+#define DECODE_BINDING_TYPE(type, codetype) case Strype::BindingType::type: rhs.Code = (int)magic_enum::enum_cast<Strype::codetype>(enumValue).value(); break
 
 	template<>
 	struct convert<Strype::InputBinding>
 	{
 		static Node encode(const Strype::InputBinding& rhs)
 		{
-			return Node(BindingToString(rhs));
+			return Node(fmt::to_string(rhs));
 		}
 
 		static bool decode(const Node& node, Strype::InputBinding& rhs)
@@ -213,6 +194,8 @@ namespace YAML {
 
 			default: STY_CORE_VERIFY(false, "Undefined BindingType");
 			}
+
+			return true;
 		}
 	};
 
@@ -248,7 +231,7 @@ namespace Strype {
 	}
 
 	inline YAML::Emitter& operator<<(YAML::Emitter& out, const Strype::InputBinding& binding) {
-		out << YAML::BindingToString(binding);
+		out << fmt::to_string(binding);
 		return out;
 	}
 

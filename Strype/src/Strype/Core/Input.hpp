@@ -3,6 +3,7 @@
 #include "Strype/Core/InputCodes.hpp"
 
 #include <glm/glm.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 namespace Strype {
 
@@ -16,6 +17,7 @@ namespace Strype {
 
 	enum class BindingType : uint16_t
 	{
+		None = 0,
 		Keyboard,
 		MouseButton,
 		GamepadButton,
@@ -24,14 +26,13 @@ namespace Strype {
 
 	struct InputBinding
 	{
-		union {
-			KeyCode Keyboard;
-			MouseCode MouseButton;
-			ButtonCode GamepadButton;
-			GamepadAxis GamepadAxis;
-		} Value;
+		BindingType Type = BindingType::None;
+		int Code; // All codes for types above fit in a int
 
-		BindingType Type;
+		bool operator==(const InputBinding& other) const
+		{
+			return Code == other.Code && Type == other.Type;
+		}
 	};
 
 	constexpr float GAMEPAD_DEADZONE = 0.5;
@@ -72,4 +73,33 @@ namespace Strype {
 		static float GetMouseX();
 		static float GetMouseY();
 	};
-}
+
+};
+
+template <>
+struct fmt::formatter<Strype::InputBinding>
+{
+	constexpr auto parse(format_parse_context& ctx)
+	{
+		return ctx.begin();
+	}
+
+	template <typename FormatContext>
+	auto format(const Strype::InputBinding& binding, FormatContext& ctx) const
+	{
+		std::string str = magic_enum::enum_name(binding.Type).data();
+		str.append("::");
+
+		switch (binding.Type)
+		{
+		case Strype::BindingType::Keyboard: str.append(magic_enum::enum_name((Strype::KeyCode)binding.Code)); break;
+		case Strype::BindingType::MouseButton: str.append(magic_enum::enum_name((Strype::MouseCode)binding.Code)); break;
+		case Strype::BindingType::GamepadButton: str.append(magic_enum::enum_name((Strype::ButtonCode)binding.Code)); break;
+		case Strype::BindingType::GamepadAxis: str.append(magic_enum::enum_name((Strype::GamepadAxis)binding.Code)); break;
+
+		default: STY_CORE_VERIFY(false, "Undefined InputBinding");
+		}
+
+		return fmt::format_to(ctx.out(), "{}", str);
+	}
+};

@@ -11,9 +11,10 @@ namespace Strype {
 		None = 0,
 		ApplicationQuit,
 		WindowClose, WindowResize, WindowMove, WindowDrop,
-		KeyPressed, KeyReleased,
-		MouseButtonPressed, MouseButtonReleased,
 		MouseMoved, MouseScrolled,
+
+		// Just a agnostic way of reprensting any input (doesnt involve Project)
+		BindingPressed, BindingReleased,
 
 		AssetImported, AssetRemoved, AssetMoved
 	};
@@ -22,11 +23,10 @@ namespace Strype {
 	{
 		None = 0,
 		EventCategoryApplication = BIT(0),
-		EventCategoryInput = BIT(1),
-		EventCategoryKeyboard = BIT(2),
+		EventCategoryWindow = BIT(1),
+		EventCategoryInput = BIT(2),
 		EventCategoryMouse = BIT(3),
-		EventCategoryMouseButton = BIT(4),
-		EventCategoryAsset = BIT(5)
+		EventCategoryAsset = BIT(4)
 	};
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
@@ -167,7 +167,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(WindowResize)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryWindow)
 		EVENT_CLASS_GLOBAL(false)
 	private:
 		glm::vec2 m_Size;
@@ -179,7 +179,7 @@ namespace Strype {
 		WindowCloseEvent() {}
 
 		EVENT_CLASS_TYPE(WindowClose)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryWindow)
 		EVENT_CLASS_GLOBAL(false)
 	};
 
@@ -197,7 +197,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(WindowMove)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryWindow)
 		EVENT_CLASS_GLOBAL(false)
 	private:
 		glm::vec2 m_Position;
@@ -212,47 +212,58 @@ namespace Strype {
 		const std::vector<std::filesystem::path>& GetPaths() const { return m_Paths; }
 
 		EVENT_CLASS_TYPE(WindowDrop)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryWindow)
 		EVENT_CLASS_GLOBAL(false)
 	private:
 		std::vector<std::filesystem::path> m_Paths;
 	};
 
-	class KeyEvent : public Event
+	class BindingPressedEvent : public Event
 	{
 	public:
-		KeyCode GetKeyCode() const { return m_KeyCode; }
+		template<typename T>
+		BindingPressedEvent(BindingType type, T code)
+			: m_Binding(type, (int)code) {}
+
+		BindingPressedEvent(InputBinding binding)
+			: m_Binding(binding) {}
+
+		const InputBinding& GetBinding() const { return m_Binding; }
 
 		std::string ToString() const override
 		{
-			return fmt::format("{}: {}", GetName(), (uint16_t)m_KeyCode);
+			return fmt::format("BindingPressedEvent: {}", m_Binding);
 		}
 
-		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
+		EVENT_CLASS_TYPE(BindingPressed)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryInput)
 		EVENT_CLASS_GLOBAL(false)
-	protected:
-		KeyEvent(KeyCode keycode)
-			: m_KeyCode(keycode) {}
-
-		KeyCode m_KeyCode;
+	private:
+		InputBinding m_Binding;
 	};
 
-	class KeyPressedEvent : public KeyEvent
+	class BindingReleasedEvent : public Event
 	{
 	public:
-		KeyPressedEvent(KeyCode keycode)
-			: KeyEvent(keycode) {}
+		template<typename T>
+		BindingReleasedEvent(BindingType type, T code)
+			: m_Binding(type, (int)code) {}
 
-		EVENT_CLASS_TYPE(KeyPressed)
-	};
+		BindingReleasedEvent(InputBinding binding)
+			: m_Binding(binding) {}
 
-	class KeyReleasedEvent : public KeyEvent
-	{
-	public:
-		KeyReleasedEvent(KeyCode keycode)
-			: KeyEvent(keycode) {}
+		const InputBinding& GetBinding() const { return m_Binding; }
 
-		EVENT_CLASS_TYPE(KeyReleased)
+		std::string ToString() const override
+		{
+			return fmt::format("BindingReleasedEvent: {}", m_Binding);
+		}
+
+		EVENT_CLASS_TYPE(BindingReleased)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryInput)
+		EVENT_CLASS_GLOBAL(false)
+	private:
+		InputBinding m_Binding;
 	};
 
 	class MouseMovedEvent : public Event
@@ -293,43 +304,6 @@ namespace Strype {
 		EVENT_CLASS_GLOBAL(false)
 	private:
 		glm::vec2 m_Offset;
-	};
-
-	class MouseButtonEvent : public Event
-	{
-	public:
-		MouseCode GetMouseButton() const { return m_Button; }
-
-		std::string ToString() const override
-		{
-			return fmt::format("{}: {}", GetName(), (uint16_t)m_Button);
-		}
-
-		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
-		EVENT_CLASS_GLOBAL(false)
-	protected:
-		MouseButtonEvent(MouseCode button)
-			: m_Button(button) {}
-
-		MouseCode m_Button;
-	};
-
-	class MouseButtonPressedEvent : public MouseButtonEvent
-	{
-	public:
-		MouseButtonPressedEvent(MouseCode button)
-			: MouseButtonEvent(button) {}
-
-		EVENT_CLASS_TYPE(MouseButtonPressed)
-	};
-
-	class MouseButtonReleasedEvent : public MouseButtonEvent
-	{
-	public:
-		MouseButtonReleasedEvent(MouseCode button)
-			: MouseButtonEvent(button) {}
-
-		EVENT_CLASS_TYPE(MouseButtonReleased)
 	};
 
 }

@@ -35,6 +35,7 @@ namespace Strype {
         	AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
         	texture->SetData(data, width * height * channels);
 
+			stbi_image_free(data);
 			return texture;
 		}
 
@@ -107,7 +108,10 @@ namespace Strype {
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 			ImGui::PushID(i);
 
-			ImGui::ImageButton("", (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, ImVec2(tx[3].x, tx[3].y), ImVec2(tx[1].x, tx[1].y));
+			// ImGui needs todo this
+			tx = Utils::FlipTexCoords(tx);
+			
+			ImGui::ImageButton("", (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, ImVec2(tx[0].x, tx[0].y), ImVec2(tx[2].x, tx[2].y));
 			
 			ImGui::PopID();
 			ImGui::PopStyleColor();

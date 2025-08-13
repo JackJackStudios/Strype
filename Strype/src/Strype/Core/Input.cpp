@@ -77,18 +77,18 @@ namespace Strype {
 
 			if (state == InputState::Held && !Input::IsKeyDown(key))
 			{
-				KeyReleasedEvent event(key);
-				Application::Get().OnEvent(event);
-
 				state = InputState::Released;
+
+				BindingReleasedEvent event(BindingType::Keyboard, key);
+				Application::Get().OnEvent(event);
 			}
 
 			if (state == InputState::None && Input::IsKeyDown(key))
 			{
-				KeyPressedEvent event(key);
-				Application::Get().OnEvent(event);
-
 				state = InputState::Pressed;
+
+				BindingPressedEvent event(BindingType::Keyboard, key);
+				Application::Get().OnEvent(event);
 			}
 		}
 
@@ -102,18 +102,18 @@ namespace Strype {
 
 			if (state == InputState::Held && !Input::IsMouseButtonDown(button))
 			{
-				MouseButtonReleasedEvent event(button);
-				Application::Get().OnEvent(event);
-
 				state = InputState::Released;
+
+				BindingReleasedEvent event(BindingType::MouseButton, button);
+				Application::Get().OnEvent(event);
 			}
 
 			if (state == InputState::None && Input::IsMouseButtonDown(button))
 			{
-				MouseButtonPressedEvent event(button);
-				Application::Get().OnEvent(event);
-
 				state = InputState::Pressed;
+
+				BindingPressedEvent event(BindingType::MouseButton, button);
+				Application::Get().OnEvent(event);
 			}
 		}
 
@@ -145,10 +145,37 @@ namespace Strype {
 						s_InputState.GamepadButtons[button] = InputState::None;
 
 					if (state == InputState::Held && !buttonDown)
+					{
 						s_InputState.GamepadButtons[button] = InputState::Released;
 
+						BindingReleasedEvent event(BindingType::GamepadButton, button);
+						Application::Get().OnEvent(event);
+					}
+
 					if (state == InputState::None && buttonDown)
+					{
 						s_InputState.GamepadButtons[button] = InputState::Pressed;
+
+						BindingPressedEvent event(BindingType::GamepadButton, button);
+						Application::Get().OnEvent(event);
+					}
+				}
+			}
+
+			// Axis events
+			for (int i = 0; i < (int)GamepadAxis::SIZE; ++i)
+			{
+				InputBinding binding = { BindingType::GamepadAxis, i };
+
+				if (IsBindingPressed(binding))
+				{
+					BindingPressedEvent event(binding);
+					Application::Get().OnEvent(event);
+				}
+				else if (IsBindingReleased(binding))
+				{
+					BindingReleasedEvent event(binding);
+					Application::Get().OnEvent(event);
 				}
 			}
 		}
@@ -168,11 +195,10 @@ namespace Strype {
 
 	bool Input::IsGamepadButtonDown(ButtonCode button)
 	{
-		if (s_InputState.GamepadButtons.find(button) != s_InputState.GamepadButtons.end())
-			if (s_InputState.GamepadButtons[button] != InputState::Released) // Released is the frame after the button is let go
-				return true;
+		auto it = s_InputState.GamepadButtons.find(button);
 
-		return false;
+		// Released is the frame after the button is let go
+		return (it != s_InputState.GamepadButtons.end() && it->second != InputState::Released);
 	}
 
 	bool Input::IsKeyPressed(KeyCode key)
@@ -235,39 +261,25 @@ namespace Strype {
 	bool Input::IsGamepadAxisActive(GamepadAxis axis)
 	{
 		if (!s_InputState.ConnectedGamepad) return false;
-		int axisIndex = -1;
-		bool positiveDir = false;
-
-		switch (axis)
-		{
-		case GamepadAxis::LeftLeft:  axisIndex = GLFW_GAMEPAD_AXIS_LEFT_X;  positiveDir = false; break;
-		case GamepadAxis::LeftRight: axisIndex = GLFW_GAMEPAD_AXIS_LEFT_X;  positiveDir = true;  break;
-		case GamepadAxis::LeftUp:    axisIndex = GLFW_GAMEPAD_AXIS_LEFT_Y;  positiveDir = false; break;
-		case GamepadAxis::LeftDown:  axisIndex = GLFW_GAMEPAD_AXIS_LEFT_Y;  positiveDir = true;  break;
-
-		case GamepadAxis::RightLeft:  axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_X; positiveDir = false; break;
-		case GamepadAxis::RightRight: axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_X; positiveDir = true;  break;
-		case GamepadAxis::RightUp:    axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_Y; positiveDir = false; break;
-		case GamepadAxis::RightDown:  axisIndex = GLFW_GAMEPAD_AXIS_RIGHT_Y; positiveDir = true;  break;
-		}
-
+		
+		int axisIndex = glm::floor((int)axis / 2); // Maps enum to the glfw axis
 		float value = s_InputState.GamepadState.axes[axisIndex];
 
-		// NEW: clamp deadzone both directions
-		if (fabs(value) < GAMEPAD_DEADZONE)
+		if (glm::abs(value) < GAMEPAD_DEADZONE)
 			return false;
 
-		return positiveDir ? (value > 0) : (value < 0);
+		// Which direction on the axis?
+		return ((int)axis % 2 == 1) ? (value > 0) : (value < 0);
 	}
 
 	bool Input::IsBindingDown(InputBinding binding) 
 	{
 		switch (binding.Type)
 		{
-		case BindingType::Keyboard:      return IsKeyDown(binding.Value.Keyboard);
-		case BindingType::MouseButton:   return IsMouseButtonDown(binding.Value.MouseButton);
-		case BindingType::GamepadButton: return IsGamepadButtonDown(binding.Value.GamepadButton);
-		case BindingType::GamepadAxis:   return IsGamepadAxisActive(binding.Value.GamepadAxis);
+		case BindingType::Keyboard:      return IsKeyDown((KeyCode)binding.Code);
+		case BindingType::MouseButton:   return IsMouseButtonDown((MouseCode)binding.Code);
+		case BindingType::GamepadButton: return IsGamepadButtonDown((ButtonCode)binding.Code);
+		case BindingType::GamepadAxis:   return IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
 		STY_CORE_VERIFY(false, "Unsupported InputBinding");
@@ -278,10 +290,10 @@ namespace Strype {
 	{
 		switch (binding.Type)
 		{
-		case BindingType::Keyboard:      return IsKeyPressed(binding.Value.Keyboard);
-		case BindingType::MouseButton:   return IsMouseButtonPressed(binding.Value.MouseButton);
-		case BindingType::GamepadButton: return IsGamepadButtonPressed(binding.Value.GamepadButton);
-		case BindingType::GamepadAxis:   return IsGamepadAxisActive(binding.Value.GamepadAxis);
+		case BindingType::Keyboard:      return IsKeyPressed((KeyCode)binding.Code);
+		case BindingType::MouseButton:   return IsMouseButtonPressed((MouseCode)binding.Code);
+		case BindingType::GamepadButton: return IsGamepadButtonPressed((ButtonCode)binding.Code);
+		case BindingType::GamepadAxis:   return IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
 		STY_CORE_VERIFY(false, "Unsupported InputBinding");
@@ -292,10 +304,10 @@ namespace Strype {
 	{
 		switch (binding.Type)
 		{
-		case BindingType::Keyboard:      return IsKeyHeld(binding.Value.Keyboard);
-		case BindingType::MouseButton:   return IsMouseButtonHeld(binding.Value.MouseButton);
-		case BindingType::GamepadButton: return IsGamepadButtonHeld(binding.Value.GamepadButton);
-		case BindingType::GamepadAxis:   return IsGamepadAxisActive(binding.Value.GamepadAxis);
+		case BindingType::Keyboard:      return IsKeyHeld((KeyCode)binding.Code);
+		case BindingType::MouseButton:   return IsMouseButtonHeld((MouseCode)binding.Code);
+		case BindingType::GamepadButton: return IsGamepadButtonHeld((ButtonCode)binding.Code);
+		case BindingType::GamepadAxis:   return IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
 		STY_CORE_VERIFY(false, "Unsupported InputBinding");
@@ -306,10 +318,10 @@ namespace Strype {
 	{
 		switch (binding.Type)
 		{
-		case BindingType::Keyboard:      return IsKeyReleased(binding.Value.Keyboard);
-		case BindingType::MouseButton:   return IsMouseButtonReleased(binding.Value.MouseButton);
-		case BindingType::GamepadButton: return IsGamepadButtonReleased(binding.Value.GamepadButton);
-		case BindingType::GamepadAxis:   return !IsGamepadAxisActive(binding.Value.GamepadAxis);
+		case BindingType::Keyboard:      return IsKeyReleased((KeyCode)binding.Code);
+		case BindingType::MouseButton:   return IsMouseButtonReleased((MouseCode)binding.Code);
+		case BindingType::GamepadButton: return IsGamepadButtonReleased((ButtonCode)binding.Code);
+		case BindingType::GamepadAxis:   return !IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
 		STY_CORE_VERIFY(false, "Unsupported InputBinding");

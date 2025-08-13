@@ -103,7 +103,7 @@ namespace Strype {
 
 		m_Room->OnUpdate(ts);
 		
-		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		if (Input::IsMouseButtonPressed(MouseCode::Left) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			float pixelData = *(float*)m_Framebuffer->ReadPixel(1, mouseX, mouseY);
 			InstanceID id = pixelData - 1;

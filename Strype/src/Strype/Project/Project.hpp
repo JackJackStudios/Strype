@@ -29,7 +29,7 @@ namespace Strype {
 		Project();
 		~Project();
 
-		ProjectConfig& GetConfig() { return m_Config; }
+		const ProjectConfig& GetConfig() const { return m_Config; }
 
 		static Ref<AssetManager> GetAssetManager() { return GetActive()->m_AssetManager; }
 		static Ref<ScriptEngine>& GetScriptEngine() { return GetActive()->m_ScriptEngine; }
@@ -135,6 +135,7 @@ namespace Strype {
 		Room* m_ActiveRoom;
 
 		friend class ProjectSerializer;
+		friend class ProjectSettingsPanel;
 	};
 
 }
