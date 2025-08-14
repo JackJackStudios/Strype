@@ -11,9 +11,8 @@ The engine is officially tested on Windows x64 and Unbuntu ARM64.
 * A C++ 20 compiler 
 
 ## Building Strype
-Core & Runtime - **Windows or Linux**
-
-Editor - **Windows only** (DotNet/MSbuild)
+* Core & Runtime - **Windows or Linux**
+* Editor - **Windows only** (DotNet/MSbuild)
 
 To build the entire repository:
 ```console
