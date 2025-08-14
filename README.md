@@ -24,4 +24,4 @@ cmake --build .
 ```
 
 ## License
-AGI is licensed under the [MIT License](LICENSE).
+Strype is licensed under the [MIT License](LICENSE).
