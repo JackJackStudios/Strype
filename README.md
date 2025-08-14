@@ -11,9 +11,8 @@ The engine is officially tested on Windows x64 and Unbuntu ARM64.
 * A C++ 20 compiler 
 
 ## Building Strype
-The Strype static library and Strype-Runtime works on both Windows and Linux however
-Strype-Editor is Windows-only due to MSbuild/DotNet required to build C# binaires. Strype-Editor will
-still be built with CMake due to testing but it will not run.
+Core & Runtime - **Windows or Linux**
+Editor - **Windows only** (DotNet/MSbuild)
 
 To build the entire repository:
 ```console
