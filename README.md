@@ -12,6 +12,7 @@ The engine is officially tested on Windows x64 and Unbuntu ARM64.
 
 ## Building Strype
 Core & Runtime - **Windows or Linux**
+
 Editor - **Windows only** (DotNet/MSbuild)
 
 To build the entire repository:
