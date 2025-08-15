@@ -66,6 +66,8 @@ namespace Strype {
 			m_PanelManager.GetInspector()->SetSelected<Object>(asset->Handle);
 		});
 
+		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
+
 		OpenProject(m_ProjectPath);
 		if (!Project::GetActive()) exit(0);
 	}
@@ -215,8 +217,7 @@ namespace Strype {
 
 	void EditorLayer::SaveProject()
 	{
-		ProjectSerializer serializer(Project::GetActive());
-		serializer.Serialize(Project::GetProjectDirectory() / (Project::GetProjectName() + ".sproj"));
+		Project::SaveFile(Project::GetActive());
 		Project::SaveAllAssets();
 	}
 
@@ -227,9 +228,7 @@ namespace Strype {
 		if (dialog.empty())
 			return; // User click off of file dialog
 
-		Ref<Project> project = CreateRef<Project>();
-		ProjectSerializer serializer(project);
-		serializer.Deserialize(dialog);
+		Ref<Project> project = Project::LoadFile(dialog);
 
 		Project::RestoreCSharp(project);
 		OpenProject(project);
@@ -247,6 +246,48 @@ namespace Strype {
 		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorLayer::FilewatcherFunc));
 		
 		OpenRoom(Project::GetHandle(project->GetConfig().StartRoom));
+	}
+
+	void EditorLayer::OnInspectorRender(Object* select)
+	{
+		ImVec2 size = ImVec2(128.0f, 128.0f);
+		Ref<Sprite> sprite = Project::GetAsset<Sprite>(select->TextureHandle);
+		TexCoords tx = Utils::FlipTexCoords(sprite->GetTexCoords());
+
+		UI::CenterWidget(size);
+		ImGui::Image(Renderer::GetCurrent()->GetTexture(sprite)->GetRendererID(), size, Utils::ToImVec2(tx[0]), Utils::ToImVec2(tx[2]));
+
+		UI::CenterWidget(size);
+		ImGui::Button(select->FilePath.filename().string().c_str(), ImVec2(size.x, 0));
+
+		if (UI::DropdownMenu("Properties"))
+		{
+			float padding = 32.0f;
+			ImVec2 child_size(ImGui::GetContentRegionAvail().x - padding*2, 75.0f);
+			
+			ImGui::Button("Add Script");
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					AssetHandle handle = *(AssetHandle*)payload->Data;
+
+					if (Project::GetAssetType(handle) == AssetType::Object)
+						m_Room->InstantiatePrefab(handle);
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (ImGui::BeginChild("ScriptWindow", child_size, ImGuiChildFlags_Borders))
+			{
+				auto& scriptEngine = Project::GetScriptEngine();
+				ImGui::Selectable(scriptEngine->GetScriptName(select->ClassID).c_str(), false);
+			}
+			ImGui::EndChild();
+
+
+			ImGui::TreePop();
+		}
 	}
 
 	void EditorLayer::FilewatcherFunc(const std::string& str, const filewatch::Event event)

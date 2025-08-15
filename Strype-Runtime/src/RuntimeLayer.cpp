@@ -1,7 +1,6 @@
 #include "RuntimeLayer.hpp"
 
 #include "Strype/Project/Project.hpp"
-#include "Strype/Project/ProjectSerializer.hpp"
 
 namespace Strype {
 
@@ -23,10 +22,7 @@ namespace Strype {
 
 	void RuntimeLayer::OpenProject(const std::filesystem::path& path)
 	{
-		Ref<Project> project = CreateRef<Project>();
-		ProjectSerializer serializer(project);
-		serializer.Deserialize(path);
-
+		Ref<Project> project = Project::LoadFile(path);
 		Project::SetActive(project);
 
 		m_Room = Project::GetAsset<Room>(Project::GetHandle(project->GetConfig().StartRoom));

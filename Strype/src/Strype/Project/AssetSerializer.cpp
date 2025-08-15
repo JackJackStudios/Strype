@@ -53,19 +53,17 @@ namespace Strype {
 
 	Ref<Asset> ObjectSerializer::LoadAsset(const std::filesystem::path& path)
 	{
-		Ref<Object> object = CreateRef<Object>();
+        YAML::Node root = YAML::LoadFile(path.string())["Object"];
+        if (!root) return nullptr;
 
-		auto& scriptEngine = Project::GetScriptEngine();
-        ScriptID script = scriptEngine->GetIDByName(path.stem().string());
+        auto& scriptEngine = Project::GetScriptEngine();
+        ScriptID script = scriptEngine->GetIDByName(root["Script"].as<std::string>());
         if (!scriptEngine->IsValidScript(script))
             return nullptr;
 
-        const ScriptField& textureField = scriptEngine->GetField(script, "TexturePath");
-        std::string coralName = std::string(*textureField.DefaultValue.As<Coral::String>());
-
-		object->ClassID = script;
-        object->TextureHandle = Project::ImportAsset(coralName);
-        if (!Project::IsAssetLoaded(object->TextureHandle)) return nullptr;
+		Ref<Object> object = CreateRef<Object>();
+        object->TextureHandle = Project::ImportAsset(root["SpritePath"].as<std::filesystem::path>());
+        object->ClassID = script;
 
 		return object;
 	}

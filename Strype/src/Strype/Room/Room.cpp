@@ -28,23 +28,10 @@ namespace Strype {
 
 		if (m_RoomState == RoomState::Editor)
 		{
-			if (Input::IsKeyDown(KeyCode::A))
-			{
-				m_Camera.Position.x -= m_CameraSpeed * ts;
-			}
-			else if (Input::IsKeyDown(KeyCode::D))
-			{
-				m_Camera.Position.x += m_CameraSpeed * ts;
-			}
-
-			if (Input::IsKeyDown(KeyCode::W))
-			{
-				m_Camera.Position.y += m_CameraSpeed * ts;
-			}
-			else if (Input::IsKeyDown(KeyCode::S))
-			{
-				m_Camera.Position.y -= m_CameraSpeed * ts;
-			}
+			int controlX = Input::IsKeyDown(KeyCode::D) - Input::IsKeyDown(KeyCode::A);
+			int controlY = Input::IsKeyDown(KeyCode::S) - Input::IsKeyDown(KeyCode::W);
+			m_Camera.Position.x += controlX * m_CameraSpeed * ts;
+			m_Camera.Position.y += controlY * m_CameraSpeed * ts;
 
 			m_Camera.UpdateMatrix();
 		}
@@ -68,7 +55,6 @@ namespace Strype {
 
 			if (m_RoomState == RoomState::Runtime)
 			{
-				//object.Emitter->SetPos(instance.Position);
 				instance.CSharp->InvokeMethod("OnUpdate", ts);
 				instance.CurrentFrame += sprite->GetFrameDelta();
 				
@@ -175,7 +161,7 @@ namespace Strype {
 
 	void Room::DestroyInstance(InstanceID obj)
 	{
-		STY_CORE_VERIFY(false, "Not implemented");
+		m_Objects.erase(std::find_if(m_Objects.begin(), m_Objects.end(), [&](const RoomInstance& other) -> bool { return other.GetHandle() == obj; }));
 	}
 
 	void Room::OnResize(const glm::vec2& size)
@@ -194,7 +180,7 @@ namespace Strype {
 	void Room::OnMouseScrolled(MouseScrolledEvent& e)
 	{
 		m_ZoomLevel += e.GetOffset().y * 0.25f;
-		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
+		m_ZoomLevel = glm::max(m_ZoomLevel, 0.25f);
 		m_Camera.SetZoomLevel(m_ZoomLevel);
 	}
 

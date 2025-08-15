@@ -2,8 +2,6 @@
 #include "Project.hpp"
 
 #include "Strype/Utils/PlatformUtils.hpp"
-
-#include "Strype/Project/ProjectSerializer.hpp"
 #include "Strype/Script/ScriptEngine.hpp"
 
 #ifdef STY_WINDOWS
@@ -115,11 +113,9 @@ namespace Strype {
 		//Change empty project to fit new project name
 		std::filesystem::rename(path / std::filesystem::path(EMPTY_PROJECT).filename(), path / (path.filename().string() + ".sproj"));
 
-		Ref<Project> project = CreateRef<Project>();
-		ProjectSerializer serializer(project);
-		serializer.Deserialize(path / (path.filename().string() + ".sproj"));
-
+		Ref<Project> project = Project::LoadFile(path / (path.filename().string() + ".sproj"));
 		Project::BuildCSharp(project);
+
 		return project;
 	}
 

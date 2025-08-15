@@ -63,6 +63,7 @@ namespace Strype {
 		void OpenProject(Ref<Project> project);
 	private:
 		void OnWindowDrop(WindowDropEvent& e);
+		void OnInspectorRender(Object* select);
 
 		void UI_RoomPanel();
 		void FilewatcherFunc(const std::string& str, const filewatch::Event event);

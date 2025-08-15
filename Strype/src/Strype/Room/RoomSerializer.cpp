@@ -34,8 +34,8 @@ namespace Strype {
 					{
 						ScopedMap objMap(out);
 
-						out << YAML::Key << "Object" << YAML::Value << obj.GetHandle();
-						out << YAML::Key << "PrefabPath" << YAML::Value << Project::GetFilePath(obj.ObjectHandle);
+						out << YAML::Key << "Instance ID" << YAML::Value << obj.GetHandle();
+						out << YAML::Key << "ObjectPath" << YAML::Value << Project::GetFilePath(obj.ObjectHandle);
 						out << YAML::Key << "Colour" << YAML::Value << obj.Colour;
 
 						out << YAML::Key << "Position" << YAML::Value << obj.Position;
@@ -52,11 +52,10 @@ namespace Strype {
 
 	Ref<Asset> RoomSerializer::LoadAsset(const std::filesystem::path& path)
 	{
-		Ref<Room> room = CreateRef<Room>();
 		YAML::Node data = YAML::LoadFile(path.string())["Room"];
+		if (!data) return nullptr;
 
-		STY_CORE_VERIFY(data, "Could not load room")
-
+		Ref<Room> room = CreateRef<Room>();
 		room->m_Width = data["Width"].as<uint64_t>();
 		room->m_Height = data["Height"].as<uint64_t>();
 		room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
@@ -64,7 +63,7 @@ namespace Strype {
 		YAML::Node objects = data["Objects"];
 		for (auto obj : objects)
 		{
-			AssetHandle handle = Project::ImportAsset(obj["PrefabPath"].as<std::filesystem::path>());
+			AssetHandle handle = Project::ImportAsset(obj["ObjectPath"].as<std::filesystem::path>());
 			if (!Project::IsAssetLoaded(handle))
 				continue;
 

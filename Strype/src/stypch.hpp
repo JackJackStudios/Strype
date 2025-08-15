@@ -18,3 +18,7 @@
 #include "Strype/Core/Buffer.hpp"
 #include "Strype/Core/Timer.hpp"
 
+#ifndef NOMINMAX
+#	define NOMINMAX
+#endif
+

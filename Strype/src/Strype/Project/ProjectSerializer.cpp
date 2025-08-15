@@ -1,28 +1,23 @@
 #include "stypch.hpp"
-#include "ProjectSerializer.hpp"
+#include "Project.hpp"
 
 #include "Strype/Utils/YamlHelpers.hpp"
 
 namespace Strype {
 
-	ProjectSerializer::ProjectSerializer(const Ref<Project>& project)
-		: m_Project(project)
-	{
-	}
-
-	void ProjectSerializer::Serialize(const std::filesystem::path& filepath)
+	void Project::SaveFile(Ref<Project> project, const std::filesystem::path& filepath)
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		out << YAML::Key << "Project" << YAML::Value;
 		out << YAML::BeginMap;
 		{
-			out << YAML::Key << "StartRoom" << YAML::Value << m_Project->m_Config.StartRoom;
-			out << YAML::Key << "ViewportSize" << YAML::Value << m_Project->m_Config.ViewportSize;
+			out << YAML::Key << "StartRoom" << YAML::Value << project->m_Config.StartRoom;
+			out << YAML::Key << "ViewportSize" << YAML::Value << project->m_Config.ViewportSize;
 
 			out << YAML::Key << "RuntimeProps" << YAML::BeginMap;
 			{
-				auto& props = m_Project->m_Config.RuntimeProps;
+				auto& props = project->m_Config.RuntimeProps;
 				out << YAML::Key << "Size" << YAML::Value << props.Size;
 				out << YAML::Key << "Visible" << YAML::Value << props.Visible;
 				out << YAML::Key << "Resizable" << YAML::Value << props.Resizable;
@@ -33,7 +28,7 @@ namespace Strype {
 			out << YAML::EndMap;
 
 			out << YAML::Key << "Bindings" << YAML::BeginMap;
-			for (const auto& [name, bindings] : m_Project->m_Bindings)
+			for (const auto& [name, bindings] : project->m_Bindings)
 			{
 				out << YAML::Key << name << YAML::Flow;
 
@@ -49,18 +44,20 @@ namespace Strype {
 		out << YAML::EndMap;
 		out << YAML::EndMap;
 
-		std::ofstream fout(filepath);
+		std::ofstream fout(filepath.empty() ? project->m_Config.ProjectDirectory / (project->m_Config.Name + ".sproj") : filepath);
 		fout << out.c_str();
 	}
 
-	void ProjectSerializer::Deserialize(const std::filesystem::path& filepath)
+	Ref<Project> Project::LoadFile(const std::filesystem::path& filepath)
 	{
+		Ref<Project> project = CreateRef<Project>();
+
 		YAML::Node root = YAML::LoadFile(filepath.string())["Project"];
-		STY_CORE_VERIFY(root, "Could not open project");
+		if (!root) return nullptr;
 
 		STY_CORE_INFO("Loading project '{}'", filepath.stem());
 
-		ProjectConfig& config = m_Project->m_Config;
+		ProjectConfig& config = project->m_Config;
 		config.Name = filepath.stem().string();
 		config.ProjectDirectory = filepath.parent_path();
 
@@ -79,8 +76,10 @@ namespace Strype {
 		for (auto it = bindings.begin(); it != bindings.end(); ++it)
 		{
 			std::string verb = it->first.as<std::string>();
-			m_Project->m_Bindings[verb] = it->second.as<std::vector<InputBinding>>();
+			project->m_Bindings[verb] = it->second.as<std::vector<InputBinding>>();
 		}
+
+		return project;
 	}
 
 }

@@ -109,9 +109,7 @@ namespace Strype {
 		}
 		else
 		{
-			AssetType type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
-
-			STY_CORE_WARN("Asset import failed AssetType::{}: \"{}\" ", magic_enum::enum_name(type), filepath);
+			STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
 			return 0;
 		}
 

@@ -12,7 +12,7 @@ namespace Strype {
 	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
 		{ ".png", AssetType::Sprite },
 		{ ".wav", AssetType::AudioFile },
-		{ ".cs", AssetType::Object },
+		{ ".sobject", AssetType::Object },
 		{ ".sroom", AssetType::Room },
 	};
 

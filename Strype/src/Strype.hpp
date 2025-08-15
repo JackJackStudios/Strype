@@ -22,7 +22,6 @@
 #include "Strype/Project/Asset.hpp"
 #include "Strype/Project/AssetManager.hpp"
 #include "Strype/Project/Project.hpp"
-#include "Strype/Project/ProjectSerializer.hpp"
 
 #include "Strype/Script/ScriptEngine.hpp"
 

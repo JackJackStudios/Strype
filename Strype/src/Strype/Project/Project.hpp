@@ -43,6 +43,9 @@ namespace Strype {
 		static void BuildCSharp(Ref<Project> project, bool restore = true);
 		static void RestoreCSharp(Ref<Project> project);
 
+		static Ref<Project> LoadFile(const std::filesystem::path& filepath);
+		static void SaveFile(Ref<Project> project, const std::filesystem::path& filepath = std::filesystem::path());
+
 		static Ref<Project> GenerateNew(const std::filesystem::path& path);
 
 		static const std::string& GetProjectName()

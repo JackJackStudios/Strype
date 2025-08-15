@@ -1,8 +1,15 @@
 #pragma once
 
+#include <imgui.h>
+
 namespace Strype {
 
 	namespace Utils {
+
+		static ImVec2 ToImVec2(const glm::vec2& vec)
+		{
+			return { vec.x, vec.y };
+		}
 
 		static std::string ReadFile(const std::filesystem::path& filepath)
 		{
