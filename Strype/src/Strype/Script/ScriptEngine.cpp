@@ -3,6 +3,7 @@
 
 #include "ScriptGlue.hpp"
 
+#include "Strype/Project/Project.hpp"
 #include "Strype/Core/Application.hpp"
 
 #include <Coral/TypeCache.hpp>

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Strype/Project/Project.hpp"
-
 #include "Strype/Core/UUID.hpp"
 #include "Strype/Core/Hash.hpp"
 
@@ -74,7 +72,8 @@ namespace Strype {
 
 	using ScriptID = UUID;
 	using ScriptMap = std::unordered_map<ScriptID, ScriptMetadata>;
-
+	
+	class Project;
 	class ScriptEngine
 	{
 	public:

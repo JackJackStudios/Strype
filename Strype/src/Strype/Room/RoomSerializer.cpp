@@ -1,11 +1,12 @@
 #include "stypch.hpp"
-#include "RoomSerializer.hpp"
+#include "Room.hpp"
 
 #include "Object.hpp"
 #include "RoomInstance.hpp"
 
 #include "Strype/Utils/YamlHelpers.hpp"
 #include "Strype/Project/Project.hpp"
+#include "Strype/Project/AssetSerializer.hpp"
 
 #include <fstream>
 

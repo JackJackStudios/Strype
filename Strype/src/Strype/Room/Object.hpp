@@ -24,7 +24,7 @@ namespace Strype {
 	public:
 		AssetHandle TextureHandle;
 		PhysicsType BodyType = PhysicsType::Kinematic;
-		UUID ClassID;
+		std::vector<UUID> Scripts;
 	};
 
 }

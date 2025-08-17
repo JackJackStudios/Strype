@@ -15,6 +15,16 @@
 
 namespace Strype {
 
+    void AssetManager::SetSerializers()
+    {
+        m_Serializers.clear();
+        m_Serializers[AssetType::Object] = CreateScope<ObjectSerializer>();
+        m_Serializers[AssetType::Sprite] = CreateScope<SpriteSerializer>();
+        m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
+        m_Serializers[AssetType::AudioFile] = CreateScope<AudioFileSerializer>();
+        m_Serializers[AssetType::Script] = CreateScope<ScriptSerializer>();
+    }
+
     Ref<Asset> SpriteSerializer::LoadAsset(const std::filesystem::path& path)
     {
         int frameCount = 1;
@@ -56,17 +66,40 @@ namespace Strype {
         YAML::Node root = YAML::LoadFile(path.string())["Object"];
         if (!root) return nullptr;
 
-        auto& scriptEngine = Project::GetScriptEngine();
-        ScriptID script = scriptEngine->GetIDByName(root["Script"].as<std::string>());
-        if (!scriptEngine->IsValidScript(script))
-            return nullptr;
-
 		Ref<Object> object = CreateRef<Object>();
         object->TextureHandle = Project::ImportAsset(root["SpritePath"].as<std::filesystem::path>());
-        object->ClassID = script;
+        
+        for (const auto& node : root["Scripts"])
+        {
+            std::string name = node.as<std::string>();
+
+            auto& scriptEngine = Project::GetScriptEngine();
+            ScriptID script = scriptEngine->GetIDByName(name);
+
+            if (!scriptEngine->IsValidScript(script))
+            {
+                STY_CORE_WARN("\"{}\" doesnt exist in C# binaries", name);
+                continue;
+            }
+
+            object->Scripts.emplace_back(script);
+        }
 
 		return object;
 	}
+
+    Ref<Asset> ScriptSerializer::LoadAsset(const std::filesystem::path& path)
+    {
+        auto& scriptEngine = Project::GetScriptEngine();
+        ScriptID script = scriptEngine->GetIDByName(path.stem().string());
+        if (!scriptEngine->IsValidScript(script))
+        {
+            STY_CORE_WARN("{} doesn't have corrosponding class in C# binaries", path.filename());
+            return nullptr;
+        }
+
+        return CreateRef<Script>(script);
+    }
 
 }
 

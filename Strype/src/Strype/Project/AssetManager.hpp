@@ -14,6 +14,7 @@ namespace Strype {
 		{ ".wav", AssetType::AudioFile },
 		{ ".sobject", AssetType::Object },
 		{ ".sroom", AssetType::Room },
+		{ ".cs", AssetType::Script },
 	};
 
 	namespace Utils {
@@ -86,6 +87,8 @@ namespace Strype {
 				func(handle);
 			}
 		}
+	private:
+		void SetSerializers();
 	private:
 		AssetRegistry m_LoadedFiles;
 		AssetMap m_AssetRegistry;

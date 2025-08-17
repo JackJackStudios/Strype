@@ -2,7 +2,6 @@
 #include "AssetManager.hpp"
 
 #include "AssetSerializer.hpp"
-#include "Strype/Room/RoomSerializer.hpp"
 #include "Strype/Project/Project.hpp"
 #include "Strype/Core/Application.hpp"
 
@@ -38,11 +37,11 @@ namespace Strype {
 	bool AssetManager::CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset) const
 	{
 		REGISTER_ASSET(Room);
+		REGISTER_ASSET(Object);
 
-		// TODO: Create object with template
-		DEREGISTER_ASSET(Object);
+		// TODO: Create scripts with template
+		DEREGISTER_ASSET(Script);
 
-		// TODO: Remove sprite when added animations
 		DEREGISTER_ASSET(Sprite);
 		DEREGISTER_ASSET(AudioFile);
 
@@ -68,10 +67,7 @@ namespace Strype {
 	AssetManager::AssetManager()
 	{
 		m_Serializers.clear();
-		m_Serializers[AssetType::Object] = CreateScope<ObjectSerializer>();
-		m_Serializers[AssetType::Sprite] = CreateScope<SpriteSerializer>();
-		m_Serializers[AssetType::Room] = CreateScope<RoomSerializer>();
-		m_Serializers[AssetType::AudioFile] = CreateScope<AudioFileSerializer>();
+		SetSerializers();
 	}
 
 	AssetManager::~AssetManager()

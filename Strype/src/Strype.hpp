@@ -17,7 +17,6 @@
 
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/RoomInstance.hpp"
-#include "Strype/Room/RoomSerializer.hpp"
 
 #include "Strype/Project/Asset.hpp"
 #include "Strype/Project/AssetManager.hpp"

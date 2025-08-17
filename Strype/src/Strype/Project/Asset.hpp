@@ -8,7 +8,7 @@ namespace Strype {
 
 	enum class AssetType : uint16_t
 	{
-		None = 0, Object, Sprite, Room, AudioFile
+		None = 0, Object, Sprite, Room, AudioFile, Script
 	};
 
 	class Asset

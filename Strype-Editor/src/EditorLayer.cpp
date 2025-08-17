@@ -272,8 +272,12 @@ namespace Strype {
 				{
 					AssetHandle handle = *(AssetHandle*)payload->Data;
 
-					if (Project::GetAssetType(handle) == AssetType::Object)
-						m_Room->InstantiatePrefab(handle);
+					if (Project::GetAssetType(handle) == AssetType::Script)
+					{
+						Ref<Script> script = Project::GetAsset<Script>(handle);
+						if (Project::GetScriptEngine()->IsValidScript(script->GetID()))
+							select->Scripts.emplace_back(script->GetID());
+					}
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -281,7 +285,11 @@ namespace Strype {
 			if (ImGui::BeginChild("ScriptWindow", child_size, ImGuiChildFlags_Borders))
 			{
 				auto& scriptEngine = Project::GetScriptEngine();
-				ImGui::Selectable(scriptEngine->GetScriptName(select->ClassID).c_str(), false);
+
+				for (auto& script : select->Scripts)
+				{
+					ImGui::Selectable(scriptEngine->GetScriptName(script).c_str(), false);
+				}
 			}
 			ImGui::EndChild();
 
