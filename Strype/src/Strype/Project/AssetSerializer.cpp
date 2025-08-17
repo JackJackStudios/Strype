@@ -61,33 +61,6 @@ namespace Strype {
         return CreateRef<AudioFile>(decoder);
     }
 
-	Ref<Asset> ObjectSerializer::LoadAsset(const std::filesystem::path& path)
-	{
-        YAML::Node root = YAML::LoadFile(path.string())["Object"];
-        if (!root) return nullptr;
-
-		Ref<Object> object = CreateRef<Object>();
-        object->TextureHandle = Project::ImportAsset(root["SpritePath"].as<std::filesystem::path>());
-        
-        for (const auto& node : root["Scripts"])
-        {
-            std::string name = node.as<std::string>();
-
-            auto& scriptEngine = Project::GetScriptEngine();
-            ScriptID script = scriptEngine->GetIDByName(name);
-
-            if (!scriptEngine->IsValidScript(script))
-            {
-                STY_CORE_WARN("\"{}\" doesnt exist in C# binaries", name);
-                continue;
-            }
-
-            object->Scripts.emplace_back(script);
-        }
-
-		return object;
-	}
-
     Ref<Asset> ScriptSerializer::LoadAsset(const std::filesystem::path& path)
     {
         auto& scriptEngine = Project::GetScriptEngine();
@@ -99,6 +72,31 @@ namespace Strype {
         }
 
         return CreateRef<Script>(script);
+    }
+
+    // Save template for newly created scripts
+    namespace Utils {
+
+        static void ReplaceKeyWord(std::string& str, const std::string& keyword, const std::string& replace)
+        {
+            size_t pos = 0;
+            while ((pos = str.find(keyword, pos)) != std::string::npos)
+            {
+                str.replace(pos, keyword.length(), replace);
+                pos += replace.length();
+            }
+        }
+    };
+
+    void ScriptSerializer::SaveAsset(Ref<Asset> asset, const std::filesystem::path& path)
+    {
+        if (((Script*)asset.get())->GetID() != 0)
+            return;
+
+        std::string scriptTemplate = Utils::ReadFile("assets/ScriptTemplate.cs");
+
+        Utils::ReplaceKeyWord(scriptTemplate, "Template", path.stem().string());
+        Utils::WriteFile(path, scriptTemplate);
     }
 
 }

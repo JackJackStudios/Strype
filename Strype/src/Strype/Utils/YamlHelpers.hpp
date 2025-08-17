@@ -258,12 +258,13 @@ namespace Strype {
 	class ScopedSeq 
 	{
 	public:
-		ScopedSeq(YAML::Emitter& emitter, const std::string& name = std::string())
+		ScopedSeq(YAML::Emitter& emitter, const std::string& name = std::string(), bool flow = false)
 			: m_Emitter(emitter) 
 		{
 			if (!name.empty())
 				m_Emitter << YAML::Key << name;
 
+			if (flow) m_Emitter << YAML::Flow;
 			m_Emitter << YAML::BeginSeq;
 		}
 

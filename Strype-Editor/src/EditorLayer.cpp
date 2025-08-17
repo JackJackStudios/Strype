@@ -265,7 +265,25 @@ namespace Strype {
 			float padding = 32.0f;
 			ImVec2 child_size(ImGui::GetContentRegionAvail().x - padding*2, 75.0f);
 			
-			ImGui::Button("Add Script");
+			if (ImGui::Button("Add Script")) ImGui::OpenPopup("SearchScript");
+			if (ImGui::BeginPopup("SearchScript"))
+			{
+				auto& scriptEngine = Project::GetScriptEngine();
+				for (const auto& [scriptID, metadata] : scriptEngine->GetAllScripts())
+				{
+					if (!StringMatchingSearch(metadata.FullName, ""))
+						continue;
+
+					ImGui::BeginDisabled(std::find(select->Scripts.begin(), select->Scripts.end(), scriptID) != select->Scripts.end());
+					if (ImGui::MenuItem(metadata.FullName.c_str()))
+						select->Scripts.emplace_back(scriptID);
+
+					ImGui::EndDisabled();
+				}
+
+				ImGui::EndPopup();
+			}
+
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
@@ -286,9 +304,16 @@ namespace Strype {
 			{
 				auto& scriptEngine = Project::GetScriptEngine();
 
-				for (auto& script : select->Scripts)
+				for (const auto& script : select->Scripts)
 				{
 					ImGui::Selectable(scriptEngine->GetScriptName(script).c_str(), false);
+					if (ImGui::BeginPopupContextItem())
+					{
+						if (ImGui::MenuItem("Delete"))
+							select->Scripts.erase(std::find(select->Scripts.begin(), select->Scripts.end(), script));
+
+						ImGui::EndPopup();
+					}
 				}
 			}
 			ImGui::EndChild();

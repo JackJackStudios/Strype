@@ -35,6 +35,29 @@ namespace Strype {
 		return true;
     }
 
+	static std::string ToLower(const std::string& s)
+	{
+		std::string result = s;
+
+		std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
+		return result;
+	}
+
+	static bool StringMatchingSearch(const std::string& item, const std::string& query, bool caseSensitive = false)
+	{
+		if (query.empty()) return true;
+		if (item.empty()) return false;
+
+		if (caseSensitive)
+		{
+			return item.find(query) != std::string::npos;
+		}
+		else
+		{
+			return ToLower(item).find(ToLower(query)) != std::string::npos;
+		}
+	}
+
 	class EditorLayer : public Layer
 	{
 	public:

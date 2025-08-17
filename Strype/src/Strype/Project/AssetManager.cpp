@@ -38,9 +38,7 @@ namespace Strype {
 	{
 		REGISTER_ASSET(Room);
 		REGISTER_ASSET(Object);
-
-		// TODO: Create scripts with template
-		DEREGISTER_ASSET(Script);
+		REGISTER_ASSET(Script);
 
 		DEREGISTER_ASSET(Sprite);
 		DEREGISTER_ASSET(AudioFile);

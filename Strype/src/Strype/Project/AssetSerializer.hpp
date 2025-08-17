@@ -47,12 +47,13 @@ namespace Strype {
 	public:
 		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
 
-		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path) {};
+		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path);
 	};
 
 	class Script : public Asset
 	{
 	public:
+		Script() = default;
 		Script(ScriptID id)
 			: m_ScriptID(id) 
 		{
@@ -74,7 +75,7 @@ namespace Strype {
 	public:
 		virtual Ref<Asset> LoadAsset(const std::filesystem::path& path);
 
-		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path) {};
+		virtual void SaveAsset(Ref<Asset> asset, const std::filesystem::path& path);
 	};
 
 }

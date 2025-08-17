@@ -185,6 +185,7 @@ namespace Strype {
 				if (m_InputActivated && Input::IsKeyDown(KeyCode::Enter))
 				{
 					Project::CreateAsset(m_CurrentDirectory->Path / path);
+					RefreshAssetTree();
 				}
 
 				m_InputType = AssetType::None;
