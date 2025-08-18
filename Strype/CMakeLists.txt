@@ -23,7 +23,7 @@ target_link_libraries(Strype PUBLIC
     box2d
     miniaudio
     ImGuizmo
-    Coral.Native
+    Coral
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum

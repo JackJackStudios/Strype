@@ -36,15 +36,20 @@ namespace Strype {
 		m_AppAssembly.reset();
 
 		std::filesystem::path filepath = proj->GetProjectDirectory() / HIDDEN_FOLDER / "bin/net8.0" / (proj->GetProjectName() + ".dll");
+		if (!std::filesystem::exists(filepath))
+		{
+			Project::BuildCSharp(proj, true);
+		}
+
 		m_AppAssembly = std::make_unique<Coral::ManagedAssembly>(std::move(s_LoadContext->LoadAssembly(filepath.string())));
 
-		if (m_AppAssembly->GetLoadStatus() == Coral::AssemblyLoadStatus::Success)
+		if (m_AppAssembly->GetLoadStatus() != Coral::AssemblyLoadStatus::Success)
 		{
-			BuildTypeCache(m_AppAssembly);
+			STY_CORE_ERROR("Error loading file: {}", filepath);
 			return;
 		}
 
-		STY_CORE_ERROR("Error loading file: {}", filepath);
+		BuildTypeCache(m_AppAssembly);
 	}
 
 	void ScriptEngine::BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly)

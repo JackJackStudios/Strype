@@ -59,7 +59,7 @@ namespace Strype {
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" -property:Configuration={} -t:", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" /nologo /clp:ErrorsOnly;WarningsOnly /m /nr:true /verbosity:minimal /p:Configuration={} -t:", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
 		
 		for (int i = 0; i < commands.size(); ++i)
 		{
@@ -69,7 +69,6 @@ namespace Strype {
 				command.append(",");
 		}
 		
-		command.append(" > nul 2>&1");
 		return command;
 #endif
 		return "";

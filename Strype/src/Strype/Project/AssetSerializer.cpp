@@ -90,8 +90,8 @@ namespace Strype {
 
     void ScriptSerializer::SaveAsset(Ref<Asset> asset, const std::filesystem::path& path)
     {
-        if (((Script*)asset.get())->GetID() != 0)
-            return;
+        Script* script = (Script*)asset.get();
+        if (script->GetID() != 0) return;
 
         std::string scriptTemplate = Utils::ReadFile("assets/ScriptTemplate.cs");
 
