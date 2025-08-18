@@ -14,7 +14,7 @@ namespace Strype {
 		glm::ivec2 ViewportSize;
 		AGI::WindowProps RuntimeProps;
 
-		std::filesystem::path StartRoom;
+		std::string StartRoom;
 		std::filesystem::path ProjectDirectory;
 	};
 
@@ -87,7 +87,7 @@ namespace Strype {
 
 		static void ReloadAsset(AssetHandle handle)
 		{
-			Project::GetAssetManager()->ImportAsset(Project::GetFilePath(handle), handle);
+			Project::GetAssetManager()->ReloadAsset(handle);
 		}
 
 		static bool IsAssetLoaded(AssetHandle handle)
@@ -95,9 +95,14 @@ namespace Strype {
 			return Project::GetAssetManager()->IsAssetLoaded(handle);
 		}
 
-		static bool IsAssetLoaded(const std::filesystem::path& path)
+		static bool IsAssetLoaded(const std::string& name)
 		{
-			return Project::GetAssetManager()->IsAssetLoaded(path);
+			return Project::GetAssetManager()->IsAssetLoaded(name);
+		}
+
+		static bool IsAssetLoaded(const std::filesystem::path& filepath)
+		{
+			return Project::GetAssetManager()->IsAssetLoaded(filepath);
 		}
 
 		static AssetHandle ImportAsset(const std::filesystem::path& path)
@@ -110,14 +115,19 @@ namespace Strype {
 			return Project::GetAssetManager()->GetAssetType(handle);
 		}
 
-		static const AssetHandle GetHandle(const std::filesystem::path& path)
+		static const AssetHandle GetHandle(const std::string& name)
 		{
-			return Project::GetAssetManager()->GetHandle(path);
+			return Project::GetAssetManager()->GetHandle(name);
 		}
 
 		static const std::filesystem::path& GetFilePath(AssetHandle handle)
 		{
 			return Project::GetAssetManager()->GetFilePath(handle);
+		}
+
+		static const std::string& GetName(AssetHandle handle)
+		{
+			return Project::GetAssetManager()->GetName(handle);
 		}
 
 		static void SaveAllAssets()

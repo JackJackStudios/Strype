@@ -61,7 +61,7 @@ namespace Strype {
 		config.Name = filepath.stem().string();
 		config.ProjectDirectory = filepath.parent_path();
 
-		config.StartRoom = root["StartRoom"].as<std::filesystem::path>();
+		config.StartRoom = root["StartRoom"].as<std::string>();
 		config.ViewportSize = root["ViewportSize"].as<glm::ivec2>();
 
 		YAML::Node runtimeProps = root["RuntimeProps"];

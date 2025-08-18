@@ -16,7 +16,7 @@ namespace Strype {
 
 		UUID& operator=(const UUID& other) { m_UUID = other.m_UUID; return *this; }
 	private:
-		uint64_t m_UUID;
+		uint64_t m_UUID = 0;
 	};
 
 	class UUID32
@@ -31,7 +31,7 @@ namespace Strype {
 
 		UUID32& operator=(const UUID32& other) { m_UUID = other.m_UUID; return *this; }
 	private:
-		uint32_t m_UUID;
+		uint32_t m_UUID = 0;
 	};
 
 }

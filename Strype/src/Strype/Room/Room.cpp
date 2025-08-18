@@ -71,12 +71,12 @@ namespace Strype {
 	{
 		if (m_RoomState == RoomState::Runtime)
 		{
-			STY_CORE_WARN("Cannot start room ({}) twice!", FilePath.filename());
+			STY_CORE_WARN("Cannot start room ({}) twice!", Name);
 			return;
 		}
 
 		Project::SetActiveRoom(this);
-		STY_CORE_TRACE("Staring room \"{}\" ", FilePath.stem());
+		STY_CORE_TRACE("Staring room \"{}\" ", Name);
 
 		b2WorldDef worldDef = b2DefaultWorldDef();
 		worldDef.gravity = { 0.0f, -m_Gravity };
@@ -120,7 +120,7 @@ namespace Strype {
 	{
 		if (m_RoomState == RoomState::Editor)
 		{
-			STY_CORE_WARN("Cannot stop room ({}) twice", FilePath.filename());
+			STY_CORE_WARN("Cannot stop room ({}) twice", Name);
 			return;
 		}
 
@@ -143,7 +143,7 @@ namespace Strype {
 		Ref<Room> room = CreateRef<Room>();
 
 		room->Handle = Handle;
-		room->FilePath = FilePath;
+		room->Name = Name;
 
 		room->m_Width = m_Width;
 		room->m_Height = m_Height;

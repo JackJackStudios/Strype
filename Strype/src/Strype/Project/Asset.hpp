@@ -15,9 +15,15 @@ namespace Strype {
 	{
 	public:
 		AssetHandle Handle;
-		std::filesystem::path FilePath;
+		std::string Name;
 
 		virtual AssetType GetType() const = 0;
 	};
 
-}
+	struct AssetMetadata
+	{
+		AssetHandle Handle;
+		std::filesystem::path Filepath;
+	};
+
+};

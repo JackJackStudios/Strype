@@ -199,10 +199,9 @@ namespace Strype {
 
 	bool ScriptEngine::IsValidScript(ScriptID scriptID) const
 	{
-		if (!m_AppAssembly)
-			return false;
+		if (!m_AppAssembly) return false;
 
-		return m_ScriptMetadata.contains(scriptID);
+		return scriptID != 0 && m_ScriptMetadata.contains(scriptID);
 	}
 
 }

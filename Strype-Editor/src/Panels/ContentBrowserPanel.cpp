@@ -128,8 +128,10 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Delete"))
 				{
+					auto filepath = Project::GetFilePath(node.Handle);
 					Project::RemoveAsset(node.Handle);
-					std::filesystem::remove(Project::GetProjectDirectory() / Project::GetFilePath(node.Handle));
+
+					std::filesystem::remove(Project::GetProjectDirectory() / filepath);
 
 					ImGui::EndPopup();
 					continue;
@@ -306,7 +308,7 @@ namespace Strype {
 		ImGui::Image(m_Icons[AssetType::Room]->GetRendererID(), size, { 0, 1 }, { 1, 0 });
 
 		UI::CenterWidget(size);
-		ImGui::Button(select->FilePath.filename().string().c_str(), ImVec2(size.x, 0));
+		ImGui::Button(select->Name.c_str(), ImVec2(size.x, 0));
 
 		if (UI::DropdownMenu("Properties"))
 		{

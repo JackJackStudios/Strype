@@ -56,6 +56,7 @@ namespace Strype {
 		if (!canCreate || temp == nullptr)
 		{
 			STY_CORE_WARN("Cannot create new instance of {}", magic_enum::enum_name(type));
+			return;
 		}
 
 		m_Serializers[temp->GetType()]->SaveAsset(temp, Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
@@ -70,16 +71,15 @@ namespace Strype {
 
 	AssetManager::~AssetManager()
 	{
-		for (auto& [handle, asset] : m_AssetRegistry)
+		for (auto& [handle, asset] : m_LoadedAssets)
 			asset.reset();
 	}
 
 	AssetHandle AssetManager::ImportAsset(std::filesystem::path filepath, AssetHandle handle)
 	{
-		if (filepath.is_absolute() && Utils::IsFileInsideFolder(filepath, Project::GetProjectDirectory()))
-			filepath = std::filesystem::relative(filepath, Project::GetProjectDirectory());
+		filepath = Utils::ToAssetSysPath(filepath);
 
-		auto name = filepath.parent_path() / filepath.stem();
+		std::string name = filepath.stem().string();
 		if (IsAssetLoaded(name) && !IsAssetLoaded(handle)) return GetHandle(name);
 
 		if (!std::filesystem::exists(Project::GetProjectDirectory() / filepath))
@@ -93,10 +93,13 @@ namespace Strype {
 		if (asset)
 		{
 			asset->Handle = handle;
-			asset->FilePath = filepath;
+			asset->Name = name;
+			m_LoadedAssets[handle] = asset;
 
-			m_AssetRegistry[handle] = asset;
-			m_LoadedFiles[name] = handle;
+			AssetMetadata metadata;
+			metadata.Handle = handle;
+			metadata.Filepath = filepath;
+			m_AssetRegistry[name] = metadata;
 
 			AssetImportedEvent e(handle);
 			Application::Get().OnEvent(e);
@@ -114,42 +117,39 @@ namespace Strype {
 	{
 		AssetType type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
 
-		if (m_Serializers.find(type) == m_Serializers.end())
+		auto it = m_Serializers.find(type);
+		if (it == m_Serializers.end())
 		{
 			STY_CORE_WARN("No serializer available for AssetType::{}", magic_enum::enum_name(type));
 			return nullptr;
 		}
 
 		STY_CORE_TRACE("Loading asset \"{}\" ", filepath);
-		return m_Serializers.at(type)->LoadAsset(Project::GetProjectDirectory() / filepath);
+		return it->second->LoadAsset(Project::GetProjectDirectory() / filepath);
 	}
 
 	AssetType AssetManager::GetAssetType(AssetHandle handle) const
 	{
-		if (m_AssetRegistry.find(handle) == m_AssetRegistry.end())
+		auto it = m_LoadedAssets.find(handle);
+		if (it == m_LoadedAssets.end())
 		{
-			STY_CORE_WARN("Could not find AssetType for ({}) ", (uint64_t)handle);
+			STY_CORE_WARN("Could not find AssetType for ({}) ", handle);
 			return AssetType::None;
 		}
 
-		return m_AssetRegistry.at(handle)->GetType();
+		return it->second->GetType();
 	}
 
-	AssetHandle AssetManager::GetHandle(const std::filesystem::path& path) const
+	AssetHandle AssetManager::GetHandle(const std::string& name) const
 	{
-		if (path.has_extension())
+		auto it = m_AssetRegistry.find(name);
+		if (it == m_AssetRegistry.end())
 		{
-			STY_CORE_WARN("Filepaths entered into AssetManager shouldn't have a extension \"{}\" ", path.extension());
-			return GetHandle(path.parent_path() / path.stem());
-		}
-
-		if (m_LoadedFiles.find(Utils::ToAssetSysPath(path)) == m_LoadedFiles.end())
-		{
-			STY_CORE_WARN("Could not find AssetHandle for \"{}\" ", Utils::ToAssetSysPath(path));
+			STY_CORE_WARN("Could not find AssetHandle for \"{}\" ", name);
 			return 0;
 		}
 
-		return m_LoadedFiles.at(Utils::ToAssetSysPath(path));
+		return it->second.Handle;
 	}
 
 	void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& path)
@@ -166,19 +166,40 @@ namespace Strype {
 
     void AssetManager::RemoveAsset(AssetHandle handle)
     {
-		STY_CORE_TRACE("Removing asset from AssetManager: \"{}\" ", GetFilePath(handle));
+		STY_CORE_TRACE("Removing asset: \"{}\" ", GetFilePath(handle));
+
+		const std::string& name = GetName(handle);
+
+		m_LoadedAssets[handle].reset();
+		m_LoadedAssets.erase(handle);
+
+		if (m_AssetRegistry.find(name) != m_AssetRegistry.end())
+			m_AssetRegistry.erase(name);
 
 		AssetRemovedEvent e(handle);
 		Application::Get().OnEvent(e);
-
-		std::filesystem::path path = GetFilePath(handle);
-
-		m_AssetRegistry[handle].reset();
-		m_AssetRegistry.erase(handle);
-
-		if (m_LoadedFiles.find(GetFilePath(handle)) != m_LoadedFiles.end())
-			m_LoadedFiles.erase(path);
     }
+
+	void AssetManager::ReloadAsset(AssetHandle handle)
+	{
+		if (!IsAssetLoaded(handle))
+		{
+			STY_CORE_WARN("Cannot find filepath for AssetHandle: {}", handle);
+			return;
+		}
+
+		auto& filepath = GetFilePath(handle);
+		Ref<Asset> newAsset = LoadAsset(filepath);
+		if (!newAsset)
+		{
+			STY_CORE_WARN("Cannot reload asset \"{}\" ", filepath);
+			return;
+		}
+
+		newAsset->Handle = handle;
+		newAsset->Name = filepath.stem().string();
+		m_LoadedAssets[handle] = newAsset;
+	}
 
 	void AssetManager::MoveAsset(AssetHandle handle, const std::filesystem::path& path)
 	{
@@ -198,30 +219,82 @@ namespace Strype {
 		AssetMovedEvent e(handle, newpath);
 		Application::Get().OnEvent(e);
 
-		m_LoadedFiles.erase(GetFilePath(handle));
-		m_LoadedFiles[newpath] = handle;
-
-		m_AssetRegistry[handle]->FilePath = newpath;
+		AssetMetadata metadata;
+		metadata.Handle = handle;
+		metadata.Filepath = newpath;
+		m_AssetRegistry[GetName(handle)] = metadata;
 	}
 
-	Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
+	Ref<Asset>& AssetManager::GetAsset(AssetHandle handle)
 	{
-		return m_AssetRegistry.at(handle);
+		static Ref<Asset> emptyAsset = nullptr;
+		if (!IsAssetLoaded(handle))
+		{
+			STY_CORE_WARN("Cannot find Asset for handle: {}", handle);
+			return emptyAsset;
+		}
+
+		return m_LoadedAssets.at(handle);
 	}
 
 	bool AssetManager::IsAssetLoaded(AssetHandle handle) const
 	{
-		return handle != 0 && m_AssetRegistry.find(handle) != m_AssetRegistry.end();
+		return handle != 0 && m_LoadedAssets.find(handle) != m_LoadedAssets.end();
 	}
 
-	const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle)
+	const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
 	{
-		return GetAsset(handle)->FilePath;
+		auto it = m_AssetRegistry.find(GetName(handle));
+		if (it == m_AssetRegistry.end())
+		{
+			if (IsAssetLoaded(handle))
+			{
+				STY_CORE_WARN("Cannot get filepath for memory-only assets");
+			}
+			else
+			{
+				STY_CORE_WARN("Cannot find Filepath for handle: {}", handle);
+			}
+
+			return "";
+		}
+
+		return it->second.Filepath;
+	}
+
+	const std::string& AssetManager::GetName(AssetHandle handle) const
+	{
+		if (!IsAssetLoaded(handle))
+		{
+			STY_CORE_WARN("Cannot find Name for handle: {}", handle);
+			return "";
+		}
+
+		return m_LoadedAssets.at(handle)->Name;
+	}
+
+	bool AssetManager::IsAssetLoaded(const std::string& name) const
+	{
+		return m_AssetRegistry.find(name) != m_AssetRegistry.end();
 	}
 
 	bool AssetManager::IsAssetLoaded(const std::filesystem::path& filepath) const
 	{
-		return m_LoadedFiles.find(Utils::ToAssetSysPath(filepath)) != m_LoadedFiles.end();
+		if (!IsAssetLoaded(filepath.stem().string()))
+		{
+			return false;
+		}
+
+		AssetHandle handle = GetHandle(filepath.stem().string());
+		if (filepath.has_extension())
+		{
+			if (GetAssetType(handle) != Utils::GetAssetTypeFromFileExtension(filepath.extension()))
+			{
+				return false;
+			}
+		}
+
+		return GetFilePath(handle) == Utils::ToAssetSysPath(filepath);
 	}
 
 	AssetSerializer* AssetManager::GetSerializer(AssetType type)
@@ -251,10 +324,8 @@ namespace Strype {
 
 	void AssetManager::SaveAllAssets()
 	{
-		for (const auto& [handle, asset] : m_AssetRegistry)
-			SaveAsset(handle, Project::GetProjectDirectory() / asset->FilePath);
+		for (const auto& [name, metadata] : m_AssetRegistry)
+			SaveAsset(metadata.Handle, metadata.Filepath);
 	}
 
-}
-
-
+};

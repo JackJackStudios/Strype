@@ -21,13 +21,14 @@ namespace Strype {
 
 		static AssetType GetAssetTypeFromFileExtension(const std::filesystem::path& extension)
 		{
-			if (s_AssetExtensionMap.find(extension) == s_AssetExtensionMap.end())
+			auto it = s_AssetExtensionMap.find(extension);
+			if (it == s_AssetExtensionMap.end())
 			{
 				STY_CORE_WARN("Could not find AssetType for \"{}\" ", extension);
 				return AssetType::None;
 			}
 
-			return s_AssetExtensionMap.at(extension);
+			return it->second;
 		}
 
 		static const std::filesystem::path& GetFileExtensionFromAssetType(AssetType type)
@@ -44,7 +45,7 @@ namespace Strype {
 
 	}
 	
-	using AssetRegistry = std::unordered_map<std::filesystem::path, AssetHandle>;
+	using AssetRegistry = std::unordered_map<std::string, AssetMetadata>;
 	using AssetMap = std::unordered_map<AssetHandle, Ref<Asset>>;
 
 	using ForEachFunc = std::function<void(AssetHandle)>;
@@ -55,21 +56,24 @@ namespace Strype {
 		AssetManager();
 		~AssetManager();
 
-		Ref<Asset> GetAsset(AssetHandle handle);
+		Ref<Asset>& GetAsset(AssetHandle handle);
 
 		bool IsAssetLoaded(AssetHandle handle) const;
+		bool IsAssetLoaded(const std::string& name) const;
 		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
 
 		AssetHandle ImportAsset(std::filesystem::path filepath, AssetHandle handle = AssetHandle());
 		Ref<Asset> LoadAsset(const std::filesystem::path& filepath);
+		void ReloadAsset(AssetHandle handle);
 
 		void ReloadAssets();
 		void SaveAllAssets();
 
-		const std::filesystem::path& GetFilePath(AssetHandle handle);
+		const std::filesystem::path& GetFilePath(AssetHandle handle) const;
+		const std::string& GetName(AssetHandle handle) const;
 		AssetType GetAssetType(AssetHandle handle) const;
 
-		AssetHandle GetHandle(const std::filesystem::path& filepath) const;
+		AssetHandle GetHandle(const std::string& name) const;
 
 		void CreateAsset(const std::filesystem::path& filepath);
 		bool CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset) const;
@@ -82,7 +86,7 @@ namespace Strype {
 		AssetSerializer* GetSerializer(AssetType type);
 		void ForEach(ForEachFunc func)
 		{
-			for (const auto& [handle, asset] : m_AssetRegistry)
+			for (const auto& [handle, asset] : m_LoadedAssets)
 			{
 				func(handle);
 			}
@@ -90,8 +94,8 @@ namespace Strype {
 	private:
 		void SetSerializers();
 	private:
-		AssetRegistry m_LoadedFiles;
-		AssetMap m_AssetRegistry;
+		AssetRegistry m_AssetRegistry;
+		AssetMap m_LoadedAssets;
 
 		std::unordered_map<AssetType, Scope<AssetSerializer>> m_Serializers;
 	};
