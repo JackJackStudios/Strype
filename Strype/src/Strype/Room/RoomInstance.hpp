@@ -41,7 +41,7 @@ namespace Strype {
 		float Rotation = 0.0f;
 
 		AssetHandle ObjectHandle;
-		Coral::ManagedObject* CSharp;
+		std::vector<Coral::ManagedObject*> CSharpObjects;
 		b2BodyId RuntimeBody;
 		//Ref<AudioSource> Emitter;
 	private:

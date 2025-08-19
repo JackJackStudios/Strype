@@ -55,7 +55,7 @@ namespace Strype {
 
 			if (m_RoomState == RoomState::Runtime)
 			{
-				instance.CSharp->InvokeMethod("OnUpdate", ts);
+				for (const auto& csharp : instance.CSharpObjects) csharp->InvokeMethod("OnUpdate", ts);
 				instance.CurrentFrame += sprite->GetFrameDelta();
 				
 				if (instance.CurrentFrame > sprite->FrameCount())
@@ -97,19 +97,20 @@ namespace Strype {
 			b2Polygon polygonShape = b2MakeBox(instance.Scale.x, instance.Scale.y);
 			b2CreatePolygonShape(instance.RuntimeBody, &shapeDef, &polygonShape);
 
-			ScriptID scriptID = Project::GetAsset<Object>(instance.ObjectHandle)->ClassID;
-
-			if (scriptEngine->IsValidScript(scriptID))
+			instance.CSharpObjects.reserve(object->Scripts.size());
+			for (const auto& scriptID : object->Scripts)
 			{
-				instance.CSharp = scriptEngine->CreateInstance(scriptID);
-				instance.CSharp->SetFieldValueRaw("ID",     &instance.m_Handle);
-				instance.CSharp->SetFieldValueRaw("Handle", &instance.ObjectHandle);
+				if (!scriptEngine->IsValidScript(scriptID))
+				{
+					STY_CORE_WARN("Object \"{}\" has an invalid script id ({})", Project::GetFilePath(instance.ObjectHandle).stem(), scriptID);
+					continue;
+				}
 
-				instance.CSharp->InvokeMethod("OnCreate");
-			}
-			else
-			{
-				STY_CORE_WARN("Object '{}' has an invalid script id ({})", instance.m_Handle, scriptID);
+				auto& csharp = instance.CSharpObjects.emplace_back(scriptEngine->CreateInstance(scriptID));
+				csharp->SetFieldValueRaw("ID", &instance.m_Handle);
+				csharp->SetFieldValueRaw("Handle", &instance.ObjectHandle);
+				
+				csharp->InvokeMethod("OnCreate");
 			}
 		}
 
@@ -129,8 +130,11 @@ namespace Strype {
 
 		for (auto& instance : m_Objects)
 		{
-			instance.CSharp->InvokeMethod("OnDestroy");
-			scriptEngine->DestroyInstance(instance.CSharp);
+			for (const auto& csharp : instance.CSharpObjects)
+			{
+				csharp->InvokeMethod("OnDestroy");
+				scriptEngine->DestroyInstance(csharp);
+			}
 		}
 
 		b2DestroyWorld(m_Physics);
