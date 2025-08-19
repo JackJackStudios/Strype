@@ -10,7 +10,12 @@ namespace Strype {
 
 	namespace Utils {
 
-		static constexpr TexCoords FlipTexCoords(const TexCoords& tex)
+		static constexpr TexCoords FlipTexCoordsH(const TexCoords& tex)
+		{
+			return { tex[1], tex[0], tex[3], tex[2] };
+		}
+
+		static constexpr TexCoords FlipTexCoordsV(const TexCoords& tex)
 		{
 			return { tex[3], tex[2], tex[1], tex[0] };
 		}

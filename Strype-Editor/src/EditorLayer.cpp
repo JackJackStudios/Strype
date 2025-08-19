@@ -74,13 +74,13 @@ namespace Strype {
 
 	EditorLayer::~EditorLayer()
 	{
+		m_FileWatcher.reset();
 		SaveProject();
 
 		//INFO: This line must happen! Usually this happens at end of main
 		//      besause the project is static, destorying the project also
 		//      destroys assets which must happen before Application shutdown
 		//      or Windows/VCRuntime gets involved.
-		m_FileWatcher.reset();
 		Project::SetActive(nullptr);
 	}
 
@@ -243,7 +243,7 @@ namespace Strype {
 		m_PanelManager.OnProjectChanged();
 
 		m_FileWatcher.reset();
-		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorLayer::FilewatcherFunc));
+		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorLayer::OnFilewatcher));
 		
 		OpenRoom(Project::GetHandle(project->GetConfig().StartRoom));
 	}
@@ -252,13 +252,13 @@ namespace Strype {
 	{
 		ImVec2 size = ImVec2(128.0f, 128.0f);
 		Ref<Sprite> sprite = Project::GetAsset<Sprite>(select->TextureHandle);
-		TexCoords tx = Utils::FlipTexCoords(sprite->GetTexCoords());
+		TexCoords tx = Utils::FlipTexCoordsV(sprite->GetTexCoords());
 
 		UI::CenterWidget(size);
 		ImGui::Image(Renderer::GetCurrent()->GetTexture(sprite)->GetRendererID(), size, Utils::ToImVec2(tx[0]), Utils::ToImVec2(tx[2]));
 
 		UI::CenterWidget(size);
-		ImGui::Button(select->FilePath.filename().string().c_str(), ImVec2(size.x, 0));
+		ImGui::Button(select->Name.c_str(), ImVec2(size.x, 0));
 
 		if (UI::DropdownMenu("Properties"))
 		{
@@ -323,21 +323,11 @@ namespace Strype {
 		}
 	}
 
-	void EditorLayer::FilewatcherFunc(const std::string& str, const filewatch::Event event)
+	void EditorLayer::OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event)
 	{
-		std::filesystem::path filepath = str;
-		if (s_AssetExtensionMap.find(filepath.extension()) == s_AssetExtensionMap.end() || !Project::IsAssetLoaded(filepath))
-			return;
-
-		switch (event)
+		if (event == filewatch::Event::modified)
 		{
-		case filewatch::Event::added:
-			Project::ImportAsset(filepath);
-			break;
-
-		case filewatch::Event::removed:
-			Project::RemoveAsset(Project::GetHandle(filepath));
-			break;
+			Project::ReloadAsset(Project::GetHandle(filepath.stem().string()));
 		}
 	}
 

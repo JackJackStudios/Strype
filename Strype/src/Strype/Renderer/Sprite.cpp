@@ -16,10 +16,10 @@ namespace Strype {
 		constexpr TexCoords BoxToTextureCoords(const glm::vec2& pos, int width, int height, const glm::vec2& atlas_size)
 		{
 			return {
-				PixelToTexcoords({ pos.x + width, pos.y }, atlas_size.x, atlas_size.y),
 				PixelToTexcoords(pos, atlas_size.x, atlas_size.y),
-				PixelToTexcoords({ pos.x, pos.y + height }, atlas_size.x, atlas_size.y),
+				PixelToTexcoords({ pos.x + width, pos.y }, atlas_size.x, atlas_size.y),
 				PixelToTexcoords({ pos.x + width, pos.y + height }, atlas_size.x, atlas_size.y),
+				PixelToTexcoords({ pos.x, pos.y + height }, atlas_size.x, atlas_size.y),
 			};
 		}
 

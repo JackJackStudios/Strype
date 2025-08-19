@@ -80,6 +80,9 @@ namespace Strype {
 		filepath = Utils::ToAssetSysPath(filepath);
 
 		std::string name = filepath.stem().string();
+		while (filepath.stem().has_extension())
+			name = std::filesystem::path(name).stem().string();
+
 		if (IsAssetLoaded(name) && !IsAssetLoaded(handle)) return GetHandle(name);
 
 		if (!std::filesystem::exists(Project::GetProjectDirectory() / filepath))
@@ -103,14 +106,12 @@ namespace Strype {
 
 			AssetImportedEvent e(handle);
 			Application::Get().OnEvent(e);
-		}
-		else
-		{
-			STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
-			return 0;
+
+			return handle;
 		}
 
-		return handle;
+		STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
+		return 0;
 	}
 
 	Ref<Asset> AssetManager::LoadAsset(const std::filesystem::path& filepath)

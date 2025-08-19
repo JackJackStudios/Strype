@@ -42,7 +42,7 @@ namespace Strype {
         textureSpec.Data = data;
         textureSpec.Datasize = width * height * channels;
         
-        std::regex pattern("_strip(\\d+)");
+        std::regex pattern(".strip(\\d+)");
         std::smatch match;
 
         std::string pathStr = path.string();

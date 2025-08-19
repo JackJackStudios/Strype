@@ -109,7 +109,7 @@ namespace Strype {
 			ImGui::PushID(i);
 
 			// ImGui needs todo this
-			tx = Utils::FlipTexCoords(tx);
+			tx = Utils::FlipTexCoordsV(tx);
 			
 			ImGui::ImageButton("", (ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, ImVec2(tx[0].x, tx[0].y), ImVec2(tx[2].x, tx[2].y));
 			
@@ -137,6 +137,11 @@ namespace Strype {
 					continue;
 				}
 
+				if (ImGui::MenuItem("Reload Asset"))
+				{
+					Project::ReloadAsset(node.Handle);
+				}
+
 				ImGui::EndPopup();
 			}
 
@@ -159,9 +164,10 @@ namespace Strype {
 				}
 			}
 
-			ImGui::TextWrapped(node.Path.stem().string().c_str());
+			ImGui::TextWrapped(Project::GetName(node.Handle).c_str());
 
-			ImGui::NextColumn(); ++i;
+			ImGui::NextColumn(); 
+			++i;
 		}
 
 		if (m_InputType != AssetType::None)

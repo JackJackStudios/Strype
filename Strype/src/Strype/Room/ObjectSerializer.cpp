@@ -42,6 +42,7 @@ namespace Strype {
 
         Ref<Object> object = CreateRef<Object>();
         object->TextureHandle = Project::ImportAsset(root["SpritePath"].as<std::filesystem::path>());
+        if (!Project::IsAssetLoaded(object->TextureHandle)) return 0;
 
         for (const auto& node : root["Scripts"])
         {

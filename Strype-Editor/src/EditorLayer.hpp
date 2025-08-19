@@ -89,7 +89,7 @@ namespace Strype {
 		void OnInspectorRender(Object* select);
 
 		void UI_RoomPanel();
-		void FilewatcherFunc(const std::string& str, const filewatch::Event event);
+		void OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event);
 	private:
 		AGI::Framebuffer m_Framebuffer;
 		InstanceID m_Selected;
