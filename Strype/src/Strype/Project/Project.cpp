@@ -122,9 +122,10 @@ namespace Strype {
 	{
 		if (s_ActiveProject)
 		{
-			s_ActiveProject->m_ScriptEngine.reset();
-			s_ActiveProject->m_AssetManager.reset();
 			s_ActiveProject->m_ActiveRoom = nullptr;
+			s_ActiveProject->m_ScriptEngine->UnloadAssembly();
+
+			s_ActiveProject->m_AssetManager.reset();
 		}
 
 		s_ActiveProject = project;

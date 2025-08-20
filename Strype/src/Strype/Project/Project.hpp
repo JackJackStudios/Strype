@@ -120,6 +120,11 @@ namespace Strype {
 			return Project::GetAssetManager()->GetHandle(name);
 		}
 
+		static const AssetHandle GetHandle(const std::filesystem::path& filepath)
+		{
+			return Project::GetAssetManager()->GetHandle(filepath);
+		}
+
 		static const std::filesystem::path& GetFilePath(AssetHandle handle)
 		{
 			return Project::GetAssetManager()->GetFilePath(handle);

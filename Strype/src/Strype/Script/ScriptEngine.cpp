@@ -32,17 +32,53 @@ namespace Strype {
 	}
 
 	ScriptEngine::ScriptEngine(Ref<Project> proj)
+		: m_ActiveProject(proj)
 	{
-		m_AppAssembly.reset();
+		ReloadAssembly();
+	}
 
-		std::filesystem::path filepath = proj->GetProjectDirectory() / HIDDEN_FOLDER / "bin/net8.0" / (proj->GetProjectName() + ".dll");
+	void ScriptEngine::ReloadAssembly()
+	{
+		if (m_IsInitizled) UnloadAssembly();
+		
+		s_Host = std::make_unique<Coral::HostInstance>();
+
+		Coral::HostSettings settings;
+		settings.CoralDirectory = (Application::Get().GetConfig().MasterDir / "DotNet").string();
+		settings.MessageCallback = OnCoralMessage;
+		settings.ExceptionCallback = OnCSharpException;
+		Coral::CoralInitStatus initStatus = s_Host->Initialize(settings);
+
+		switch (initStatus)
+		{
+		case Coral::CoralInitStatus::CoralManagedNotFound:
+			STY_CORE_ERROR("Could not find Coral.Managed.dll in directory {}", settings.CoralDirectory);
+			break;
+
+		case Coral::CoralInitStatus::CoralManagedInitError:
+			STY_CORE_ERROR("Failed to initialize Coral.Managed");
+			break;
+
+		case Coral::CoralInitStatus::DotNetNotFound:
+			STY_CORE_ERROR("Strype requires .NET 8 or higher!");
+			break;
+		}
+
+		s_LoadContext = std::make_unique<Coral::AssemblyLoadContext>(std::move(s_Host->CreateAssemblyLoadContext("StrypeLoadContext")));
+
+		auto scriptCorePath = (Application::Get().GetConfig().MasterDir / "DotNet" / "Strype-ScriptCore.dll").string();
+		s_CoreAssembly = CreateRef<Coral::ManagedAssembly>(s_LoadContext->LoadAssembly(scriptCorePath));
+
+		ScriptGlue::RegisterGlue(*s_CoreAssembly);
+
+		std::filesystem::path filepath = m_ActiveProject->GetProjectDirectory() / HIDDEN_FOLDER / "bin/net8.0" / (m_ActiveProject->GetProjectName() + ".dll");
 		if (!std::filesystem::exists(filepath))
 		{
-			Project::BuildCSharp(proj, true);
+			Project::BuildCSharp(m_ActiveProject, true);
 		}
 
 		m_AppAssembly = std::make_unique<Coral::ManagedAssembly>(std::move(s_LoadContext->LoadAssembly(filepath.string())));
-
+		
 		if (m_AppAssembly->GetLoadStatus() != Coral::AssemblyLoadStatus::Success)
 		{
 			STY_CORE_ERROR("Error loading file: {}", filepath);
@@ -50,6 +86,31 @@ namespace Strype {
 		}
 
 		BuildTypeCache(m_AppAssembly);
+		m_IsInitizled = true;
+	}
+
+	void ScriptEngine::UnloadAssembly()
+	{
+		m_ManagedObjects.Clear();
+
+		for (auto& [scriptID, metadata] : m_ScriptMetadata)
+		{
+			for (auto& [fieldID, fieldMetadata] : metadata.Fields)
+			{
+				fieldMetadata.DefaultValue.Release();
+			}
+		}
+
+		m_ScriptMetadata.clear();
+
+		m_AppAssembly.reset();
+		s_CoreAssembly.reset();
+
+		s_Host->UnloadAssemblyLoadContext(*s_LoadContext);
+		s_LoadContext.reset();
+
+		s_Host->Shutdown();
+		s_Host.reset();
 	}
 
 	void ScriptEngine::BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly)
@@ -77,10 +138,16 @@ namespace Strype {
 					uint32_t fieldID = Hash::GenerateFNVHash(fieldNameStr);
 
 					Coral::Type* fieldType = &fieldInfo.GetType();
-					Coral::ScopedString typeName = fieldType->GetFullName();
+					std::string typeName = fieldType->GetFullName();
 
-					if (fieldNameStr == "ID" || !s_DataTypeLookup.contains(typeName) || fieldNameStr.find("k__BackingField") != std::string::npos)
+					if (fieldNameStr == "ID" || fieldNameStr.find("k__BackingField") != std::string::npos)
 						continue;
+
+					if (!s_DataTypeLookup.contains(typeName))
+					{
+						STY_CORE_WARN("Unknown type on C# class ({}) \"{}\" ", fullName, typeName);
+						continue;
+					}
 
 					if (fieldType->IsSZArray())
 						fieldType = &fieldType->GetElementType();
@@ -127,74 +194,6 @@ namespace Strype {
 
 			temp.Destroy();
 		}
-	}
-
-	ScriptEngine::~ScriptEngine()
-	{
-		m_ManagedObjects.Clear();
-
-		for (auto& [scriptID, metadata] : m_ScriptMetadata)
-		{
-			for (auto& [fieldID, fieldMetadata] : metadata.Fields)
-			{
-				fieldMetadata.DefaultValue.Release();
-			}
-		}
-
-		m_ScriptMetadata.clear();
-		
-		m_AppAssembly.reset();
-	}
-
-	void ScriptEngine::Initialize()
-	{
-		s_Host = std::make_unique<Coral::HostInstance>();
-
-		Coral::HostSettings settings;
-		settings.CoralDirectory = (Application::Get().GetConfig().MasterDir / "DotNet").string();
-		settings.MessageCallback = OnCoralMessage;
-		settings.ExceptionCallback = OnCSharpException;
-		Coral::CoralInitStatus initStatus = s_Host->Initialize(settings);
-
-		if (initStatus == Coral::CoralInitStatus::Success)
-		{
-			s_LoadContext = std::make_unique<Coral::AssemblyLoadContext>(std::move(s_Host->CreateAssemblyLoadContext("StrypeLoadContext")));
-
-			auto scriptCorePath = (Application::Get().GetConfig().MasterDir / "DotNet" / "Strype-ScriptCore.dll").string();
-			s_CoreAssembly = CreateRef<Coral::ManagedAssembly>(s_LoadContext->LoadAssembly(scriptCorePath));
-
-			ScriptGlue::RegisterGlue(*s_CoreAssembly);
-			return;
-		}
-
-		switch (initStatus)
-		{
-		case Coral::CoralInitStatus::CoralManagedNotFound:
-			STY_CORE_ERROR("Could not find Coral.Managed.dll in directory {}", settings.CoralDirectory);
-			break;
-
-		case Coral::CoralInitStatus::CoralManagedInitError:
-			STY_CORE_ERROR("Failed to initialize Coral.Managed");
-			break;
-
-		case Coral::CoralInitStatus::DotNetNotFound:
-			STY_CORE_ERROR("Strype requires .NET 8 or higher!");
-			break;
-		}
-
-		// All of the above errors are fatal
-		std::exit(-1);
-	}
-
-	void ScriptEngine::Shutdown()
-	{
-		s_CoreAssembly.reset();
-
-		s_Host->UnloadAssemblyLoadContext(*s_LoadContext);
-		s_LoadContext.reset();
-
-		s_Host->Shutdown();
-		s_Host.reset();
 	}
 
 	bool ScriptEngine::IsValidScript(ScriptID scriptID) const

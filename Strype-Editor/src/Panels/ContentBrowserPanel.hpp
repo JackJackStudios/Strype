@@ -46,6 +46,7 @@ namespace Strype {
 		std::filesystem::path GetCurrentPath() const { return m_CurrentDirectory->Path; }
 	private:
 		void OnInspectorRender(Room* select);
+		void OnInspectorRender(Object* select);
 		std::vector<char> GetDialogMessage(AssetType type);
 		void OnAssetsUpdated(Event& e);
 

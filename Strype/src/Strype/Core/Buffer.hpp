@@ -58,7 +58,7 @@ namespace Strype {
 
 		void Release()
 		{
-			free(Data);
+			if (Data) free(Data);
 
 			Data = nullptr;
 			Size = 0;

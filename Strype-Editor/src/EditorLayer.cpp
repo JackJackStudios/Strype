@@ -16,6 +16,7 @@ namespace Strype {
 			WindowProps.Title = m_ActiveProject->GetConfig().Name;
 
 			Project::BuildCSharp(m_ActiveProject, false);
+			m_ActiveProject->GetScriptEngine()->ReloadAssembly();
 		}
 
 		void OnAttach() override
@@ -65,8 +66,6 @@ namespace Strype {
 		{
 			m_PanelManager.GetInspector()->SetSelected<Object>(asset->Handle);
 		});
-
-		m_PanelManager.GetInspector()->AddType<Object>(STY_BIND_EVENT_FN(EditorLayer::OnInspectorRender));
 
 		OpenProject(m_ProjectPath);
 		if (!Project::GetActive()) exit(0);
@@ -248,86 +247,30 @@ namespace Strype {
 		OpenRoom(Project::GetHandle(project->GetConfig().StartRoom));
 	}
 
-	void EditorLayer::OnInspectorRender(Object* select)
-	{
-		ImVec2 size = ImVec2(128.0f, 128.0f);
-		Ref<Sprite> sprite = Project::GetAsset<Sprite>(select->TextureHandle);
-		TexCoords tx = Utils::FlipTexCoordsV(sprite->GetTexCoords());
-
-		UI::CenterWidget(size);
-		ImGui::Image(Renderer::GetCurrent()->GetTexture(sprite)->GetRendererID(), size, Utils::ToImVec2(tx[0]), Utils::ToImVec2(tx[2]));
-
-		UI::CenterWidget(size);
-		ImGui::Button(select->Name.c_str(), ImVec2(size.x, 0));
-
-		if (UI::DropdownMenu("Properties"))
-		{
-			float padding = 32.0f;
-			ImVec2 child_size(ImGui::GetContentRegionAvail().x - padding*2, 75.0f);
-			
-			if (ImGui::Button("Add Script")) ImGui::OpenPopup("SearchScript");
-			if (ImGui::BeginPopup("SearchScript"))
-			{
-				auto& scriptEngine = Project::GetScriptEngine();
-				for (const auto& [scriptID, metadata] : scriptEngine->GetAllScripts())
-				{
-					if (!StringMatchingSearch(metadata.FullName, ""))
-						continue;
-
-					ImGui::BeginDisabled(std::find(select->Scripts.begin(), select->Scripts.end(), scriptID) != select->Scripts.end());
-					if (ImGui::MenuItem(metadata.FullName.c_str()))
-						select->Scripts.emplace_back(scriptID);
-
-					ImGui::EndDisabled();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			if (ImGui::BeginDragDropTarget())
-			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-				{
-					AssetHandle handle = *(AssetHandle*)payload->Data;
-
-					if (Project::GetAssetType(handle) == AssetType::Script)
-					{
-						Ref<Script> script = Project::GetAsset<Script>(handle);
-						if (Project::GetScriptEngine()->IsValidScript(script->GetID()))
-							select->Scripts.emplace_back(script->GetID());
-					}
-				}
-				ImGui::EndDragDropTarget();
-			}
-
-			if (ImGui::BeginChild("ScriptWindow", child_size, ImGuiChildFlags_Borders))
-			{
-				auto& scriptEngine = Project::GetScriptEngine();
-
-				for (const auto& script : select->Scripts)
-				{
-					ImGui::Selectable(scriptEngine->GetScriptName(script).c_str(), false);
-					if (ImGui::BeginPopupContextItem())
-					{
-						if (ImGui::MenuItem("Delete"))
-							select->Scripts.erase(std::find(select->Scripts.begin(), select->Scripts.end(), script));
-
-						ImGui::EndPopup();
-					}
-				}
-			}
-			ImGui::EndChild();
-
-
-			ImGui::TreePop();
-		}
-	}
-
 	void EditorLayer::OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event)
 	{
+		if (Utils::IsFileInsideFolder(filepath, HIDDEN_FOLDER))
+			return;
+
+		if (event == filewatch::Event::added)
+		{
+			// Full build - pause editor
+			if (Utils::GetAssetTypeFromFileExtension(filepath.extension()) == AssetType::Script)
+			{
+				Project::BuildCSharp(Project::GetActive(), false);
+				Project::GetActive()->GetScriptEngine()->ReloadAssembly();
+			}
+		}
+
 		if (event == filewatch::Event::modified)
 		{
-			Project::ReloadAsset(Project::GetHandle(filepath.stem().string()));
+			if (Project::IsAssetLoaded(filepath))
+				Project::ReloadAsset(Project::GetHandle(filepath));
+
+			if (Utils::GetAssetTypeFromFileExtension(filepath.extension()) == AssetType::Script)
+			{
+				// Build on seprate thread - runtime waits
+			}
 		}
 	}
 
@@ -386,7 +329,10 @@ namespace Strype {
 					m_PanelManager.AddPanel<ProjectSettingsPanel>();
 
 				if (ImGui::MenuItem("Build C# Assembly"))
+				{
 					Project::BuildCSharp(Project::GetActive());
+					Project::GetActive()->GetScriptEngine()->ReloadAssembly();
+				}
 
 				if (ImGui::MenuItem("Restore C# Project"))
 					Project::RestoreCSharp(Project::GetActive());

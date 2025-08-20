@@ -37,7 +37,6 @@ namespace Strype {
 			std::filesystem::current_path(m_Config.WorkingDir);
 
 		Audio::Init();
-		ScriptEngine::Initialize();
 	}
 
 	Application::~Application()
@@ -45,7 +44,6 @@ namespace Strype {
 		for (auto& thread : m_ActiveThreads)
 			thread.join();
 
-		ScriptEngine::Shutdown();
 		Audio::Shutdown();
 	}
 

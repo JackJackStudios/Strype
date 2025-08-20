@@ -12,16 +12,6 @@ namespace Strype {
 
 	namespace Utils {
 
-		static bool IsFileInsideFolder(const std::filesystem::path& file, const std::filesystem::path& folder)
-		{
-			// For this function to return true, the file must exist in the folder and it exists
-
-			auto absFile = std::filesystem::absolute(file).lexically_normal();
-			auto absFolder = std::filesystem::absolute(folder).lexically_normal();
-
-			return std::mismatch(absFolder.begin(), absFolder.end(), absFile.begin()).first == absFolder.end() && std::filesystem::exists(file);
-		}
-
 		static std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
 		{
 			if (filepath.is_absolute() && Utils::IsFileInsideFolder(filepath, Project::GetProjectDirectory()))
@@ -30,6 +20,17 @@ namespace Strype {
 			}
 
 			return filepath;
+		}
+
+		static std::string CalculateName(const std::filesystem::path& filepath)
+		{
+			std::string name = filepath.filename().string();
+			auto pos = name.find('.');
+
+			if (pos != std::string::npos)
+				name = name.substr(0, pos);
+
+			return name;
 		}
 
 	}
@@ -79,10 +80,7 @@ namespace Strype {
 	{
 		filepath = Utils::ToAssetSysPath(filepath);
 
-		std::string name = filepath.stem().string();
-		while (filepath.stem().has_extension())
-			name = std::filesystem::path(name).stem().string();
-
+		std::string name = Utils::CalculateName(filepath);
 		if (IsAssetLoaded(name) && !IsAssetLoaded(handle)) return GetHandle(name);
 
 		if (!std::filesystem::exists(Project::GetProjectDirectory() / filepath))
@@ -106,12 +104,14 @@ namespace Strype {
 
 			AssetImportedEvent e(handle);
 			Application::Get().OnEvent(e);
-
-			return handle;
+		}
+		else
+		{
+			STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
+			return 0;
 		}
 
-		STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
-		return 0;
+		return handle;
 	}
 
 	Ref<Asset> AssetManager::LoadAsset(const std::filesystem::path& filepath)
@@ -153,6 +153,18 @@ namespace Strype {
 		return it->second.Handle;
 	}
 
+	AssetHandle AssetManager::GetHandle(const std::filesystem::path& filepath) const
+	{
+		auto it = m_AssetRegistry.find(Utils::CalculateName(filepath));
+
+		if (!IsAssetLoaded(filepath) || it->second.Filepath != Utils::ToAssetSysPath(filepath))
+		{
+			STY_CORE_WARN("Cannot find Handle for \"{}\" ", Utils::ToAssetSysPath(filepath));
+		}
+
+		return it->second.Handle;
+	}
+
 	void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& path)
 	{
 		if (m_Serializers.find(GetAssetType(handle)) == m_Serializers.end())
@@ -185,7 +197,7 @@ namespace Strype {
 	{
 		if (!IsAssetLoaded(handle))
 		{
-			STY_CORE_WARN("Cannot find filepath for AssetHandle: {}", handle);
+			STY_CORE_WARN("Cannot find Filepath for AssetHandle: {}", handle);
 			return;
 		}
 
@@ -245,22 +257,14 @@ namespace Strype {
 
 	const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
 	{
-		auto it = m_AssetRegistry.find(GetName(handle));
-		if (it == m_AssetRegistry.end())
+		static std::filesystem::path emptyPath = "";
+		if (!IsAssetLoaded(handle))
 		{
-			if (IsAssetLoaded(handle))
-			{
-				STY_CORE_WARN("Cannot get filepath for memory-only assets");
-			}
-			else
-			{
-				STY_CORE_WARN("Cannot find Filepath for handle: {}", handle);
-			}
-
-			return "";
+			STY_CORE_WARN("Cannot find Filepath for handle: {}", handle);
+			return emptyPath;
 		}
 
-		return it->second.Filepath;
+		return m_AssetRegistry.at(GetName(handle)).Filepath;
 	}
 
 	const std::string& AssetManager::GetName(AssetHandle handle) const

@@ -31,6 +31,22 @@ namespace Strype {
 			return it->second;
 		}
 
+		static bool IsFileInsideFolder(const std::filesystem::path& file, const std::filesystem::path& folder)
+		{
+			try
+			{
+				auto absFolder = std::filesystem::weakly_canonical(folder);
+				auto absFile = std::filesystem::weakly_canonical(file);
+
+				// Check that absFile starts with absFolder
+				return std::mismatch(absFolder.begin(), absFolder.end(), absFile.begin()).first == absFolder.end();
+			}
+			catch (const std::filesystem::filesystem_error& e)
+			{
+				return false;
+			}
+		}
+
 		static const std::filesystem::path& GetFileExtensionFromAssetType(AssetType type)
 		{
 			for (const auto& [extension, assetType] : s_AssetExtensionMap)
@@ -74,6 +90,7 @@ namespace Strype {
 		AssetType GetAssetType(AssetHandle handle) const;
 
 		AssetHandle GetHandle(const std::string& name) const;
+		AssetHandle GetHandle(const std::filesystem::path& filepath) const;
 
 		void CreateAsset(const std::filesystem::path& filepath);
 		bool CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset) const;

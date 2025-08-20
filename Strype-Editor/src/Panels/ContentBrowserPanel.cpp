@@ -67,7 +67,6 @@ namespace Strype {
 
 			m_Icons[typeEnum.value()] = Utils::LoadTexture(entry.path());
 		}
-	
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -261,6 +260,7 @@ namespace Strype {
 		ImGui::Columns(1);
 
 		m_Inspector->AddType<Room>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnInspectorRender));
+		m_Inspector->AddType<Object>(STY_BIND_EVENT_FN(ContentBrowserPanel::OnInspectorRender));
 	}
 
 	void ContentBrowserPanel::OnEvent(Event& e)
@@ -306,6 +306,92 @@ namespace Strype {
 		});
 	}
 
+	void ContentBrowserPanel::OnInspectorRender(Object* select)
+	{
+		ImVec2 size = ImVec2(128.0f, 128.0f);
+
+		TexCoords tx = RenderCaps::TextureCoords;
+		AGI::Texture icon = Project::IsAssetLoaded(select->TextureHandle) ? GetIcon(select->TextureHandle, &tx) : GetIcon(AssetType::Sprite);
+
+		UI::CenterWidget(size);
+		tx = Utils::FlipTexCoordsV(tx);
+		ImGui::Image(icon->GetRendererID(), size, Utils::ToImVec2(tx[0]), Utils::ToImVec2(tx[2]));
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+			{
+				AssetHandle handle = *(AssetHandle*)payload->Data;
+
+				if (Project::GetAssetType(handle) == AssetType::Sprite)
+					select->TextureHandle = handle;
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		UI::CenterWidget(size);
+		ImGui::Button(select->Name.c_str(), ImVec2(size.x, 0));
+
+		if (UI::DropdownMenu("Properties"))
+		{
+			float padding = 32.0f;
+			ImVec2 child_size(ImGui::GetContentRegionAvail().x - padding * 2, 75.0f);
+
+			if (ImGui::Button("Add Script")) ImGui::OpenPopup("SearchScript");
+			if (ImGui::BeginPopup("SearchScript"))
+			{
+				auto& scriptEngine = Project::GetScriptEngine();
+				for (const auto& [scriptID, metadata] : scriptEngine->GetAllScripts())
+				{
+					ImGui::BeginDisabled(std::find(select->Scripts.begin(), select->Scripts.end(), scriptID) != select->Scripts.end());
+
+					if (ImGui::MenuItem(metadata.FullName.c_str()))
+						select->Scripts.emplace_back(scriptID);
+
+					ImGui::EndDisabled();
+				}
+
+				ImGui::EndPopup();
+			}
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				{
+					AssetHandle handle = *(AssetHandle*)payload->Data;
+
+					if (Project::GetAssetType(handle) == AssetType::Script)
+					{
+						Ref<Script> script = Project::GetAsset<Script>(handle);
+						if (Project::GetScriptEngine()->IsValidScript(script->GetID()))
+							select->Scripts.emplace_back(script->GetID());
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (ImGui::BeginChild("ScriptWindow", child_size, ImGuiChildFlags_Borders))
+			{
+				auto& scriptEngine = Project::GetScriptEngine();
+
+				for (const auto& script : select->Scripts)
+				{
+					ImGui::Selectable(scriptEngine->GetScriptName(script).c_str(), false);
+					if (ImGui::BeginPopupContextItem())
+					{
+						if (ImGui::MenuItem("Delete"))
+							select->Scripts.erase(std::find(select->Scripts.begin(), select->Scripts.end(), script));
+
+						ImGui::EndPopup();
+					}
+				}
+			}
+			ImGui::EndChild();
+
+			ImGui::TreePop();
+		}
+	}
+
 	void ContentBrowserPanel::OnInspectorRender(Room* select)
 	{
 		ImVec2 size = ImVec2(128.0f, 128.0f);
@@ -338,7 +424,7 @@ namespace Strype {
 		{
 			auto sprite = Project::GetAsset<Sprite>(handle);
 			*tx = sprite->GetTexCoords();
-
+		
 			return Renderer::GetCurrent()->GetTexture(sprite);
 		}
 

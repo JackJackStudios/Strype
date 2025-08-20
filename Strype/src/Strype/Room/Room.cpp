@@ -102,7 +102,7 @@ namespace Strype {
 			{
 				if (!scriptEngine->IsValidScript(scriptID))
 				{
-					STY_CORE_WARN("Object \"{}\" has an invalid script id ({})", Project::GetFilePath(instance.ObjectHandle).stem(), scriptID);
+					STY_CORE_WARN("Object \"{}\" has an invalid script id ({})", Name, scriptID);
 					continue;
 				}
 
@@ -130,7 +130,7 @@ namespace Strype {
 
 		for (auto& instance : m_Objects)
 		{
-			for (const auto& csharp : instance.CSharpObjects)
+			for (auto& csharp : instance.CSharpObjects)
 			{
 				csharp->InvokeMethod("OnDestroy");
 				scriptEngine->DestroyInstance(csharp);

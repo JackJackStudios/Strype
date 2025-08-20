@@ -20,7 +20,7 @@ namespace Strype {
 
 		{
 			ScopedMap root(out, "Object");
-			out << YAML::Key << "SpritePath" << YAML::Value << Project::GetFilePath(object->TextureHandle);
+			out << YAML::Key << "SpritePath" << YAML::Value << (Project::IsAssetLoaded(object->TextureHandle) ? Project::GetFilePath(object->TextureHandle) : "");
 
             {
                 ScopedSeq scriptsSeq(out, "Scripts", true);
@@ -41,8 +41,12 @@ namespace Strype {
         if (!root) return nullptr;
 
         Ref<Object> object = CreateRef<Object>();
-        object->TextureHandle = Project::ImportAsset(root["SpritePath"].as<std::filesystem::path>());
-        if (!Project::IsAssetLoaded(object->TextureHandle)) return 0;
+
+        auto filepath = Project::GetProjectDirectory() / root["SpritePath"].as<std::filesystem::path>();
+        if (std::filesystem::exists(filepath) && filepath.has_filename())
+        {
+            object->TextureHandle = Project::ImportAsset(filepath);
+        }
 
         for (const auto& node : root["Scripts"])
         {

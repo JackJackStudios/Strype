@@ -1,2 +1,12 @@
 Project:
   StartRoom: Room1
+  ViewportSize: [640, 360]
+  RuntimeProps:
+    Size: [1280, 720]
+    Visible: true
+    Resizable: true
+    Borderless: false
+    VSync: true
+    WindowMode: Windowed
+  Bindings:
+    []

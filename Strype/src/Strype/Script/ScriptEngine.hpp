@@ -78,10 +78,9 @@ namespace Strype {
 	{
 	public:
 		ScriptEngine(Ref<Project> proj);
-		~ScriptEngine();
 
-		static void Initialize();
-		static void Shutdown();
+		void UnloadAssembly();
+		void ReloadAssembly();
 
 		const ScriptMetadata& GetScriptMetadata(ScriptID scriptID) const { return m_ScriptMetadata.at(scriptID); }
 		const ScriptMap& GetAllScripts() const { return m_ScriptMetadata; }
@@ -94,6 +93,7 @@ namespace Strype {
 		const Coral::Type* GetTypeByName(const std::string& name) const { return m_ScriptMetadata.at(Hash::GenerateFNVHash(name)).Type; }
 		const ScriptID GetIDByName(const std::string& name) const { return Hash::GenerateFNVHash(name); }
 
+
 		template<typename... TArgs>
 		Coral::ManagedObject* CreateInstance(ScriptID scriptID, TArgs&&... args)
 		{
@@ -104,17 +104,21 @@ namespace Strype {
 			return &handle;
 		}
 
-		void DestroyInstance(Coral::ManagedObject* instance)
+		void DestroyInstance(Coral::ManagedObject*& instance)
 		{
 			instance->Destroy();
+			instance = nullptr;
 		}
 	private:
 		void BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly);
 	private:
-		inline static std::unique_ptr<Coral::HostInstance> s_Host;
-		inline static std::unique_ptr<Coral::AssemblyLoadContext> s_LoadContext;
-		inline static Ref<Coral::ManagedAssembly> s_CoreAssembly;
+		bool m_IsInitizled = false;
 
+		std::unique_ptr<Coral::HostInstance> s_Host;
+		std::unique_ptr<Coral::AssemblyLoadContext> s_LoadContext;
+		Ref<Coral::ManagedAssembly> s_CoreAssembly;
+
+		Ref<Project> m_ActiveProject;
 		Coral::StableVector<Coral::ManagedObject> m_ManagedObjects;
 		Ref<Coral::ManagedAssembly> m_AppAssembly;
 		ScriptMap m_ScriptMetadata;

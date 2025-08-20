@@ -43,21 +43,6 @@ namespace Strype {
 		return result;
 	}
 
-	static bool StringMatchingSearch(const std::string& item, const std::string& query, bool caseSensitive = false)
-	{
-		if (query.empty()) return true;
-		if (item.empty()) return false;
-
-		if (caseSensitive)
-		{
-			return item.find(query) != std::string::npos;
-		}
-		else
-		{
-			return ToLower(item).find(ToLower(query)) != std::string::npos;
-		}
-	}
-
 	class EditorLayer : public Layer
 	{
 	public:
@@ -86,7 +71,6 @@ namespace Strype {
 		void OpenProject(Ref<Project> project);
 	private:
 		void OnWindowDrop(WindowDropEvent& e);
-		void OnInspectorRender(Object* select);
 
 		void UI_RoomPanel();
 		void OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event);
