@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <Strype.hpp>
-#include "EditorLayer.hpp"
+#include "EditorSession.hpp"
 
 using namespace Strype;
 
@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	config.DockspaceEnabled = true;
 
 	Application(config)
-		.PushLayer<EditorLayer>(argc > 1 ? argv[1] : "")
+		.NewSession<EditorSession>(argc > 1 ? argv[1] : "")
 		.Run();
 
 	return 0;

@@ -1,12 +1,12 @@
-#include "EditorLayer.hpp"
+#include "EditorSession.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Strype {
 
-	// Layer for running runtime for projects 
+	// Session for running runtime for projects 
 	// that are already loaded by the editor.
-	class EditorRuntime : public Layer
+	class EditorRuntime : public Session
 	{
 	public:
 		EditorRuntime(Ref<Project> proj)
@@ -41,7 +41,7 @@ namespace Strype {
 		Ref<Room> m_Room;
 	};
 
-	void EditorLayer::OnAttach()
+	void EditorSession::OnAttach()
 	{
 		m_Room = CreateRef<Room>();
 
@@ -71,7 +71,7 @@ namespace Strype {
 		if (!Project::GetActive()) exit(0);
 	}
 
-	EditorLayer::~EditorLayer()
+	EditorSession::~EditorSession()
 	{
 		m_FileWatcher.reset();
 		SaveProject();
@@ -83,7 +83,7 @@ namespace Strype {
 		Project::SetActive(nullptr);
 	}
 
-	void EditorLayer::OnUpdate(float ts)
+	void EditorSession::OnUpdate(float ts)
 	{
 		auto[mouseX, mouseY] = ImGui::GetMousePos();
 		mouseX -= m_ViewportBounds[0].x;
@@ -122,7 +122,7 @@ namespace Strype {
 		m_PanelManager.OnUpdate(ts);
 	}
 
-	void EditorLayer::UI_RoomPanel()
+	void EditorSession::UI_RoomPanel()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Room");
@@ -199,13 +199,13 @@ namespace Strype {
 		ImGui::PopStyleVar();
 	}
 
-	void EditorLayer::OpenRoom(AssetHandle handle)
+	void EditorSession::OpenRoom(AssetHandle handle)
 	{
 		m_Room = Project::GetAsset<Room>(handle);
 		m_PanelManager.SetRoomContext(m_Room);
 	}
 
-	void EditorLayer::NewProject(const std::filesystem::path& path)
+	void EditorSession::NewProject(const std::filesystem::path& path)
 	{
 		std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFolder() : path;
 		if (dialog.empty())
@@ -214,13 +214,13 @@ namespace Strype {
 		OpenProject(Project::GenerateNew(dialog));
 	}
 
-	void EditorLayer::SaveProject()
+	void EditorSession::SaveProject()
 	{
 		Project::SaveFile(Project::GetActive());
 		Project::SaveAllAssets();
 	}
 
-	void EditorLayer::OpenProject(const std::filesystem::path& path)
+	void EditorSession::OpenProject(const std::filesystem::path& path)
 	{
 		std::filesystem::path dialog = path.empty() ? FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0") : path;
 
@@ -233,7 +233,7 @@ namespace Strype {
 		OpenProject(project);
 	}
 
-	void EditorLayer::OpenProject(Ref<Project> project)
+	void EditorSession::OpenProject(Ref<Project> project)
 	{
 		if (Project::GetActive())
 			SaveProject();
@@ -242,12 +242,12 @@ namespace Strype {
 		m_PanelManager.OnProjectChanged();
 
 		m_FileWatcher.reset();
-		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorLayer::OnFilewatcher));
+		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorSession::OnFilewatcher));
 		
 		OpenRoom(Project::GetHandle(project->GetConfig().StartRoom));
 	}
 
-	void EditorLayer::OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event)
+	void EditorSession::OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event)
 	{
 		if (Utils::IsFileInsideFolder(filepath, HIDDEN_FOLDER))
 			return;
@@ -274,16 +274,16 @@ namespace Strype {
 		}
 	}
 
-    void EditorLayer::OnEvent(Event& e)
+    void EditorSession::OnEvent(Event& e)
 	{
 		m_PanelManager.OnEvent(e);
 		m_Room->OnEvent(e);
 
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorLayer::OnWindowDrop));
+		dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorSession::OnWindowDrop));
 	}
 
-	void EditorLayer::OnWindowDrop(WindowDropEvent& e)
+	void EditorSession::OnWindowDrop(WindowDropEvent& e)
 	{
 		for (const auto& filepath : e.GetPaths())
 		{
@@ -299,7 +299,7 @@ namespace Strype {
 		}
 	}
 
-	void EditorLayer::OnImGuiRender()
+	void EditorSession::OnImGuiRender()
 	{
 		if (ImGui::BeginMenuBar())
 		{
@@ -340,7 +340,7 @@ namespace Strype {
 				ImGui::Separator();
 
 				if (ImGui::MenuItem("Start Runtime"))
-					Application::Get().PushLayer<EditorRuntime>(Project::GetActive());
+					Application::Get().NewSession<EditorRuntime>(Project::GetActive());
 
 				ImGui::EndMenu();
 			}

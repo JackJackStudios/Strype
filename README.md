@@ -26,10 +26,10 @@ To create a simple app in Strype:
 
 using namespace Strype;
 
-class TestLayer : public Layer
+class TestSession : public Session
 {
 public:
-    TestLayer()
+    TestSession()
     {
         WindowProps.Title = "The Strype Engine";
         // Add other window props...
@@ -42,7 +42,7 @@ int main()
     config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
 
     Application(config)
-        .PushLayer<TestLayer>()
+        .NewSession<TestSession>()
         .Run();
 }
 ```

@@ -10,10 +10,10 @@
 
 namespace Strype {
 
-	class Layer
+	class Session
 	{
 	public:
-		virtual ~Layer() {}
+		virtual ~Session() {}
 
 		virtual void OnAttach() {}
 		virtual void OnUpdate(float ts) {}

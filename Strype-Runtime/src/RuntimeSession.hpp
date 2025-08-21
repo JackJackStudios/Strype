@@ -4,11 +4,11 @@
 
 namespace Strype {
 
-	class RuntimeLayer : public Layer
+	class RuntimeSession : public Session
 	{
 	public:
-		~RuntimeLayer();
-		RuntimeLayer(const std::filesystem::path& path)
+		~RuntimeSession();
+		RuntimeSession(const std::filesystem::path& path)
 			: m_ProjectPath(path) 
 		{
 			WindowProps.Title = "Strype-Runtime";

@@ -43,11 +43,11 @@ namespace Strype {
 		return result;
 	}
 
-	class EditorLayer : public Layer
+	class EditorSession : public Session
 	{
 	public:
-		~EditorLayer();
-		EditorLayer(const std::filesystem::path& projectPath)
+		~EditorSession();
+		EditorSession(const std::filesystem::path& projectPath)
 			: m_ProjectPath(projectPath) 
 		{
 			WindowProps.Title = "Strype-Editor";

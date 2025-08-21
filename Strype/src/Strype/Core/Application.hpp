@@ -3,7 +3,7 @@
 #include "Strype/Core/Base.hpp"
 
 #include "Strype/Core/Event.hpp"
-#include "Strype/Core/Layer.hpp"
+#include "Strype/Core/Session.hpp"
 #include "Strype/Renderer/Renderer.hpp"
 
 #include <AGI/agi.hpp>
@@ -34,20 +34,21 @@ namespace Strype {
 		AGI::Window* GetWindow() { return m_Window; }
 
 		void OnEvent(Event& e);
+		void Run();
 
 		template<typename T, typename... Args>
-		Application& PushLayer(Args&&... args)
+		Application& NewSession(Args&&... args)
 		{
-			InitLayer(m_LayerStack.emplace_back(new T(std::forward<Args>(args)...)));
+			InitSession(m_ActiveSessions.emplace_back(new T(std::forward<Args>(args)...)));
 			if (m_IsRunning)
 			{
-				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_LayerStack[m_LayerStack.size() - 1]);
+				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_ActiveSessions[m_ActiveSessions.size() - 1]);
 			}
 			return *this;
 		}
 	private:
-		void InitLayer(Layer* layer);
-		void ThreadFunc(Layer* layer);
+		void InitSession(Session* layer);
+		void ThreadFunc(Session* layer);
 
 		void OnApplicationQuit(ApplicationQuitEvent& e);
 		
@@ -58,14 +59,11 @@ namespace Strype {
 		AppConfig m_Config;
 		bool m_IsRunning = false;
 
-		std::vector<Layer*> m_LayerStack;
+		std::vector<Session*> m_ActiveSessions;
 		std::vector<std::thread> m_ActiveThreads;
 	private:
 		inline static Application* s_Instance = nullptr;
 		inline static thread_local AGI::Window* m_Window;
-
-		void Run();
-		friend int ::main(int argc, char** argv);
 	};
 
 	Application* CreateApplication(int argc, char** argv);

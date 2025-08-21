@@ -1,5 +1,5 @@
 #include <Strype.hpp>
-#include "RuntimeLayer.hpp"
+#include "RuntimeSession.hpp"
 
 using namespace Strype;
 
@@ -9,7 +9,7 @@ int main(int argc, char** argv)
 	config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
 	
 	Application(config)
-		.PushLayer<RuntimeLayer>(argv[1])
+		.NewSession<RuntimeSession>(argv[1])
 		.Run();
 
 	return 0;

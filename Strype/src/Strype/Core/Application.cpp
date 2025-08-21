@@ -49,7 +49,7 @@ namespace Strype {
 
 	void Application::OnEvent(Event& e)
 	{
-		for (auto it = m_LayerStack.begin(); it != m_LayerStack.end(); ++it)
+		for (auto it = m_ActiveSessions.begin(); it != m_ActiveSessions.end(); ++it)
 		{
 			if (e.IsGlobal())
 			{
@@ -67,7 +67,7 @@ namespace Strype {
 		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(Application::OnWindowResize));
 	}
 
-	void Application::ThreadFunc(Layer* layer)
+	void Application::ThreadFunc(Session* layer)
 	{
 		layer->Render->Init();
 
@@ -125,37 +125,39 @@ namespace Strype {
 		int index = layer->m_StackIndex;
 		delete layer;
 
-		m_LayerStack.erase(m_LayerStack.begin() + index);
+		m_ActiveSessions.erase(m_ActiveSessions.begin() + index);
 	}
 
-	void Application::InitLayer(Layer* layer)
+	void Application::InitSession(Session* session)
 	{
 		AGI::Settings settings;
 		settings.PreferedAPI = AGI::BestAPI();
 		settings.MessageFunc = OnAGIMessage;
 		settings.Blending = true;
 
-		layer->WindowProps.Visible = false;
+		session->WindowProps.Visible = false;
 
-		auto* window = AGI::Window::Create(settings, layer->WindowProps);
-		layer->Render = CreateScope<Renderer>(window);
+		auto* window = AGI::Window::Create(settings, session->WindowProps);
+		session->Render = CreateScope<Renderer>(window);
 
-		layer->m_StartupFrames = m_Config.StartupFrames;
-		layer->m_StackIndex = m_LayerStack.size() - 1;
+		session->m_StartupFrames = m_Config.StartupFrames;
+		session->m_StackIndex = m_ActiveSessions.size() - 1;
 	}
 
 	void Application::Run()
 	{
+		if (m_IsRunning) return;
+
 		m_IsRunning = true;
-		for (size_t i = m_LayerStack.size(); i-- > 0; )
+		for (size_t i = m_ActiveSessions.size(); i-- > 0; )
 		{
 			if (i == 0)
 			{
-				ThreadFunc(m_LayerStack[i]);
+				ThreadFunc(m_ActiveSessions[i]);
 			}
 			else
 			{
-				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_LayerStack[i]);
+				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_ActiveSessions[i]);
 			}
 		}
 	}
