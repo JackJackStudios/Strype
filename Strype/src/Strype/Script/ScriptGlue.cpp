@@ -7,23 +7,11 @@
 #include "Strype/Core/Input.hpp"
 #include "Strype/Project/Project.hpp"
 
-#define STY_ADD_INTERNAL_CALL(icall) coreAssembly.AddInternalCall("Strype.InternalCalls", #icall, (void*)InternalCalls::icall)
+#define STY_ADD_INTERNAL_CALL(icall) s_CoreAssembly->AddInternalCall("Strype.InternalCalls", #icall, (void*)InternalCalls::icall)
 
 namespace Strype {
 
-	void ScriptGlue::RegisterGlue(Coral::ManagedAssembly& coreAssembly)
-	{
-		RegisterComponentTypes(coreAssembly);
-		RegisterInternalCalls(coreAssembly);
-
-		coreAssembly.UploadInternalCalls();
-	}
-
-	void ScriptGlue::RegisterComponentTypes(Coral::ManagedAssembly& coreAssembly)
-	{
-	}
-
-	void ScriptGlue::RegisterInternalCalls(Coral::ManagedAssembly& coreAssembly)
+	void ScriptEngine::RegisterInternalCalls()
 	{
 		STY_ADD_INTERNAL_CALL(Room_CreateObject);
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
@@ -36,6 +24,11 @@ namespace Strype {
 		STY_ADD_INTERNAL_CALL(Object_SetRotation);
 		STY_ADD_INTERNAL_CALL(Object_GetScale);
 		STY_ADD_INTERNAL_CALL(Object_SetScale);
+
+		// STY_ADD_INTERNAL_CALL(Input_IsVerbPressed);
+		// STY_ADD_INTERNAL_CALL(Input_IsVerbHeld);
+		// STY_ADD_INTERNAL_CALL(Input_IsVerbDown);
+		// STY_ADD_INTERNAL_CALL(Input_IsVerbReleased);
 
 		STY_ADD_INTERNAL_CALL(Input_IsKeyPressed);
 		STY_ADD_INTERNAL_CALL(Input_IsKeyHeld);
@@ -54,7 +47,7 @@ namespace Strype {
 		
 		uint32_t Room_CreateObject(float x, float y, uint64_t object)
 		{
-			auto instance = Project::GetActiveRoom()->InstantiatePrefab(object);
+			auto instance = Project::GetActiveRoom()->CreateInstance(object);
 			Project::GetActiveRoom()->GetObject(instance).Position = { x, y };
 
 			return instance;
@@ -107,6 +100,54 @@ namespace Strype {
 		void Object_SetRotation(uint32_t id, float* inRotation)
 		{
 			Project::GetActiveRoom()->GetObject(id).Rotation = *inRotation;
+		}
+
+		Coral::Bool32 Input_IsVerbPressed(Coral::String verb)
+		{
+			std::string message = verb;
+			if (!Project::GetActive()->VerbExists(message)) return false;
+
+			for (const auto& binding : Project::GetActive()->GetBindings(message))
+			{
+				if (Input::IsBindingPressed(binding))
+					return true;
+			}
+		}
+
+		Coral::Bool32 Input_IsVerbHeld(Coral::String verb)
+		{
+			std::string message = verb;
+			if (!Project::GetActive()->VerbExists(message)) return false;
+
+			for (const auto& binding : Project::GetActive()->GetBindings(message))
+			{
+				if (Input::IsBindingHeld(binding))
+					return true;
+			}
+		}
+
+		Coral::Bool32 Input_IsVerbDown(Coral::String verb)
+		{
+			std::string message = verb;
+			if (!Project::GetActive()->VerbExists(message)) return false;
+
+			for (const auto& binding : Project::GetActive()->GetBindings(message))
+			{
+				if (Input::IsBindingDown(binding))
+					return true;
+			}
+		}
+
+		Coral::Bool32 Input_IsVerbReleased(Coral::String verb)
+		{
+			std::string message = verb;
+			if (!Project::GetActive()->VerbExists(message)) return false;
+
+			for (const auto& binding : Project::GetActive()->GetBindings(message))
+			{
+				if (Input::IsBindingReleased(binding))
+					return true;
+			}
 		}
 
 		Coral::Bool32 Input_IsKeyPressed(KeyCode keycode) { return Input::IsKeyPressed(keycode); }

@@ -140,6 +140,15 @@ namespace Strype {
 			Project::GetAssetManager()->SaveAllAssets();
 		}
 
+		bool VerbExists(const std::string& str)
+		{
+			return m_Bindings.find(str) == m_Bindings.end();
+		}
+
+		const std::vector<InputBinding>& GetBindings(const std::string& str)
+		{
+			return m_Bindings[str];
+		}
 	private:
 		std::string GetMSbuildCommand(std::vector<const char*> commands);
 	private:

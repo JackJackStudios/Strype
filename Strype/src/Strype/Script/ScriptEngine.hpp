@@ -111,12 +111,13 @@ namespace Strype {
 		}
 	private:
 		void BuildTypeCache(const Ref<Coral::ManagedAssembly>& assembly);
+		void RegisterInternalCalls();
 	private:
 		bool m_IsInitizled = false;
 
-		std::unique_ptr<Coral::HostInstance> s_Host;
-		std::unique_ptr<Coral::AssemblyLoadContext> s_LoadContext;
-		Ref<Coral::ManagedAssembly> s_CoreAssembly;
+		static inline std::unique_ptr<Coral::HostInstance> s_Host;
+		static inline std::unique_ptr<Coral::AssemblyLoadContext> s_LoadContext;
+		static inline Ref<Coral::ManagedAssembly> s_CoreAssembly;
 
 		Ref<Project> m_ActiveProject;
 		Coral::StableVector<Coral::ManagedObject> m_ManagedObjects;

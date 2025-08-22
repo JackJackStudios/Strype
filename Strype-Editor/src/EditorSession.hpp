@@ -12,6 +12,13 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace Strype {
+	
+	// rect = x, y, width, height
+	static bool PointInRectangle(const glm::vec2& position, const glm::vec4& rect)
+	{
+		return rect.x < position.x && rect.x + rect.z > position.x &&
+			   rect.y < position.y && rect.y + rect.w > position.y;
+	}
 
     static bool DecomposeTransform(const glm::mat4& transform, glm::vec2& position, float& rotation, glm::vec2& scale)
     {

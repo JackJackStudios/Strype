@@ -22,7 +22,7 @@ namespace Strype {
 	public:
 		Room();
 
-		InstanceID InstantiatePrefab(AssetHandle prefab);
+		InstanceID CreateInstance(AssetHandle object);
 
 		bool InstanceExists(InstanceID obj) const { return obj < m_Objects.size(); }
 		void DestroyInstance(InstanceID obj);
@@ -43,6 +43,9 @@ namespace Strype {
 		RoomState GetState() const { return m_RoomState; }
 		Camera& GetCamera() { return m_Camera; }
 		RoomInstance& GetObject(InstanceID id) { return m_Objects[id]; }
+
+		std::vector<RoomInstance>::iterator begin() { return m_Objects.begin(); }
+		std::vector<RoomInstance>::iterator end() { return m_Objects.end(); }
 	private:
 		void OnMouseScrolled(MouseScrolledEvent& e);
 	private:
@@ -60,13 +63,8 @@ namespace Strype {
 		float m_CameraSpeed = 5.0f;
 		float m_ZoomLevel = 1.0f;
 
-		friend class Prefab;
-		friend class RoomInstance;
-		friend class SceneHierachyPanel;
 		friend class RoomSerializer;
 		friend class ContentBrowserPanel;
 	};
-
-	static Ref<Room> s_PrefabRoom = CreateRef<Room>();
 
 }

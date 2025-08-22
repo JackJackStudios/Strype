@@ -12,7 +12,9 @@ namespace Strype {
 		void SetProjection(const glm::vec2& size);
 		void SetZoomLevel(float zoom);
 
+		float GetZoomLevel() const { return m_ZoomLevel; }
 		glm::vec2 GetSize() const { return m_Size; }
+		glm::vec2 GetHalfSize() const { return { m_Size.x / 2, m_Size.y / 2 }; }
 
 		void UpdateMatrix();
 

@@ -46,7 +46,7 @@ namespace Strype {
 		m_Room = CreateRef<Room>();
 
 		AGI::FramebufferSpecification framebufferSpec;
-		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8, AGI::FramebufferTextureFormat::RED_FLOAT };
+		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8 };
 		framebufferSpec.Width = 1280;
 		framebufferSpec.Height = 720;
 		m_Framebuffer = Render->GetContext()->CreateFramebuffer(framebufferSpec);
@@ -103,17 +103,29 @@ namespace Strype {
 		Render->Clear();
 
 		m_Room->OnUpdate(ts);
-		
-		if (Input::IsMouseButtonPressed(MouseCode::Left) && mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
-		{
-			float pixelData = *(float*)m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-			InstanceID id = pixelData - 1;
 
-			if (pixelData == 0) m_Selected = -1;
-			if (pixelData != 0 && m_Room->InstanceExists(id))
+		if (Input::IsMouseButtonPressed(MouseCode::Left))
+		{
+			bool found = false;
+
+			for (const auto& inst : *m_Room)
 			{
-				m_Selected = id;
-				m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				glm::vec2 framebufPos = inst.Position + m_Room->GetCamera().GetHalfSize();
+				glm::vec2 frameSize = Project::GetAsset<Sprite>(Project::GetAsset<Object>(inst.ObjectHandle)->TextureHandle)->GetFrameSize() * m_Room->GetCamera().GetZoomLevel();
+
+				if (PointInRectangle({ mouseX, mouseY }, { framebufPos.x - frameSize.x / 2, framebufPos.y - frameSize.y / 2, frameSize }))
+				{
+					m_Selected = inst.GetHandle();
+					m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				m_Selected = -1;
 			}
 		}
 		
@@ -147,7 +159,7 @@ namespace Strype {
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 		
 				if (Project::GetAssetType(handle) == AssetType::Object)
-					m_Room->InstantiatePrefab(handle);
+					m_Room->CreateInstance(handle);
 			}
 			ImGui::EndDragDropTarget();
 		}

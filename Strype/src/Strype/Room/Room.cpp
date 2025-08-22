@@ -24,7 +24,7 @@ namespace Strype {
 	{
 		Renderer::GetCurrent()->BeginRoom(m_Camera);
 
-		Renderer::GetCurrent()->DrawQuad({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
+		Renderer::GetCurrent()->DrawSprite({ 0.0f, 0.0f, 0.0f }, { m_Width, m_Height }, 0.0f, glm::make_vec4(m_BackgroundColour));
 
 		if (m_RoomState == RoomState::Editor)
 		{
@@ -42,15 +42,13 @@ namespace Strype {
 		{
 			auto sprite = Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle);
 
-			Renderer::GetCurrent()->DrawQuad(
+			Renderer::GetCurrent()->DrawSprite(
 				glm::make_vec3(instance.Position),
 				instance.Scale,
 				instance.Rotation,
 				instance.Colour,
 				sprite,
-				instance.CurrentFrame,
-
-				Buffer((float)(instance.m_Handle+1))
+				instance.CurrentFrame
 			);
 
 			if (m_RoomState == RoomState::Runtime)
@@ -158,9 +156,9 @@ namespace Strype {
 		return room;
 	}
 
-	InstanceID Room::InstantiatePrefab(AssetHandle prefab)
+	InstanceID Room::CreateInstance(AssetHandle object)
 	{
-		return m_Objects.emplace_back(UUID32(m_Objects.size()), prefab, this).m_Handle;
+		return m_Objects.emplace_back(UUID32(m_Objects.size()), object, this).m_Handle;
 	}
 
 	void Room::DestroyInstance(InstanceID obj)

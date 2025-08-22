@@ -13,16 +13,6 @@
 
 namespace Strype {
 
-	class ScriptGlue
-	{
-	public:
-		static void RegisterGlue(Coral::ManagedAssembly& coreAssembly);
-
-	private:
-		static void RegisterComponentTypes(Coral::ManagedAssembly& coreAssembly);
-		static void RegisterInternalCalls(Coral::ManagedAssembly& coreAssembly);
-	};
-
 	namespace InternalCalls {
 
 		template<std::default_initializable T>
@@ -69,7 +59,12 @@ namespace Strype {
 		void Object_SetScale(uint32_t id, glm::vec2* inScale);
 		void Object_GetRotation(uint32_t id, float* outRotation);
 		void Object_SetRotation(uint32_t id, float* inRotation);
-		
+
+		Coral::Bool32 Input_IsVerbPressed(Coral::String verb);
+		Coral::Bool32 Input_IsVerbHeld(Coral::String verb);
+		Coral::Bool32 Input_IsVerbDown(Coral::String verb);
+		Coral::Bool32 Input_IsVerbReleased(Coral::String verb);
+
 		Coral::Bool32 Input_IsKeyPressed(KeyCode keycode);
 		Coral::Bool32 Input_IsKeyHeld(KeyCode keycode);
 		Coral::Bool32 Input_IsKeyDown(KeyCode keycode);

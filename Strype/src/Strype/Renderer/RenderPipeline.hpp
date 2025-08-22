@@ -35,7 +35,6 @@ namespace Strype {
 		AGI::BufferLayout Layout;
 
 		int NextAttr = 0;
-		std::string UserAttribute;
 
 		void SubmitAttribute(const std::string& name, const Buffer& buf)
 		{

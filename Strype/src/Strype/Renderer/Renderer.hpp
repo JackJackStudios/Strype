@@ -43,11 +43,11 @@ namespace Strype {
 		void EndRoom();
 
 		// Primitives
-		void DrawQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, Ref<Sprite> sprite = nullptr, float frame = 0, const Buffer& buf = Buffer(0));
-		AGI::Texture GetTexture(Ref<Sprite> sprite);
+		void DrawSprite(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour, Ref<Sprite> sprite = nullptr, float frame = 0);
 
 		AGI::RenderContext* GetContext() { return m_RenderContext; }
 		AGI::Window* GetWindow() { return m_RenderContext->GetBoundWindow(); }
+		AGI::Texture GetTexture(Ref<Sprite> sprite);
 
 		static Renderer* GetCurrent() { return m_CurrentContext; }
 	private:

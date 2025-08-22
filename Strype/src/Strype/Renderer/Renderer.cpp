@@ -48,14 +48,6 @@ namespace Strype {
 				STY_CORE_VERIFY(pipeline.Layout.HasElement(std::string(*it)), "Missing layout element: {}", *it);
 		}
 
-		if (pipeline.Layout.GetSize() > RenderCaps::RequiredAttrs.size())
-		{
-			std::string userAttr = pipeline.Layout[RenderCaps::RequiredAttrs.size()].Name;
-
-			STY_CORE_TRACE("Detected user attribute in {}: \"{}\" ", filepath.filename(), userAttr);
-			pipeline.UserAttribute = userAttr;
-		}
-
 		pipeline.VertexArray = m_RenderContext->CreateVertexArray();
 		pipeline.VertexBuffer = m_RenderContext->CreateVertexBuffer(RenderCaps::MaxVertices, pipeline.Layout);
 		pipeline.VertexArray->AddVertexBuffer(pipeline.VertexBuffer);

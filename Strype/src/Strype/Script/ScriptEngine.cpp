@@ -69,7 +69,8 @@ namespace Strype {
 		auto scriptCorePath = (Application::Get().GetConfig().MasterDir / "DotNet" / "Strype-ScriptCore.dll").string();
 		s_CoreAssembly = CreateRef<Coral::ManagedAssembly>(s_LoadContext->LoadAssembly(scriptCorePath));
 
-		ScriptGlue::RegisterGlue(*s_CoreAssembly);
+		RegisterInternalCalls();
+		s_CoreAssembly->UploadInternalCalls();
 
 		std::filesystem::path filepath = m_ActiveProject->GetProjectDirectory() / HIDDEN_FOLDER / "bin/net8.0" / (m_ActiveProject->GetProjectName() + ".dll");
 		if (!std::filesystem::exists(filepath))

@@ -68,7 +68,7 @@ namespace Strype {
 			if (!Project::IsAssetLoaded(handle))
 				continue;
 
-			RoomInstance& newobj = room->GetObject(room->InstantiatePrefab(handle));
+			RoomInstance& newobj = room->GetObject(room->CreateInstance(handle));
 			newobj.ObjectHandle = handle;
 
 			newobj.Position = obj["Position"].as<glm::vec2>();
