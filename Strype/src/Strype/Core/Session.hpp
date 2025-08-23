@@ -24,6 +24,9 @@ namespace Strype {
 
 		AGI::WindowProps WindowProps;
 		bool ImGuiEnabled = false;
+		bool DockspaceEnabled = false;
+
+		bool Running = false;
 	private:
 		int m_StackIndex;
 

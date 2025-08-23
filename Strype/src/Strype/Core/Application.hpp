@@ -17,8 +17,7 @@ namespace Strype {
 	{
 		std::filesystem::path MasterDir;
 		std::filesystem::path WorkingDir;
-
-		bool DockspaceEnabled = false;
+		
 		int StartupFrames = 10;
 	};
 
@@ -44,8 +43,17 @@ namespace Strype {
 			{
 				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_ActiveSessions[m_ActiveSessions.size() - 1]);
 			}
+
 			return *this;
 		}
+
+		template<typename T, typename... Args>
+		void OnEvent(Args&&... args)
+		{
+			T event(std::forward<Args>(args)...);
+			OnEvent(event);
+		}
+
 	private:
 		void InitSession(Session* layer);
 		void ThreadFunc(Session* layer);

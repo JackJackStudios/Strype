@@ -54,13 +54,14 @@ namespace Strype {
 	{
 	public:
 		~EditorSession();
-		EditorSession(const std::filesystem::path& projectPath)
-			: m_ProjectPath(projectPath) 
+		EditorSession(Ref<Project> project)
+			: m_Project(project)
 		{
 			WindowProps.Title = "Strype-Editor";
 			WindowProps.Mode = AGI::WindowMode::Maximized;
 			
 			ImGuiEnabled = true;
+			DockspaceEnabled = true;
 		}
 
 		void OnAttach() override;
@@ -92,7 +93,7 @@ namespace Strype {
 
 		glm::vec2 m_ViewportBounds[2];
 		ImGuizmo::OPERATION m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
-		std::filesystem::path m_ProjectPath;
+		Ref<Project> m_Project;
 	};
 
 }

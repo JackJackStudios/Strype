@@ -82,13 +82,15 @@ namespace Strype {
 
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 			io.IniFilename = "assets/imgui.ini";
 
-			if (m_Config.DockspaceEnabled)
-				io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			io.Fonts->AddFontFromFileTTF("assets/Roboto-Regular.ttf", 16);
+			io.Fonts->Build();
 		}
 
 		layer->OnAttach();
+		layer->Running = true;
 
 		while (!m_Window->ShouldClose())
 		{
@@ -105,7 +107,7 @@ namespace Strype {
 				ImGuizmo::BeginFrame();
 
 				{
-					ScopedDockspace dockspace(m_Config.DockspaceEnabled);
+					ScopedDockspace dockspace(layer->DockspaceEnabled);
 					layer->OnImGuiRender();
 				}
 

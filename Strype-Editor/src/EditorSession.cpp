@@ -67,7 +67,7 @@ namespace Strype {
 			m_PanelManager.GetInspector()->SetSelected<Object>(asset->Handle);
 		});
 
-		OpenProject(m_ProjectPath);
+		OpenProject(m_Project);
 		if (!Project::GetActive()) exit(0);
 	}
 

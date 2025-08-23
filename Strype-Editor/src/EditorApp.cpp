@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <Strype.hpp>
+#include "LauncherSession.hpp"
 #include "EditorSession.hpp"
 
 using namespace Strype;
@@ -14,10 +15,9 @@ int main(int argc, char** argv)
 
 	AppConfig config;
 	config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
-	config.DockspaceEnabled = true;
 
 	Application(config)
-		.NewSession<EditorSession>(argc > 1 ? argv[1] : "")
+		.NewSession<LauncherSession>()
 		.Run();
 
 	return 0;

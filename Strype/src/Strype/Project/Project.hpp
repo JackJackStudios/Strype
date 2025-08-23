@@ -19,7 +19,7 @@ namespace Strype {
 	};
 
 	// Relative to working directory
-	constexpr std::string_view EMPTY_PROJECT = "assets/EmptyProject/EmptyProject.sproj";
+	constexpr std::string_view EMPTY_PROJECT = "assets/template/EmptyProject.sproj";
 	constexpr std::string_view HIDDEN_FOLDER = "strype";
 
 	//Note: Project is not a Asset because it holds the AssetManager
@@ -159,7 +159,7 @@ namespace Strype {
 
 		Ref<AssetManager> m_AssetManager;
 		Ref<ScriptEngine> m_ScriptEngine;
-		Room* m_ActiveRoom;
+		Room* m_ActiveRoom = nullptr;
 
 		friend class ProjectSerializer;
 		friend class ProjectSettingsPanel;
