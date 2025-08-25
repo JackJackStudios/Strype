@@ -154,10 +154,11 @@ namespace Strype {
 	{
 		s_CurrentSession = session;
 		STY_CORE_VERIFY(session->Running == false, "Session already active");
-
 		session->Running = true;
-
+		
 		session->Render->Init();
+
+		InstallCallbacks();
 		Input::Init();
 
 		if (session->ImGuiEnabled)
