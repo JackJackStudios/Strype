@@ -4,9 +4,9 @@ Currently tested on **Windows x64** and **Ubuntu ARM64**.
 
 ## Features
 - Super quick rendering optimized for pixel art
-- Robust agnostic renderer (OpenGL, Vulkan)
+- Robust agnostic renderer (OpenGL - Vulkan comming soon!)
 - Intergrates with C# (with .NET / MSBuild)
-- Integration with tools like [Aseprite](https://www.aseprite.org/), [FMOD](https://www.fmod.com/), and [Steamworks](https://partner.steamgames.com/)
+- Multi-threaded windowing with ImGui
 
 ## Using Strype
 * Core & Runtime - **Windows or Linux**
@@ -39,6 +39,8 @@ public:
 int main()
 {
     AppConfig config;
+    
+    // This line is a temporary fix and will be removed in a later release.
     config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
 
     Application(config)
@@ -53,6 +55,7 @@ Strype’s goal is to create a developer and artist-friendly engine that integra
 ### Main features to come:
 - 2D rendering expansion (text, video, particles)
 - More rendering API support (DirectX, Vulkan)
+- Integration with tools like [Aseprite](https://www.aseprite.org/), [FMOD](https://www.fmod.com/), and [Steamworks](https://partner.steamgames.com/)
 - Flexbox-style UI system
 - Templates and packages
 - Hot reloading
