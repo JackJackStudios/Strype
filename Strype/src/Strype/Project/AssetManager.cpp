@@ -182,11 +182,11 @@ namespace Strype {
 
 		const std::string& name = GetName(handle);
 
-		m_LoadedAssets[handle].reset();
-		m_LoadedAssets.erase(handle);
-
 		if (m_AssetRegistry.find(name) != m_AssetRegistry.end())
 			m_AssetRegistry.erase(name);
+
+		m_LoadedAssets[handle].reset();
+		m_LoadedAssets.erase(handle);
 
 		Application::Get().DispatchEvent<AssetRemovedEvent>(handle);
     }
