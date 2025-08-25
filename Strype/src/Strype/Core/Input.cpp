@@ -78,17 +78,13 @@ namespace Strype {
 			if (state == InputState::Held && !Input::IsKeyDown(key))
 			{
 				state = InputState::Released;
-
-				BindingReleasedEvent event(BindingType::Keyboard, key);
-				Application::Get().OnEvent(event);
+				Application::Get().DispatchEvent<BindingReleasedEvent>(BindingType::Keyboard, key);
 			}
 
 			if (state == InputState::None && Input::IsKeyDown(key))
 			{
 				state = InputState::Pressed;
-
-				BindingPressedEvent event(BindingType::Keyboard, key);
-				Application::Get().OnEvent(event);
+				Application::Get().DispatchEvent<BindingPressedEvent>(BindingType::Keyboard, key);
 			}
 		}
 
@@ -103,17 +99,13 @@ namespace Strype {
 			if (state == InputState::Held && !Input::IsMouseButtonDown(button))
 			{
 				state = InputState::Released;
-
-				BindingReleasedEvent event(BindingType::MouseButton, button);
-				Application::Get().OnEvent(event);
+				Application::Get().DispatchEvent<BindingReleasedEvent>(BindingType::MouseButton, button);
 			}
 
 			if (state == InputState::None && Input::IsMouseButtonDown(button))
 			{
 				state = InputState::Pressed;
-
-				BindingPressedEvent event(BindingType::MouseButton, button);
-				Application::Get().OnEvent(event);
+				Application::Get().DispatchEvent<BindingPressedEvent>(BindingType::MouseButton, button);
 			}
 		}
 
@@ -147,17 +139,13 @@ namespace Strype {
 					if (state == InputState::Held && !buttonDown)
 					{
 						s_InputState.GamepadButtons[button] = InputState::Released;
-
-						BindingReleasedEvent event(BindingType::GamepadButton, button);
-						Application::Get().OnEvent(event);
+						Application::Get().DispatchEvent<BindingReleasedEvent>(BindingType::GamepadButton, button);
 					}
 
 					if (state == InputState::None && buttonDown)
 					{
 						s_InputState.GamepadButtons[button] = InputState::Pressed;
-
-						BindingPressedEvent event(BindingType::GamepadButton, button);
-						Application::Get().OnEvent(event);
+						Application::Get().DispatchEvent<BindingPressedEvent>(BindingType::GamepadButton, button);
 					}
 				}
 			}
@@ -169,13 +157,11 @@ namespace Strype {
 
 				if (IsBindingPressed(binding))
 				{
-					BindingPressedEvent event(binding);
-					Application::Get().OnEvent(event);
+					Application::Get().DispatchEvent<BindingPressedEvent>(binding);
 				}
 				else if (IsBindingReleased(binding))
 				{
-					BindingReleasedEvent event(binding);
-					Application::Get().OnEvent(event);
+					Application::Get().DispatchEvent<BindingReleasedEvent>(binding);
 				}
 			}
 		}

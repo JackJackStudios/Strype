@@ -112,6 +112,8 @@ namespace Strype {
 				if (Input::IsBindingPressed(binding))
 					return true;
 			}
+
+			return false;
 		}
 
 		Coral::Bool32 Input_IsVerbHeld(Coral::String verb)
@@ -124,6 +126,8 @@ namespace Strype {
 				if (Input::IsBindingHeld(binding))
 					return true;
 			}
+
+			return false;
 		}
 
 		Coral::Bool32 Input_IsVerbDown(Coral::String verb)
@@ -136,6 +140,8 @@ namespace Strype {
 				if (Input::IsBindingDown(binding))
 					return true;
 			}
+
+			return false;
 		}
 
 		Coral::Bool32 Input_IsVerbReleased(Coral::String verb)
@@ -148,6 +154,8 @@ namespace Strype {
 				if (Input::IsBindingReleased(binding))
 					return true;
 			}
+
+			return false;
 		}
 
 		Coral::Bool32 Input_IsKeyPressed(KeyCode keycode) { return Input::IsKeyPressed(keycode); }

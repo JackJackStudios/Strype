@@ -72,11 +72,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Coral)
 
 FetchContent_Declare(
-    ImGui
-    GIT_REPOSITORY https://github.com/JackKnox/imgui.git
-    GIT_TAG        docking
+    ImGuizmo
+    GIT_REPOSITORY https://github.com/JackKnox/ImGuizmo.git
+    GIT_TAG        master
 )
-FetchContent_MakeAvailable(ImGui)
+FetchContent_MakeAvailable(ImGuizmo)
 
 FetchContent_Declare(
     miniaudio
@@ -91,13 +91,6 @@ FetchContent_Declare(
     GIT_TAG        v3.1.1
 )
 FetchContent_MakeAvailable(box2d)
-
-FetchContent_Declare(
-    ImGuizmo
-    GIT_REPOSITORY https://github.com/JackKnox/ImGuizmo.git
-    GIT_TAG        master
-)
-FetchContent_MakeAvailable(ImGuizmo)
 
 FetchContent_Declare(
     spdlog

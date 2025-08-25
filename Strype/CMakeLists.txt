@@ -19,14 +19,13 @@ target_link_libraries(Strype PUBLIC
     agi_imgui
 
     glm
-    ImGui
     box2d
-    miniaudio
     ImGuizmo
-    Coral
+    miniaudio
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum
+    Coral
 )
 
 # Download scripting binaries

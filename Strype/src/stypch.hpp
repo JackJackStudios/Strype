@@ -10,6 +10,7 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <deque>
 #include <unordered_map>
 
 #include "Strype/Core/Log.hpp"

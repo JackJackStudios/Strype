@@ -49,85 +49,14 @@ namespace Strype {
 
 	void Application::OnEvent(Event& e)
 	{
-		for (auto it = m_ActiveSessions.begin(); it != m_ActiveSessions.end(); ++it)
-		{
-			if (e.IsGlobal())
-			{
-				(*it)->OnEvent(e);
-			}
-			else
-			{
-				if (Renderer::GetCurrent()->GetContext()->GetBoundWindow() == m_Window)
-					(*it)->OnEvent(e);
-			}
-		}
+		STY_CORE_VERIFY(s_CurrentSession, "Cannot call OnEvent() on this thread");
+		STY_CORE_VERIFY(e.Dispatched, "Cannot call OnEvent() directly, use DispatchEvent instead");
+
+		s_CurrentSession->OnEvent(e);
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(STY_BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(Application::OnWindowResize));
-	}
-
-	void Application::ThreadFunc(Session* layer)
-	{
-		layer->Render->Init();
-
-		m_Window = layer->Render->GetWindow();
-		InstallCallbacks();
-
-		Input::Init();
-
-		if (layer->ImGuiEnabled)
-		{
-			layer->m_ImGuiLayer = AGI::ImGuiLayer::Create(m_Window);
-
-			ImGuiIO& io = ImGui::GetIO();
-			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-			io.IniFilename = "assets/imgui.ini";
-
-			io.Fonts->AddFontFromFileTTF("assets/Roboto-Regular.ttf", 16);
-			io.Fonts->Build();
-		}
-
-		layer->OnAttach();
-		layer->Running = true;
-
-		while (!m_Window->ShouldClose())
-		{
-			float timestep = m_Window->GetDelta();
-
-			layer->Render->SetClearColour({ 0.1f, 0.1f, 0.1f });
-			layer->Render->Clear();
-			
-			layer->OnUpdate(timestep);
-
-			if (layer->ImGuiEnabled)
-			{
-				layer->m_ImGuiLayer->BeginFrame();
-				ImGuizmo::BeginFrame();
-
-				{
-					ScopedDockspace dockspace(layer->DockspaceEnabled);
-					layer->OnImGuiRender();
-				}
-
-				layer->m_ImGuiLayer->EndFrame();
-			}
-
-			m_Window->OnUpdate();
-			Input::Update();
-
-			if (--layer->m_StartupFrames == 0)
-				m_Window->SetVisable(true);
-		}
-
-		layer->m_ImGuiLayer.reset();
-		layer->Render->Shutdown();
-
-		int index = layer->m_StackIndex;
-		delete layer;
-
-		m_ActiveSessions.erase(m_ActiveSessions.begin() + index);
 	}
 
 	void Application::InitSession(Session* session)
@@ -144,35 +73,35 @@ namespace Strype {
 
 		session->m_StartupFrames = m_Config.StartupFrames;
 		session->m_StackIndex = m_ActiveSessions.size() - 1;
+
+		m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), session);
 	}
 
 	void Application::Run()
 	{
-		if (m_IsRunning) return;
-
 		m_IsRunning = true;
-		for (size_t i = m_ActiveSessions.size(); i-- > 0; )
+
+		while (!m_ActiveSessions.empty())
 		{
-			if (i == 0)
+			while (!m_GlobalQueue.empty())
 			{
-				ThreadFunc(m_ActiveSessions[i]);
-			}
-			else
-			{
-				m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), m_ActiveSessions[i]);
+				Event* event = m_GlobalQueue.front();
+				m_GlobalQueue.pop_front();
+				
+				for (auto& session : m_ActiveSessions) session->m_EventQueue.push_back(event);
 			}
 		}
 	}
 
-	void Application::OnWindowClose(WindowCloseEvent& e)
+	void Application::Quit()
 	{
-		m_Window->ShouldClose(true);
-		m_Window->SetVisable(false);
 	}
 
-	void Application::OnApplicationQuit(ApplicationQuitEvent& e)
+	void Application::OnWindowClose(WindowCloseEvent& e)
 	{
-		 
+		auto window = s_CurrentSession->GetWindow();
+		window->ShouldClose(true);
+		window->SetVisable(false);
 	}
 
 	void Application::OnWindowResize(WindowResizeEvent& e)
@@ -185,46 +114,113 @@ namespace Strype {
 
 	void Application::InstallCallbacks()
 	{
-		m_Window->SetWindowSizeCallback([](AGI::Window* window, glm::vec2 size)
+		auto window = s_CurrentSession->GetWindow();
+		window->SetWindowSizeCallback([](AGI::Window* window, glm::vec2 size)
 		{
-			WindowResizeEvent event(size);
-			Application::Get().OnEvent(event);
+			Application::Get().DispatchEvent<WindowResizeEvent>(size);
 		});
 
-		m_Window->SetWindowPosCallback([](AGI::Window* window, glm::vec2 pos)
+		window->SetWindowPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
-			WindowMoveEvent event(pos);
-			Application::Get().OnEvent(event);
+			Application::Get().DispatchEvent<WindowMoveEvent>(pos);
 		});
 
-		m_Window->SetWindowCloseCallback([](AGI::Window* window)
+		window->SetWindowCloseCallback([](AGI::Window* window)
 		{
-			WindowCloseEvent event;
-			Application::Get().OnEvent(event);
+			Application::Get().DispatchEvent<WindowCloseEvent>();
 		});
 
-		m_Window->SetDropCallback([](AGI::Window* window, int path_count, const char* paths[])
+		window->SetDropCallback([](AGI::Window* window, int path_count, const char* paths[])
 		{
 			std::vector<std::filesystem::path> filepaths(path_count);
 			for (int i = 0; i < path_count; i++)
 				filepaths[i] = paths[i];
 
-			WindowDropEvent event(std::move(filepaths));
-			Application::Get().OnEvent(event);
+			Application::Get().DispatchEvent<WindowDropEvent>(std::move(filepaths));
 		});
 
-		m_Window->SetScrollCallback([](AGI::Window* window, glm::vec2 offset)
+		window->SetScrollCallback([](AGI::Window* window, glm::vec2 offset)
 		{
-			MouseScrolledEvent event(offset);
-			Application::Get().OnEvent(event);
+			Application::Get().DispatchEvent<MouseScrolledEvent>(offset);
 		});
 
-		m_Window->SetCursorPosCallback([](AGI::Window* window, glm::vec2 pos)
+		window->SetCursorPosCallback([](AGI::Window* window, glm::vec2 pos)
 		{
-			MouseMovedEvent event(pos);
-			Application::Get().OnEvent(event);
+			Application::Get().DispatchEvent<MouseMovedEvent>(pos);
 		});
 	}
 
-}
+	void Application::ThreadFunc(Session* session)
+	{
+		s_CurrentSession = session;
+		STY_CORE_VERIFY(session->Running == false, "Session already active");
 
+		session->Running = true;
+
+		session->Render->Init();
+		Input::Init();
+
+		if (session->ImGuiEnabled)
+		{
+			session->m_ImGuiLayer = AGI::ImGuiLayer::Create(session->Render->GetContext());
+
+			ImGuiIO& io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			io.IniFilename = "assets/imgui.ini";
+
+			io.Fonts->AddFontFromFileTTF("assets/Roboto-Regular.ttf", 16);
+		}
+
+		auto window = session->GetWindow();
+		session->OnAttach();
+
+		while (!window->ShouldClose())
+		{
+			float timestep = window->GetDelta();
+
+			session->Render->SetClearColour({ 0.1f, 0.1f, 0.1f });
+			session->Render->Clear();
+
+			session->OnUpdate(timestep);
+
+			if (session->m_ImGuiLayer)
+			{
+				session->m_ImGuiLayer->BeginFrame();
+				ImGuizmo::BeginFrame();
+
+				{
+					ScopedDockspace dockspace(session->DockspaceEnabled);
+					session->OnImGuiRender();
+				}
+
+				session->m_ImGuiLayer->EndFrame();
+			}
+
+			if (--session->m_StartupFrames == 0)
+				window->SetVisable(true);
+
+			window->OnUpdate();
+			Input::Update();
+
+			while (!session->m_EventQueue.empty())
+			{
+				Event* event = session->m_EventQueue.front();
+				session->m_EventQueue.pop_front();
+
+				OnEvent(*event);
+			}
+		}
+
+		session->m_ImGuiLayer.reset();
+		session->Render->Shutdown();
+
+		int index = session->m_StackIndex;
+		delete session;
+
+		m_ActiveSessions.erase(m_ActiveSessions.begin() + index);
+		for (int i = index; i < m_ActiveSessions.size(); ++i)
+			m_ActiveSessions[i]->m_StackIndex = i;
+	}
+
+};

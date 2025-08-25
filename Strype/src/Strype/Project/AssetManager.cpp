@@ -102,8 +102,7 @@ namespace Strype {
 			metadata.Filepath = filepath;
 			m_AssetRegistry[name] = metadata;
 
-			AssetImportedEvent e(handle);
-			Application::Get().OnEvent(e);
+			Application::Get().DispatchEvent<AssetImportedEvent>(handle);
 		}
 		else
 		{
@@ -189,8 +188,7 @@ namespace Strype {
 		if (m_AssetRegistry.find(name) != m_AssetRegistry.end())
 			m_AssetRegistry.erase(name);
 
-		AssetRemovedEvent e(handle);
-		Application::Get().OnEvent(e);
+		Application::Get().DispatchEvent<AssetRemovedEvent>(handle);
     }
 
 	void AssetManager::ReloadAsset(AssetHandle handle)
@@ -229,8 +227,7 @@ namespace Strype {
 			return;
 		}
 
-		AssetMovedEvent e(handle, newpath);
-		Application::Get().OnEvent(e);
+		Application::Get().DispatchEvent<AssetMovedEvent>(handle, newpath);
 
 		AssetMetadata metadata;
 		metadata.Handle = handle;

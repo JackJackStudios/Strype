@@ -328,8 +328,7 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Exit"))
 				{
-					ApplicationQuitEvent e;
-					Application::Get().OnEvent(e);
+					Application::Get().Quit();
 				}
 
 				ImGui::EndMenu();

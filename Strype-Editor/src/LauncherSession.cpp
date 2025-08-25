@@ -114,7 +114,7 @@ namespace Strype {
             if (ImGui::Selectable("", false, 0, ImVec2(fullWidth, iconSize)))
             {
                 Application::Get().NewSession<EditorSession>(project);
-                Application::Get().OnEvent<WindowCloseEvent>();
+                Application::Get().DispatchEvent<WindowCloseEvent>();
             }
 
             ImGui::SetCursorPos(cursor);

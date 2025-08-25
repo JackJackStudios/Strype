@@ -6,7 +6,7 @@
 #include "Strype/Renderer/Renderer.hpp"
 
 #include <AGI/agi.hpp>
-#include <AGI/ext/ImGuiLayer.hpp>
+#include <ImGuiLayer.hpp>
 
 namespace Strype {
 
@@ -19,6 +19,11 @@ namespace Strype {
 		virtual void OnUpdate(float ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}
+
+		AGI::Window* GetWindow() const
+		{
+			return Render->GetContext()->GetBoundWindow();
+		}
 	public:
 		Scope<Renderer> Render;
 
@@ -30,6 +35,7 @@ namespace Strype {
 	private:
 		int m_StackIndex;
 
+		EventQueue m_EventQueue;
 		std::unique_ptr<AGI::ImGuiLayer> m_ImGuiLayer;
 		int m_StartupFrames;
 
