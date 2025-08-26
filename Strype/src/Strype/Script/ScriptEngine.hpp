@@ -78,6 +78,7 @@ namespace Strype {
 	{
 	public:
 		ScriptEngine(Ref<Project> proj);
+		~ScriptEngine();
 
 		void UnloadAssembly();
 		void ReloadAssembly();

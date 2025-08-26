@@ -25,6 +25,8 @@ namespace Strype {
 		template<typename TPanel, typename... TArgs>
 		Ref<TPanel> AddPanel(TArgs&&... args)
 		{
+			static_assert(std::is_base_of<EditorPanel, TPanel>::value, "T must inherit from EditorPanel");
+
 			Ref<TPanel> temp = CreateRef<TPanel>(std::forward<TArgs>(args)...);
 			temp->m_CurrentRoom = this->m_ActiveRoom;
 			temp->m_Inspector = this->m_Inspector;

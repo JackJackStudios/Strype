@@ -9,6 +9,7 @@ namespace Strype {
 	enum class EventType
 	{
 		None = 0,
+		ApplicationQuit,
 		WindowClose, WindowResize, WindowMove, WindowDrop,
 		MouseMoved, MouseScrolled,
 
@@ -78,6 +79,16 @@ namespace Strype {
 		}
 	private:
 		Event& m_Event;
+	};
+
+	class ApplicationQuitEvent : public Event
+	{
+	public:
+		ApplicationQuitEvent() {}
+
+		EVENT_CLASS_TYPE(ApplicationQuit)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryWindow)
+		EVENT_CLASS_GLOBAL(true)
 	};
 
 	class AssetImportedEvent : public Event

@@ -56,6 +56,7 @@ namespace Strype {
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(STY_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<ApplicationQuitEvent>(STY_BIND_EVENT_FN(Application::OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(STY_BIND_EVENT_FN(Application::OnWindowResize));
 	}
 
@@ -93,11 +94,7 @@ namespace Strype {
 		}
 	}
 
-	void Application::Quit()
-	{
-	}
-
-	void Application::OnWindowClose(WindowCloseEvent& e)
+	void Application::OnWindowClose(Event& e)
 	{
 		auto window = s_CurrentSession->GetWindow();
 		window->ShouldClose(true);

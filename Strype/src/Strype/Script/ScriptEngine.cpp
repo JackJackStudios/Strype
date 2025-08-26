@@ -37,6 +37,11 @@ namespace Strype {
 		ReloadAssembly();
 	}
 
+	ScriptEngine::~ScriptEngine()
+	{
+		UnloadAssembly();
+	}
+
 	void ScriptEngine::ReloadAssembly()
 	{
 		if (m_IsInitizled) UnloadAssembly();

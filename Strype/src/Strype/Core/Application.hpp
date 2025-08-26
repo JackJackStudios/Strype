@@ -31,8 +31,6 @@ namespace Strype {
 		const AppConfig& GetConfig() const { return m_Config; }
 		AGI::Window* GetWindow() const { return s_CurrentSession->GetWindow(); }
 
-		void Quit();
-
 		template<typename T, typename... Args>
 		Application& NewSession(Args&&... args)
 		{
@@ -68,7 +66,7 @@ namespace Strype {
 		void InitSession(Session* session);
 		void ThreadFunc(Session* layer);
 
-		void OnWindowClose(WindowCloseEvent& e);
+		void OnWindowClose(Event& e);
 		void OnWindowResize(WindowResizeEvent& e);
 		void InstallCallbacks();
 	protected:

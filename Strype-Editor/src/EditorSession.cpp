@@ -75,12 +75,6 @@ namespace Strype {
 	{
 		m_FileWatcher.reset();
 		SaveProject();
-
-		//INFO: This line must happen! Usually this happens at end of main
-		//      besause the project is static, destorying the project also
-		//      destroys assets which must happen before Application shutdown
-		//      or Windows/VCRuntime gets involved.
-		Project::SetActive(nullptr);
 	}
 
 	void EditorSession::OnUpdate(float ts)
@@ -291,6 +285,11 @@ namespace Strype {
 		m_PanelManager.OnEvent(e);
 		m_Room->OnEvent(e);
 
+		if (e.GetEventType() == EventType::WindowClose)
+		{
+			Application::Get().DispatchEvent<ApplicationQuitEvent>();
+		}
+
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowDropEvent>(STY_BIND_EVENT_FN(EditorSession::OnWindowDrop));
 	}
@@ -327,9 +326,7 @@ namespace Strype {
 					SaveProject();
 
 				if (ImGui::MenuItem("Exit"))
-				{
-					Application::Get().Quit();
-				}
+					Application::Get().DispatchEvent<ApplicationQuitEvent>();
 
 				ImGui::EndMenu();
 			}
@@ -342,7 +339,7 @@ namespace Strype {
 				if (ImGui::MenuItem("Build C# Assembly"))
 				{
 					Project::BuildCSharp(Project::GetActive());
-					Project::GetActive()->GetScriptEngine()->ReloadAssembly();
+					Project::GetScriptEngine()->ReloadAssembly();
 				}
 
 				if (ImGui::MenuItem("Restore C# Project"))
