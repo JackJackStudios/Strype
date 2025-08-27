@@ -46,6 +46,7 @@ namespace Strype {
         if (std::filesystem::exists(filepath) && filepath.has_filename())
         {
             object->TextureHandle = Project::ImportAsset(filepath);
+            if (!Project::IsAssetLoaded(object->TextureHandle)) return nullptr;
         }
 
         for (const auto& node : root["Scripts"])

@@ -119,30 +119,20 @@ namespace Strype {
 	{
 		if (!sprite) return 0.0f;
 
-		float slotIndex = 0.0f;
 		for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
 		{
 			if (m_TextureSlots[i].SpriteRef == sprite)
-			{
-				slotIndex = (float)i;
-				break;
-			}
+				return (float)i;
 		}
 
-		if (slotIndex == 0.0f)
-		{
-			if (m_TextureSlotIndex >= RenderCaps::MaxTextureSlots)
-				FlushAndReset();
-			
-			slotIndex = (float)m_TextureSlotIndex;
+		if (m_TextureSlotIndex >= RenderCaps::MaxTextureSlots)
+			FlushAndReset();
 
-			TextureSlot slot;
-			slot.SpriteRef = sprite;
-			slot.Texture = m_RenderContext->CreateTexture(sprite->GetSpecs());
-			m_TextureSlots[m_TextureSlotIndex++] = slot;
-		}
+		uint32_t slotIndex = m_TextureSlotIndex++;
+		m_TextureSlots[slotIndex].SpriteRef = sprite;
+		m_TextureSlots[slotIndex].Texture = m_RenderContext->CreateTexture(sprite->GetSpecs());
 
-		return slotIndex;
+		return (float)slotIndex;
 	}
 
 	AGI::Texture Renderer::GetTexture(Ref<Sprite> sprite)

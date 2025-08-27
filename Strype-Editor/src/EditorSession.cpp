@@ -273,9 +273,15 @@ namespace Strype {
 			if (Project::IsAssetLoaded(filepath))
 				Project::ReloadAsset(Project::GetHandle(filepath));
 
-			if (Utils::GetAssetTypeFromFileExtension(filepath.extension()) == AssetType::Script)
+			auto it = s_AssetExtensionMap.find(filepath.extension());
+			if (it != s_AssetExtensionMap.end())
 			{
-				// Build on seprate thread - runtime waits
+				switch (it->second)
+				{
+				case AssetType::Script:
+					// Build on seprate thread - runtime waits
+					break;
+				}
 			}
 		}
 	}

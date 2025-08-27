@@ -43,6 +43,7 @@ namespace Strype {
 		void EndRoom();
 
 		// Primitives
+		void DrawQuad(const glm::mat4& transform, const glm::vec4& colour, float slotIndex, TexCoords texcoords = RenderCaps::TextureCoords);
 		void DrawSprite(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour, Ref<Sprite> sprite = nullptr, float frame = 0);
 
 		AGI::RenderContext* GetContext() { return m_RenderContext; }
@@ -52,16 +53,22 @@ namespace Strype {
 		static Renderer* GetCurrent() { return m_CurrentContext; }
 	private:
 		float GetTextureSlot(Ref<Sprite> sprite);
+		constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation);
 
 		void Flush();
 		void FlushAndReset();
 		void InitPipeline(RenderPipeline& pipeline, const std::filesystem::path& filepath);
 	private:
 		AGI::RenderContext* m_RenderContext;
+
+		// NOTE: As sprites are project-wide and can be used across windows
+		//       to avoid graphical glitches the Renderer keeps all OpenGl/Vulkan 
+		//       textures (AGI::Texture) internally. Use Renderer::GetTexture to create a
+		//       a internal texture based on the specification inside Sprite
 		struct TextureSlot
 		{
-			Ref<Sprite> SpriteRef = nullptr; // Sprites can be held across Renderer's.
-			AGI::Texture Texture;            // Textures are stored per-Renderer and are bound to a render context.
+			Ref<Sprite> SpriteRef = nullptr;
+			AGI::Texture Texture;
 		};
 
 		std::array<TextureSlot, RenderCaps::MaxTextureSlots> m_TextureSlots;

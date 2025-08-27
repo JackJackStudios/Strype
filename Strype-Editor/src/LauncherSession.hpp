@@ -32,7 +32,7 @@ namespace Strype {
 	public:
 		LauncherSession()
 		{
-			WindowProps.Title = "Strype Engine - Launcher";
+			WindowProps.Title = "Strype Launcher";
 			WindowProps.Size = { 853, 480 };
 			WindowProps.Resizable = false;
 

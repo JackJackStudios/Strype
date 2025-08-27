@@ -170,7 +170,7 @@ namespace Strype {
 			io.Fonts->AddFontFromFileTTF("assets/Roboto-Regular.ttf", 16);
 		}
 
-		auto window = session->GetWindow();
+		auto* window = session->GetWindow();
 		session->OnAttach();
 
 		while (!window->ShouldClose())

@@ -2,13 +2,13 @@
 
 #include <Strype.hpp>
 #include "LauncherSession.hpp"
-#include "EditorSession.hpp"
 
 using namespace Strype;
 
 int main(int argc, char** argv)
 {
 #ifndef STY_WINDOWS
+	// NOTE: Using std::cerr as spdlog is not initialized yet.
 	std::cerr << "Strype-Editor currently only supportes Windows." << std::endl;
 	STY_DEBUGBREAK();
 #endif

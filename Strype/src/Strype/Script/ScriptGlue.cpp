@@ -1,5 +1,7 @@
 #include "stypch.hpp"
+
 #include "ScriptGlue.hpp"
+#include "ScriptEngine.hpp"
 
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/RoomInstance.hpp"

@@ -31,16 +31,16 @@ namespace Strype {
 		const AppConfig& GetConfig() const { return m_Config; }
 		AGI::Window* GetWindow() const { return s_CurrentSession->GetWindow(); }
 
-		template<typename T, typename... Args>
+		template<typename TSession, typename... Args>
 		Application& NewSession(Args&&... args)
 		{
-			static_assert(std::is_base_of<Session, T>::value, "T must inherit from Session");
+			static_assert(std::is_base_of<Session, TSession>::value, "T must inherit from Session");
 
-			InitSession(m_ActiveSessions.emplace_back(new T(std::forward<Args>(args)...)));
+			InitSession(m_ActiveSessions.emplace_back(new TSession(std::forward<Args>(args)...)));
 			return *this;
 		}
 
-		template <typename TEvent, typename... Args>
+		template<typename TEvent, typename... Args>
 		Application& DispatchEvent(Args&&... args)
 		{
 			static_assert(std::is_base_of<Event, TEvent>::value, "T must inherit from Event");
