@@ -14,7 +14,7 @@ namespace Strype {
 		~Sprite();
 
 		const AGI::TextureSpecification& GetSpecs() { return m_Specification; }
-		int FrameCount() const { return m_FrameCount; }
+		int GetFrameCount() const { return m_FrameCount; }
 		float GetFrameDelta() const { return 1 / m_FPS; }
 
 		glm::vec2 GetFrameSize() const;

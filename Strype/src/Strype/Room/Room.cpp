@@ -20,6 +20,21 @@ namespace Strype {
 	{
 	}
 
+	Room::Room(const Room& other)
+		: m_Objects(other.m_Objects),
+		m_Gravity(other.m_Gravity),
+		m_Width(other.m_Width),
+		m_Height(other.m_Height),
+		m_BackgroundColour(other.m_BackgroundColour),
+		m_RoomState(other.m_RoomState),
+		m_Camera(other.m_Camera),
+		m_CameraSpeed(other.m_CameraSpeed),
+		m_ZoomLevel(other.m_ZoomLevel)
+	{
+		Name = other.Name;
+		Handle = 0;
+	}
+
 	void Room::OnUpdate(float ts)
 	{
 		Renderer::GetCurrent()->BeginRoom(m_Camera);
@@ -32,11 +47,9 @@ namespace Strype {
 			int controlY = Input::IsKeyDown(KeyCode::S) - Input::IsKeyDown(KeyCode::W);
 			m_Camera.Position.x += controlX * m_CameraSpeed * ts;
 			m_Camera.Position.y += controlY * m_CameraSpeed * ts;
-
-			m_Camera.UpdateMatrix();
 		}
 
-		auto& scriptEngine = Project::GetScriptEngine();
+		m_Camera.UpdateMatrix();
 
 		for (auto& instance : m_Objects)
 		{
@@ -53,11 +66,16 @@ namespace Strype {
 
 			if (m_RoomState == RoomState::Runtime)
 			{
-				for (const auto& csharp : instance.CSharpObjects) csharp->InvokeMethod("OnUpdate", ts);
+				for (const auto& csharp : instance.CSharpObjects) 
+					csharp->InvokeMethod("OnUpdate", ts);
+
 				instance.CurrentFrame += sprite->GetFrameDelta();
-				
-				if (instance.CurrentFrame > sprite->FrameCount())
-					instance.CurrentFrame = instance.CurrentFrame - (float)sprite->FrameCount();
+				instance.CurrentFrame = fmod(instance.CurrentFrame, (float)sprite->GetFrameCount());
+
+				//const auto& position = b2Body_GetPosition(instance.RuntimeBody);
+				//instance.Position.x = position.x;
+				//instance.Position.y = position.y;
+				//instance.Rotation = glm::degrees(b2Rot_GetAngle(b2Body_GetRotation(instance.RuntimeBody)));
 			}
 		}
 
@@ -85,14 +103,18 @@ namespace Strype {
 		for (auto& instance : m_Objects)
 		{
 			auto object = Project::GetAsset<Object>(instance.ObjectHandle);
+			auto sprite = Project::GetAsset<Sprite>(object->TextureHandle);
 
 			b2BodyDef bodyDef = b2DefaultBodyDef();
 			bodyDef.type = (b2BodyType)object->BodyType;
 			bodyDef.position = { instance.Position.x, instance.Position.y };
+			bodyDef.fixedRotation = false;
 			instance.RuntimeBody = b2CreateBody(m_Physics, &bodyDef);
 
-			b2ShapeDef shapeDef = b2DefaultShapeDef(); shapeDef.density = 1.0f;
-			b2Polygon polygonShape = b2MakeBox(instance.Scale.x, instance.Scale.y);
+			b2ShapeDef shapeDef = b2DefaultShapeDef(); 
+			glm::vec2 halfsize = (sprite->GetFrameSize() * glm::vec2(instance.Scale.x, instance.Scale.y)) / 2.0f;
+
+			b2Polygon polygonShape = b2MakeBox(halfsize.x, halfsize.y);
 			b2CreatePolygonShape(instance.RuntimeBody, &shapeDef, &polygonShape);
 
 			instance.CSharpObjects.reserve(object->Scripts.size());
@@ -133,27 +155,13 @@ namespace Strype {
 				csharp->InvokeMethod("OnDestroy");
 				scriptEngine->DestroyInstance(csharp);
 			}
+
+			instance.CSharpObjects.clear();
 		}
 
 		b2DestroyWorld(m_Physics);
 
 		m_RoomState = RoomState::Editor;
-	}
-
-	Ref<Room> Room::CopyTo()
-	{
-		Ref<Room> room = CreateRef<Room>();
-
-		room->Handle = Handle;
-		room->Name = Name;
-
-		room->m_Width = m_Width;
-		room->m_Height = m_Height;
-		room->m_BackgroundColour = m_BackgroundColour;
-
-		room->m_Objects = m_Objects;
-
-		return room;
 	}
 
 	InstanceID Room::CreateInstance(AssetHandle object)

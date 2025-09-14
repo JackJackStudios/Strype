@@ -272,8 +272,7 @@ namespace Strype {
 
 	void ContentBrowserPanel::OnAssetsUpdated(Event& e)
 	{
-		if (e.IsInCategory(EventCategoryAsset))
-			RefreshAssetTree();
+		RefreshAssetTree();
 	}
 
 	void ContentBrowserPanel::RefreshAssetTree()

@@ -316,7 +316,10 @@ namespace Strype {
 
 	glm::vec2 Input::GetMousePosition()
 	{
-		return Application::Get().GetWindow()->GetCursorPos();
+		double xpos, ypos;
+		glfwGetCursorPos(Application::Get().GetWindow()->GetGlfwWindow(), &xpos, &ypos);
+
+		return glm::vec2(xpos, ypos);
 	}
 
 	float Input::GetMouseX()

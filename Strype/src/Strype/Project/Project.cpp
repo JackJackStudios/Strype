@@ -43,14 +43,6 @@ namespace Strype {
 
 	}
 
-	Project::Project()
-	{
-	}
-
-	Project::~Project()
-	{
-	}
-
 	std::string Project::GetMSbuildCommand(std::vector<const char*> commands)
 	{
 #ifdef STY_WINDOWS

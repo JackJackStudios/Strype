@@ -11,7 +11,7 @@ namespace Strype {
 	class Audio
 	{
 	public:
-		static void Init();
+		static bool Init();
 		static void Shutdown();
 
 		static ma_engine* GetAudioEngine();

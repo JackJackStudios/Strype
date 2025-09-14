@@ -45,7 +45,7 @@ namespace Strype {
 		if (UI::DropdownMenu("Viewport"))
 		{
 			UI::DragIVec2("Viewport size", config.ViewportSize);
-			UI::DragIVec2("Window size", config.RuntimeProps.Size);
+			UI::DragUVec2("Window size", config.RuntimeProps.Size);
 			UI::EnumOptions("Window mode", config.RuntimeProps.Mode);
 
 			ImGui::Checkbox("Resizable", &config.RuntimeProps.Resizable);

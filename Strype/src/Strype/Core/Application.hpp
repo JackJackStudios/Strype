@@ -18,14 +18,13 @@ namespace Strype {
 		std::filesystem::path MasterDir;
 		std::filesystem::path WorkingDir;
 		
-		int StartupFrames = 10;
 	};
 
 	class Application
 	{
 	public:
 		Application(const AppConfig& config);
-		virtual ~Application();
+		~Application();
 
 		static Application& Get() { return *s_Instance; }
 		const AppConfig& GetConfig() const { return m_Config; }

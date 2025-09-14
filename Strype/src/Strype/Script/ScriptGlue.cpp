@@ -63,9 +63,7 @@ namespace Strype {
 		void Camera_Move(glm::vec2* inPosition)
 		{
 			auto& camera = Project::GetActiveRoom()->GetCamera();
-
 			camera.Position = *inPosition;
-			camera.UpdateMatrix();
 		}
 
 		void Camera_Zoom(float* inZoomLevel)

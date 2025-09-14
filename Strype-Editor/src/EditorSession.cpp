@@ -14,14 +14,11 @@ namespace Strype {
 		{
 			WindowProps = m_ActiveProject->GetConfig().RuntimeProps;
 			WindowProps.Title = m_ActiveProject->GetConfig().Name;
-
-			Project::BuildCSharp(m_ActiveProject, false);
-			m_ActiveProject->GetScriptEngine()->ReloadAssembly();
 		}
 
 		void OnAttach() override
 		{
-			m_Room = Project::GetAsset<Room>(Project::GetHandle(m_ActiveProject->GetConfig().StartRoom))->CopyTo();
+			m_Room = CreateRef<Room>(*Project::GetAsset<Room>(Project::GetHandle(m_ActiveProject->GetConfig().StartRoom)));
 			m_Room->OnResize(m_ActiveProject->GetConfig().ViewportSize);
 
 			m_Room->StartRuntime();
@@ -43,17 +40,8 @@ namespace Strype {
 
 	void EditorSession::OnAttach()
 	{
-		m_Room = CreateRef<Room>();
-
-		AGI::FramebufferSpecification framebufferSpec;
-		framebufferSpec.Attachments = { AGI::FramebufferTextureFormat::RGBA8 };
-		framebufferSpec.Width = 1280;
-		framebufferSpec.Height = 720;
-		m_Framebuffer = Render->GetContext()->CreateFramebuffer(framebufferSpec);
-		
 		// Configure PanelManager
-		m_PanelManager.SetRoomContext(m_Room);
-
+		m_PanelManager.AddPanel<RoomPanel>();
 		m_ContentBrowserPanel = m_PanelManager.AddPanel<ContentBrowserPanel>();
 
 		m_ContentBrowserPanel->SetItemClickCallback(AssetType::Room, [this](Ref<Asset> asset)
@@ -79,136 +67,12 @@ namespace Strype {
 
 	void EditorSession::OnUpdate(float ts)
 	{
-		auto[mouseX, mouseY] = ImGui::GetMousePos();
-		mouseX -= m_ViewportBounds[0].x;
-		mouseY -= m_ViewportBounds[0].y;
-		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-		mouseY = viewportSize.y - mouseY;
-
-		if (viewportSize.x > 0.0f && viewportSize.y > 0.0f && // zero sized framebuffer is invalid
-			(m_Framebuffer->GetWidth() != viewportSize.x || m_Framebuffer->GetHeight() != viewportSize.y))
-		{
-			m_Framebuffer->Resize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
-			m_Room->OnResize(viewportSize);
-		}
-
-		m_Framebuffer->Bind();
-		Render->SetClearColour({ 0.1f, 0.1f, 0.1f });
-		Render->Clear();
-
-		m_Room->OnUpdate(ts);
-
-		if (Input::IsMouseButtonPressed(MouseCode::Left))
-		{
-			bool found = false;
-
-			for (const auto& inst : *m_Room)
-			{
-				glm::vec2 framebufPos = inst.Position + m_Room->GetCamera().GetHalfSize();
-				glm::vec2 frameSize = Project::GetAsset<Sprite>(Project::GetAsset<Object>(inst.ObjectHandle)->TextureHandle)->GetFrameSize() * m_Room->GetCamera().GetZoomLevel();
-
-				if (PointInRectangle({ mouseX, mouseY }, { framebufPos.x - frameSize.x / 2, framebufPos.y - frameSize.y / 2, frameSize }))
-				{
-					m_Selected = inst.GetHandle();
-					m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
-
-					found = true;
-					break;
-				}
-			}
-
-			if (!found)
-			{
-				m_Selected = -1;
-			}
-		}
-		
-		m_Framebuffer->Unbind();
-
 		m_PanelManager.OnUpdate(ts);
-	}
-
-	void EditorSession::UI_RoomPanel()
-	{
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Room");
-
-		ImGuizmo::SetOrthographic(true);
-		ImGuizmo::SetDrawlist();
-		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
-
-		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		auto viewportOffset = ImGui::GetWindowPos();
-		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-		ImVec2 viewportSize = { m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y };
-
-		ImGui::Image(m_Framebuffer->GetAttachmentID(), viewportSize, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
-			{
-				AssetHandle handle = *(AssetHandle*)payload->Data;
-		
-				if (Project::GetAssetType(handle) == AssetType::Object)
-					m_Room->CreateInstance(handle);
-			}
-			ImGui::EndDragDropTarget();
-		}
-
-		if (m_Room->InstanceExists(m_Selected))
-		{
-			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
-			RoomInstance& obj = m_Room->GetObject(m_Selected);
-			glm::mat4 transform = obj.GetTransform();
-
-			ImGuizmo::Manipulate(
-				glm::value_ptr(m_Room->GetCamera().GetViewMatrix()), 
-				glm::value_ptr(m_Room->GetCamera().GetProjectionMatrix()),
-				m_GuizmoType, 
-				ImGuizmo::LOCAL, 
-				glm::value_ptr(transform),
-				nullptr, nullptr
-			);
-
-			if (ImGuizmo::IsUsing())
-			{
-				glm::vec2 position, scale;
-				float rotation;
-				DecomposeTransform(transform, position, rotation, scale);
-
-				obj.Position = position;
-				obj.Rotation = rotation;
-				obj.Scale = scale;
-			}
-			else
-			{
-				if (Input::IsKeyDown(KeyCode::I))
-				{
-					m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
-				}
-				else if (Input::IsKeyDown(KeyCode::O))
-				{
-					m_GuizmoType = ImGuizmo::OPERATION::SCALE;
-				}
-				else if (Input::IsKeyDown(KeyCode::P))
-				{
-					m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
-				}
-			}
-		}
-
-		ImGui::End();
-		ImGui::PopStyleVar();
 	}
 
 	void EditorSession::OpenRoom(AssetHandle handle)
 	{
-		m_Room = Project::GetAsset<Room>(handle);
-		m_PanelManager.SetRoomContext(m_Room);
+		m_PanelManager.SetRoomContext(Project::GetAsset<Room>(handle));
 	}
 
 	void EditorSession::NewProject(const std::filesystem::path& path)
@@ -289,10 +153,10 @@ namespace Strype {
     void EditorSession::OnEvent(Event& e)
 	{
 		m_PanelManager.OnEvent(e);
-		m_Room->OnEvent(e);
 
 		if (e.GetEventType() == EventType::WindowClose)
 		{
+			// Closes runtime as well
 			Application::Get().DispatchEvent<ApplicationQuitEvent>();
 		}
 
@@ -354,15 +218,19 @@ namespace Strype {
 				ImGui::Separator();
 
 				if (ImGui::MenuItem("Start Runtime"))
+				{
+					// TODO: Some kind of timestamp system? (filewatcher)
+					//Project::BuildCSharp(Project::GetActive(), false);
+					//Project::GetActive()->GetScriptEngine()->ReloadAssembly();
+
 					Application::Get().NewSession<EditorRuntime>(Project::GetActive());
+				}
 
 				ImGui::EndMenu();
 			}
 
 			ImGui::EndMenuBar();
 		}
-
-		UI_RoomPanel();
 
 		m_PanelManager.OnImGuiRender();
 	}

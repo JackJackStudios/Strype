@@ -13,7 +13,7 @@ namespace Strype {
 
 	void Renderer::Clear()
 	{
-		m_RenderContext->Clear();
+		m_RenderContext->BeginFrame();
 	}
 
 	void Renderer::SetClearColour(const glm::vec3& colour)

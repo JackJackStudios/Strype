@@ -16,6 +16,10 @@ namespace Strype {
 	{
 		//HACK: Assume asset is room 
 		Room* room = (Room*)asset.get();
+		if (room->m_RoomState == RoomState::Runtime)
+		{
+			return;
+		}
 
 		YAML::Emitter out;
 		{

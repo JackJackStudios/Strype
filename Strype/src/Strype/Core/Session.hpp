@@ -30,6 +30,7 @@ namespace Strype {
 		AGI::WindowProps WindowProps;
 		bool ImGuiEnabled = false;
 		bool DockspaceEnabled = false;
+		int StartupFrames = 10;
 
 		bool Running = false;
 	private:
@@ -37,7 +38,6 @@ namespace Strype {
 
 		EventQueue m_EventQueue;
 		std::unique_ptr<AGI::ImGuiLayer> m_ImGuiLayer;
-		int m_StartupFrames;
 
 		friend class Application;
 	};

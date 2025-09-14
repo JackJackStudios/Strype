@@ -42,6 +42,11 @@ namespace Strype {
 			return ImGui::DragScalarN(name, ImGuiDataType_U32, glm::value_ptr(vector), 2);
 		}
 
+		static bool DragUVec2(const char* name, glm::uvec2& vector)
+		{
+			return ImGui::DragScalarN(name, ImGuiDataType_U32, glm::value_ptr(vector), 2);
+		}
+
 		template<typename T>
 		static void EnumOptions(const char* name, T& data)
 		{

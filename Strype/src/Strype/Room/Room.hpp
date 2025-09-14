@@ -21,6 +21,7 @@ namespace Strype {
 	{
 	public:
 		Room();
+		Room(const Room& other);
 
 		InstanceID CreateInstance(AssetHandle object);
 
@@ -33,7 +34,6 @@ namespace Strype {
 		void StartRuntime();
 		void StopRuntime();
 
-		Ref<Room> CopyTo();
 		void OnResize(const glm::vec2& dims);
 		void OnEvent(Event& e);
 

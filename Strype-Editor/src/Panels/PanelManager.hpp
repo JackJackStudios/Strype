@@ -21,6 +21,7 @@ namespace Strype {
 		void OnProjectChanged();
 
 		Ref<InspectorPanel> GetInspector() { return m_Inspector; }
+		Ref<Room> GetRoomContext() { return m_ActiveRoom;  }
 
 		template<typename TPanel, typename... TArgs>
 		Ref<TPanel> AddPanel(TArgs&&... args)

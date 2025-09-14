@@ -125,7 +125,7 @@ namespace Strype {
 		}
 
 		STY_CORE_TRACE("Loading asset \"{}\" ", filepath);
-		return it->second->LoadAsset(Project::GetProjectDirectory() / filepath);
+		return it->second->LoadAsset(Project::GetProjectDirectory() / Utils::ToAssetSysPath(filepath));
 	}
 
 	AssetType AssetManager::GetAssetType(AssetHandle handle) const

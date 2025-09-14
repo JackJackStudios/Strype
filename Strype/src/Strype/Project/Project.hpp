@@ -26,9 +26,6 @@ namespace Strype {
 	class Project
 	{
 	public:
-		Project();
-		~Project();
-
 		const ProjectConfig& GetConfig() const { return m_Config; }
 
 		static Ref<AssetManager> GetAssetManager() { return GetActive()->m_AssetManager; }
@@ -62,6 +59,12 @@ namespace Strype {
 		static Ref<T> GetAsset(AssetHandle handle)
 		{
 			return std::static_pointer_cast<T>(Project::GetAssetManager()->GetAsset(handle));
+		}
+
+		template<typename T>
+		static Ref<T> LoadAsset(const std::filesystem::path& path)
+		{
+			return std::static_pointer_cast<T>(Project::GetAssetManager()->LoadAsset(path));
 		}
 
 		static void CreateAsset(const std::filesystem::path& path)
@@ -160,7 +163,7 @@ namespace Strype {
 		Ref<AssetManager> m_AssetManager;
 		Ref<ScriptEngine> m_ScriptEngine;
 		Room* m_ActiveRoom = nullptr;
-
+		 
 		friend class ProjectSerializer;
 		friend class ProjectSettingsPanel;
 	};

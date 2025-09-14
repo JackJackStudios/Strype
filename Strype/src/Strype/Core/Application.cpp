@@ -36,7 +36,8 @@ namespace Strype {
 		if (!m_Config.WorkingDir.empty())
 			std::filesystem::current_path(m_Config.WorkingDir);
 
-		Audio::Init();
+		bool result = Audio::Init();
+		STY_CORE_VERIFY(result == true, "Failed to initialize audio");
 	}
 
 	Application::~Application()
@@ -50,7 +51,6 @@ namespace Strype {
 	void Application::OnEvent(Event& e)
 	{
 		STY_CORE_VERIFY(s_CurrentSession, "Cannot call OnEvent() on this thread");
-		STY_CORE_VERIFY(e.Dispatched, "Cannot call OnEvent() directly, use DispatchEvent instead");
 
 		s_CurrentSession->OnEvent(e);
 
@@ -67,14 +67,12 @@ namespace Strype {
 		settings.MessageFunc = OnAGIMessage;
 		settings.Blending = true;
 
-		session->WindowProps.Visible = false;
+		session->WindowProps.Visible = (session->StartupFrames == 0);
 
 		auto* window = AGI::Window::Create(settings, session->WindowProps);
 		session->Render = CreateScope<Renderer>(window);
 
-		session->m_StartupFrames = m_Config.StartupFrames;
 		session->m_StackIndex = m_ActiveSessions.size() - 1;
-
 		m_ActiveThreads.emplace_back(STY_BIND_EVENT_FN(Application::ThreadFunc), session);
 	}
 
@@ -178,7 +176,7 @@ namespace Strype {
 			float timestep = window->GetDelta();
 
 			session->Render->SetClearColour({ 0.1f, 0.1f, 0.1f });
-			session->Render->Clear();
+			session->Render->GetContext()->BeginFrame();
 
 			session->OnUpdate(timestep);
 
@@ -195,10 +193,16 @@ namespace Strype {
 				session->m_ImGuiLayer->EndFrame();
 			}
 
-			if (--session->m_StartupFrames == 0)
-				window->SetVisable(true);
+			if (session->StartupFrames >= 0)
+			{
+				if (session->StartupFrames == 0)
+					window->SetVisable(true);
+			
+				session->StartupFrames--;
+			}
 
-			window->OnUpdate();
+			session->Render->GetContext()->EndFrame();
+			window->PollEvents();
 			Input::Update();
 
 			while (!session->m_EventQueue.empty())
