@@ -51,7 +51,7 @@ namespace Strype {
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" /nologo /clp:ErrorsOnly;WarningsOnly /m /nr:true /verbosity:minimal /p:Configuration={} -t:", path.string(), msBuildPath.string(), (HIDDEN_FOLDER / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" /nologo /clp:ErrorsOnly;WarningsOnly /m /nr:true /verbosity:minimal /p:Configuration={} -t:", path.string(), msBuildPath.string(), (Project::HiddenFolder / path.filename()).string(), STY_BUILD_CONFIG_NAME);
 		
 		for (int i = 0; i < commands.size(); ++i)
 		{
@@ -71,7 +71,7 @@ namespace Strype {
 		STY_CORE_TRACE("Building C# project '{}'", project->GetConfig().ProjectDirectory);
 
 		if (restore) RestoreCSharp(project);
-		std::filesystem::remove_all(project->GetConfig().ProjectDirectory / HIDDEN_FOLDER / "bin");
+		std::filesystem::remove_all(project->GetConfig().ProjectDirectory / Project::HiddenFolder / "bin");
 
 		std::string command = project->GetMSbuildCommand({ "build" });
 		system(command.c_str());
@@ -82,12 +82,12 @@ namespace Strype {
 		auto& path = project->GetConfig().ProjectDirectory;
 
 		std::string content = Utils::ReadFile("assets/premake5.lua");
-		Utils::ReplaceKeyWord(content, std::filesystem::path(EMPTY_PROJECT).stem().string(), path.stem().string());
+		Utils::ReplaceKeyWord(content, std::filesystem::path(Project::EmptyProject).stem().string(), path.stem().string());
 
-		Utils::WriteFile(path / HIDDEN_FOLDER / "premake5.lua", content);
+		Utils::WriteFile(path / Project::HiddenFolder / "premake5.lua", content);
 
 #ifdef STY_WINDOWS
-		system(fmt::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / HIDDEN_FOLDER).string()).c_str());
+		system(fmt::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / Project::HiddenFolder).string()).c_str());
 		system(project->GetMSbuildCommand({ "restore" }).c_str());
 #endif
 	}
@@ -95,14 +95,14 @@ namespace Strype {
 	Ref<Project> Project::GenerateNew(const std::filesystem::path& path)
 	{
 		// Create nessacry folders
-		std::filesystem::create_directories(path / HIDDEN_FOLDER);
+		std::filesystem::create_directories(path / Project::HiddenFolder);
 
 		// Copy empty project
-		std::filesystem::path templateDir = std::filesystem::path(EMPTY_PROJECT).parent_path();
+		std::filesystem::path templateDir = std::filesystem::path(Project::EmptyProject).parent_path();
 		Utils::CopyDirectory(templateDir, path);
 
 		//Change empty project to fit new project name
-		std::filesystem::rename(path / std::filesystem::path(EMPTY_PROJECT).filename(), path / (path.filename().string() + ".sproj"));
+		std::filesystem::rename(path / std::filesystem::path(Project::EmptyProject).filename(), path / (path.filename().string() + ".sproj"));
 
 		Ref<Project> project = Project::LoadFile(path / (path.filename().string() + ".sproj"));
 		Project::BuildCSharp(project);
@@ -128,7 +128,7 @@ namespace Strype {
 
 			Ref<AssetManager> assetManager = CreateRef<AssetManager>();
 			project->m_AssetManager = assetManager;
-			project->m_AssetManager->ReloadAssets(); // <- This must not happen in constructor
+			project->m_AssetManager->LoadAllAssets(project); // <- This must not happen in constructor
 		}
 	}
 
