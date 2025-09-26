@@ -1,333 +1,233 @@
 #include "stypch.hpp"
 #include "AssetManager.hpp"
 
-#include "AssetSerializer.hpp"
-#include "Strype/Project/Project.hpp"
-#include "Strype/Core/Application.hpp"
+#include "AssetImporters.hpp"
 
-#define REGISTER_ASSET(a) if (type == AssetType::a) { if (createAsset) { createdAsset = CreateRef<a>(); } return true; }
-#define DEREGISTER_ASSET(a) if (type == AssetType::a) return false
+#include "Strype/Core/Application.hpp"
+#include "Strype/Project/Project.hpp"
 
 namespace Strype {
 
-	namespace Utils {
+    namespace Utils {
 
-		static std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
-		{
-			if (filepath.is_absolute() && Utils::IsFileInsideFolder(filepath, Project::GetProjectDirectory()))
-			{
-				return std::filesystem::relative(filepath, Project::GetProjectDirectory());
-			}
+        static bool IsFileInsideFolder(const std::filesystem::path& file, const std::filesystem::path& folder)
+        {
+            auto absFolder = std::filesystem::weakly_canonical(folder);
+            auto absFile = std::filesystem::weakly_canonical(file);
+            
+            // Check that absFile starts with absFolder
+            return std::mismatch(absFolder.begin(), absFolder.end(), absFile.begin()).first == absFolder.end();
+        }
 
-			return filepath;
-		}
+        static std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
+        {
+            if (filepath.is_absolute() && Utils::IsFileInsideFolder(filepath, Project::GetProjectDirectory()))
+            {
+                return std::filesystem::relative(filepath, Project::GetProjectDirectory());
+            }
 
-		static std::string CalculateName(const std::filesystem::path& filepath)
-		{
-			std::string name = filepath.filename().string();
-			auto pos = name.find('.');
+            return filepath;
+        }
 
-			if (pos != std::string::npos)
-				name = name.substr(0, pos);
+        static std::string CalculateName(const std::filesystem::path& filepath)
+        {
+            std::string name = filepath.filename().string();
+            auto pos = name.find('.');
 
-			return name;
-		}
+            if (pos != std::string::npos)
+                name = name.substr(0, pos);
 
-	}
+            return name;
+        }
 
-	bool AssetManager::CanCreateAsset(AssetType type, bool createAsset, Ref<Asset>& createdAsset) const
-	{
-		REGISTER_ASSET(Room);
-		REGISTER_ASSET(Object);
-		REGISTER_ASSET(Script);
+    };
 
-		DEREGISTER_ASSET(Sprite);
-		DEREGISTER_ASSET(AudioFile);
+    void AssetManager::LoadAllAssets(Ref<Project> proj)
+    {
+        if (proj == nullptr) proj = m_LoadedProject;
+        if (proj == nullptr)
+        {
+            STY_CORE_WARN("Cannot load AssetManager with no project");
+            return;
+        }
 
-		STY_CORE_VERIFY(false, "Unknown AssetType");
-		return false;
-	}
+        using directory_iter = std::filesystem::recursive_directory_iterator;
+        for (auto it = directory_iter(proj->GetConfig().ProjectDirectory); it != directory_iter(); ++it)
+        {
+            const auto& filepath = it->path();
+            if (it->is_directory() && filepath.filename() == Project::HiddenFolder)
+                it.disable_recursion_pending();
 
-	void AssetManager::CreateAsset(const std::filesystem::path& path)
-	{
-		Ref<Asset> temp = nullptr;
-		AssetType type = Utils::GetAssetTypeFromFileExtension(path.extension());
-		
-		bool canCreate = CanCreateAsset(type, true, temp);
-		if (!canCreate || temp == nullptr)
-		{
-			STY_CORE_WARN("Cannot create new instance of {}", magic_enum::enum_name(type));
-			return;
-		}
+            if (s_AssetImportersMap.find(filepath.extension()) != s_AssetImportersMap.end())
+                ImportAsset(filepath);
+        }
 
-		m_Serializers[temp->GetType()]->SaveAsset(temp, Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
-		ImportAsset(Utils::ToAssetSysPath(path));
-	}
+        m_LoadedProject = proj;
+    }
 
-	AssetManager::AssetManager()
-	{
-		m_Serializers.clear();
-		SetSerializers();
-	}
+    void AssetManager::SaveAllAssets()
+    {
+        for (const auto& [name, metadata] : m_AssetRegistry)
+            SaveAsset(metadata.Handle, metadata.Filepath);
+    }
 
-	AssetManager::~AssetManager()
-	{
-		for (auto& [handle, asset] : m_LoadedAssets)
-			asset.reset();
-	}
+    bool AssetManager::IsAssetLoaded(AssetHandle handle) const
+    {
+        return m_LoadedAssets.find(handle) == m_LoadedAssets.end();
+    }
 
-	AssetHandle AssetManager::ImportAsset(std::filesystem::path filepath, AssetHandle handle)
-	{
-		filepath = Utils::ToAssetSysPath(filepath);
+    bool AssetManager::IsAssetFile(AssetHandle handle) const
+    {
+        return IsAssetLoaded(handle) && m_AssetRegistry.find(GetAsset(handle)->Name) != m_AssetRegistry.end();
+    }
 
-		std::string name = Utils::CalculateName(filepath);
-		if (IsAssetLoaded(name) && !IsAssetLoaded(handle)) return GetHandle(name);
+    Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
+    {
+        auto it = m_LoadedAssets.find(handle);
+        if (m_LoadedAssets.end() == it)
+        {
+            STY_CORE_WARN("Cannot find Asset for AssetHandle: {}", handle);
+            return nullptr;
+        }
 
-		if (!std::filesystem::exists(Project::GetProjectDirectory() / filepath))
-		{
-			STY_CORE_WARN("File not found: \"{}\" ", filepath);
-			return 0;
-		}
+        return it->second;
+    }
 
-		Ref<Asset> asset = LoadAsset(filepath);
+    const Ref<Asset>& AssetManager::GetAsset(AssetHandle handle) const
+    {
+        auto it = m_LoadedAssets.find(handle);
+        if (m_LoadedAssets.end() == it)
+        {
+            STY_CORE_WARN("Cannot find Asset for AssetHandle: {}", handle);
+            return nullptr;
+        }
 
-		if (asset)
-		{
-			asset->Handle = handle;
-			asset->Name = name;
-			m_LoadedAssets[handle] = asset;
+        return it->second;
+    }
 
-			AssetMetadata metadata;
-			metadata.Handle = handle;
-			metadata.Filepath = filepath;
-			m_AssetRegistry[name] = metadata;
+    AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)
+    {
+        AssetHandle handle; // Randomly generated UUID
 
-			Application::Get().DispatchEvent<AssetImportedEvent>(handle);
-		}
-		else
-		{
-			STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
-			return 0;
-		}
+        std::filesystem::path syspath = Utils::ToAssetSysPath(filepath);
+        std::string name = Utils::CalculateName(syspath);
 
-		return handle;
-	}
+        if (!std::filesystem::exists(m_LoadedProject->GetConfig().ProjectDirectory / syspath))
+        {
+            STY_CORE_WARN("File not found: \"{}\" ", syspath);
+            return 0;
+        }
 
-	Ref<Asset> AssetManager::LoadAsset(const std::filesystem::path& filepath)
-	{
-		AssetType type = Utils::GetAssetTypeFromFileExtension(filepath.extension());
+        Ref<Asset> asset = LoadAsset(syspath);
+        if (asset == nullptr)
+        {
+            STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
+            return 0;
+        }
 
-		auto it = m_Serializers.find(type);
-		if (it == m_Serializers.end())
-		{
-			STY_CORE_WARN("No serializer available for AssetType::{}", magic_enum::enum_name(type));
-			return nullptr;
-		}
 
-		STY_CORE_TRACE("Loading asset \"{}\" ", filepath);
-		return it->second->LoadAsset(Project::GetProjectDirectory() / Utils::ToAssetSysPath(filepath));
-	}
+        AssetMetadata metadata;
+        metadata.Handle = handle;
+        metadata.Filepath = syspath;
 
-	AssetType AssetManager::GetAssetType(AssetHandle handle) const
-	{
-		auto it = m_LoadedAssets.find(handle);
-		if (it == m_LoadedAssets.end())
-		{
-			STY_CORE_WARN("Could not find AssetType for ({}) ", handle);
-			return AssetType::None;
-		}
+        m_AssetRegistry[name] = metadata;
+        m_LoadedAssets[handle] = asset;
 
-		return it->second->GetType();
-	}
+        asset->Name = Utils::CalculateName(syspath);
+        asset->Handle = handle;
 
-	AssetHandle AssetManager::GetHandle(const std::string& name) const
-	{
-		auto it = m_AssetRegistry.find(name);
-		if (it == m_AssetRegistry.end())
-		{
-			STY_CORE_WARN("Could not find AssetHandle for \"{}\" ", name);
-			return 0;
-		}
+        Application::Get().DispatchEvent<AssetImportedEvent>(handle);
+        return handle;
+    }
 
-		return it->second.Handle;
-	}
+    Ref<Asset> AssetManager::LoadAsset(const std::filesystem::path& filepath)
+    {
+        // TODO: implement
+        STY_CORE_VERIFY(false, "Not Implemented");
+        return nullptr;
+    }
 
-	AssetHandle AssetManager::GetHandle(const std::filesystem::path& filepath) const
-	{
-		auto it = m_AssetRegistry.find(Utils::CalculateName(filepath));
+    const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
+    {
+        if (!IsAssetFile(handle))
+        {
+            STY_CORE_WARN("Cannot find Filepath for AssetHandle: {}", handle);
+            return "";
+        }
 
-		if (!IsAssetLoaded(filepath) || it->second.Filepath != Utils::ToAssetSysPath(filepath))
-		{
-			STY_CORE_WARN("Cannot find Handle for \"{}\" ", Utils::ToAssetSysPath(filepath));
-		}
+        return m_AssetRegistry.at(GetName(handle)).Filepath;
+    }
 
-		return it->second.Handle;
-	}
+    const std::string& AssetManager::GetName(AssetHandle handle) const
+    {
+        // TODO: implement
+        if (!IsAssetLoaded(handle))
+        {
+            STY_CORE_WARN("Cannot find Name for AssetHandle: {}", handle);
+            return "";
+        }
 
-	void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& path)
-	{
-		if (m_Serializers.find(GetAssetType(handle)) == m_Serializers.end())
-		{
-			STY_CORE_WARN("No serializer available for AssetType::{}", magic_enum::enum_name(GetAssetType(handle)));
-			return;
-		}
+        return GetAsset(handle)->Name;
+    }
 
-		STY_CORE_TRACE("Saving asset \"{}\" ", Utils::ToAssetSysPath(path));
-		m_Serializers[GetAssetType(handle)]->SaveAsset(GetAsset(handle), Project::GetProjectDirectory() / Utils::ToAssetSysPath(path));
-	}
+    AssetType AssetManager::GetAssetType(AssetHandle handle) const
+    {
+        if (!IsAssetLoaded(handle))
+        {
+            STY_CORE_WARN("Cannot find Type for AssetHandle: {}", handle);
+            return AssetType::None;
+        }
+
+        return GetAsset(handle)->GetType();
+    }
+
+    AssetHandle AssetManager::GetHandle(const std::string& name) const
+    {
+        // TODO: implement
+        STY_CORE_VERIFY(false, "Not Implemented");
+
+        return 0;
+    }
+
+    void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& filepath)
+    {
+        // TODO: implement
+        STY_CORE_VERIFY(false, "Not Implemented");
+    }
 
     void AssetManager::RemoveAsset(AssetHandle handle)
     {
-		STY_CORE_TRACE("Removing asset: \"{}\" ", GetFilePath(handle));
+        if (!IsAssetLoaded(handle))
+        {
+            STY_CORE_WARN("Cannot remove Asset for AssetHandle: {}", handle);
+            return;
+        }
 
-		const std::string& name = GetName(handle);
+        Application::Get().DispatchEvent<AssetRemovedEvent>(handle);
 
-		if (m_AssetRegistry.find(name) != m_AssetRegistry.end())
-			m_AssetRegistry.erase(name);
-
-		m_LoadedAssets[handle].reset();
-		m_LoadedAssets.erase(handle);
-
-		Application::Get().DispatchEvent<AssetRemovedEvent>(handle);
+        if (IsAssetFile(handle)) m_AssetRegistry.erase(GetName(handle));
+        m_LoadedAssets.erase(handle);
     }
 
-	void AssetManager::ReloadAsset(AssetHandle handle)
-	{
-		if (!IsAssetLoaded(handle))
-		{
-			STY_CORE_WARN("Cannot find Filepath for AssetHandle: {}", handle);
-			return;
-		}
+    void AssetManager::ReloadAsset(AssetHandle handle)
+    {
+        if (!IsAssetFile(handle))
+        {
+            STY_CORE_WARN("Cannot reload memory-only AssetHandle: {}", handle);
+            return;
+        }
 
-		auto& filepath = GetFilePath(handle);
-		Ref<Asset> newAsset = LoadAsset(filepath);
-		if (!newAsset)
-		{
-			STY_CORE_WARN("Cannot reload asset \"{}\" ", filepath);
-			return;
-		}
+        if (!std::filesystem::exists(GetFilePath(handle)))
+        {
+            STY_CORE_WARN("File not found: \"{}\"", GetFilePath(handle));
+            return;
+        }
 
-		newAsset->Handle = handle;
-		newAsset->Name = filepath.stem().string();
-		m_LoadedAssets[handle] = newAsset;
-	}
+        Ref<Asset> asset = LoadAsset(GetFilePath(handle));
+        asset->Name = GetName(handle);
+        asset->Handle = handle;
 
-	void AssetManager::MoveAsset(AssetHandle handle, const std::filesystem::path& path)
-	{
-		const auto& newpath = Utils::ToAssetSysPath(path);
-		if (std::filesystem::exists(Project::GetProjectDirectory() / newpath))
-		{
-			STY_CORE_WARN("Cannot override other files when moving asset \"{}\" ", path);
-			return;
-		}
-
-		if (GetFilePath(handle).extension() != newpath.extension())
-		{
-			STY_CORE_WARN("Cannot change file extension, this may corrupt data! ({} -> {})", GetFilePath(handle).extension(), newpath.extension());
-			return;
-		}
-
-		Application::Get().DispatchEvent<AssetMovedEvent>(handle, newpath);
-
-		AssetMetadata metadata;
-		metadata.Handle = handle;
-		metadata.Filepath = newpath;
-		m_AssetRegistry[GetName(handle)] = metadata;
-	}
-
-	Ref<Asset>& AssetManager::GetAsset(AssetHandle handle)
-	{
-		static Ref<Asset> emptyAsset = nullptr;
-		if (!IsAssetLoaded(handle))
-		{
-			STY_CORE_WARN("Cannot find Asset for handle: {}", handle);
-			return emptyAsset;
-		}
-
-		return m_LoadedAssets.at(handle);
-	}
-
-	bool AssetManager::IsAssetLoaded(AssetHandle handle) const
-	{
-		return handle != 0 && m_LoadedAssets.find(handle) != m_LoadedAssets.end();
-	}
-
-	const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
-	{
-		static std::filesystem::path emptyPath = "";
-		if (!IsAssetLoaded(handle))
-		{
-			STY_CORE_WARN("Cannot find Filepath for handle: {}", handle);
-			return emptyPath;
-		}
-
-		return m_AssetRegistry.at(GetName(handle)).Filepath;
-	}
-
-	const std::string& AssetManager::GetName(AssetHandle handle) const
-	{
-		if (!IsAssetLoaded(handle))
-		{
-			STY_CORE_WARN("Cannot find Name for handle: {}", handle);
-			return "";
-		}
-
-		return m_LoadedAssets.at(handle)->Name;
-	}
-
-	bool AssetManager::IsAssetLoaded(const std::string& name) const
-	{
-		return m_AssetRegistry.find(name) != m_AssetRegistry.end();
-	}
-
-	bool AssetManager::IsAssetLoaded(const std::filesystem::path& filepath) const
-	{
-		if (!IsAssetLoaded(filepath.stem().string()))
-		{
-			return false;
-		}
-
-		AssetHandle handle = GetHandle(filepath.stem().string());
-		if (filepath.has_extension())
-		{
-			if (GetAssetType(handle) != Utils::GetAssetTypeFromFileExtension(filepath.extension()))
-			{
-				return false;
-			}
-		}
-
-		return GetFilePath(handle) == Utils::ToAssetSysPath(filepath);
-	}
-
-	AssetSerializer* AssetManager::GetSerializer(AssetType type)
-	{
-		if (m_Serializers.find(type) == m_Serializers.end())
-		{
-			STY_CORE_WARN("No serializer available for AssetType::{}", magic_enum::enum_name(type));
-			return nullptr;
-		}
-
-		return m_Serializers[type].get();
-	}
-
-	void AssetManager::ReloadAssets()
-	{
-		using directory_iter = std::filesystem::recursive_directory_iterator;
-		for (auto it = directory_iter(Project::GetProjectDirectory()); it != directory_iter(); ++it)
-		{
-			const auto& filepath = it->path();
-			if (it->is_directory() && filepath.filename() == HIDDEN_FOLDER)
-				it.disable_recursion_pending();
-
-			if (s_AssetExtensionMap.find(filepath.extension()) != s_AssetExtensionMap.end())
-				ImportAsset(filepath);
-		}
-	}
-
-	void AssetManager::SaveAllAssets()
-	{
-		for (const auto& [name, metadata] : m_AssetRegistry)
-			SaveAsset(metadata.Handle, metadata.Filepath);
-	}
+        m_LoadedAssets[handle] = asset;
+    }
 
 };
