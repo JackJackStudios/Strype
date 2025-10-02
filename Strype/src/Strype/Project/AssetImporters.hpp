@@ -15,13 +15,25 @@
 #include <stb_image.h>
 #include <regex>
 
+#define ASSET_IMPORTER_FUNC(type, func)                                   \
+    static Ref<Asset> func(const std::filesystem::path&);        \
+    struct func##_registrar {                                             \
+        func##_registrar() {                                              \
+            s_AssetImportersMap[type] = func;                             \
+        }                                                                 \
+    };                                                                    \
+    static inline func##_registrar s_##func##_registrar;                  \
+    static Ref<Asset> func
+
 namespace Strype {
+
+    inline static std::unordered_map<AssetType, std::function<Ref<Asset>(const std::filesystem::path&)>> s_AssetImportersMap;
 
     //////////////////////////////////////////
     // LOADING ASSETS ////////////////////////
     //////////////////////////////////////////
 
-    Ref<Asset> load_sprite_asset(const std::filesystem::path& filepath)
+    ASSET_IMPORTER_FUNC(AssetType::Sprite, load_sprite_asset)(const std::filesystem::path& filepath)
 	{
         int frameCount = 1;
         int width, height, channels;
@@ -48,7 +60,7 @@ namespace Strype {
         return CreateRef<Sprite>(textureSpec, frameCount);
 	}
 
-    Ref<Asset> load_audiofile_asset(const std::filesystem::path& path)
+    ASSET_IMPORTER_FUNC(AssetType::AudioFile, load_audiofile_asset)(const std::filesystem::path& path)
     {
         ma_decoder decoder;
         ma_result result = ma_decoder_init_file(path.string().c_str(), nullptr, &decoder);
@@ -57,9 +69,9 @@ namespace Strype {
         return CreateRef<AudioFile>(decoder);
     }
 
-    Ref<Asset> load_script_asset(const std::filesystem::path& path)
+    ASSET_IMPORTER_FUNC(AssetType::Script, load_script_asset)(const std::filesystem::path& path)
     {
-        auto& scriptEngine = Project::GetScriptEngine();
+        auto scriptEngine = Project::GetScriptEngine();
         ScriptID script = scriptEngine->GetIDByName(path.stem().string());
         if (!scriptEngine->IsValidScript(script))
         {
@@ -70,12 +82,13 @@ namespace Strype {
         return CreateRef<Script>(script);
     }
 
-    Ref<Asset> load_object_asset(const std::filesystem::path& path)
+    ASSET_IMPORTER_FUNC(AssetType::Object, load_object_asset)(const std::filesystem::path& path)
     {
         YAML::Node root = YAML::LoadFile(path.string())["Object"];
         if (!root) return nullptr;
 
         Ref<Object> object = CreateRef<Object>();
+        auto scriptEngine = Project::GetScriptEngine();
 
         auto filepath = Project::GetProjectDirectory() / root["SpritePath"].as<std::filesystem::path>();
         if (std::filesystem::exists(filepath) && filepath.has_filename())
@@ -87,8 +100,6 @@ namespace Strype {
         for (const auto& node : root["Scripts"])
         {
             std::string name = node.as<std::string>();
-
-            auto& scriptEngine = Project::GetScriptEngine();
             ScriptID script = scriptEngine->GetIDByName(name);
 
             if (!scriptEngine->IsValidScript(script))
@@ -103,7 +114,7 @@ namespace Strype {
         return object;
     }
 
-    Ref<Asset> load_room_asset(const std::filesystem::path& path)
+    ASSET_IMPORTER_FUNC(AssetType::Room, load_room_asset)(const std::filesystem::path& path)
     {
         YAML::Node data = YAML::LoadFile(path.string())["Room"];
         if (!data) return nullptr;
@@ -209,19 +220,5 @@ namespace Strype {
         out << YAML::EndMap;
         Utils::WriteFile(filepath, out.c_str());
     }
-
-    static std::unordered_map<std::filesystem::path, std::function<Ref<Asset>(const std::filesystem::path&)>> s_AssetImportersMap = {
-        { ".png",   load_sprite_asset },
-        //{ ".jpg",   load_sprite_asset },
-        //{ ".jpeg",  load_sprite_asset },
-        //{ ".bmp",   load_sprite_asset },
-
-        { ".wav",   load_audiofile_asset },
-        //{ ".mp3",   load_audiofile_asset },
-        //{ ".flac",  load_audiofile_asset },
-        //{ ".ogg",   load_audiofile_asset },
-
-        { ".cs",    load_script_asset },
-    };
 
 };

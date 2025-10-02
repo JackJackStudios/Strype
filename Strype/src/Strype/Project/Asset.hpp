@@ -14,10 +14,11 @@ namespace Strype {
 	class Asset
 	{
 	public:
+		virtual ~Asset() = default;
+		virtual AssetType GetType() const = 0;
+
 		AssetHandle Handle;
 		std::string Name;
-
-		virtual AssetType GetType() const = 0;
 	};
 
 	struct AssetMetadata

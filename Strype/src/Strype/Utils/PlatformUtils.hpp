@@ -50,6 +50,16 @@ namespace Strype {
 		{
 			return (uint8_t*)origin + shift;
 		}
+
+		static bool IsFileInsideFolder(const std::filesystem::path& file, const std::filesystem::path& folder)
+		{
+			auto absFolder = std::filesystem::weakly_canonical(folder);
+			auto absFile = std::filesystem::weakly_canonical(file);
+
+			// Check that absFile starts with absFolder
+			return std::mismatch(absFolder.begin(), absFolder.end(), absFile.begin()).first == absFolder.end();
+		}
+
 	};
 
 	class FileDialogs

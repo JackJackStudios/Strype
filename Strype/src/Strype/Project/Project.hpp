@@ -32,7 +32,7 @@ namespace Strype {
 		const ProjectConfig& GetConfig() const { return m_Config; }
 
 		static Ref<AssetManager> GetAssetManager() { return GetActive()->m_AssetManager; }
-		static Ref<ScriptEngine>& GetScriptEngine() { return GetActive()->m_ScriptEngine; }
+		static Ref<ScriptEngine> GetScriptEngine() { return GetActive()->m_ScriptEngine; }
 		static Room* GetActiveRoom() { return GetActive()->m_ActiveRoom; }
 
 		static void SetActiveRoom(Room* room) { GetActive()->m_ActiveRoom = room; }
@@ -44,7 +44,7 @@ namespace Strype {
 		static void RestoreCSharp(Ref<Project> project);
 
 		static Ref<Project> LoadFile(const std::filesystem::path& filepath);
-		static void SaveFile(Ref<Project> project, const std::filesystem::path& filepath = std::filesystem::path());
+		static void SaveAll(Ref<Project> project, const std::filesystem::path& filepath = std::filesystem::path());
 
 		static Ref<Project> GenerateNew(const std::filesystem::path& path);
 

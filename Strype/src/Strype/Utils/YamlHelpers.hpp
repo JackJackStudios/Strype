@@ -235,46 +235,4 @@ namespace Strype {
 		return out;
 	}
 
-	class ScopedMap 
-	{
-	public:
-		ScopedMap(YAML::Emitter& emitter, const std::string& name = std::string())
-			: m_Emitter(emitter) 
-		{
-			if (!name.empty())
-				m_Emitter << YAML::Key << name;
-
-			m_Emitter << YAML::BeginMap;
-		}
-
-		~ScopedMap() {
-			m_Emitter << YAML::EndMap;
-		}
-
-	private:
-		YAML::Emitter& m_Emitter;
-	};
-
-	class ScopedSeq 
-	{
-	public:
-		ScopedSeq(YAML::Emitter& emitter, const std::string& name = std::string(), bool flow = false)
-			: m_Emitter(emitter) 
-		{
-			if (!name.empty())
-				m_Emitter << YAML::Key << name;
-
-			if (flow) m_Emitter << YAML::Flow;
-			m_Emitter << YAML::BeginSeq;
-		}
-
-		~ScopedSeq() 
-		{
-			m_Emitter << YAML::EndSeq;
-		}
-
-	private:
-		YAML::Emitter& m_Emitter;
-	};
-
 }

@@ -77,7 +77,7 @@ namespace Strype {
 		RegisterInternalCalls();
 		s_CoreAssembly->UploadInternalCalls();
 
-		std::filesystem::path filepath = m_ActiveProject->GetProjectDirectory() / HIDDEN_FOLDER / "bin/net8.0" / (m_ActiveProject->GetProjectName() + ".dll");
+		std::filesystem::path filepath = m_ActiveProject->GetProjectDirectory() / Project::HiddenFolder / "bin/net8.0" / (m_ActiveProject->GetProjectName() + ".dll");
 		if (!std::filesystem::exists(filepath))
 		{
 			Project::BuildCSharp(m_ActiveProject, true);

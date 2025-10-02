@@ -5,8 +5,10 @@
 
 namespace Strype {
 
-	void Project::SaveFile(Ref<Project> project, const std::filesystem::path& filepath)
+	void Project::SaveAll(Ref<Project> project, const std::filesystem::path& filepath)
 	{
+		project->m_AssetManager->SaveAllAssets();
+
 		YAML::Emitter out;
 		out << YAML::BeginMap;
 		out << YAML::Key << "Project" << YAML::Value;

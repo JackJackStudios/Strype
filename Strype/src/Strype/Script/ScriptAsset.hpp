@@ -8,7 +8,6 @@ namespace Strype {
 	class Script : public Asset
 	{
 	public:
-		Script() = default;
 		Script(ScriptID id)
 			: m_ScriptID(id)
 		{

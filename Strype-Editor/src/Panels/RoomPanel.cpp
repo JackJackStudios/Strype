@@ -109,7 +109,7 @@ namespace Strype {
 			{
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
-				if (Project::GetAssetType(handle) == AssetType::Object)
+				if (Project::GetAsset<Asset>(handle)->GetType() == AssetType::Object)
 					m_CurrentRoom->CreateInstance(handle);
 			}
 			ImGui::EndDragDropTarget();

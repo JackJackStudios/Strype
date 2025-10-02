@@ -16,6 +16,7 @@
 #include "Strype/Renderer/RenderPipeline.hpp"
 
 #include "Strype/Room/Room.hpp"
+#include "Strype/Room/Object.hpp"
 #include "Strype/Room/RoomInstance.hpp"
 
 #include "Strype/Project/Asset.hpp"
@@ -23,6 +24,7 @@
 #include "Strype/Project/Project.hpp"
 
 #include "Strype/Script/ScriptEngine.hpp"
+#include "Strype/Script/ScriptAsset.hpp"
 
 #include "Strype/Utils/PlatformUtils.hpp"
 

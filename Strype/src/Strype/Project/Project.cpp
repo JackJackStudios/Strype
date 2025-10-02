@@ -51,7 +51,7 @@ namespace Strype {
 		TCHAR programFilesFilePath[MAX_PATH];
 		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
 		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" /nologo /clp:ErrorsOnly;WarningsOnly /m /nr:true /verbosity:minimal /p:Configuration={} -t:", path.string(), msBuildPath.string(), (Project::HiddenFolder / path.filename()).string(), STY_BUILD_CONFIG_NAME);
+		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" /nologo /clp:ErrorsOnly;WarningsOnly /m /nr:true /verbosity:minimal /p:Configuration={} -t:", path.string(), msBuildPath.string(), Project::HiddenFolder / path.filename(), STY_BUILD_CONFIG_NAME);
 		
 		for (int i = 0; i < commands.size(); ++i)
 		{
@@ -82,7 +82,7 @@ namespace Strype {
 		auto& path = project->GetConfig().ProjectDirectory;
 
 		std::string content = Utils::ReadFile("assets/premake5.lua");
-		Utils::ReplaceKeyWord(content, std::filesystem::path(Project::EmptyProject).stem().string(), path.stem().string());
+		Utils::ReplaceKeyWord(content, Project::EmptyProject.stem().string(), path.stem().string());
 
 		Utils::WriteFile(path / Project::HiddenFolder / "premake5.lua", content);
 
@@ -98,11 +98,10 @@ namespace Strype {
 		std::filesystem::create_directories(path / Project::HiddenFolder);
 
 		// Copy empty project
-		std::filesystem::path templateDir = std::filesystem::path(Project::EmptyProject).parent_path();
-		Utils::CopyDirectory(templateDir, path);
+		Utils::CopyDirectory(Project::EmptyProject.parent_path(), path);
 
 		//Change empty project to fit new project name
-		std::filesystem::rename(path / std::filesystem::path(Project::EmptyProject).filename(), path / (path.filename().string() + ".sproj"));
+		std::filesystem::rename(path / Project::EmptyProject.filename(), path / (path.filename().string() + ".sproj"));
 
 		Ref<Project> project = Project::LoadFile(path / (path.filename().string() + ".sproj"));
 		Project::BuildCSharp(project);

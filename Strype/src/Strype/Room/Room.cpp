@@ -98,7 +98,7 @@ namespace Strype {
 		worldDef.gravity = { 0.0f, -m_Gravity };
 		m_Physics = b2CreateWorld(&worldDef);
 
-		auto& scriptEngine = Project::GetScriptEngine();
+		Ref<ScriptEngine> scriptEngine = Project::GetScriptEngine();
 
 		for (auto& instance : m_Objects)
 		{
@@ -145,7 +145,7 @@ namespace Strype {
 			return;
 		}
 
-		auto& scriptEngine = Project::GetScriptEngine();
+		Ref<ScriptEngine> scriptEngine = Project::GetScriptEngine();
 		Project::SetActiveRoom(nullptr);
 
 		for (auto& instance : m_Objects)

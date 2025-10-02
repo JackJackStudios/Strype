@@ -18,7 +18,7 @@ namespace Strype {
 
 		void OnAttach() override
 		{
-			m_Room = CreateRef<Room>(*Project::GetAsset<Room>(Project::GetHandle(m_ActiveProject->GetConfig().StartRoom)));
+			m_Room = CreateRef<Room>(*Project::GetAsset<Room>(Project::GetAssetManager()->GetHandle(m_ActiveProject->GetConfig().StartRoom)));
 			m_Room->OnResize(m_ActiveProject->GetConfig().ViewportSize);
 
 			m_Room->StartRuntime();
@@ -86,8 +86,7 @@ namespace Strype {
 
 	void EditorSession::SaveProject()
 	{
-		Project::SaveFile(Project::GetActive());
-		Project::SaveAllAssets();
+		Project::SaveAll(Project::GetActive());
 	}
 
 	void EditorSession::OpenProject(const std::filesystem::path& path)
@@ -114,18 +113,18 @@ namespace Strype {
 		m_FileWatcher.reset();
 		m_FileWatcher = CreateRef<filewatch::FileWatch<std::string>>(Project::GetProjectDirectory().string(), STY_BIND_EVENT_FN(EditorSession::OnFilewatcher));
 		
-		OpenRoom(Project::GetHandle(project->GetConfig().StartRoom));
+		OpenRoom(Project::GetAssetManager()->GetHandle(project->GetConfig().StartRoom));
 	}
 
 	void EditorSession::OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event)
 	{
-		if (Utils::IsFileInsideFolder(filepath, HIDDEN_FOLDER))
+		if (Utils::IsFileInsideFolder(filepath, Project::HiddenFolder))
 			return;
 
 		if (event == filewatch::Event::added)
 		{
 			// Full build - pause editor
-			if (Utils::GetAssetTypeFromFileExtension(filepath.extension()) == AssetType::Script)
+			if (AssetManager::GetAssetType(filepath.extension()) == AssetType::Script)
 			{
 				Project::BuildCSharp(Project::GetActive(), false);
 				Project::GetActive()->GetScriptEngine()->ReloadAssembly();
@@ -134,19 +133,17 @@ namespace Strype {
 
 		if (event == filewatch::Event::modified)
 		{
-			if (Project::IsAssetLoaded(filepath))
-				Project::ReloadAsset(Project::GetHandle(filepath));
+			Ref<AssetManager> manager = Project::GetAssetManager();
 
-			auto it = s_AssetExtensionMap.find(filepath.extension());
-			if (it != s_AssetExtensionMap.end())
-			{
-				switch (it->second)
-				{
-				case AssetType::Script:
-					// Build on seprate thread - runtime waits
-					break;
-				}
-			}
+			if (manager->IsAssetLoaded(filepath))
+				manager->ReloadAsset(manager->GetHandle(AssetManager::CalculateName(filepath)));
+
+			//switch (AssetManager::GetAssetType(filepath.extension())
+			//{
+			//case AssetType::Script:
+			//	// Build on seprate thread - runtime waits
+			//	break;
+			//}
 		}
 	}
 
@@ -168,14 +165,13 @@ namespace Strype {
 	{
 		for (const auto& filepath : e.GetPaths())
 		{
-			const auto& ext = filepath.extension();
-			AssetType type = Utils::GetAssetTypeFromFileExtension(ext);
+			AssetType type = AssetManager::GetAssetType(filepath.extension());
 
 			std::filesystem::path newPath = m_ContentBrowserPanel->GetCurrentPath() / filepath.filename();
 			if (!std::filesystem::exists(newPath) && type != AssetType::None)
 			{
 				std::filesystem::copy_file(filepath, newPath);
-				Project::ImportAsset(newPath);
+				Project::GetAssetManager()->ImportAsset(newPath);
 			}
 		}
 	}

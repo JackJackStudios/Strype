@@ -63,7 +63,8 @@ namespace Strype {
 		float m_CameraSpeed = 5.0f;
 		float m_ZoomLevel = 1.0f;
 
-		friend class RoomSerializer;
+		friend Ref<Asset> load_room_asset(const std::filesystem::path& path);
+		friend void save_room_asset(Ref<Room> room, const std::filesystem::path& filepath);
 		friend class ContentBrowserPanel;
 	};
 

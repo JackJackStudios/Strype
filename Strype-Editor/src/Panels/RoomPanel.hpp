@@ -3,6 +3,7 @@
 #include "EditorPanel.hpp"
 #include "Strype/Utils/ImguiUtils.hpp"
 
+#include <Strype.hpp>
 #include <ImGuizmo.h>
 
 namespace Strype {

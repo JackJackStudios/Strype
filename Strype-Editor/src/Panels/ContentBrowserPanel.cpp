@@ -4,9 +4,7 @@
 #include "Strype/Utils/ImguiUtils.hpp"
 
 #include <stb_image.h>
-
 #include <glm/gtc/type_ptr.hpp>
-#include <imgui_internal.h>
 
 namespace Strype {
 
@@ -15,6 +13,25 @@ namespace Strype {
 		static int NumOfFileOrDirs(const std::filesystem::path& path)
 		{
 			return std::distance(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator{});
+		}
+
+
+		static bool FileExistsNoExtensions(const std::filesystem::path& basePath) 
+		{
+			std::filesystem::path dir = basePath.parent_path();
+			std::string stem = basePath.stem().string(); // filename without extension
+
+			if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir))
+				return false;
+
+			for (auto& entry : std::filesystem::directory_iterator(dir)) 
+			{
+				if (!entry.is_regular_file()) continue;
+				if (entry.path().stem() == stem) {
+					return true; // found same name with some extension
+				}
+			}
+			return false;
 		}
 
 		static AGI::Texture LoadTexture(const std::filesystem::path& path)
@@ -127,8 +144,8 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Delete"))
 				{
-					auto filepath = Project::GetFilePath(node.Handle);
-					Project::RemoveAsset(node.Handle);
+					auto filepath = Project::GetAssetManager()->GetFilePath(node.Handle);
+					Project::GetAssetManager()->RemoveAsset(node.Handle);
 
 					std::filesystem::remove(Project::GetProjectDirectory() / filepath);
 
@@ -138,7 +155,7 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Reload Asset"))
 				{
-					Project::ReloadAsset(node.Handle);
+					Project::GetAssetManager()->ReloadAsset(node.Handle);
 				}
 
 				ImGui::EndPopup();
@@ -163,7 +180,7 @@ namespace Strype {
 				}
 			}
 
-			ImGui::TextWrapped(Project::GetName(node.Handle).c_str());
+			ImGui::TextWrapped(Project::GetAssetManager()->GetName(node.Handle).c_str());
 
 			ImGui::NextColumn(); 
 			++i;
@@ -174,16 +191,13 @@ namespace Strype {
 			AGI::Texture icon = GetIcon(m_InputType);
 			ImGui::Image((ImTextureID)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
-			std::filesystem::path path = std::string(m_InputText) + Utils::GetFileExtensionFromAssetType(m_InputType).string();
-			bool overwriting = std::filesystem::exists(m_CurrentDirectory->Path / path);
-			
-			if (overwriting) 
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+			bool overwriting = Utils::FileExistsNoExtensions(m_CurrentDirectory->Path / m_InputText);
+			if (overwriting) ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
 
 			ImGui::SetNextItemWidth(thumbnailSize);
 			ImGui::InputText("##Input", m_InputText, sizeof(m_InputText));
 
-			if (ImGui::GetCurrentContext()->ColorStack.Size > 0)
+			if (overwriting)
 				ImGui::PopStyleColor();
 
 			if (ImGui::IsItemActivated()) m_InputActivated = true;
@@ -191,7 +205,9 @@ namespace Strype {
 			{
 				if (m_InputActivated && Input::IsKeyDown(KeyCode::Enter))
 				{
-					Project::CreateAsset(m_CurrentDirectory->Path / path);
+					Ref<AssetManager> manager = Project::GetAssetManager();
+					manager->SaveAsset(manager->CreateAsset(m_InputType), m_InputText);
+
 					RefreshAssetTree();
 				}
 
@@ -222,10 +238,10 @@ namespace Strype {
 						if (type == AssetType::None)
 							continue;
 						
-						//INFO: This tells us whetever the asset can be created
-						//      completely empty like a Object/Room but a Sprite/AudioFile
-						//      must be based off a file.
-						bool canCreate = Project::CanCreateAsset(type);
+						// INFO: This tells us whetever the asset can be created
+						//       completely empty like a Object/Room but a Sprite/AudioFile
+						//       must be based off a file.
+						bool canCreate = false;//Project::CanCreateAsset(type);
 
 						if (!ImGui::MenuItem(name.data(), ""))
 							continue;
@@ -241,7 +257,7 @@ namespace Strype {
 								continue;
 
 							std::filesystem::copy_file(path, m_CurrentDirectory->Path / path.filename(), std::filesystem::copy_options::overwrite_existing);
-							Project::ImportAsset(m_CurrentDirectory->Path / path.filename());
+							Project::GetAssetManager()->ImportAsset(m_CurrentDirectory->Path / path.filename());
 						}
 					}
 
@@ -282,10 +298,10 @@ namespace Strype {
 		m_CurrentDirectory = &m_RootDirectory;
 		
 		auto manager = Project::GetAssetManager();
-		manager->ForEach([this](AssetHandle handle)
+		manager->ForEach([&](AssetHandle handle)
 		{
 			TreeNode* currentFolder = &m_RootDirectory;
-			const auto& filepath = Project::GetFilePath(handle);
+			const auto& filepath = manager->GetFilePath(handle);
 
 			std::filesystem::path currentPath;
 			for (auto it = filepath.begin(); it != filepath.end(); ++it)
@@ -310,7 +326,7 @@ namespace Strype {
 		ImVec2 size = ImVec2(128.0f, 128.0f);
 
 		TexCoords tx = RenderCaps::TextureCoords;
-		AGI::Texture icon = Project::IsAssetLoaded(select->TextureHandle) ? GetIcon(select->TextureHandle, &tx) : GetIcon(AssetType::Sprite);
+		AGI::Texture icon = Project::GetAssetManager()->IsAssetLoaded(select->TextureHandle) ? GetIcon(select->TextureHandle, &tx) : GetIcon(AssetType::Sprite);
 
 		UI::CenterWidget(size);
 		tx = Utils::FlipTexCoordsV(tx);
@@ -322,7 +338,7 @@ namespace Strype {
 			{
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
-				if (Project::GetAssetType(handle) == AssetType::Sprite)
+				if (Project::GetAsset<Asset>(handle)->GetType() == AssetType::Sprite)
 					select->TextureHandle = handle;
 			}
 			ImGui::EndDragDropTarget();
@@ -339,7 +355,7 @@ namespace Strype {
 			if (ImGui::Button("Add Script")) ImGui::OpenPopup("SearchScript");
 			if (ImGui::BeginPopup("SearchScript"))
 			{
-				auto& scriptEngine = Project::GetScriptEngine();
+				Ref<ScriptEngine> scriptEngine = Project::GetScriptEngine();
 				for (const auto& [scriptID, metadata] : scriptEngine->GetAllScripts())
 				{
 					ImGui::BeginDisabled(std::find(select->Scripts.begin(), select->Scripts.end(), scriptID) != select->Scripts.end());
@@ -359,7 +375,7 @@ namespace Strype {
 				{
 					AssetHandle handle = *(AssetHandle*)payload->Data;
 
-					if (Project::GetAssetType(handle) == AssetType::Script)
+					if (Project::GetAsset<Asset>(handle)->GetType() == AssetType::Script)
 					{
 						Ref<Script> script = Project::GetAsset<Script>(handle);
 						if (Project::GetScriptEngine()->IsValidScript(script->GetID()))
@@ -371,7 +387,7 @@ namespace Strype {
 
 			if (ImGui::BeginChild("ScriptWindow", child_size, ImGuiChildFlags_Borders))
 			{
-				auto& scriptEngine = Project::GetScriptEngine();
+				auto scriptEngine = Project::GetScriptEngine();
 
 				for (const auto& script : select->Scripts)
 				{
@@ -417,8 +433,7 @@ namespace Strype {
 		if (handle == 0)
 			return m_DirectoryIcon;
 
-		AssetType type = Project::GetAssetType(handle);
-
+		AssetType type = Project::GetAsset<Asset>(handle)->GetType();
 		if (type == AssetType::Sprite)
 		{
 			auto sprite = Project::GetAsset<Sprite>(handle);

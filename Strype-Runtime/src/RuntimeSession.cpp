@@ -25,7 +25,7 @@ namespace Strype {
 		Ref<Project> project = Project::LoadFile(path);
 		Project::SetActive(project);
 
-		m_Room = Project::GetAsset<Room>(Project::GetHandle(project->GetConfig().StartRoom));
+		m_Room = Project::GetAsset<Room>(Project::GetAssetManager()->GetHandle(project->GetConfig().StartRoom));
 
 	}
 

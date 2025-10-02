@@ -6,9 +6,26 @@
 
 namespace Strype {
 	
+	static std::unordered_map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
+		{ ".png",     AssetType::Sprite },
+		{ ".jpg",     AssetType::Sprite },
+		{ ".jpeg",    AssetType::Sprite },
+		{ ".bmp",     AssetType::Sprite },
+					  
+		{ ".wav",     AssetType::AudioFile },
+		{ ".mp3",     AssetType::AudioFile },
+		{ ".flac",    AssetType::AudioFile },
+		{ ".ogg",     AssetType::AudioFile },
+
+		{ ".cs",      AssetType::Script },
+		{ ".sroom",   AssetType::Room },
+		{ ".sobject", AssetType::Object },
+	};
+
+
 	using AssetRegistry = std::unordered_map<std::string, AssetMetadata>;
 	using AssetMap = std::unordered_map<AssetHandle, Ref<Asset>>;
-
+	
 	class Project;
 
 	class AssetManager
@@ -18,9 +35,11 @@ namespace Strype {
 		void SaveAllAssets();
 
 		bool IsAssetLoaded(AssetHandle handle) const;
+		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
 		bool IsAssetFile(AssetHandle handle) const;
 
 		AssetHandle ImportAsset(const std::filesystem::path& filepath);
+		AssetHandle CreateAsset(AssetType type);
 
 		void SaveAsset(AssetHandle handle, const std::filesystem::path& filepath = std::filesystem::path());
 		Ref<Asset> LoadAsset(const std::filesystem::path& filepath);
@@ -30,11 +49,32 @@ namespace Strype {
 		
 		const std::filesystem::path& GetFilePath(AssetHandle handle) const;
 		const std::string& GetName(AssetHandle handle) const;
-		AssetType GetAssetType(AssetHandle handle) const;
 		AssetHandle GetHandle(const std::string& name) const;
 		
 		void RemoveAsset(AssetHandle handle);
 		void ReloadAsset(AssetHandle handle);
+
+		static AssetType GetAssetType(const std::filesystem::path& ext)
+		{
+			return AssetType::None;
+		}
+
+		static std::string CalculateName(const std::filesystem::path& filepath)
+		{
+			std::string name = filepath.filename().string();
+			auto pos = name.find('.');
+
+			if (pos != std::string::npos)
+				name = name.substr(0, pos);
+
+			return name;
+		}
+
+		void ForEach(std::function<void(AssetHandle)> func)
+		{
+			for (const auto& [handle, asset] : m_LoadedAssets)
+				func(handle);
+		}
 	private:
 		AssetRegistry m_AssetRegistry;
 		AssetMap m_LoadedAssets;

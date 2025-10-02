@@ -10,15 +10,6 @@ namespace Strype {
 
     namespace Utils {
 
-        static bool IsFileInsideFolder(const std::filesystem::path& file, const std::filesystem::path& folder)
-        {
-            auto absFolder = std::filesystem::weakly_canonical(folder);
-            auto absFile = std::filesystem::weakly_canonical(file);
-            
-            // Check that absFile starts with absFolder
-            return std::mismatch(absFolder.begin(), absFolder.end(), absFile.begin()).first == absFolder.end();
-        }
-
         static std::filesystem::path ToAssetSysPath(const std::filesystem::path& filepath)
         {
             if (filepath.is_absolute() && Utils::IsFileInsideFolder(filepath, Project::GetProjectDirectory()))
@@ -27,17 +18,6 @@ namespace Strype {
             }
 
             return filepath;
-        }
-
-        static std::string CalculateName(const std::filesystem::path& filepath)
-        {
-            std::string name = filepath.filename().string();
-            auto pos = name.find('.');
-
-            if (pos != std::string::npos)
-                name = name.substr(0, pos);
-
-            return name;
         }
 
     };
@@ -51,6 +31,8 @@ namespace Strype {
             return;
         }
 
+        m_LoadedProject = proj;
+
         using directory_iter = std::filesystem::recursive_directory_iterator;
         for (auto it = directory_iter(proj->GetConfig().ProjectDirectory); it != directory_iter(); ++it)
         {
@@ -58,11 +40,9 @@ namespace Strype {
             if (it->is_directory() && filepath.filename() == Project::HiddenFolder)
                 it.disable_recursion_pending();
 
-            if (s_AssetImportersMap.find(filepath.extension()) != s_AssetImportersMap.end())
+            if (s_AssetExtensionMap.find(filepath.extension()) != s_AssetExtensionMap.end())
                 ImportAsset(filepath);
         }
-
-        m_LoadedProject = proj;
     }
 
     void AssetManager::SaveAllAssets()
@@ -73,7 +53,15 @@ namespace Strype {
 
     bool AssetManager::IsAssetLoaded(AssetHandle handle) const
     {
-        return m_LoadedAssets.find(handle) == m_LoadedAssets.end();
+        return m_LoadedAssets.find(handle) != m_LoadedAssets.end();
+    }
+
+    bool AssetManager::IsAssetLoaded(const std::filesystem::path& filepath) const
+    {
+        auto it = m_AssetRegistry.find(CalculateName(filepath));
+        if (it == m_AssetRegistry.end()) return false;
+        
+        return IsAssetLoaded(it->second.Handle);
     }
 
     bool AssetManager::IsAssetFile(AssetHandle handle) const
@@ -110,7 +98,7 @@ namespace Strype {
         AssetHandle handle; // Randomly generated UUID
 
         std::filesystem::path syspath = Utils::ToAssetSysPath(filepath);
-        std::string name = Utils::CalculateName(syspath);
+        std::string name = CalculateName(syspath);
 
         if (!std::filesystem::exists(m_LoadedProject->GetConfig().ProjectDirectory / syspath))
         {
@@ -125,7 +113,6 @@ namespace Strype {
             return 0;
         }
 
-
         AssetMetadata metadata;
         metadata.Handle = handle;
         metadata.Filepath = syspath;
@@ -133,18 +120,38 @@ namespace Strype {
         m_AssetRegistry[name] = metadata;
         m_LoadedAssets[handle] = asset;
 
-        asset->Name = Utils::CalculateName(syspath);
+        asset->Name = name;
         asset->Handle = handle;
 
         Application::Get().DispatchEvent<AssetImportedEvent>(handle);
         return handle;
     }
 
-    Ref<Asset> AssetManager::LoadAsset(const std::filesystem::path& filepath)
+    AssetHandle AssetManager::CreateAsset(AssetType type)
     {
         // TODO: implement
         STY_CORE_VERIFY(false, "Not Implemented");
-        return nullptr;
+        return 0;
+    }
+
+    Ref<Asset> AssetManager::LoadAsset(const std::filesystem::path& filepath)
+    {
+        if (!std::filesystem::exists(m_LoadedProject->GetConfig().ProjectDirectory / Utils::ToAssetSysPath(filepath)))
+        {
+            STY_CORE_WARN("File not found: \"{}\" ", Utils::ToAssetSysPath(filepath));
+            return nullptr;
+        }
+
+        auto it = s_AssetExtensionMap.find(filepath.extension());
+        AssetType type = it == s_AssetExtensionMap.end() ? AssetType::None : it->second;
+
+        if (s_AssetImportersMap.find(type) == s_AssetImportersMap.end())
+        {
+            STY_CORE_WARN("No importer available for AssetType::{}", magic_enum::enum_name(type));
+            return nullptr;
+        }
+
+        return s_AssetImportersMap[type](m_LoadedProject->GetConfig().ProjectDirectory / Utils::ToAssetSysPath(filepath));
     }
 
     const std::filesystem::path& AssetManager::GetFilePath(AssetHandle handle) const
@@ -170,23 +177,16 @@ namespace Strype {
         return GetAsset(handle)->Name;
     }
 
-    AssetType AssetManager::GetAssetType(AssetHandle handle) const
-    {
-        if (!IsAssetLoaded(handle))
-        {
-            STY_CORE_WARN("Cannot find Type for AssetHandle: {}", handle);
-            return AssetType::None;
-        }
-
-        return GetAsset(handle)->GetType();
-    }
-
     AssetHandle AssetManager::GetHandle(const std::string& name) const
     {
-        // TODO: implement
-        STY_CORE_VERIFY(false, "Not Implemented");
+        auto it = m_AssetRegistry.find(name);
+        if (it == m_AssetRegistry.end())
+        {
+            STY_CORE_WARN("Cannot find AssetHandle for Name: {}", name);
+            return 0;
+        }
 
-        return 0;
+        return it->second.Handle;
     }
 
     void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& filepath)
