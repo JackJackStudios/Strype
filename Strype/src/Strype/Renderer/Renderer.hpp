@@ -31,13 +31,14 @@ namespace Strype {
 	{
 	public:
 		Renderer(AGI::Window* window);
+		~Renderer();
+
+		void BeginFrame();
+		void EndFrame();
 
 		void Init();
-		void Shutdown();
 		void OnWindowResize(const glm::vec2& size);
-
 		void SetClearColour(const glm::vec3& colour);
-		void Clear();
 
 		void BeginRoom(Camera& camera);
 		void EndRoom();
@@ -51,9 +52,9 @@ namespace Strype {
 		AGI::Texture GetTexture(Ref<Sprite> sprite);
 
 		static Renderer* GetCurrent() { return m_CurrentContext; }
+		static constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation);
 	private:
 		float GetTextureSlot(Ref<Sprite> sprite);
-		constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation);
 
 		void Flush();
 		void FlushAndReset();

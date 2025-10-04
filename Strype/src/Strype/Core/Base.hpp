@@ -66,6 +66,8 @@ namespace Strype {
 #	define STY_BUILD_PLATFORM_NAME "Windows x64"
 #elif defined(STY_LINUX)
 #	define STY_BUILD_PLATFORM_NAME "Linux"
+#elif defined(STY_MACOSX)
+#	define STY_BUILD_PLATFORM_NAME "Mac OSX"
 #else
 #	error Undefined Platform?
 #endif

@@ -176,7 +176,7 @@ namespace Strype {
 			float timestep = window->GetDelta();
 
 			session->Render->SetClearColour({ 0.1f, 0.1f, 0.1f });
-			session->Render->GetContext()->BeginFrame();
+			session->Render->BeginFrame();
 
 			session->OnUpdate(timestep);
 
@@ -201,10 +201,10 @@ namespace Strype {
 				session->StartupFrames--;
 			}
 
-			session->Render->GetContext()->EndFrame();
+			session->Render->EndFrame();
 			window->PollEvents();
-			Input::Update();
 
+			Input::Update();
 			while (!session->m_EventQueue.empty())
 			{
 				Event* event = session->m_EventQueue.front();
@@ -214,11 +214,11 @@ namespace Strype {
 			}
 		}
 
-		session->m_ImGuiLayer.reset();
-		session->Render->Shutdown();
-
 		int index = session->m_StackIndex;
 		delete session;
+
+		session->m_ImGuiLayer.reset();
+		session->Render.reset();
 
 		m_ActiveSessions.erase(m_ActiveSessions.begin() + index);
 		for (int i = index; i < m_ActiveSessions.size(); ++i)

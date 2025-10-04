@@ -1,4 +1,4 @@
- #include "stypch.hpp"
+#include "stypch.hpp"
 #include "Renderer.hpp"
 
 #include "Strype/Core/Application.hpp"
@@ -30,7 +30,7 @@ namespace Strype {
 		InitPipeline(m_QuadPipeline, "QuadShader.glsl");
 	}
 
-	void Renderer::Shutdown()
+	Renderer::~Renderer()
 	{
 		m_RenderContext->Shutdown();
 		delete m_RenderContext;

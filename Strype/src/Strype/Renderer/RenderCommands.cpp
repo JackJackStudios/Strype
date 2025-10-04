@@ -11,9 +11,14 @@ namespace Strype {
 		m_RenderContext->SetViewport(0, 0, size.x, size.y);
 	}
 
-	void Renderer::Clear()
+	void Renderer::BeginFrame()
 	{
 		m_RenderContext->BeginFrame();
+	}
+
+	void Renderer::EndFrame()
+	{
+		m_RenderContext->EndFrame();
 	}
 
 	void Renderer::SetClearColour(const glm::vec3& colour)

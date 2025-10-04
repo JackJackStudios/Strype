@@ -5,12 +5,6 @@
 
 namespace Strype {
 
-	Camera::Camera(const glm::vec2& size)
-		: m_Size(size), m_ViewMatrix(1.0f)
-	{
-		SetProjection(size);
-	}
-
 	void Camera::SetZoomLevel(float zoom)
 	{
 		m_ZoomLevel = zoom;

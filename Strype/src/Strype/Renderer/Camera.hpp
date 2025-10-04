@@ -7,8 +7,6 @@ namespace Strype {
 	class Camera
 	{
 	public:
-		Camera(const glm::vec2& size);
-
 		void SetProjection(const glm::vec2& size);
 		void SetZoomLevel(float zoom);
 
