@@ -1,7 +1,5 @@
 #pragma once
 
-#include "RoomInstance.hpp"
-
 #include <box2d/box2d.h>
 
 namespace Strype {
@@ -24,7 +22,7 @@ namespace Strype {
 	public:
 		AssetHandle TextureHandle = 0;
 		PhysicsType BodyType = PhysicsType::Dynamic;
-		std::vector<UUID> Scripts;
+		std::vector<UUID> Scripts; // UUID = ScriptID
 	};
 
 }

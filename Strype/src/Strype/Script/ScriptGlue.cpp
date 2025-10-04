@@ -4,7 +4,6 @@
 #include "ScriptEngine.hpp"
 
 #include "Strype/Room/Room.hpp"
-#include "Strype/Room/RoomInstance.hpp"
 
 #include "Strype/Core/Input.hpp"
 #include "Strype/Project/Project.hpp"
@@ -49,10 +48,10 @@ namespace Strype {
 		
 		uint32_t Room_CreateObject(float x, float y, uint64_t object)
 		{
-			auto instance = Project::GetActiveRoom()->CreateInstance(object);
-			Project::GetActiveRoom()->GetObject(instance).Position = { x, y };
-
-			return instance;
+			RoomInstance instance;
+			instance.Position = { x, y };
+			instance.ObjectHandle = object;
+			return Project::GetActiveRoom()->CreateInstance(instance);
 		}
 
 		void Room_DestroyObject(uint32_t id)
@@ -74,32 +73,32 @@ namespace Strype {
 
 		void Object_GetPosition(uint32_t id, glm::vec2* outPosition)
 		{
-			*outPosition = Project::GetActiveRoom()->GetObject(id).Position;
+			*outPosition = Project::GetActiveRoom()->GetInstance(id).Position;
 		}
 
 		void Object_SetPosition(uint32_t id, glm::vec2* inPosition)
 		{
-			Project::GetActiveRoom()->GetObject(id).Position = *inPosition;
+			Project::GetActiveRoom()->GetInstance(id).Position = *inPosition;
 		}
 
 		void Object_GetScale(uint32_t id, glm::vec2* outScale)
 		{
-			*outScale = Project::GetActiveRoom()->GetObject(id).Scale;
+			*outScale = Project::GetActiveRoom()->GetInstance(id).Scale;
 		}
 
 		void Object_SetScale(uint32_t id, glm::vec2* inScale)
 		{
-			Project::GetActiveRoom()->GetObject(id).Scale = *inScale;
+			Project::GetActiveRoom()->GetInstance(id).Scale = *inScale;
 		}
 
 		void Object_GetRotation(uint32_t id, float* outRotation)
 		{
-			*outRotation = Project::GetActiveRoom()->GetObject(id).Rotation;
+			*outRotation = Project::GetActiveRoom()->GetInstance(id).Rotation;
 		}
 
 		void Object_SetRotation(uint32_t id, float* inRotation)
 		{
-			Project::GetActiveRoom()->GetObject(id).Rotation = *inRotation;
+			Project::GetActiveRoom()->GetInstance(id).Rotation = *inRotation;
 		}
 
 		Coral::Bool32 Input_IsVerbPressed(Coral::String verb)

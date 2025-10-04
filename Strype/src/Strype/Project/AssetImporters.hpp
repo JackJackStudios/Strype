@@ -16,7 +16,7 @@
 #include <regex>
 
 #define ASSET_IMPORTER_FUNC(type, func)                                   \
-    static Ref<Asset> func(const std::filesystem::path&);        \
+    static Ref<Asset> func(const std::filesystem::path&);                 \
     struct func##_registrar {                                             \
         func##_registrar() {                                              \
             s_AssetImportersMap[type] = func;                             \
@@ -120,8 +120,7 @@ namespace Strype {
         if (!data) return nullptr;
 
         Ref<Room> room = CreateRef<Room>();
-        room->m_Width = data["Width"].as<uint64_t>();
-        room->m_Height = data["Height"].as<uint64_t>();
+        room->m_Size = data["Size"].as<glm::vec2>();
         room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
 
         YAML::Node objects = data["Objects"];
@@ -131,13 +130,14 @@ namespace Strype {
             if (!Project::GetAssetManager()->IsAssetLoaded(handle))
                 continue;
 
-            RoomInstance& newobj = room->GetObject(room->CreateInstance(handle));
-            newobj.ObjectHandle = handle;
+            RoomInstance instance;
+            instance.ObjectHandle = handle;
 
-            newobj.Position = obj["Position"].as<glm::vec2>();
-            newobj.Scale = obj["Scale"].as<glm::vec2>();
-            newobj.Rotation = obj["Rotation"].as<float>();
-            newobj.Colour = obj["Colour"].as<glm::vec4>();
+            instance.Position = obj["Position"].as<glm::vec2>();
+            instance.Scale = obj["Scale"].as<glm::vec2>();
+            instance.Rotation = obj["Rotation"].as<float>();
+            instance.Colour = obj["Colour"].as<glm::vec4>();
+            room->CreateInstance(instance);
         }
 
         return room;
@@ -153,8 +153,7 @@ namespace Strype {
         out << YAML::BeginMap;
         out << YAML::Key << "Room" << YAML::BeginMap;
 
-        out << YAML::Key << "Width" << YAML::Value << room->m_Width;
-        out << YAML::Key << "Height" << YAML::Value << room->m_Height;
+        out << YAML::Key << "Size" << YAML::Value << (glm::vec2)room->m_Size;
         out << YAML::Key << "BackgroundColour" << YAML::Value << room->m_BackgroundColour;
 
         {
@@ -164,7 +163,6 @@ namespace Strype {
             {
                 out  << YAML::BeginMap;
 
-                out << YAML::Key << "Instance ID" << YAML::Value << obj.GetHandle();
                 out << YAML::Key << "ObjectPath" << YAML::Value << Project::GetAssetManager()->GetFilePath(obj.ObjectHandle);
                 out << YAML::Key << "Colour" << YAML::Value << obj.Colour;
 

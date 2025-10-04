@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Strype/Core/Event.hpp"
-#include "Strype/Renderer/Camera.hpp"
 #include "Strype/Project/Asset.hpp"
-
-#include "RoomInstance.hpp"
+#include "Strype/Core/UUID.hpp"
+#include "Strype/Renderer/Renderer.hpp"
 
 #include <box2d/box2d.h>
+#include <Coral/ManagedObject.hpp>
 
 namespace Strype {
 
@@ -17,51 +16,81 @@ namespace Strype {
 		Paused
 	};
 
+	struct RoomInstance
+	{
+		AssetHandle ObjectHandle;
+		float CurrentFrame = 0.0f;
+
+		glm::vec2 Position = { 0.0f, 0.0f };
+		glm::vec2 Scale = { 1.0f, 1.0f };
+		float Rotation = 0.0f;
+
+		glm::vec4 Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
+		std::vector<Coral::ManagedObject*> CSharpObjects;
+		b2BodyId RuntimeBody;
+	};
+
+	using InstanceID = UUID32;
+
 	class Room : public Asset
 	{
 	public:
-		Room();
-		Room(const Room& other);
-
-		InstanceID CreateInstance(AssetHandle object);
-
-		bool InstanceExists(InstanceID obj) const { return obj < m_Objects.size(); }
-		void DestroyInstance(InstanceID obj);
-		void Clear() { m_Objects.clear(); }
-
 		void OnUpdate(float ts);
+		void OnRender(Scope<Renderer>& renderer);
 
-		void StartRuntime();
-		void StopRuntime();
+		void ToggleRuntime(bool toggle);
+		void TogglePause(bool toggle);
 
-		void OnResize(const glm::vec2& dims);
-		void OnEvent(Event& e);
+		InstanceID CreateInstance(const RoomInstance& instance)
+		{
+			uint32_t handle = (uint32_t)m_Indices.size();
+			m_Indices.push_back((uint32_t)m_Objects.size());
+			m_Reverse.push_back(handle);
+			m_Objects.push_back(instance);
+			return handle;
+		}
+
+		void DestroyInstance(InstanceID handle)
+		{
+			uint32_t index = m_Indices[handle];
+			uint32_t last = (uint32_t)m_Objects.size() - 1;
+
+			m_Objects[index] = m_Objects[last];
+			uint32_t movedHandle = m_Reverse[last];
+			m_Indices[movedHandle] = index;
+			m_Reverse[index] = movedHandle;
+
+			m_Reverse.pop_back();
+			m_Reverse.pop_back();
+		}
+
+		RoomInstance& GetInstance(InstanceID handle)
+		{
+			return m_Objects[m_Indices[handle]];
+		}
+
+		bool InstanceExists(InstanceID handle)
+		{
+			return handle < m_Indices.size();
+		}
 
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
-
-		RoomState GetState() const { return m_RoomState; }
 		Camera& GetCamera() { return m_Camera; }
-		RoomInstance& GetObject(InstanceID id) { return m_Objects[id]; }
 
-		std::vector<RoomInstance>::iterator begin() { return m_Objects.begin(); }
-		std::vector<RoomInstance>::iterator end() { return m_Objects.end(); }
+		std::vector<InstanceID>::iterator begin() { return m_Reverse.begin(); }
+		std::vector<InstanceID>::iterator end() { return m_Reverse.end(); }
 	private:
-		void OnMouseScrolled(MouseScrolledEvent& e);
-	private:
+		RoomState   m_RoomState = RoomState::Editor;
+		glm::uvec2  m_Size;
+		glm::vec3   m_BackgroundColour;
+		float       m_Gravity = 10.0f;
+		b2WorldId   m_PhysicsWorld = {};
+		Camera      m_Camera;
+
 		std::vector<RoomInstance> m_Objects;
-
-		b2WorldId m_Physics;
-		float m_Gravity = 10.0f;
-
-		uint64_t m_Width = 720, m_Height = 360;
-		glm::vec3 m_BackgroundColour;
-
-		RoomState m_RoomState = RoomState::Editor;
-
-		Camera m_Camera;
-		float m_CameraSpeed = 5.0f;
-		float m_ZoomLevel = 1.0f;
+		std::vector<uint32_t> m_Indices;
+		std::vector<InstanceID> m_Reverse;
 
 		friend Ref<Asset> load_room_asset(const std::filesystem::path& path);
 		friend void save_room_asset(Ref<Room> room, const std::filesystem::path& filepath);
