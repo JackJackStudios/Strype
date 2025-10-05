@@ -45,7 +45,7 @@ namespace Strype {
 	{
         ImVec4 colour = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
         Render->SetClearColour({ colour.x, colour.y, colour.z });
-        Render->Clear();
+        Render->BeginFrame();
 
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar
             | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove

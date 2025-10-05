@@ -19,7 +19,6 @@ namespace Strype {
 
 		m_AspectRatio = size.x / size.y;
 		m_ProjectionMatrix = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 	void Camera::UpdateMatrix()
@@ -28,7 +27,6 @@ namespace Strype {
 			glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), glm::vec3(0, 0, 1));
 
 		m_ViewMatrix = glm::inverse(transform);
-		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 
 }

@@ -21,17 +21,18 @@ namespace Strype {
 			m_Room = CreateRef<Room>(*Project::GetAsset<Room>(Project::GetAssetManager()->GetHandle(m_ActiveProject->GetConfig().StartRoom)));
 			m_Room->OnResize(m_ActiveProject->GetConfig().ViewportSize);
 
-			m_Room->StartRuntime();
+			m_Room->ToggleRuntime(true);
 		}
 
 		~EditorRuntime()
 		{
-			m_Room->StopRuntime();
+			m_Room->ToggleRuntime(false);
 		}
 
 		void OnUpdate(float ts) override
 		{
 			m_Room->OnUpdate(ts);
+			m_Room->OnRender(Renderer::GetCurrent());
 		}
 	private:
 		Ref<Project> m_ActiveProject;
@@ -219,6 +220,7 @@ namespace Strype {
 					//Project::BuildCSharp(Project::GetActive(), false);
 					//Project::GetActive()->GetScriptEngine()->ReloadAssembly();
 
+					Project::SaveAll(Project::GetActive());
 					Application::Get().NewSession<EditorRuntime>(Project::GetActive());
 				}
 

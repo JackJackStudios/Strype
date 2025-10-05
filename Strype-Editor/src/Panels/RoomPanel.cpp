@@ -53,22 +53,25 @@ namespace Strype {
 
 		m_Framebuffer->Bind();
 		Renderer::GetCurrent()->SetClearColour({ 0.1f, 0.1f, 0.1f });
-		Renderer::GetCurrent()->Clear();
+		Renderer::GetCurrent()->BeginFrame();
 
 		m_CurrentRoom->OnUpdate(ts);
+		m_CurrentRoom->OnRender(Renderer::GetCurrent());
 
 		if (Input::IsMouseButtonPressed(MouseCode::Left))
 		{
 			bool found = false;
 
-			for (const auto& inst : *m_CurrentRoom)
+			for (const auto& handle : *m_CurrentRoom)
 			{
+				RoomInstance& inst = m_CurrentRoom->GetInstance(handle);
+
 				glm::vec2 framebufPos = inst.Position + m_CurrentRoom->GetCamera().GetHalfSize();
 				glm::vec2 frameSize = Project::GetAsset<Sprite>(Project::GetAsset<Object>(inst.ObjectHandle)->TextureHandle)->GetFrameSize() * m_CurrentRoom->GetCamera().GetZoomLevel();
 
 				if (PointInRectangle({ mouseX, mouseY }, { framebufPos.x - frameSize.x / 2, framebufPos.y - frameSize.y / 2, frameSize }))
 				{
-					m_Selected = inst.GetHandle();
+					m_Selected = handle;
 					m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
 
 					found = true;
@@ -110,7 +113,12 @@ namespace Strype {
 				AssetHandle handle = *(AssetHandle*)payload->Data;
 
 				if (Project::GetAsset<Asset>(handle)->GetType() == AssetType::Object)
-					m_CurrentRoom->CreateInstance(handle);
+				{
+					RoomInstance instance;
+					instance.ObjectHandle = handle;
+					instance.Position = { 0.0f, 0.0f };
+					m_CurrentRoom->CreateInstance(instance);
+				}
 			}
 			ImGui::EndDragDropTarget();
 		}
@@ -119,8 +127,8 @@ namespace Strype {
 		{
 			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
-			RoomInstance& obj = m_CurrentRoom->GetObject(m_Selected);
-			glm::mat4 transform = obj.GetTransform();
+			RoomInstance& obj = m_CurrentRoom->GetInstance(m_Selected);
+			glm::mat4 transform = Renderer::GetTransform({ obj.Position.x, obj.Position.y, 0.0f }, obj.Scale, obj.Rotation);
 
 			ImGuizmo::Manipulate(
 				glm::value_ptr(m_CurrentRoom->GetCamera().GetViewMatrix()),
@@ -164,7 +172,7 @@ namespace Strype {
 
 	void RoomPanel::OnEvent(Event& e)
 	{
-		m_CurrentRoom->OnEvent(e);
+		//m_CurrentRoom->OnEvent(e);
 	}
 
 };

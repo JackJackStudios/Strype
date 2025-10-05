@@ -18,7 +18,7 @@ namespace Strype {
 
 		const glm::mat4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
 		const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
-		const glm::mat4& GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; }
+		glm::mat4 GetViewProjectionMatrix() const { return m_ProjectionMatrix * m_ViewMatrix; }
 	public:
 		glm::vec2 Position = { 0.0f, 0.0f };
 		float Rotation = 0.0f;
@@ -29,7 +29,6 @@ namespace Strype {
 
 		glm::mat4 m_ProjectionMatrix;
 		glm::mat4 m_ViewMatrix;
-		glm::mat4 m_ViewProjectionMatrix;
 
 	};
 

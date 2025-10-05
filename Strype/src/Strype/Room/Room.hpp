@@ -13,7 +13,6 @@ namespace Strype {
 	{
 		Editor,
 		Runtime,
-		Paused
 	};
 
 	struct RoomInstance
@@ -36,10 +35,12 @@ namespace Strype {
 	{
 	public:
 		void OnUpdate(float ts);
-		void OnRender(Scope<Renderer>& renderer);
+		void OnRender(Renderer* renderer);
+
+		void OnResize(const glm::vec2& size) { m_Camera.SetProjection(size); }
+		void TogglePause(bool toggle) { m_IsPaused = toggle; }
 
 		void ToggleRuntime(bool toggle);
-		void TogglePause(bool toggle);
 
 		InstanceID CreateInstance(const RoomInstance& instance)
 		{
@@ -76,12 +77,16 @@ namespace Strype {
 
 		static AssetType GetStaticType() { return AssetType::Room; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
+
+		bool IsActive() const { return m_RoomState == RoomState::Runtime && !m_IsPaused; }
 		Camera& GetCamera() { return m_Camera; }
 
 		std::vector<InstanceID>::iterator begin() { return m_Reverse.begin(); }
 		std::vector<InstanceID>::iterator end() { return m_Reverse.end(); }
 	private:
 		RoomState   m_RoomState = RoomState::Editor;
+		bool        m_IsPaused = false;
+
 		glm::uvec2  m_Size;
 		glm::vec3   m_BackgroundColour;
 		float       m_Gravity = 10.0f;

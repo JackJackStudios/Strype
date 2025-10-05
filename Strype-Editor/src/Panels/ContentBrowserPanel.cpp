@@ -266,7 +266,7 @@ namespace Strype {
 
 				if (ImGui::MenuItem("Create Folder"))
 				{
-					STY_CORE_VERIFY(false, "Not implemented");
+					STY_CORE_VERIFY(false, "Not Implemented");
 				}
 
 				ImGui::EndPopup();
@@ -419,8 +419,8 @@ namespace Strype {
 
 		if (UI::DropdownMenu("Properties"))
 		{
-			ImGui::DragScalar("Width", ImGuiDataType_U64, &select->m_Width);
-			ImGui::DragScalar("Height", ImGuiDataType_U64, &select->m_Height);
+			ImGui::DragScalar("Width", ImGuiDataType_U32, &select->m_Size.x);
+			ImGui::DragScalar("Height", ImGuiDataType_U32, &select->m_Size.y);
 
 			ImGui::ColorEdit3("Background Colour", glm::value_ptr(select->m_BackgroundColour), ImGuiColorEditFlags_NoInputs);
 

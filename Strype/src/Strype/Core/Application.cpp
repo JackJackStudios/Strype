@@ -85,9 +85,9 @@ namespace Strype {
 			while (!m_GlobalQueue.empty())
 			{
 				Event* event = m_GlobalQueue.front();
-				m_GlobalQueue.pop_front();
-				
 				for (auto& session : m_ActiveSessions) session->m_EventQueue.push_back(event);
+
+				m_GlobalQueue.pop_front();
 			}
 		}
 	}
@@ -148,7 +148,6 @@ namespace Strype {
 	void Application::ThreadFunc(Session* session)
 	{
 		s_CurrentSession = session;
-		STY_CORE_VERIFY(session->Running == false, "Session already active");
 		session->Running = true;
 		
 		session->Render->Init();
@@ -158,7 +157,7 @@ namespace Strype {
 
 		if (session->ImGuiEnabled)
 		{
-			session->m_ImGuiLayer = AGI::ImGuiLayer::Create(session->Render->GetContext());
+			session->m_ImGuiLayer = std::make_unique<AGI::ImGuiLayer>(session->Render->GetContext());
 
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -214,12 +213,12 @@ namespace Strype {
 			}
 		}
 
-		int index = session->m_StackIndex;
-		delete session;
-
 		session->m_ImGuiLayer.reset();
 		session->Render.reset();
 
+		int index = session->m_StackIndex;
+		delete session;
+		
 		m_ActiveSessions.erase(m_ActiveSessions.begin() + index);
 		for (int i = index; i < m_ActiveSessions.size(); ++i)
 			m_ActiveSessions[i]->m_StackIndex = i;
