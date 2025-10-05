@@ -97,8 +97,8 @@ namespace Strype {
 		std::vector<uint32_t> m_Indices;
 		std::vector<InstanceID> m_Reverse;
 
-		friend Ref<Asset> load_room_asset(const std::filesystem::path& path);
-		friend void save_room_asset(Ref<Room> room, const std::filesystem::path& filepath);
+		friend Ref<Asset> load_room_asset(const std::filesystem::path&);
+		friend void save_room_asset(Ref<Asset>, const std::filesystem::path&);
 		friend class ContentBrowserPanel;
 	};
 

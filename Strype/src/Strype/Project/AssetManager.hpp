@@ -26,6 +26,9 @@ namespace Strype {
 	using AssetRegistry = std::unordered_map<std::string, AssetMetadata>;
 	using AssetMap = std::unordered_map<AssetHandle, Ref<Asset>>;
 	
+	using AssetImporterFunc = std::function<Ref<Asset>(const std::filesystem::path&)>;
+	using AssetExporterFunc = std::function<void(Ref<Asset>, const std::filesystem::path&)>;
+
 	class Project;
 
 	class AssetManager
@@ -54,9 +57,15 @@ namespace Strype {
 		void RemoveAsset(AssetHandle handle);
 		void ReloadAsset(AssetHandle handle);
 
+		// NOTE: Asset loading/saving functions not 
+		//       accesiable in anywhere except AssetManager.cpp
+		static AssetImporterFunc GetAssetImporter(AssetType type);
+		static AssetExporterFunc GetAssetExporter(AssetType type);
+
 		static AssetType GetAssetType(const std::filesystem::path& ext)
 		{
-			return AssetType::None;
+			auto it = s_AssetExtensionMap.find(ext.extension());
+			return it == s_AssetExtensionMap.end() ? AssetType::None : it->second;
 		}
 
 		static std::string CalculateName(const std::filesystem::path& filepath)

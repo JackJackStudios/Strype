@@ -241,7 +241,7 @@ namespace Strype {
 						// INFO: This tells us whetever the asset can be created
 						//       completely empty like a Object/Room but a Sprite/AudioFile
 						//       must be based off a file.
-						bool canCreate = false;//Project::CanCreateAsset(type);
+						bool canCreate = (AssetManager::GetAssetExporter(type) != nullptr);
 
 						if (!ImGui::MenuItem(name.data(), ""))
 							continue;

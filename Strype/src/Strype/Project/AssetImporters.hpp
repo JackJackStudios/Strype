@@ -25,9 +25,21 @@
     static inline func##_registrar s_##func##_registrar;                  \
     static Ref<Asset> func
 
+#define ASSET_EXPORTER_FUNC(type, func)                                    \
+    static void func(Ref<Asset>, const std::filesystem::path&);            \
+    struct func##_exporter_registrar {                                     \
+        func##_exporter_registrar() {                                      \
+            s_AssetExportersMap[type] = func;                              \
+        }                                                                  \
+    };                                                                     \
+    static inline func##_exporter_registrar s_##func##_exporter_registrar; \
+    static void func
+
+
 namespace Strype {
 
-    inline static std::unordered_map<AssetType, std::function<Ref<Asset>(const std::filesystem::path&)>> s_AssetImportersMap;
+    inline static std::unordered_map<AssetType, AssetImporterFunc> s_AssetImportersMap;
+    inline static std::unordered_map<AssetType, AssetExporterFunc> s_AssetExportersMap;
 
     //////////////////////////////////////////
     // LOADING ASSETS ////////////////////////
@@ -147,8 +159,10 @@ namespace Strype {
     // SAVING ASSETS /////////////////////////
     //////////////////////////////////////////
 
-    void save_room_asset(Ref<Room> room, const std::filesystem::path& filepath)
+    ASSET_EXPORTER_FUNC(AssetType::Room, save_room_asset)(Ref<Asset> asset, const std::filesystem::path& filepath)
     {
+        Room* room = (Room*)asset.get();
+
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "Room" << YAML::BeginMap;
@@ -181,9 +195,11 @@ namespace Strype {
         Utils::WriteFile(filepath, out.c_str());
     }
 
-    void save_script_asset(Ref<Script> script, const std::filesystem::path& filepath)
+    ASSET_EXPORTER_FUNC(AssetType::Script, save_script_asset)(Ref<Asset> asset, const std::filesystem::path& filepath)
     {
+        Script* script = (Script*)asset.get();
         if (script->GetID() != 0) return;
+
         std::string scriptTemplate = Utils::ReadFile("assets/ScriptTemplate.cs");
 
         size_t pos = 0;
@@ -196,8 +212,10 @@ namespace Strype {
         Utils::WriteFile(filepath, scriptTemplate);
     }
 
-    void save_object_asset(Ref<Object> object, const std::filesystem::path& filepath)
+    ASSET_EXPORTER_FUNC(AssetType::Object, save_object_asset)(Ref<Asset> asset, const std::filesystem::path& filepath)
     {
+        Object* object = (Object*)asset.get();
+
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "Object" << YAML::BeginMap;

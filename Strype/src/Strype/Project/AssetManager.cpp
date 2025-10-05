@@ -142,9 +142,7 @@ namespace Strype {
             return nullptr;
         }
 
-        auto it = s_AssetExtensionMap.find(filepath.extension());
-        AssetType type = it == s_AssetExtensionMap.end() ? AssetType::None : it->second;
-
+        AssetType type = AssetManager::GetAssetType(filepath.extension());
         if (s_AssetImportersMap.find(type) == s_AssetImportersMap.end())
         {
             STY_CORE_WARN("No importer available for AssetType::{}", magic_enum::enum_name(type));
@@ -167,7 +165,6 @@ namespace Strype {
 
     const std::string& AssetManager::GetName(AssetHandle handle) const
     {
-        // TODO: implement
         if (!IsAssetLoaded(handle))
         {
             STY_CORE_WARN("Cannot find Name for AssetHandle: {}", handle);
@@ -191,8 +188,22 @@ namespace Strype {
 
     void AssetManager::SaveAsset(AssetHandle handle, const std::filesystem::path& filepath)
     {
-        // TODO: implement
-        STY_CORE_VERIFY(false, "Not Implemented");
+        if (!IsAssetFile(handle))
+        {
+            STY_CORE_WARN("Cannot save memory-only AssetHandle: {}", handle);
+            return;
+        }
+
+        Ref<Asset> asset = GetAsset(handle);
+
+        auto it = s_AssetExportersMap.find(asset->GetType());
+        if (it == s_AssetExportersMap.end())
+        {
+            STY_CORE_WARN("No exporter available for AssetType::{}", magic_enum::enum_name(asset->GetType()));
+            return;
+        }
+
+        it->second(asset, Project::GetProjectDirectory() / (filepath.empty() ? GetFilePath(handle) : Utils::ToAssetSysPath(filepath)));
     }
 
     void AssetManager::RemoveAsset(AssetHandle handle)
@@ -228,6 +239,18 @@ namespace Strype {
         asset->Handle = handle;
 
         m_LoadedAssets[handle] = asset;
+    }
+
+    AssetImporterFunc AssetManager::GetAssetImporter(AssetType type)
+    {
+        auto it = s_AssetImportersMap.find(type);
+        return it == s_AssetImportersMap.end() ? nullptr : it->second;
+    }
+
+    AssetExporterFunc AssetManager::GetAssetExporter(AssetType type)
+    {
+        auto it = s_AssetExportersMap.find(type);
+        return it == s_AssetExportersMap.end() ? nullptr : it->second;
     }
 
 };

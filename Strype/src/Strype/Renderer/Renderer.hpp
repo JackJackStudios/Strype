@@ -51,8 +51,16 @@ namespace Strype {
 		AGI::Window* GetWindow() { return m_RenderContext->GetBoundWindow(); }
 		AGI::Texture GetTexture(Ref<Sprite> sprite);
 
+		static constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation)
+		{
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
+			if (rotation != 0) transform = transform * glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
+			transform *= glm::scale(glm::mat4(1.0f), glm::vec3(scale.x, scale.y, 0.0f));
+
+			return transform;
+		}
+
 		static Renderer* GetCurrent() { return m_CurrentContext; }
-		static constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation);
 	private:
 		float GetTextureSlot(Ref<Sprite> sprite);
 

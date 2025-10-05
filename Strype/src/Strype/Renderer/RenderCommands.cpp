@@ -26,15 +26,6 @@ namespace Strype {
 		m_RenderContext->SetClearColour({ colour.x, colour.y, colour.z, 1.0f });
 	}
 
-	constexpr glm::mat4 Renderer::GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-		if (rotation != 0) transform = transform * glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
-		transform *= glm::scale(glm::mat4(1.0f), glm::make_vec3(scale));
-
-		return transform;
-	}
-
 	void Renderer::DrawQuad(const glm::mat4& transform, const glm::vec4& colour, float slotIndex, TexCoords texcoords)
 	{
 		for (size_t i = 0; i < 4; i++)
