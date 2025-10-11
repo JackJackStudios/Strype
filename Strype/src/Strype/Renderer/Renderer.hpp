@@ -6,6 +6,9 @@
 #include "RenderPipeline.hpp"
 #include "Strype/Utils/PlatformUtils.hpp"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Strype {
@@ -50,6 +53,7 @@ namespace Strype {
 		AGI::RenderContext* GetContext() { return m_RenderContext; }
 		AGI::Window* GetWindow() { return m_RenderContext->GetBoundWindow(); }
 		AGI::Texture GetTexture(Ref<Sprite> sprite);
+		FT_Library GetFreetypeLib() const { return m_FreetypeLib; }
 
 		static constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation)
 		{
@@ -69,6 +73,7 @@ namespace Strype {
 		void InitPipeline(RenderPipeline& pipeline, const std::filesystem::path& filepath);
 	private:
 		AGI::RenderContext* m_RenderContext;
+		FT_Library m_FreetypeLib = nullptr;
 
 		// NOTE: As sprites are project-wide and can be used across windows
 		//       to avoid graphical glitches the Renderer keeps all OpenGl/Vulkan 

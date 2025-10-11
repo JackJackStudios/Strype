@@ -1,6 +1,6 @@
 #pragma once
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>

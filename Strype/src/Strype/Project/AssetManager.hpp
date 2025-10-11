@@ -17,6 +17,9 @@ namespace Strype {
 		{ ".flac",    AssetType::AudioFile },
 		{ ".ogg",     AssetType::AudioFile },
 
+		{ ".ttf",     AssetType::Font },
+		{ ".otf",     AssetType::Font },
+
 		{ ".cs",      AssetType::Script },
 		{ ".sroom",   AssetType::Room },
 		{ ".sobject", AssetType::Object },
@@ -64,7 +67,7 @@ namespace Strype {
 
 		static AssetType GetAssetType(const std::filesystem::path& ext)
 		{
-			auto it = s_AssetExtensionMap.find(ext.extension());
+			auto it = s_AssetExtensionMap.find(ext);
 			return it == s_AssetExtensionMap.end() ? AssetType::None : it->second;
 		}
 

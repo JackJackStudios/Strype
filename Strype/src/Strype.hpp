@@ -13,6 +13,7 @@
 
 #include "Strype/Renderer/Renderer.hpp"
 #include "Strype/Renderer/Sprite.hpp"
+#include "Strype/Renderer/Font.hpp"
 #include "Strype/Renderer/RenderPipeline.hpp"
 
 #include "Strype/Room/Room.hpp"
@@ -27,6 +28,6 @@
 
 #include "Strype/Utils/PlatformUtils.hpp"
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 #include <glm/glm.hpp>
 #include <AGI/agi.hpp>

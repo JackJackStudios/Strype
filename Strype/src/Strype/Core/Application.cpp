@@ -28,10 +28,10 @@ namespace Strype {
 	Application::Application(const AppConfig& config)
 		: m_Config(config)
 	{
-		Log::Init();
-
 		STY_CORE_VERIFY(!s_Instance, "Application already exists!");
 		s_Instance = this;
+
+		Log::Init();
 
 		if (!m_Config.WorkingDir.empty())
 			std::filesystem::current_path(m_Config.WorkingDir);

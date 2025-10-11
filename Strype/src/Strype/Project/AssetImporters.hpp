@@ -5,6 +5,7 @@
 
 #include "Strype/Audio/Audio.hpp"
 #include "Strype/Renderer/Sprite.hpp"
+#include "Strype/Renderer/Font.hpp"
 #include "Strype/Script/ScriptAsset.hpp"
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/Object.hpp"
@@ -16,24 +17,24 @@
 #include <regex>
 
 #define ASSET_IMPORTER_FUNC(type, func)                                   \
-    static Ref<Asset> func(const std::filesystem::path&);                 \
+    Ref<Asset> func(const std::filesystem::path&);                 \
     struct func##_registrar {                                             \
         func##_registrar() {                                              \
             s_AssetImportersMap[type] = func;                             \
         }                                                                 \
     };                                                                    \
     static inline func##_registrar s_##func##_registrar;                  \
-    static Ref<Asset> func
+    Ref<Asset> func
 
 #define ASSET_EXPORTER_FUNC(type, func)                                    \
-    static void func(Ref<Asset>, const std::filesystem::path&);            \
+    void func(Ref<Asset>, const std::filesystem::path&);            \
     struct func##_exporter_registrar {                                     \
         func##_exporter_registrar() {                                      \
             s_AssetExportersMap[type] = func;                              \
         }                                                                  \
     };                                                                     \
     static inline func##_exporter_registrar s_##func##_exporter_registrar; \
-    static void func
+    void func
 
 
 namespace Strype {
@@ -153,6 +154,18 @@ namespace Strype {
         }
 
         return room;
+    }
+
+    ASSET_IMPORTER_FUNC(AssetType::Font, load_font_asset)(const std::filesystem::path& path)
+    {
+        int pixelHeight = 48;
+        std::vector<CharsetRange> charset = { LatinCharacters };
+
+        FT_Face face;
+        FT_New_Face(Renderer::GetCurrent()->GetFreetypeLib(), path.string().c_str(), 0, &face);
+        FT_Set_Pixel_Sizes(face, 0, pixelHeight);
+
+        return CreateRef<Font>(face, charset);
     }
 
     //////////////////////////////////////////

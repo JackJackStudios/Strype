@@ -44,11 +44,11 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(AGI)
 
 FetchContent_Declare(
-    glm
-    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    agi_extensions
+    GIT_REPOSITORY https://github.com/JackJackStudios/agi_extensions.git
     GIT_TAG        master
 )
-FetchContent_MakeAvailable(glm)
+FetchContent_MakeAvailable(agi_extensions)
 
 FetchContent_Declare(
     YAML_CPP
@@ -84,6 +84,13 @@ FetchContent_Declare(
     GIT_TAG        master
 )
 FetchContent_MakeAvailable(miniaudio)
+
+FetchContent_Declare(
+    freetype
+    GIT_REPOSITORY https://github.com/freetype/freetype.git
+    GIT_TAG VER-2-13-2
+)
+FetchContent_MakeAvailable(freetype)
 
 FetchContent_Declare(
     box2d

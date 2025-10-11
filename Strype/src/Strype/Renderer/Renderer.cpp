@@ -28,10 +28,13 @@ namespace Strype {
 		m_TextureSlots[0] = { nullptr, m_WhiteTexture };
 
 		InitPipeline(m_QuadPipeline, "QuadShader.glsl");
+		FT_Init_FreeType(&m_FreetypeLib);
 	}
 
 	Renderer::~Renderer()
 	{
+		FT_Done_FreeType(m_FreetypeLib);
+
 		m_RenderContext->Shutdown();
 		delete m_RenderContext;
 	}
