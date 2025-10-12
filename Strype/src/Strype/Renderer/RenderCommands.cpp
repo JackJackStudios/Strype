@@ -1,4 +1,4 @@
-#include "stypch.hpp"
+﻿#include "stypch.hpp"
 #include "Strype/Renderer/Renderer.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -48,9 +48,40 @@ namespace Strype {
 		if (sprite) transform *= glm::scale(glm::mat4(1.0f), glm::make_vec3(sprite->GetFrameSize()));
 
 		TexCoords texCoords = sprite ? sprite->GetTexCoords(frame) : RenderCaps::TextureCoords;
-		float slotIndex = sprite ? GetTextureSlot(sprite) : 0.0f;
+		float slotIndex = sprite ? GetTextureSlot(sprite->GetTexture()) : 0.0f;
 
 		DrawQuad(transform, colour, slotIndex, texCoords);
+	}
+
+	void Renderer::DrawText(const glm::vec3& position, const std::string& text, Ref<Font> font)
+	{
+		int pen_x = position.x;
+		int pen_y = position.y; // baseline at position
+
+		for (const auto& ch : text)
+		{
+			auto it = font->m_Glyphs.find(ch);
+
+			FontGlyph& G = it->second;
+			int glyph_x = pen_x + G.bearingX;
+			int glyph_y = pen_y + (G.bearingY - G.height);
+
+			glm::mat4 transform = GetTransform({ glyph_x, glyph_y, 0.0f }, { G.width, G.height }, 0.0f);
+			TexCoords texcoords = { glm::vec2(G.u0, G.v0), glm::vec2(G.u1, G.v0), glm::vec2(G.u1, G.v1), glm::vec2(G.u0, G.v1) };
+
+			for (size_t i = 0; i < 4; i++)
+			{
+				m_TextPipeline.SubmitAttribute("a_Position", transform * RenderCaps::VertexPositions[i]);
+				m_TextPipeline.SubmitAttribute("a_Colour",   glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+				m_TextPipeline.SubmitAttribute("a_TexCoord", Utils::FlipTexCoordsV(texcoords)[i]);
+				m_TextPipeline.SubmitAttribute("a_TexIndex", GetTextureSlot(font->m_AtlasTexture));
+
+				m_TextPipeline.NextPoint();
+			}
+
+			m_TextPipeline.IndexCount += 6;
+			pen_x += G.advanceX;
+		}
 	}
 
 }

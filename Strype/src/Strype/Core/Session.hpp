@@ -6,7 +6,7 @@
 #include "Strype/Renderer/Renderer.hpp"
 
 #include <AGI/agi.hpp>
-#include <ImGuiLayer.hpp>
+#include <agi_imgui/ImGuiLayer.hpp>
 
 namespace Strype {
 

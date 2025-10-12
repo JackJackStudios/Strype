@@ -7,7 +7,7 @@
 #include "Strype/Renderer/Renderer.hpp"
 
 #include <AGI/agi.hpp>
-#include <ImGuiLayer.hpp>
+#include <agi_imgui/ImGuiLayer.hpp>
 
 int main(int argc, char** argv);
 

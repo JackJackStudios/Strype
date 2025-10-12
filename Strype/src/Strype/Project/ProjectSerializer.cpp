@@ -57,8 +57,6 @@ namespace Strype {
 		YAML::Node root = YAML::LoadFile(filepath.string())["Project"];
 		if (!root) return nullptr;
 
-		STY_CORE_INFO("Loading project '{}'", filepath.stem());
-
 		ProjectConfig& config = project->m_Config;
 		config.Name = filepath.stem().string();
 		config.ProjectDirectory = filepath.parent_path();

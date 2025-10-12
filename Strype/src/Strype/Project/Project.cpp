@@ -114,19 +114,19 @@ namespace Strype {
 		if (s_ActiveProject)
 		{
 			s_ActiveProject->m_ActiveRoom = nullptr;
-			s_ActiveProject->m_ScriptEngine->UnloadAssembly();
 
-			s_ActiveProject->m_AssetManager.reset();
+			s_ActiveProject->m_ScriptEngine->UnloadAssembly();
+			s_ActiveProject->m_AssetManager->SaveAllAssets();
 		}
 
 		s_ActiveProject = project;
 		if (s_ActiveProject)
 		{
-			Ref<ScriptEngine> scriptEngine = CreateRef<ScriptEngine>(project);
-			project->m_ScriptEngine = scriptEngine;
+			STY_CORE_INFO("Loading project \"{}\" ", s_ActiveProject->GetConfig().ProjectDirectory.stem());
 
-			Ref<AssetManager> assetManager = CreateRef<AssetManager>();
-			project->m_AssetManager = assetManager;
+			project->m_ScriptEngine = CreateRef<ScriptEngine>(project);
+			project->m_AssetManager = CreateRef<AssetManager>();
+
 			project->m_AssetManager->LoadAllAssets(project); // <- This must not happen in constructor
 		}
 	}

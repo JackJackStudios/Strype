@@ -18,16 +18,17 @@ namespace Strype {
 		m_CurrentContext = this;
 
 		AGI::TextureSpecification textureSpec;
+		textureSpec.Size = { 1, 1 };
 		textureSpec.Format = AGI::ImageFormat::RGBA;
-		textureSpec.Width = 1;
-		textureSpec.Height = 1;
 		m_WhiteTexture = m_RenderContext->CreateTexture(textureSpec);
 
 		uint32_t whiteTextureData = 0xffffffff;
 		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
-		m_TextureSlots[0] = { nullptr, m_WhiteTexture };
+		m_TextureSlots[0] = m_WhiteTexture;
 
 		InitPipeline(m_QuadPipeline, "QuadShader.glsl");
+		InitPipeline(m_TextPipeline, "TextShader.glsl");
+
 		FT_Init_FreeType(&m_FreetypeLib);
 	}
 
@@ -86,6 +87,9 @@ namespace Strype {
 	{
 		m_QuadPipeline.NextFrame();
 		m_QuadPipeline.Shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+
+		m_TextPipeline.NextFrame();
+		m_TextPipeline.Shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		
 		m_TextureSlotIndex = 1;
 	}
@@ -95,17 +99,22 @@ namespace Strype {
 		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadPipeline.VBPtr - (uint8_t*)m_QuadPipeline.VBBase);
 		m_QuadPipeline.VertexBuffer->SetData(m_QuadPipeline.VBBase, dataSize);
 
+		dataSize = (uint32_t)((uint8_t*)m_TextPipeline.VBPtr - (uint8_t*)m_TextPipeline.VBBase);
+		m_TextPipeline.VertexBuffer->SetData(m_TextPipeline.VBBase, dataSize);
+
 		Flush();
 	}
 
 	void Renderer::Flush()
 	{
 		for (uint32_t i = 0; i < m_TextureSlotIndex; ++i)
-			m_TextureSlots[i].Texture->Bind(i);
+			m_TextureSlots[i]->Bind(i);
 
-		if (m_QuadPipeline.IndexCount == 0) return;
 		m_QuadPipeline.Shader->Bind();
-		m_RenderContext->DrawIndexed(m_QuadPipeline.VertexArray, m_QuadPipeline.IndexCount);
+		m_RenderContext->DrawIndexed(m_QuadPipeline.VertexArray);
+
+		m_TextPipeline.Shader->Bind();
+		m_RenderContext->DrawIndexed(m_TextPipeline.VertexArray);
 	}
 
 	void Renderer::FlushAndReset()
@@ -115,16 +124,19 @@ namespace Strype {
 		m_QuadPipeline.IndexCount = 0;
 		m_QuadPipeline.VBPtr = m_QuadPipeline.VBBase;
 
+		m_TextPipeline.IndexCount = 0;
+		m_TextPipeline.VBPtr = m_TextPipeline.VBBase;
+
 		m_TextureSlotIndex = 1;
 	}
 
-	float Renderer::GetTextureSlot(Ref<Sprite> sprite)
+	float Renderer::GetTextureSlot(AGI::Texture texture)
 	{
-		if (!sprite) return 0.0f;
+		if (!texture) return 0.0f;
 
 		for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
 		{
-			if (m_TextureSlots[i].SpriteRef == sprite)
+			if (m_TextureSlots[i]->GetRendererID() == texture->GetRendererID())
 				return (float)i;
 		}
 
@@ -132,15 +144,9 @@ namespace Strype {
 			FlushAndReset();
 
 		uint32_t slotIndex = m_TextureSlotIndex++;
-		m_TextureSlots[slotIndex].SpriteRef = sprite;
-		m_TextureSlots[slotIndex].Texture = m_RenderContext->CreateTexture(sprite->GetSpecs());
+		m_TextureSlots[slotIndex] = texture;
 
 		return (float)slotIndex;
-	}
-
-	AGI::Texture Renderer::GetTexture(Ref<Sprite> sprite)
-	{
-		return m_TextureSlots[GetTextureSlot(sprite)].Texture;
 	}
 
 }

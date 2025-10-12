@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Strype/Project/Asset.hpp"
+#include "Strype/Renderer/Sprite.hpp"
 
 #include <ft2build.h>
 #include <AGI/agi.hpp>
@@ -38,10 +39,12 @@ namespace Strype {
         virtual AssetType GetType() const override { return GetStaticType(); }
     private:
         FT_Face m_FontFace;
-        AGI::Texture m_AtlasTexture;
-
         int m_PixelHeight = 48;
-        std::map<char, FontGlyph> m_Glyphs;
+
+        AGI::Texture m_AtlasTexture;
+        std::unordered_map<char, FontGlyph> m_Glyphs;
+
+        friend class Renderer;
 	};
 
 };

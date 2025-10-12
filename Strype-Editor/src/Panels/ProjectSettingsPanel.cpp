@@ -15,8 +15,7 @@ namespace Strype {
 		STY_VERIFY(data, "Failed to load texture \"{}\" ", path);
 
 		AGI::TextureSpecification textureSpec;
-		textureSpec.Width = width;
-		textureSpec.Height = height;
+		textureSpec.Size = { width, height };
 		textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
 		textureSpec.LinearFiltering = true;
 

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Camera.hpp"
-#include "Sprite.hpp"
-
-#include "RenderPipeline.hpp"
-#include "Strype/Utils/PlatformUtils.hpp"
+#include "Strype/Renderer/Camera.hpp"
+#include "Strype/Renderer/RenderPipeline.hpp"
+#include "Strype/Renderer/Sprite.hpp"
+#include "Strype/Renderer/Font.hpp"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -36,12 +35,12 @@ namespace Strype {
 		Renderer(AGI::Window* window);
 		~Renderer();
 
-		void BeginFrame();
-		void EndFrame();
-
 		void Init();
 		void OnWindowResize(const glm::vec2& size);
 		void SetClearColour(const glm::vec3& colour);
+
+		void BeginFrame();
+		void EndFrame();
 
 		void BeginRoom(Camera& camera);
 		void EndRoom();
@@ -49,10 +48,10 @@ namespace Strype {
 		// Primitives
 		void DrawQuad(const glm::mat4& transform, const glm::vec4& colour, float slotIndex, TexCoords texcoords = RenderCaps::TextureCoords);
 		void DrawSprite(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour, Ref<Sprite> sprite = nullptr, float frame = 0);
+		void DrawText(const glm::vec3& position, const std::string& text, Ref<Font> font);
 
-		AGI::RenderContext* GetContext() { return m_RenderContext; }
-		AGI::Window* GetWindow() { return m_RenderContext->GetBoundWindow(); }
-		AGI::Texture GetTexture(Ref<Sprite> sprite);
+		AGI::RenderContext* GetContext() const { return m_RenderContext; }
+		AGI::Window* GetWindow() const { return m_RenderContext->GetBoundWindow(); }
 		FT_Library GetFreetypeLib() const { return m_FreetypeLib; }
 
 		static constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation)
@@ -66,7 +65,7 @@ namespace Strype {
 
 		static Renderer* GetCurrent() { return m_CurrentContext; }
 	private:
-		float GetTextureSlot(Ref<Sprite> sprite);
+		float GetTextureSlot(AGI::Texture texture);
 
 		void Flush();
 		void FlushAndReset();
@@ -75,22 +74,13 @@ namespace Strype {
 		AGI::RenderContext* m_RenderContext;
 		FT_Library m_FreetypeLib = nullptr;
 
-		// NOTE: As sprites are project-wide and can be used across windows
-		//       to avoid graphical glitches the Renderer keeps all OpenGl/Vulkan 
-		//       textures (AGI::Texture) internally. Use Renderer::GetTexture to create a
-		//       a internal texture based on the specification inside Sprite
-		struct TextureSlot
-		{
-			Ref<Sprite> SpriteRef = nullptr;
-			AGI::Texture Texture;
-		};
-
-		std::array<TextureSlot, RenderCaps::MaxTextureSlots> m_TextureSlots;
+		std::array<AGI::Texture, RenderCaps::MaxTextureSlots> m_TextureSlots;
 		AGI::Texture m_WhiteTexture;
 		uint32_t m_TextureSlotIndex = 1; // 0 = white texture
 
 		// Enter other pipelines here...
 		RenderPipeline m_QuadPipeline;
+		RenderPipeline m_TextPipeline;
 
 		inline static thread_local Renderer* m_CurrentContext;
 	};

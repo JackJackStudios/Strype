@@ -56,12 +56,11 @@ namespace Strype {
         if (!data) return nullptr;
 
         AGI::TextureSpecification textureSpec;
-        textureSpec.Width = width;
-        textureSpec.Height = height;
+        textureSpec.Size = { width, height };
         textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
 
-        textureSpec.Data = data;
-        textureSpec.Datasize = width * height * channels;
+        AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
+        texture->SetData(data, width * height * channels);
 
         std::regex pattern(".strip(\\d+)");
         std::smatch match;
@@ -70,7 +69,7 @@ namespace Strype {
         if (std::regex_search(pathStr, match, pattern))
             frameCount = std::stoi(match[1].str());
 
-        return CreateRef<Sprite>(textureSpec, frameCount);
+        return CreateRef<Sprite>(texture, frameCount);
 	}
 
     ASSET_IMPORTER_FUNC(AssetType::AudioFile, load_audiofile_asset)(const std::filesystem::path& path)

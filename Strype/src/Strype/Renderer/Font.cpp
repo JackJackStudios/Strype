@@ -14,20 +14,21 @@ namespace Strype {
             m_Pixels.resize(size.x * size.y);
         }
 
-        glm::ivec2 PackAndBlit(const uint8_t* src, int srcWidth, int srcHeight, int srcPitch)
+        glm::ivec2 PackAndBlit(const uint8_t* src, int srcWidth, int srcHeight, int srcPitch, int padding = 1)
         {
             if (srcWidth == 0 || srcHeight == 0)
                 return { 0, 0 };
 
-            if (m_CurrentPos.x + srcWidth > m_Size.x) 
+            // Check if we need to wrap to next row
+            if (m_CurrentPos.x + srcWidth + padding > m_Size.x)
             {
                 m_CurrentPos.x = 0;
-                m_CurrentPos.y += m_RowHeight;
+                m_CurrentPos.y += m_RowHeight + padding;
                 m_RowHeight = 0;
             }
 
-            EnsureHeight(m_CurrentPos.y + srcHeight);
-            if (m_CurrentPos.y + srcHeight > m_Size.y) 
+            EnsureHeight(m_CurrentPos.y + srcHeight + padding);
+            if (m_CurrentPos.y + srcHeight + padding > m_Size.y)
             {
                 STY_CORE_ERROR("Atlas overflow even after resize. Increase initial size.");
                 return { 0, 0 };
@@ -36,16 +37,18 @@ namespace Strype {
             int dstX = m_CurrentPos.x;
             int dstY = m_CurrentPos.y;
 
-            for (int y = 0; y < srcHeight; ++y) 
+            // Copy each row of pixels
+            for (int y = 0; y < srcHeight; ++y)
             {
                 const uint8_t* srcRow = src + y * srcPitch;
                 uint8_t* dstRow = m_Pixels.data() + ((m_CurrentPos.y + y) * m_Size.x + m_CurrentPos.x);
                 std::memcpy(dstRow, srcRow, static_cast<size_t>(srcWidth));
             }
 
-            m_CurrentPos.x += srcWidth;
-            if (srcHeight > m_RowHeight)
-                m_RowHeight = srcHeight;
+            // Advance position for next sprite
+            m_CurrentPos.x += srcWidth + padding;
+            if (srcHeight + padding > m_RowHeight)
+                m_RowHeight = srcHeight + padding;
 
             return { dstX, dstY };
         }
@@ -113,12 +116,12 @@ namespace Strype {
         }
 
         AGI::TextureSpecification specification;
-        specification.Width = atlas.GetSize().x;
-        specification.Height = atlas.GetSize().y;
+        specification.Size = atlas.GetSize();
         specification.Format = AGI::ImageFormat::RED;
 
+        specification.Data = (void*)atlas.GetPixels().data();
+        specification.Datasize = atlas.GetPixels().size() * sizeof(uint8_t);
         m_AtlasTexture = Renderer::GetCurrent()->GetContext()->CreateTexture(specification);
-        m_AtlasTexture->SetData((void*)atlas.GetPixels().data(), atlas.GetPixels().size() * sizeof(uint8_t));
 
         ExampleText("Hello, FreeType!");
 	}

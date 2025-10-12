@@ -25,25 +25,24 @@ namespace Strype {
 
 	};
 
-	Sprite::Sprite(AGI::TextureSpecification spec, int frames)
-		: m_Specification(spec), m_FrameCount(frames)
+	Sprite::Sprite(AGI::Texture texture, int frames)
+		: m_Texture(texture), m_FrameCount(frames)
 	{
 	}
 
 	Sprite::~Sprite()
 	{
-		stbi_image_free(m_Specification.Data);
 	}
 
 	glm::vec2 Sprite::GetFrameSize() const
 	{
-		return { (float)m_Specification.Width / m_FrameCount, m_Specification.Height };
+		return { (float)GetSpecs().Size.x / m_FrameCount, GetSpecs().Size.y};
 	}
 
 	TexCoords Sprite::GetTexCoords(float frame)
 	{
 		frame = std::floor(frame);
-		if (frame + 1 * GetFrameSize().x > m_Specification.Width)
+		if (frame + 1 * GetFrameSize().x > GetSpecs().Size.y)
 		{
 			STY_CORE_WARN("Frame goes out of bounds (Frame: {})", frame);
 			return {};
@@ -52,7 +51,7 @@ namespace Strype {
 		if (m_FrameCount == 1)
 			return RenderCaps::TextureCoords;
 
-		return Utils::BoxToTextureCoords({ frame * GetFrameSize().x, 0.0f }, GetFrameSize().x, GetFrameSize().y, { m_Specification.Width, m_Specification.Height });
+		return Utils::BoxToTextureCoords({ frame * GetFrameSize().x, 0.0f }, GetFrameSize().x, GetFrameSize().y, GetSpecs().Size);
 	}
 
 }

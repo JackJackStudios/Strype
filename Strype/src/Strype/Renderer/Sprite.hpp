@@ -10,10 +10,12 @@ namespace Strype {
 	class Sprite : public Asset
 	{
 	public:
-		Sprite(AGI::TextureSpecification spec, int frames = 1);
+		Sprite(AGI::Texture texture, int frames = 1);
 		~Sprite();
 
-		const AGI::TextureSpecification& GetSpecs() { return m_Specification; }
+		const AGI::Texture& GetTexture() { return m_Texture; }
+		const AGI::TextureSpecification& GetSpecs() const { return m_Texture->GetSpecification(); }
+
 		int GetFrameCount() const { return m_FrameCount; }
 		float GetFrameDelta() const { return 1 / m_FPS; }
 
@@ -24,7 +26,7 @@ namespace Strype {
 		static AssetType GetStaticType() { return AssetType::Sprite; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	private:
-		AGI::TextureSpecification m_Specification;
+		AGI::Texture m_Texture;
 		int m_FrameCount;
 
 		float m_FPS = 60;
