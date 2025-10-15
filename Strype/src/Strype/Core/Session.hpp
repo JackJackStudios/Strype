@@ -30,9 +30,8 @@ namespace Strype {
 		AGI::WindowProps WindowProps;
 		bool ImGuiEnabled = false;
 		bool DockspaceEnabled = false;
+		bool ShareResources = false;
 		int StartupFrames = 10;
-
-		bool Running = false;
 	private:
 		int m_StackIndex;
 

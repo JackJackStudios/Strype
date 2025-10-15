@@ -31,8 +31,6 @@ namespace Strype {
 		renderer->BeginRoom(m_Camera);
 		renderer->DrawSprite({ 0.0f, 0.0f, 0.0f }, m_Size, 0.0f, { m_BackgroundColour.x, m_BackgroundColour.y, m_BackgroundColour.z, 1.0f });
 
-		renderer->DrawText({ 0.0f, 0.0f, 0.0f }, "Hello FreeType!", Project::GetAsset<Font>(Project::GetAssetManager()->GetHandle("test-font")));
-
 		for (auto& instance : m_Objects)
 		{
 			Ref<Sprite> sprite = Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle);

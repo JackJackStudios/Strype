@@ -122,38 +122,11 @@ namespace Strype {
         specification.Data = (void*)atlas.GetPixels().data();
         specification.Datasize = atlas.GetPixels().size() * sizeof(uint8_t);
         m_AtlasTexture = Renderer::GetCurrent()->GetContext()->CreateTexture(specification);
-
-        ExampleText("Hello, FreeType!");
 	}
 
     Font::~Font()
     {
         FT_Done_Face(m_FontFace);
-    }
-
-    void Font::ExampleText(const std::string& text)
-    {
-        int pen_x = 0;
-        int pen_y = m_PixelHeight; // baseline roughly at pixel_height (depends on font)
-        std::cout << "Sample layout for: \"" << text << "\"\n";
-        for (char ch : text) 
-        {
-            auto it = m_Glyphs.find(ch);
-            if (it == m_Glyphs.end()) { pen_x += m_PixelHeight / 2; continue; } // fallback gap
-            const FontGlyph& G = it->second;
-
-            // Position where the glyph bitmap should be drawn (top-left)
-            int glyph_x = pen_x + G.bearingX;
-            int glyph_y = pen_y - G.bearingY;
-
-            // UVs are (G.u0,G.v0)-(G.u1,G.v1)
-            std::cout << "'" << ch << "': advance=" << G.advanceX
-                << " pos=(" << glyph_x << "," << glyph_y << ") size=("
-                << G.width << "x" << G.height << ") uv=("
-                << G.u0 << "," << G.v0 << ")-(" << G.u1 << "," << G.v1 << ")\n";
-
-            pen_x += G.advanceX;
-        }
     }
 
 };

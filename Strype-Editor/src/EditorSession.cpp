@@ -14,6 +14,8 @@ namespace Strype {
 		{
 			WindowProps = m_ActiveProject->GetConfig().RuntimeProps;
 			WindowProps.Title = m_ActiveProject->GetConfig().Name;
+
+			ShareResources = true;
 		}
 
 		void OnAttach() override

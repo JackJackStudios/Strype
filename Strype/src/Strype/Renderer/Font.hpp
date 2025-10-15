@@ -33,8 +33,6 @@ namespace Strype {
 		Font(FT_Face face, const std::vector<CharsetRange>& ranges);
         ~Font();
 
-        void ExampleText(const std::string& text);
-
         static AssetType GetStaticType() { return AssetType::Font; }
         virtual AssetType GetType() const override { return GetStaticType(); }
     private:

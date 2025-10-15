@@ -66,6 +66,7 @@ namespace Strype {
 		settings.PreferedAPI = AGI::BestAPI();
 		settings.MessageFunc = OnAGIMessage;
 		settings.Blending = true;
+		settings.ShareResources = session->ShareResources;
 
 		session->WindowProps.Visible = (session->StartupFrames == 0);
 
@@ -148,8 +149,6 @@ namespace Strype {
 	void Application::ThreadFunc(Session* session)
 	{
 		s_CurrentSession = session;
-		session->Running = true;
-		
 		session->Render->Init();
 
 		InstallCallbacks();
