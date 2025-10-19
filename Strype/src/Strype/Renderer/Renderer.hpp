@@ -69,7 +69,7 @@ namespace Strype {
 
 		void Flush();
 		void FlushAndReset();
-		void InitPipeline(RenderPipeline& pipeline, const std::filesystem::path& filepath);
+		void InitPipeline(RenderPipeline& pipeline, const char* shaderSource);
 	private:
 		AGI::RenderContext* m_RenderContext;
 		FT_Library m_FreetypeLib = nullptr;

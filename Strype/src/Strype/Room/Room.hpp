@@ -19,6 +19,7 @@ namespace Strype {
 	{
 		AssetHandle ObjectHandle;
 		float CurrentFrame = 0.0f;
+		float AnimationSpeed = 1.0f;
 
 		glm::vec2 Position = { 0.0f, 0.0f };
 		glm::vec2 Scale = { 1.0f, 1.0f };

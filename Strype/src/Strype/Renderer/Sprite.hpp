@@ -17,19 +17,18 @@ namespace Strype {
 		const AGI::TextureSpecification& GetSpecs() const { return m_Texture->GetSpecification(); }
 
 		int GetFrameCount() const { return m_FrameCount; }
-		float GetFrameDelta() const { return 1 / m_FPS; }
+		float GetFrameDelta(float ts) const { return ts * m_FPS; }
 
 		glm::vec2 GetFrameSize() const;
-
 		TexCoords GetTexCoords(float frame = 0);
 
 		static AssetType GetStaticType() { return AssetType::Sprite; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	private:
 		AGI::Texture m_Texture;
-		int m_FrameCount;
 
-		float m_FPS = 60;
+		int m_FrameCount;
+		float m_FPS = 5;
 	};
 
 }

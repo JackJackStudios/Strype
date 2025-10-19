@@ -49,7 +49,7 @@ namespace Strype {
 		s_Host = std::make_unique<Coral::HostInstance>();
 
 		Coral::HostSettings settings;
-		settings.CoralDirectory = (Application::Get().GetConfig().MasterDir / "DotNet").string();
+		settings.CoralDirectory = (std::filesystem::current_path() / "DotNet").string();
 		settings.MessageCallback = OnCoralMessage;
 		settings.ExceptionCallback = OnCSharpException;
 		Coral::CoralInitStatus initStatus = s_Host->Initialize(settings);
@@ -70,9 +70,7 @@ namespace Strype {
 		}
 
 		s_LoadContext = std::make_unique<Coral::AssemblyLoadContext>(std::move(s_Host->CreateAssemblyLoadContext("StrypeLoadContext")));
-
-		auto scriptCorePath = (Application::Get().GetConfig().MasterDir / "DotNet" / "Strype-ScriptCore.dll").string();
-		s_CoreAssembly = CreateRef<Coral::ManagedAssembly>(s_LoadContext->LoadAssembly(scriptCorePath));
+		s_CoreAssembly = CreateRef<Coral::ManagedAssembly>(s_LoadContext->LoadAssembly(settings.CoralDirectory + "/Strype-ScriptCore.dll"));
 
 		RegisterInternalCalls();
 		s_CoreAssembly->UploadInternalCalls();

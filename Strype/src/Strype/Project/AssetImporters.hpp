@@ -51,7 +51,7 @@ namespace Strype {
         int frameCount = 1;
         int width, height, channels;
 
-        stbi_set_flip_vertically_on_load(1);
+        stbi_set_flip_vertically_on_load(false);
         stbi_uc* data = stbi_load(filepath.string().c_str(), &width, &height, &channels, 0);
         if (!data) return nullptr;
 
@@ -105,8 +105,10 @@ namespace Strype {
         auto filepath = Project::GetProjectDirectory() / root["SpritePath"].as<std::filesystem::path>();
         if (std::filesystem::exists(filepath) && filepath.has_filename())
         {
-            object->TextureHandle = Project::GetAssetManager()->ImportAsset(filepath);
-            if (!Project::GetAssetManager()->IsAssetLoaded(object->TextureHandle)) return nullptr;
+            Ref<AssetManager> manager = Project::GetAssetManager();
+
+            object->TextureHandle = manager->ImportAsset(filepath);
+            if (!manager->IsAssetLoaded(object->TextureHandle)) return nullptr;
         }
 
         for (const auto& node : root["Scripts"])

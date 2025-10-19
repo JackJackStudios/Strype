@@ -18,7 +18,7 @@ namespace Strype {
 		float halfHeight = (size.y * 0.5f) / m_ZoomLevel;
 
 		m_AspectRatio = size.x / size.y;
-		m_ProjectionMatrix = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight);
+		m_ProjectionMatrix = glm::ortho(-halfWidth, halfWidth, halfHeight, -halfHeight);
 	}
 
 	void Camera::UpdateMatrix()

@@ -19,13 +19,16 @@ namespace Strype {
 			for (const auto& csharp : instance.CSharpObjects)
 				csharp->InvokeMethod("OnUpdate", ts);
 
-			instance.CurrentFrame += sprite->GetFrameDelta();
+			instance.CurrentFrame += sprite->GetFrameDelta(ts) * instance.AnimationSpeed;
 			instance.CurrentFrame = fmod(instance.CurrentFrame, (float)sprite->GetFrameCount());
 		}
 	}
 
 	void Room::OnRender(Renderer* renderer)
 	{
+		if (m_Camera.GetSize().x == 0 || m_Camera.GetSize().y == 0)
+			STY_CORE_WARN("Cannot resize camera to {}", m_Camera.GetSize());
+
 		m_Camera.UpdateMatrix();
 
 		renderer->BeginRoom(m_Camera);
@@ -33,9 +36,13 @@ namespace Strype {
 
 		for (auto& instance : m_Objects)
 		{
-			Ref<Sprite> sprite = Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle);
-			renderer->DrawSprite({ instance.Position.x, instance.Position.y, 0.0f },
-			                     instance.Scale, instance.Rotation, instance.Colour, sprite, instance.CurrentFrame);
+			// NOTE: GetAsset() returns nullptr when object doesn't have a sprite. 
+			if (AssetHandle handle = Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle)
+			{
+				Ref<Sprite> sprite = Project::GetAsset<Sprite>(handle);
+				renderer->DrawSprite({ instance.Position.x, instance.Position.y, 0.0f },
+					instance.Scale, instance.Rotation, instance.Colour, sprite, instance.CurrentFrame);
+			}
 		}
 
 		renderer->EndRoom();

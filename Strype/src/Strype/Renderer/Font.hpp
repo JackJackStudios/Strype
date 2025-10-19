@@ -12,12 +12,12 @@ namespace Strype {
 
     struct FontGlyph 
     {
-        int advanceX;    // in pixels
-        int bearingX;    // left bearing in pixels
-        int bearingY;    // top bearing in pixels
-        int width;       // bitmap width in pixels
-        int height;      // bitmap height in pixels
-        float u0, u1, v0, v1; // UV coordinates in atlas (0..1)
+        int advanceX;
+        int bearingX;
+        int bearingY;
+        int width;
+        int height;
+        float u0, u1, v0, v1;
     };
 
     struct CharsetRange
