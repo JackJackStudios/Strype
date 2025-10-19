@@ -3,7 +3,7 @@ add_library(Strype STATIC ${SOURCE_DIR})
 
 FetchContent_Declare(
     stb
-    GIT_REPOSITORY https://github.com/nothings/stb/
+    GIT_REPOSITORY https://github.com/nothings/stb.git
     GIT_TAG        master
 )
 FetchContent_MakeAvailable(stb)
@@ -38,3 +38,26 @@ file(DOWNLOAD
     "https://github.com/JackJackStudios/Strype-ScriptCore/releases/download/latest/Strype-ScriptCore.dll"
     "${CMAKE_CURRENT_SOURCE_DIR}/master/DotNet/Strype-ScriptCore.dll"
     STATUS status)
+
+# Pack shader folder into a .embed
+set(EMBED_SRC "${CMAKE_CURRENT_SOURCE_DIR}/master/shaders")
+set(EMBED_OUT "${CMAKE_CURRENT_SOURCE_DIR}/baseshaders.embed")
+
+file(WRITE "${EMBED_OUT}" "// Auto-generated shader embed file\n") 
+
+file(GLOB_RECURSE FILES "${EMBED_SRC}/*")
+
+foreach(FILE ${FILES})
+    if (NOT IS_DIRECTORY "${FILE}")
+        get_filename_component(NAME "${FILE}" NAME_WE)
+        file(READ "${FILE}" CONTENTS)
+
+        string(REPLACE "\\" "\\\\" CONTENTS "${CONTENTS}")
+        string(REPLACE "\"" "\\\"" CONTENTS "${CONTENTS}")
+        string(REPLACE "\n" "\\n\"\n\"" CONTENTS "${CONTENTS}")
+        string(REPLACE "\r" "" CONTENTS "${CONTENTS}")
+
+        file(APPEND "${EMBED_OUT}" "static const char ${NAME}_data[] =\n\"${CONTENTS}\";\n")
+        file(APPEND "${EMBED_OUT}" "static const size_t ${NAME}_size = sizeof(${NAME}_data);\n\n")
+    endif()
+endforeach()

@@ -6,7 +6,10 @@ namespace Strype {
 
 	void RuntimeSession::OnAttach()
 	{
-		OpenProject(m_ProjectPath);
+		Project::SetActive(m_Project);
+
+		m_Room = Project::GetAsset<Room>(Project::GetAssetManager()->GetHandle(m_Project->GetConfig().StartRoom));
+		m_Room->OnResize(m_Project->GetConfig().ViewportSize);
 		m_Room->ToggleRuntime(true);
 	}
 
@@ -19,15 +22,6 @@ namespace Strype {
 	{
 		m_Room->OnUpdate(ts);
 		m_Room->OnRender(Renderer::GetCurrent());
-	}
-
-	void RuntimeSession::OpenProject(const std::filesystem::path& path)
-	{
-		Ref<Project> project = Project::LoadFile(path);
-		Project::SetActive(project);
-
-		m_Room = Project::GetAsset<Room>(Project::GetAssetManager()->GetHandle(project->GetConfig().StartRoom));
-
 	}
 
 }

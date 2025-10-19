@@ -138,7 +138,7 @@ namespace Strype {
 	class AssetMovedEvent : public Event
 	{
 	public:
-		AssetMovedEvent(uint64_t handle, std::filesystem::path newpath)
+		AssetMovedEvent(uint64_t handle, const std::filesystem::path& newpath)
 			: m_Handle(handle), m_NewPath(newpath)
 		{
 		}

@@ -26,10 +26,10 @@ namespace Strype {
 		STY_ADD_INTERNAL_CALL(Object_GetScale);
 		STY_ADD_INTERNAL_CALL(Object_SetScale);
 
-		// STY_ADD_INTERNAL_CALL(Input_IsVerbPressed);
-		// STY_ADD_INTERNAL_CALL(Input_IsVerbHeld);
-		// STY_ADD_INTERNAL_CALL(Input_IsVerbDown);
-		// STY_ADD_INTERNAL_CALL(Input_IsVerbReleased);
+		STY_ADD_INTERNAL_CALL(Input_IsVerbPressed);
+		STY_ADD_INTERNAL_CALL(Input_IsVerbHeld);
+		STY_ADD_INTERNAL_CALL(Input_IsVerbDown);
+		STY_ADD_INTERNAL_CALL(Input_IsVerbReleased);
 
 		STY_ADD_INTERNAL_CALL(Input_IsKeyPressed);
 		STY_ADD_INTERNAL_CALL(Input_IsKeyHeld);

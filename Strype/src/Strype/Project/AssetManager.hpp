@@ -57,6 +57,7 @@ namespace Strype {
 		const std::string& GetName(AssetHandle handle) const;
 		AssetHandle GetHandle(const std::string& name) const;
 		
+		void MoveAsset(AssetHandle handle, const std::filesystem::path& filepath);
 		void RemoveAsset(AssetHandle handle);
 		void ReloadAsset(AssetHandle handle);
 
@@ -82,7 +83,7 @@ namespace Strype {
 			return name;
 		}
 
-		void ForEach(std::function<void(AssetHandle)> func)
+		void ForEach(const std::function<void(AssetHandle)>& func)
 		{
 			for (const auto& [handle, asset] : m_LoadedAssets)
 				func(handle);

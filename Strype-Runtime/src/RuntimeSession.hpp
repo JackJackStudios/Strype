@@ -9,18 +9,16 @@ namespace Strype {
 	public:
 		~RuntimeSession();
 		RuntimeSession(const std::filesystem::path& path)
-			: m_ProjectPath(path) 
 		{
-			WindowProps.Title = "Strype-Runtime";
+			m_Project = Project::LoadFile(path);
+			WindowProps.Title = m_Project->GetConfig().Name;
 		}
 
-		void OnAttach();
+		void OnAttach() override;
 		void OnUpdate(float ts) override;
-
-		void OpenProject(const std::filesystem::path& path);
 	private:
 		Ref<Room> m_Room;
-		std::filesystem::path m_ProjectPath;
+		Ref<Project> m_Project;
 	};
 
 }

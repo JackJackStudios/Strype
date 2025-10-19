@@ -20,6 +20,16 @@ namespace Strype {
             return filepath;
         }
 
+        static std::string GetFullExtension(const std::filesystem::path& path)
+        {
+            std::string filename = path.filename().string();
+            size_t firstDot = filename.find('.');
+            if (firstDot == std::string::npos)
+                return "";
+
+            return filename.substr(firstDot);
+        }
+
     };
 
     void AssetManager::LoadAllAssets(Ref<Project> proj)
@@ -206,6 +216,52 @@ namespace Strype {
         it->second(asset, Project::GetProjectDirectory() / (filepath.empty() ? GetFilePath(handle) : Utils::ToAssetSysPath(filepath)));
     }
 
+    void AssetManager::MoveAsset(AssetHandle handle, const std::filesystem::path& destPath)
+    {
+        if (!IsAssetFile(handle))
+        {
+            STY_CORE_WARN("Cannot move/rename memory-only AssetHandle: {}", handle);
+            return;
+        }
+
+        const auto oldPath = GetFilePath(handle);
+        auto newPath = Utils::ToAssetSysPath(destPath);
+
+        if (!newPath.has_filename())
+            newPath /= oldPath.filename();
+
+        if (!newPath.has_extension())
+            newPath.replace_extension(Utils::GetFullExtension(oldPath));
+
+        auto fullNewPath = m_LoadedProject->GetConfig().ProjectDirectory / newPath;
+        if (std::filesystem::exists(fullNewPath))
+        {
+            STY_CORE_WARN("Cannot move AssetHandle {} - destination already exists: {}", handle, newPath);
+            return;
+        }
+
+        if (newPath.extension() != oldPath.extension())
+        {
+            STY_CORE_WARN("Cannot change file extension when moving AssetHandle {}", handle);
+            return;
+        }
+
+        std::filesystem::rename(m_LoadedProject->GetConfig().ProjectDirectory / oldPath, fullNewPath);
+        Application::Get().DispatchEvent<AssetMovedEvent>(handle, newPath);
+
+        const auto& oldName = GetName(handle);
+        const auto newName = CalculateName(newPath);
+
+        AssetMetadata& metadata = m_AssetRegistry[oldName];
+        metadata.Filepath = newPath;
+
+        if (newName != oldName)
+        {
+            m_AssetRegistry[newName] = metadata;
+            m_AssetRegistry.erase(oldName);
+        }
+    }
+
     void AssetManager::RemoveAsset(AssetHandle handle)
     {
         if (!IsAssetLoaded(handle))
@@ -228,7 +284,7 @@ namespace Strype {
             return;
         }
 
-        if (!std::filesystem::exists(GetFilePath(handle)))
+        if (!std::filesystem::exists(Project::GetProjectDirectory() / GetFilePath(handle)))
         {
             STY_CORE_WARN("File not found: \"{}\"", GetFilePath(handle));
             return;

@@ -66,7 +66,7 @@ namespace Strype {
 
 		bool VerbExists(const std::string& str)
 		{
-			return m_Bindings.find(str) == m_Bindings.end();
+			return m_Bindings.find(str) != m_Bindings.end();
 		}
 
 		const std::vector<InputBinding>& GetBindings(const std::string& str)
