@@ -36,14 +36,9 @@ public:
     }
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    AppConfig config;
-    
-    // This line is a temporary fix and will be removed in a later release.
-    config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
-
-    Application(config)
+    Application(argc, argv)
         .NewSession<TestSession>()
         .Run();
 }

@@ -2,6 +2,7 @@
 #include "Renderer.hpp"
 
 #include "Strype/Core/Application.hpp"
+#include "../baseshaders.embed"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -26,8 +27,8 @@ namespace Strype {
 		m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 		m_TextureSlots[0] = m_WhiteTexture;
 
-		InitPipeline(m_QuadPipeline, "QuadShader.glsl");
-		InitPipeline(m_TextPipeline, "TextShader.glsl");
+		InitPipeline(m_QuadPipeline, QuadShader_data);
+		InitPipeline(m_TextPipeline, TextShader_data);
 
 		FT_Init_FreeType(&m_FreetypeLib);
 	}
@@ -40,9 +41,9 @@ namespace Strype {
 		delete m_RenderContext;
 	}
 
-	void Renderer::InitPipeline(RenderPipeline& pipeline, const std::filesystem::path& filepath)
+	void Renderer::InitPipeline(RenderPipeline& pipeline, const char* shaderSource)
 	{
-		pipeline.Shader = m_RenderContext->CreateShader(AGI::Utils::ProcessSource(Utils::ReadFile(Application::Get().GetConfig().MasterDir / "shaders" / filepath)));
+		pipeline.Shader = m_RenderContext->CreateShader(AGI::Utils::ProcessSource(shaderSource));
 		pipeline.Layout = pipeline.Shader->GetLayout();
 
 		for (const auto& attr : pipeline.Layout)
@@ -73,7 +74,7 @@ namespace Strype {
 			offset += 4;
 		}
 
-		pipeline.IndexBuffer = m_RenderContext->CreateIndexBuffer(quadIndices.data(), RenderCaps::MaxIndices);
+		pipeline.IndexBuffer = m_RenderContext->CreateIndexBuffer(quadIndices.data(), quadIndices.size());
 		pipeline.VertexArray->SetIndexBuffer(pipeline.IndexBuffer);
 
 		int32_t samplers[RenderCaps::MaxTextureSlots];
@@ -96,11 +97,8 @@ namespace Strype {
 
 	void Renderer::EndRoom()
 	{
-		uint32_t dataSize = (uint32_t)((uint8_t*)m_QuadPipeline.VBPtr - (uint8_t*)m_QuadPipeline.VBBase);
-		m_QuadPipeline.VertexBuffer->SetData(m_QuadPipeline.VBBase, dataSize);
-
-		dataSize = (uint32_t)((uint8_t*)m_TextPipeline.VBPtr - (uint8_t*)m_TextPipeline.VBBase);
-		m_TextPipeline.VertexBuffer->SetData(m_TextPipeline.VBBase, dataSize);
+		m_QuadPipeline.VertexBuffer->SetData(m_QuadPipeline.VBBase, (uint32_t)((uint8_t*)m_QuadPipeline.VBPtr - (uint8_t*)m_QuadPipeline.VBBase));
+		m_TextPipeline.VertexBuffer->SetData(m_TextPipeline.VBBase, (uint32_t)((uint8_t*)m_TextPipeline.VBPtr - (uint8_t*)m_TextPipeline.VBBase));
 
 		Flush();
 	}
@@ -111,10 +109,10 @@ namespace Strype {
 			m_TextureSlots[i]->Bind(i);
 
 		m_QuadPipeline.Shader->Bind();
-		m_RenderContext->DrawIndexed(m_QuadPipeline.VertexArray);
+		m_RenderContext->DrawIndexed(m_QuadPipeline.VertexArray, m_QuadPipeline.IndexCount);
 
 		m_TextPipeline.Shader->Bind();
-		m_RenderContext->DrawIndexed(m_TextPipeline.VertexArray);
+		m_RenderContext->DrawIndexed(m_TextPipeline.VertexArray, m_TextPipeline.IndexCount);
 	}
 
 	void Renderer::FlushAndReset()
@@ -133,7 +131,6 @@ namespace Strype {
 	float Renderer::GetTextureSlot(AGI::Texture texture)
 	{
 		if (!texture) return 0.0f;
-
 		for (uint32_t i = 1; i < m_TextureSlotIndex; i++)
 		{
 			if (m_TextureSlots[i]->GetRendererID() == texture->GetRendererID())

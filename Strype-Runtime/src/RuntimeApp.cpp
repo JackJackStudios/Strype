@@ -5,11 +5,8 @@ using namespace Strype;
 
 int main(int argc, char** argv)
 {
-	AppConfig config;
-	config.MasterDir = std::string(getenv("STRYPE_DIR")) + "\\Strype\\master";
-	
-	Application(config)
-		.NewSession<RuntimeSession>(argv[1])
+	Application(argc, argv)
+		.NewSession<RuntimeSession>(argc > 1 ? argv[1] : FileDialogs::OpenFile("Strype Project (.sproj)\0*.sproj\0"))
 		.Run();
 
 	return 0;

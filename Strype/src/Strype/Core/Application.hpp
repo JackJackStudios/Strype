@@ -13,21 +13,15 @@ int main(int argc, char** argv);
 
 namespace Strype {
 
-	struct AppConfig
-	{
-		std::filesystem::path MasterDir;
-		std::filesystem::path WorkingDir;
-		
-	};
-
 	class Application
 	{
 	public:
-		Application(const AppConfig& config);
+		Application(int argc, char** argv);
 		~Application();
 
 		static Application& Get() { return *s_Instance; }
-		const AppConfig& GetConfig() const { return m_Config; }
+		static bool IsRunning() { return s_Instance != nullptr && s_Instance->m_IsRunning; }
+
 		AGI::Window* GetWindow() const { return s_CurrentSession->GetWindow(); }
 
 		template<typename TSession, typename... Args>
@@ -58,12 +52,11 @@ namespace Strype {
 
 			return *this;
 		}
-
 	private:
 		void OnEvent(Event& e);
 
 		void InitSession(Session* session);
-		void ThreadFunc(Session* layer);
+		void ThreadFunc(Session* session);
 
 		void OnWindowClose(Event& e);
 		void OnWindowResize(WindowResizeEvent& e);
@@ -72,7 +65,6 @@ namespace Strype {
 		void Run();
 		friend int ::main(int argc, char** argv);
 	private:
-		AppConfig m_Config;
 		bool m_IsRunning = false;
 
 		EventQueue m_GlobalQueue;
