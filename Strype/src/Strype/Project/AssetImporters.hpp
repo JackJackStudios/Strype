@@ -9,6 +9,7 @@
 #include "Strype/Script/ScriptAsset.hpp"
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/Object.hpp"
+#include "Strype/Room/Tilemap.hpp"
 
 #include "Strype/Utils/YamlHelpers.hpp"
 #include <yaml-cpp/yaml.h>
@@ -17,7 +18,7 @@
 #include <regex>
 
 #define ASSET_IMPORTER_FUNC(type, func)                                   \
-    Ref<Asset> func(const std::filesystem::path&);                 \
+    Ref<Asset> func(const std::filesystem::path&);                        \
     struct func##_registrar {                                             \
         func##_registrar() {                                              \
             s_AssetImportersMap[type] = func;                             \
@@ -27,7 +28,7 @@
     Ref<Asset> func
 
 #define ASSET_EXPORTER_FUNC(type, func)                                    \
-    void func(Ref<Asset>, const std::filesystem::path&);            \
+    void func(Ref<Asset>, const std::filesystem::path&);                   \
     struct func##_exporter_registrar {                                     \
         func##_exporter_registrar() {                                      \
             s_AssetExportersMap[type] = func;                              \
@@ -87,7 +88,7 @@ namespace Strype {
         ScriptID script = scriptEngine->GetIDByName(path.stem().string());
         if (!scriptEngine->IsValidScript(script))
         {
-            STY_CORE_WARN("{} doesn't have corrosponding class in C# binaries", path.filename());
+            STY_LOG_WARN("Script", "{} doesn't have corrosponding class in C# binaries", path.filename());
             return nullptr;
         }
 
@@ -118,7 +119,7 @@ namespace Strype {
 
             if (!scriptEngine->IsValidScript(script))
             {
-                STY_CORE_WARN("\"{}\" doesnt exist in C# binaries", name);
+                STY_LOG_WARN("\"{}\" doesnt exist in C# binaries", name);
                 continue;
             }
 
@@ -135,6 +136,7 @@ namespace Strype {
 
         Ref<Room> room = CreateRef<Room>();
         room->m_Size = data["Size"].as<glm::vec2>();
+        room->m_Gravity = data["Gravity"].as<float>();
         room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
 
         YAML::Node objects = data["Objects"];
@@ -146,11 +148,9 @@ namespace Strype {
 
             RoomInstance instance;
             instance.ObjectHandle = handle;
-
             instance.Position = obj["Position"].as<glm::vec2>();
             instance.Scale = obj["Scale"].as<glm::vec2>();
             instance.Rotation = obj["Rotation"].as<float>();
-            instance.Colour = obj["Colour"].as<glm::vec4>();
             room->CreateInstance(instance);
         }
 
@@ -169,6 +169,18 @@ namespace Strype {
         return CreateRef<Font>(face, charset);
     }
 
+    ASSET_IMPORTER_FUNC(AssetType::Tilemap, load_tilemap_asset)(const std::filesystem::path& path)
+    {
+        YAML::Node data = YAML::LoadFile(path.string())["Tilemap"];
+        if (!data) return nullptr;
+
+        Ref<Tilemap> tilemap = CreateRef<Tilemap>();
+        tilemap->m_TileSize = glm::uvec2(data["TileWidth"].as<uint32_t>(), data["TileHeight"].as<uint32_t>());
+        tilemap->m_AtlasSprite = Project::GetAssetManager()->ImportAsset(data["SpritePath"].as<std::filesystem::path>());
+
+        return tilemap;
+    }
+
     //////////////////////////////////////////
     // SAVING ASSETS /////////////////////////
     //////////////////////////////////////////
@@ -181,7 +193,8 @@ namespace Strype {
         out << YAML::BeginMap;
         out << YAML::Key << "Room" << YAML::BeginMap;
 
-        out << YAML::Key << "Size" << YAML::Value << (glm::vec2)room->m_Size;
+        out << YAML::Key << "Size" << YAML::Value << room->m_Size;
+        out << YAML::Key << "Gravity" << YAML::Value << room->m_Gravity;
         out << YAML::Key << "BackgroundColour" << YAML::Value << room->m_BackgroundColour;
 
         {
@@ -192,8 +205,6 @@ namespace Strype {
                 out  << YAML::BeginMap;
 
                 out << YAML::Key << "ObjectPath" << YAML::Value << Project::GetAssetManager()->GetFilePath(obj.ObjectHandle);
-                out << YAML::Key << "Colour" << YAML::Value << obj.Colour;
-
                 out << YAML::Key << "Position" << YAML::Value << obj.Position;
                 out << YAML::Key << "Scale" << YAML::Value << obj.Scale;
                 out << YAML::Key << "Rotation" << YAML::Value << obj.Rotation;

@@ -27,7 +27,7 @@ namespace Strype {
 	void Room::OnRender(Renderer* renderer)
 	{
 		if (m_Camera.GetSize().x == 0 || m_Camera.GetSize().y == 0)
-			STY_CORE_WARN("Cannot resize camera to {}", m_Camera.GetSize());
+			STY_LOG_WARN("Room", "Cannot resize camera to {}", m_Camera.GetSize());
 
 		m_Camera.UpdateMatrix();
 
@@ -70,7 +70,7 @@ namespace Strype {
 				{
 					if (!scriptEngine->IsValidScript(scriptID))
 					{
-						STY_CORE_WARN("Object \"{}\" has an invalid script id ({})", object->Name, scriptID);
+						STY_LOG_WARN("Room", "Object \"{}\" has an invalid script id ({})", object->Name, scriptID);
 						continue;
 					}
 

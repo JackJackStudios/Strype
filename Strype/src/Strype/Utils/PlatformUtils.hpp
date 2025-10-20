@@ -28,12 +28,12 @@ namespace Strype {
 				}
 				else
 				{
-					STY_CORE_ERROR("Could not read from file '{0}'", filepath);
+					STY_LOG_ERROR("Platform", "Could not read from file \"{}\"", filepath);
 				}
 			}
 			else
 			{
-				STY_CORE_ERROR("Could not open file '{0}'", filepath);
+				STY_LOG_ERROR("Platform", "Could not open file \"{}\"", filepath);
 			}
 
 			return result;

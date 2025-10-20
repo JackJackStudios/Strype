@@ -23,6 +23,7 @@ namespace Strype {
 		{ ".cs",      AssetType::Script },
 		{ ".sroom",   AssetType::Room },
 		{ ".sobject", AssetType::Object },
+		{ ".stilemap", AssetType::Tilemap },
 	};
 
 

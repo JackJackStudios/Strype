@@ -41,7 +41,7 @@ namespace Strype {
 			if (buf.Empty())
 				return;
 
-			STY_CORE_VERIFY(buf.Size == Layout[NextAttr].Size, "Size of attribute and buffer entered must be the same!");
+			STY_VERIFY(buf.Size == Layout[NextAttr].Size, "Size of attribute and buffer entered must be the same!");
 			std::memcpy(Utils::ShiftPtr(VBPtr, Layout[NextAttr].Offset), buf.Data, Layout[NextAttr].Size);
 
 			NextAttr++;

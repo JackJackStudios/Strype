@@ -1,6 +1,3 @@
-file(GLOB_RECURSE SOURCE_DIR "src/**.cpp" "src/**.hpp")
-add_library(Strype STATIC ${SOURCE_DIR})
-
 FetchContent_Declare(
     stb
     GIT_REPOSITORY https://github.com/nothings/stb.git
@@ -9,23 +6,34 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(stb)
 FetchContent_GetProperties(stb)
 
-target_precompile_headers(Strype PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/stypch.hpp)
+file(GLOB_RECURSE SOURCE_DIR "src/**.cpp" "src/**.hpp")
+add_library(Strype STATIC ${SOURCE_DIR})
 
 target_include_directories(Strype PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_precompile_headers(Strype PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/stypch.hpp)
+
 target_include_directories(Strype PUBLIC ${stb_SOURCE_DIR})
-
 target_link_libraries(Strype PUBLIC
-    agi
-    agi_imgui
-
-    box2d
-    ImGuizmo
-    miniaudio
-    freetype
+    agi agi_imgui ImGuizmo
+    miniaudio freetype
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum
-    Coral
+    box2d Coral
+)
+
+target_compile_definitions(Strype PUBLIC
+    $<$<PLATFORM_ID:Windows>:STY_WINDOWS>
+    $<$<PLATFORM_ID:Linux>:STY_LINUX>
+    $<$<PLATFORM_ID:Darwin>:STY_MACOSX>
+
+    $<$<CONFIG:Debug>:STY_DEBUG>
+    $<$<CONFIG:Release>:STY_RELEASE>
+    $<$<CONFIG:RelWithDebInfo>:STY_RELEASE>
+    $<$<CONFIG:MinSizeRel>:STY_DIST>
+    YAML_CPP_STATIC_DEFINE
+    
+    STY_VERSION="${PROJECT_VERSION}"
 )
 
 # Download scripting binaries

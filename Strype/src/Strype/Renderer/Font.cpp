@@ -30,7 +30,7 @@ namespace Strype {
             EnsureHeight(m_CurrentPos.y + srcHeight + padding);
             if (m_CurrentPos.y + srcHeight + padding > m_Size.y)
             {
-                STY_CORE_ERROR("Atlas overflow even after resize. Increase initial size.");
+                STY_LOG_ERROR("Renderer", "Atlas overflow even after resize. Increase initial size.");
                 return { 0, 0 };
             }
 

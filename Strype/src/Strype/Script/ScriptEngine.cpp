@@ -12,22 +12,16 @@ namespace Strype {
 
 	static void OnCSharpException(std::string_view message)
 	{
-		STY_CORE_ERROR("C# Exception: {}", message);
+		STY_LOG_ERROR("C# Exception: {}", message);
 	}
 
 	static void OnCoralMessage(std::string_view message, Coral::MessageLevel level)
 	{
 		switch (level)
 		{
-		case Coral::MessageLevel::Info:
-			STY_CORE_TRACE("{}", std::string(message));
-			break;
-		case Coral::MessageLevel::Warning:
-			STY_CORE_WARN("{}", std::string(message));
-			break;
-		case Coral::MessageLevel::Error:
-			STY_CORE_ERROR("{}", std::string(message));
-			break;
+		case Coral::MessageLevel::Info: STY_LOG_TRACE("Script", message); break;
+		case Coral::MessageLevel::Warning: STY_LOG_WARN("Script", message); break;
+		case Coral::MessageLevel::Error: STY_LOG_ERROR("Script", message); break;
 		}
 	}
 
@@ -57,15 +51,15 @@ namespace Strype {
 		switch (initStatus)
 		{
 		case Coral::CoralInitStatus::CoralManagedNotFound:
-			STY_CORE_ERROR("Could not find Coral.Managed.dll in directory {}", settings.CoralDirectory);
+			STY_LOG_ERROR("Script", "Could not find Coral.Managed.dll in directory {}", settings.CoralDirectory);
 			break;
 
 		case Coral::CoralInitStatus::CoralManagedInitError:
-			STY_CORE_ERROR("Failed to initialize Coral.Managed");
+			STY_LOG_ERROR("Script", "Failed to initialize Coral.Managed");
 			break;
 
 		case Coral::CoralInitStatus::DotNetNotFound:
-			STY_CORE_ERROR("Strype requires .NET 8 or higher!");
+			STY_LOG_ERROR("Script", "Strype requires .NET 8 or higher!");
 			break;
 		}
 
@@ -85,7 +79,7 @@ namespace Strype {
 		
 		if (m_AppAssembly->GetLoadStatus() != Coral::AssemblyLoadStatus::Success)
 		{
-			STY_CORE_ERROR("Error loading file: {}", filepath);
+			STY_LOG_ERROR("Script", "Error loading file: {}", filepath);
 			return;
 		}
 
@@ -149,7 +143,7 @@ namespace Strype {
 
 					if (!s_DataTypeLookup.contains(typeName))
 					{
-						STY_CORE_WARN("Unknown type on C# class ({}) \"{}\" ", fullName, typeName);
+						STY_LOG_WARN("Script", "Unknown type on C# class ({}) \"{}\" ", fullName, typeName);
 						continue;
 					}
 

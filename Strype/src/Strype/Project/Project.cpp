@@ -68,7 +68,7 @@ namespace Strype {
 
 	void Project::BuildCSharp(Ref<Project> project, bool restore)
 	{
-		STY_CORE_TRACE("Building C# project '{}'", project->GetConfig().ProjectDirectory);
+		STY_LOG_TRACE("Project", "Building C# project '{}'", project->GetConfig().ProjectDirectory);
 
 		if (restore) RestoreCSharp(project);
 		std::filesystem::remove_all(project->GetConfig().ProjectDirectory / Project::HiddenFolder / "bin");
@@ -122,7 +122,7 @@ namespace Strype {
 		s_ActiveProject = project;
 		if (s_ActiveProject)
 		{
-			STY_CORE_INFO("Loading project \"{}\" ", s_ActiveProject->GetConfig().ProjectDirectory.stem());
+			STY_LOG_INFO("Project", "Loading project \"{}\" ", s_ActiveProject->GetConfig().ProjectDirectory.stem());
 
 			project->m_ScriptEngine = CreateRef<ScriptEngine>(project);
 			project->m_AssetManager = CreateRef<AssetManager>();

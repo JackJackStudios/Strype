@@ -177,10 +177,10 @@ namespace Strype {
 
 			switch (level)
 			{
-			case LogLevel::Trace: STY_TRACE(message); break;
-			case LogLevel::Info:  STY_INFO(message); break;
-			case LogLevel::Warn:  STY_WARN(message); break;
-			case LogLevel::Error: STY_ERROR(message); break;
+			case LogLevel::Trace: STY_LOG_TRACE("Runtime", message); break;
+			case LogLevel::Info:  STY_LOG_INFO("Runtime", message); break;
+			case LogLevel::Warn:  STY_LOG_WARN("Runtime", message); break;
+			case LogLevel::Error: STY_LOG_ERROR("Runtime", message); break;
 			}
 
 			Coral::String::Free(fmt);

@@ -18,22 +18,22 @@ namespace Strype {
 	{
 		switch (level)
 		{
-		case AGI::LogLevel::Trace:   STY_CORE_TRACE("{}", std::string(message)); break;
-		case AGI::LogLevel::Info:    STY_CORE_INFO("{}", std::string(message)); break;
-		case AGI::LogLevel::Warning: STY_CORE_WARN("{}", std::string(message)); break;
-		case AGI::LogLevel::Error:   STY_CORE_ERROR("{}", std::string(message)); break;
+		case AGI::LogLevel::Trace:   STY_LOG_TRACE("Renderer", message); break;
+		case AGI::LogLevel::Info:    STY_LOG_INFO("Renderer", message); break;
+		case AGI::LogLevel::Warning: STY_LOG_WARN("Renderer", message); break;
+		case AGI::LogLevel::Error:   STY_LOG_ERROR("Renderer", message); break;
 		}
 	}
 
 	Application::Application(int argc, char** argv)
 	{
-		STY_CORE_VERIFY(!s_Instance, "Application already exists!");
+		STY_VERIFY(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
 		Log::Init();
 
 		bool result = Audio::Init();
-		STY_CORE_VERIFY(result == true, "Failed to initialize audio");
+		STY_VERIFY(result == true, "Failed to initialize audio");
 	}
 
 	Application::~Application()
@@ -46,7 +46,7 @@ namespace Strype {
 
 	void Application::OnEvent(Event& e)
 	{
-		STY_CORE_VERIFY(s_CurrentSession, "Cannot call OnEvent() on this thread");
+		STY_VERIFY(s_CurrentSession, "Cannot call OnEvent() on this thread");
 
 		s_CurrentSession->OnEvent(e);
 

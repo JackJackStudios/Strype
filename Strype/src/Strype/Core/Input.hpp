@@ -97,7 +97,7 @@ struct fmt::formatter<Strype::InputBinding>
 		case Strype::BindingType::GamepadButton: str.append(magic_enum::enum_name((Strype::ButtonCode)binding.Code)); break;
 		case Strype::BindingType::GamepadAxis: str.append(magic_enum::enum_name((Strype::GamepadAxis)binding.Code)); break;
 
-		default: STY_CORE_VERIFY(false, "Undefined InputBinding");
+		default: STY_VERIFY(false, "Undefined InputBinding");
 		}
 
 		return fmt::format_to(ctx.out(), "{}", str);

@@ -30,7 +30,7 @@ namespace Strype {
 			s_InputState.ConnectedGamepad = true;
 			s_InputState.GamepadID = jid;
 
-			STY_CORE_INFO("Gamepad connected: \"{}\" (GUID = {})", glfwGetJoystickName(jid), glfwGetJoystickGUID(jid));
+			STY_LOG_INFO("Input", "Gamepad connected: \"{}\" (GUID = {})", glfwGetJoystickName(jid), glfwGetJoystickGUID(jid));
 		}
 		else if (event == GLFW_DISCONNECTED)
 		{
@@ -268,7 +268,7 @@ namespace Strype {
 		case BindingType::GamepadAxis:   return IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
-		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		STY_VERIFY(false, "Unsupported InputBinding");
 		return false;
 	}
 
@@ -282,7 +282,7 @@ namespace Strype {
 		case BindingType::GamepadAxis:   return IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
-		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		STY_VERIFY(false, "Unsupported InputBinding");
 		return false;
 	}
 
@@ -296,7 +296,7 @@ namespace Strype {
 		case BindingType::GamepadAxis:   return IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
-		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		STY_VERIFY(false, "Unsupported InputBinding");
 		return false;
 	}
 
@@ -310,7 +310,7 @@ namespace Strype {
 		case BindingType::GamepadAxis:   return !IsGamepadAxisActive((GamepadAxis)binding.Code);
 		}
 
-		STY_CORE_VERIFY(false, "Unsupported InputBinding");
+		STY_VERIFY(false, "Unsupported InputBinding");
 		return false;
 	}
 

@@ -37,7 +37,7 @@ namespace Strype {
         if (proj == nullptr) proj = m_LoadedProject;
         if (proj == nullptr)
         {
-            STY_CORE_WARN("Cannot load AssetManager with no project");
+            STY_LOG_WARN("Asset", "Cannot load AssetManager with no project");
             return;
         }
 
@@ -84,7 +84,7 @@ namespace Strype {
         auto it = m_LoadedAssets.find(handle);
         if (m_LoadedAssets.end() == it)
         {
-            STY_CORE_WARN("Cannot find Asset for AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot find Asset for AssetHandle: {}", handle);
             return nullptr;
         }
 
@@ -96,7 +96,7 @@ namespace Strype {
         auto it = m_LoadedAssets.find(handle);
         if (m_LoadedAssets.end() == it)
         {
-            STY_CORE_WARN("Cannot find Asset for AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot find Asset for AssetHandle: {}", handle);
             return nullptr;
         }
 
@@ -112,14 +112,14 @@ namespace Strype {
 
         if (!std::filesystem::exists(m_LoadedProject->GetConfig().ProjectDirectory / syspath))
         {
-            STY_CORE_WARN("File not found: \"{}\" ", syspath);
+            STY_LOG_WARN("Asset", "File not found: \"{}\" ", syspath);
             return 0;
         }
 
         Ref<Asset> asset = LoadAsset(syspath);
         if (asset == nullptr)
         {
-            STY_CORE_WARN("Asset import failed: \"{}\" ", filepath);
+            STY_LOG_WARN("Asset", "Asset import failed: \"{}\" ", filepath);
             return 0;
         }
 
@@ -140,7 +140,7 @@ namespace Strype {
     AssetHandle AssetManager::CreateAsset(AssetType type)
     {
         // TODO: implement
-        STY_CORE_VERIFY(false, "Not Implemented");
+        STY_VERIFY(false, "Not Implemented");
         return 0;
     }
 
@@ -148,14 +148,14 @@ namespace Strype {
     {
         if (!std::filesystem::exists(m_LoadedProject->GetConfig().ProjectDirectory / Utils::ToAssetSysPath(filepath)))
         {
-            STY_CORE_WARN("File not found: \"{}\" ", Utils::ToAssetSysPath(filepath));
+            STY_LOG_WARN("Asset", "File not found: \"{}\" ", Utils::ToAssetSysPath(filepath));
             return nullptr;
         }
 
         AssetType type = AssetManager::GetAssetType(filepath.extension());
         if (s_AssetImportersMap.find(type) == s_AssetImportersMap.end())
         {
-            STY_CORE_WARN("No importer available for AssetType::{}", magic_enum::enum_name(type));
+            STY_LOG_WARN("Asset", "No importer available for AssetType::{}", magic_enum::enum_name(type));
             return nullptr;
         }
 
@@ -166,7 +166,7 @@ namespace Strype {
     {
         if (!IsAssetFile(handle))
         {
-            STY_CORE_WARN("Cannot find Filepath for AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot find Filepath for AssetHandle: {}", handle);
             return "";
         }
 
@@ -177,7 +177,7 @@ namespace Strype {
     {
         if (!IsAssetLoaded(handle))
         {
-            STY_CORE_WARN("Cannot find Name for AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot find Name for AssetHandle: {}", handle);
             return "";
         }
 
@@ -189,7 +189,7 @@ namespace Strype {
         auto it = m_AssetRegistry.find(name);
         if (it == m_AssetRegistry.end())
         {
-            STY_CORE_WARN("Cannot find AssetHandle for Name: {}", name);
+            STY_LOG_WARN("Cannot find AssetHandle for Name: {}", name);
             return 0;
         }
 
@@ -200,7 +200,7 @@ namespace Strype {
     {
         if (!IsAssetFile(handle))
         {
-            STY_CORE_WARN("Cannot save memory-only AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot save memory-only AssetHandle: {}", handle);
             return;
         }
 
@@ -209,7 +209,7 @@ namespace Strype {
         auto it = s_AssetExportersMap.find(asset->GetType());
         if (it == s_AssetExportersMap.end())
         {
-            STY_CORE_WARN("No exporter available for AssetType::{}", magic_enum::enum_name(asset->GetType()));
+            STY_LOG_WARN("Asset", "No exporter available for AssetType::{}", magic_enum::enum_name(asset->GetType()));
             return;
         }
 
@@ -220,7 +220,7 @@ namespace Strype {
     {
         if (!IsAssetFile(handle))
         {
-            STY_CORE_WARN("Cannot move/rename memory-only AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot move/rename memory-only AssetHandle: {}", handle);
             return;
         }
 
@@ -236,13 +236,13 @@ namespace Strype {
         auto fullNewPath = m_LoadedProject->GetConfig().ProjectDirectory / newPath;
         if (std::filesystem::exists(fullNewPath))
         {
-            STY_CORE_WARN("Cannot move AssetHandle {} - destination already exists: {}", handle, newPath);
+            STY_LOG_WARN("Asset", "Cannot move AssetHandle {} - destination already exists: {}", handle, newPath);
             return;
         }
 
         if (newPath.extension() != oldPath.extension())
         {
-            STY_CORE_WARN("Cannot change file extension when moving AssetHandle {}", handle);
+            STY_LOG_WARN("Asset", "Cannot change file extension when moving AssetHandle {}", handle);
             return;
         }
 
@@ -266,7 +266,7 @@ namespace Strype {
     {
         if (!IsAssetLoaded(handle))
         {
-            STY_CORE_WARN("Cannot remove Asset for AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot remove Asset for AssetHandle: {}", handle);
             return;
         }
 
@@ -280,13 +280,13 @@ namespace Strype {
     {
         if (!IsAssetFile(handle))
         {
-            STY_CORE_WARN("Cannot reload memory-only AssetHandle: {}", handle);
+            STY_LOG_WARN("Asset", "Cannot reload memory-only AssetHandle: {}", handle);
             return;
         }
 
         if (!std::filesystem::exists(Project::GetProjectDirectory() / GetFilePath(handle)))
         {
-            STY_CORE_WARN("File not found: \"{}\"", GetFilePath(handle));
+            STY_LOG_WARN("Asset", "File not found: \"{}\"", GetFilePath(handle));
             return;
         }
 

@@ -15,7 +15,7 @@ namespace Strype {
 #endif
 
 		spdlog::sink_ptr console = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-		console->set_pattern("%^[%T] %n: %v%$");
+		console->set_pattern("%^[%T] %v%$");
 
 		s_CoreLogger = std::make_shared<spdlog::logger>("STRYPE", console);
 		s_CoreLogger->set_level(loglevel);

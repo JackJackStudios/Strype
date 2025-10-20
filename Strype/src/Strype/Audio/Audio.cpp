@@ -5,15 +5,10 @@ namespace Strype {
 
 	static void AudioCallback(void* pUserData, ma_uint32 level, const char* pMessage)
 	{
-		// HACK: miniaudio appends \n to its messages
-		std::string msg(pMessage);
-		msg = msg.substr(0, msg.length() - 1);
-
 		switch (level)
 		{
-		// NOTE: miniaudio is very verbose, don't include debug and trace
-		case MA_LOG_LEVEL_WARNING: STY_CORE_WARN(msg); break;
-		case MA_LOG_LEVEL_ERROR:   STY_CORE_ERROR(msg); break;
+		case MA_LOG_LEVEL_WARNING: STY_LOG_WARN("Audio", std::string_view(pMessage)); break;
+		case MA_LOG_LEVEL_ERROR:   STY_LOG_ERROR("Audio", std::string_view(pMessage)); break;
 		}
 	}
 
@@ -37,10 +32,10 @@ namespace Strype {
 		ma_result result = ma_engine_init(&config, &s_AudioData.AudioEngine);
 		if (result != MA_SUCCESS) return false;
 
-		STY_CORE_INFO("Using audio device: {}", ma_engine_get_device(&s_AudioData.AudioEngine)->playback.name);
-		STY_CORE_TRACE("  Format: {}",          ma_get_format_name(ma_engine_get_device(&s_AudioData.AudioEngine)->playback.format));
-		STY_CORE_TRACE("  Channels: {}",        ma_engine_get_device(&s_AudioData.AudioEngine)->playback.channels);
-		STY_CORE_TRACE("  Sample Rate: {}",     ma_engine_get_device(&s_AudioData.AudioEngine)->sampleRate);
+		STY_LOG_INFO("Audio", "Using audio device: {}", ma_engine_get_device(&s_AudioData.AudioEngine)->playback.name);
+		STY_LOG_TRACE("Audio", "  Format: {}",          ma_get_format_name(ma_engine_get_device(&s_AudioData.AudioEngine)->playback.format));
+		STY_LOG_TRACE("Audio", "  Channels: {}",        ma_engine_get_device(&s_AudioData.AudioEngine)->playback.channels);
+		STY_LOG_TRACE("Audio", "  Sample Rate: {}",     ma_engine_get_device(&s_AudioData.AudioEngine)->sampleRate);
 		return true;
 	}
 

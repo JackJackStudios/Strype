@@ -44,7 +44,7 @@ namespace Strype {
 		frame = std::floor(frame);
 		if (frame + 1 * GetFrameSize().x > GetSpecs().Size.y)
 		{
-			STY_CORE_WARN("Frame goes out of bounds (Frame: {})", frame);
+			STY_LOG_WARN("Renderer", "Frame goes out of bounds (Frame: {})", frame);
 			return {};
 		}
 

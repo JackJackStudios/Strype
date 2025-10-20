@@ -192,7 +192,7 @@ namespace YAML {
 			DECODE_BINDING_TYPE(GamepadButton, ButtonCode);
 			DECODE_BINDING_TYPE(GamepadAxis, GamepadAxis);
 
-			default: STY_CORE_VERIFY(false, "Undefined BindingType");
+			default: STY_VERIFY(false, "Undefined BindingType");
 			}
 
 			return true;

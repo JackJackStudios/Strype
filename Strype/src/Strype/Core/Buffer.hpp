@@ -92,7 +92,7 @@ namespace Strype {
 
 		uint8_t* ReadBytes(uint64_t size, uint64_t offset) const
 		{
-			STY_CORE_VERIFY(offset + size <= Size, "Buffer overflow!");
+			STY_VERIFY(offset + size <= Size, "Buffer overflow!");
 			uint8_t* buffer = new uint8_t[size];
 			memcpy(buffer, (uint8_t*)Data + offset, size);
 			return buffer;
@@ -100,7 +100,7 @@ namespace Strype {
 
 		void Write(const void* data, uint64_t size, uint64_t offset = 0)
 		{
-			STY_CORE_VERIFY(offset + size <= Size, "Buffer overflow!");
+			STY_VERIFY(offset + size <= Size, "Buffer overflow!");
 			memcpy((uint8_t*)Data + offset, data, size);
 		}
 

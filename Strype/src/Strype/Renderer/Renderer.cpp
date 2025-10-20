@@ -50,7 +50,7 @@ namespace Strype {
 		{
 			auto it = std::find(RenderCaps::RequiredAttrs.begin(), RenderCaps::RequiredAttrs.end(), attr.Name);
 			if (it != RenderCaps::RequiredAttrs.end())
-				STY_CORE_VERIFY(pipeline.Layout.HasElement(std::string(*it)), "Missing layout element: {}", *it);
+				STY_VERIFY(pipeline.Layout.HasElement(std::string(*it)), "Missing layout element: {}", *it);
 		}
 
 		pipeline.VertexArray = m_RenderContext->CreateVertexArray();
