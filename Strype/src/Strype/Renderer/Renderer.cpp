@@ -28,8 +28,6 @@ namespace Strype {
 		m_TextureSlots[0] = m_WhiteTexture;
 
 		InitPipeline(m_QuadPipeline, QuadShader_data);
-		InitPipeline(m_TextPipeline, TextShader_data);
-
 		FT_Init_FreeType(&m_FreetypeLib);
 	}
 
@@ -88,9 +86,6 @@ namespace Strype {
 	{
 		m_QuadPipeline.NextFrame();
 		m_QuadPipeline.Shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
-
-		m_TextPipeline.NextFrame();
-		m_TextPipeline.Shader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 		
 		m_TextureSlotIndex = 1;
 	}
@@ -98,7 +93,6 @@ namespace Strype {
 	void Renderer::EndRoom()
 	{
 		m_QuadPipeline.VertexBuffer->SetData(m_QuadPipeline.VBBase, (uint32_t)((uint8_t*)m_QuadPipeline.VBPtr - (uint8_t*)m_QuadPipeline.VBBase));
-		m_TextPipeline.VertexBuffer->SetData(m_TextPipeline.VBBase, (uint32_t)((uint8_t*)m_TextPipeline.VBPtr - (uint8_t*)m_TextPipeline.VBBase));
 
 		Flush();
 	}
@@ -110,9 +104,6 @@ namespace Strype {
 
 		m_QuadPipeline.Shader->Bind();
 		m_RenderContext->DrawIndexed(m_QuadPipeline.VertexArray, m_QuadPipeline.IndexCount);
-
-		m_TextPipeline.Shader->Bind();
-		m_RenderContext->DrawIndexed(m_TextPipeline.VertexArray, m_TextPipeline.IndexCount);
 	}
 
 	void Renderer::FlushAndReset()
@@ -121,9 +112,6 @@ namespace Strype {
 
 		m_QuadPipeline.IndexCount = 0;
 		m_QuadPipeline.VBPtr = m_QuadPipeline.VBBase;
-
-		m_TextPipeline.IndexCount = 0;
-		m_TextPipeline.VBPtr = m_TextPipeline.VBBase;
 
 		m_TextureSlotIndex = 1;
 	}

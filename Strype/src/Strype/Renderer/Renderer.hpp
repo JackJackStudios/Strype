@@ -102,7 +102,6 @@ namespace Strype {
 
 		// Enter other pipelines here...
 		RenderPipeline m_QuadPipeline;
-		RenderPipeline m_TextPipeline;
 
 		inline static thread_local Renderer* m_CurrentContext;
 	};
