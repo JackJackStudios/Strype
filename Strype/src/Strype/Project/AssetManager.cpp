@@ -6,6 +6,8 @@
 #include "Strype/Core/Application.hpp"
 #include "Strype/Project/Project.hpp"
 
+#include <spdlog/fmt/bundled/color.h>
+
 namespace Strype {
 
     namespace Utils {
@@ -53,6 +55,31 @@ namespace Strype {
             if (s_AssetExtensionMap.find(filepath.extension()) != s_AssetExtensionMap.end())
                 ImportAsset(filepath);
         }
+
+        std::unordered_map<AssetType, size_t> assetCount;
+        size_t totalCount = 0;
+        std::string summary;
+
+        for (const auto& [name, metadata] : m_AssetRegistry)
+        {
+            assetCount[GetAsset(metadata.Handle)->GetType()]++;
+            totalCount++;
+        }
+
+        bool first = true;
+        for (auto type : magic_enum::enum_values<AssetType>())
+        {
+            auto it = assetCount.find(type);
+            if (it == assetCount.end()) continue;
+
+            if (!first) summary += ", ";
+            first = false;
+
+            std::string name = std::string(magic_enum::enum_name(type));
+            summary += fmt::format("{}:{}", name, it->second);
+        }
+
+        STY_LOG_INFO("Asset", "Imported {} assets ({})", totalCount, summary);
     }
 
     void AssetManager::SaveAllAssets()
@@ -105,11 +132,12 @@ namespace Strype {
 
     AssetHandle AssetManager::ImportAsset(const std::filesystem::path& filepath)
     {
-        AssetHandle handle; // Randomly generated UUID
+        std::string name = CalculateName(filepath);
+
+        if (auto it = m_AssetRegistry.find(name); it != m_AssetRegistry.end())
+            return it->second.Handle;
 
         std::filesystem::path syspath = Utils::ToAssetSysPath(filepath);
-        std::string name = CalculateName(syspath);
-
         if (!std::filesystem::exists(m_LoadedProject->GetConfig().ProjectDirectory / syspath))
         {
             STY_LOG_WARN("Asset", "File not found: \"{}\" ", syspath);
@@ -119,20 +147,22 @@ namespace Strype {
         Ref<Asset> asset = LoadAsset(syspath);
         if (asset == nullptr)
         {
-            STY_LOG_WARN("Asset", "Asset import failed: \"{}\" ", filepath);
+            STY_LOG_WARN("Asset", "Import failed: \"{}\" ", filepath);
             return 0;
         }
 
         AssetMetadata metadata;
+        AssetHandle handle; // Randomly generated UUID
+
+        asset->Name = name;
+        asset->Handle = handle;
         metadata.Handle = handle;
         metadata.Filepath = syspath;
 
         m_AssetRegistry[name] = metadata;
         m_LoadedAssets[handle] = asset;
 
-        asset->Name = name;
-        asset->Handle = handle;
-
+        STY_LOG_TRACE("Asset", "Importing asset: {} (AssetType::{})", fmt::styled(name, fmt::fg(fmt::terminal_color::bright_cyan)), magic_enum::enum_name(asset->GetType()));
         Application::Get().DispatchEvent<AssetImportedEvent>(handle);
         return handle;
     }

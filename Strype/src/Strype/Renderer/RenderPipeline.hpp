@@ -20,6 +20,26 @@ namespace Strype {
 			return { tex[3], tex[2], tex[1], tex[0] };
 		}
 
+		static constexpr glm::vec2 SizeFromTexcoords(const TexCoords& tex, const glm::vec2& atlas_size)
+		{
+			return { atlas_size.x * glm::abs(tex[1].x - tex[0].x), atlas_size.y * glm::abs(tex[1].y - tex[2].y) };
+		}
+
+		static constexpr glm::vec2 PixelToTexcoords(const glm::vec2& pos, int atlas_width, int atlas_height)
+		{
+			return { pos.x / atlas_width, pos.y / atlas_height };
+		}
+
+		static constexpr TexCoords BoxToTextureCoords(const glm::vec2& pos, int width, int height, const glm::vec2& atlas_size)
+		{
+			return {
+				PixelToTexcoords(pos, atlas_size.x, atlas_size.y),
+				PixelToTexcoords({ pos.x + width, pos.y }, atlas_size.x, atlas_size.y),
+				PixelToTexcoords({ pos.x + width, pos.y + height }, atlas_size.x, atlas_size.y),
+				PixelToTexcoords({ pos.x, pos.y + height }, atlas_size.x, atlas_size.y),
+			};
+		}
+
 	};
 
 	struct RenderPipeline

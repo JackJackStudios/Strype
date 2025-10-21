@@ -34,7 +34,7 @@ public:
         WindowProps.Title = "The Strype Engine";
         // Add other window props...
     }
-}
+};
 
 int main(int argc, char** argv)
 {

@@ -7,6 +7,19 @@
 #include <box2d/box2d.h>
 #include <Coral/ManagedObject.hpp>
 
+namespace std {
+
+	template <>
+	struct hash<glm::ivec2>
+	{
+		std::size_t operator()(const glm::ivec2& vec) const
+		{
+			return hash<uint64_t>()((uint64_t)vec.y << 32 | vec.x);
+		}
+	};
+
+}
+
 namespace Strype {
 
 	enum class RoomState
@@ -30,11 +43,11 @@ namespace Strype {
 		b2BodyId RuntimeBody;
 	};
 
-	using InstanceID = UUID32;
-
 	class Room : public Asset
 	{
 	public:
+		using InstanceID = UUID32;
+
 		void OnUpdate(float ts);
 		void OnRender(Renderer* renderer);
 
@@ -93,6 +106,14 @@ namespace Strype {
 		float       m_Gravity = 10.0f;
 		b2WorldId   m_PhysicsWorld = {};
 		Camera      m_Camera;
+
+		struct Tilemap
+		{
+			std::unordered_map<glm::ivec2, int> PackedData;
+			AssetHandle AtlasHandle;
+			glm::ivec2 TileSize;
+		};
+		Tilemap m_MainTilemap;
 
 		std::vector<RoomInstance> m_Objects;
 		std::vector<uint32_t> m_Indices;

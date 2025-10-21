@@ -1,13 +1,12 @@
 #include "stypch.hpp"
 #include "Application.hpp"
 
-#include "Strype/Renderer/Renderer.hpp"
-#include "Strype/Audio/Audio.hpp"
 #include "Strype/Core/Input.hpp"
+#include "Strype/Audio/Audio.hpp"
+#include "Strype/Renderer/Renderer.hpp"
 
 #include "Strype/Utils/PlatformUtils.hpp"
 #include "Strype/Utils/ScopedDockspace.hpp"
-
 #include "Strype/Script/ScriptEngine.hpp"
 
 #include <ImGuizmo.h>

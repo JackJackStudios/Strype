@@ -20,7 +20,7 @@ namespace Strype {
 		float GetFrameDelta(float ts) const { return ts * m_FPS; }
 
 		glm::vec2 GetFrameSize() const;
-		TexCoords GetTexCoords(float frame = 0);
+		TexCoords GetTexCoords(float frame, const TexCoords& tex);
 
 		static AssetType GetStaticType() { return AssetType::Sprite; }
 		virtual AssetType GetType() const override { return GetStaticType(); }

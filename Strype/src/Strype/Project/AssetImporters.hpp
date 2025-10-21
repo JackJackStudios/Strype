@@ -9,7 +9,6 @@
 #include "Strype/Script/ScriptAsset.hpp"
 #include "Strype/Room/Room.hpp"
 #include "Strype/Room/Object.hpp"
-#include "Strype/Room/Tilemap.hpp"
 
 #include "Strype/Utils/YamlHelpers.hpp"
 #include <yaml-cpp/yaml.h>
@@ -139,6 +138,10 @@ namespace Strype {
         room->m_Gravity = data["Gravity"].as<float>();
         room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
 
+        YAML::Node tilemap = data["Tilemap"];
+        room->m_MainTilemap.AtlasHandle = Project::GetAssetManager()->ImportAsset(tilemap["SpritePath"].as<std::filesystem::path>());
+        room->m_MainTilemap.TileSize = tilemap["TileSize"].as<glm::vec2>();
+
         YAML::Node objects = data["Objects"];
         for (auto obj : objects)
         {
@@ -167,18 +170,6 @@ namespace Strype {
         FT_Set_Pixel_Sizes(face, 0, pixelHeight);
 
         return CreateRef<Font>(face, charset);
-    }
-
-    ASSET_IMPORTER_FUNC(AssetType::Tilemap, load_tilemap_asset)(const std::filesystem::path& path)
-    {
-        YAML::Node data = YAML::LoadFile(path.string())["Tilemap"];
-        if (!data) return nullptr;
-
-        Ref<Tilemap> tilemap = CreateRef<Tilemap>();
-        tilemap->m_TileSize = glm::uvec2(data["TileWidth"].as<uint32_t>(), data["TileHeight"].as<uint32_t>());
-        tilemap->m_AtlasSprite = Project::GetAssetManager()->ImportAsset(data["SpritePath"].as<std::filesystem::path>());
-
-        return tilemap;
     }
 
     //////////////////////////////////////////

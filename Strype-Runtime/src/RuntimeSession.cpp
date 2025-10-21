@@ -16,6 +16,7 @@ namespace Strype {
 	RuntimeSession::~RuntimeSession()
 	{
 		m_Room->ToggleRuntime(false);
+		Project::SetActive(nullptr);
 	}
 
 	void RuntimeSession::OnUpdate(float ts)

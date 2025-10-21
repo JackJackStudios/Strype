@@ -42,45 +42,37 @@ namespace Strype {
 	}
 
 	// Simple functions
-	void Renderer::DrawSprite(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& colour, Ref<Sprite> sprite, float frame)
+	void Renderer::DrawSprite(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour, Ref<Sprite> sprite, float frame, SpriteAlign alignment, TexCoords texcoords)
 	{
-		glm::mat4 transform = GetTransform(position, size, rotation);
-		if (sprite) transform *= glm::scale(glm::mat4(1.0f), glm::make_vec3(sprite->GetFrameSize()));
+		glm::vec2 imageSize = Utils::SizeFromTexcoords(texcoords, sprite->GetFrameSize());
+		glm::mat4 transform = GetTransform(position, scale * imageSize, rotation, alignment);
 
-		TexCoords texCoords = sprite ? sprite->GetTexCoords(frame) : RenderCaps::TextureCoords;
-		float slotIndex = sprite ? GetTextureSlot(sprite->GetTexture()) : 0.0f;
-
-		DrawQuad(transform, colour, slotIndex, texCoords);
+		DrawQuad(transform, colour, GetTextureSlot(sprite->GetTexture()), sprite->GetTexCoords(frame, texcoords));
 	}
 
-	void Renderer::DrawText(const glm::vec3& position, const std::string& text, Ref<Font> font)
+	void Renderer::DrawRect(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour)
+	{
+		glm::mat4 transform = GetTransform(position, scale, rotation);
+		DrawQuad(transform, colour, 0.0f, RenderCaps::TextureCoords);
+	}
+
+	void Renderer::DrawText(const glm::vec3& position, const glm::vec4& colour, const std::string& text, Ref<Font> font)
 	{
 		int pen_x = position.x;
 		int pen_y = position.y; // baseline at position
 
 		for (const auto& ch : text)
 		{
-			auto it = font->m_Glyphs.find(ch);
+			FontGlyph& data = font->m_Glyphs.find(ch)->second;
 
-			FontGlyph& G = it->second;
-			int glyph_x = pen_x + G.bearingX;
-			int glyph_y = pen_y + (G.bearingY - G.height);
+			int glyph_x = pen_x + data.bearingX;
+			int glyph_y = pen_y + (data.bearingY - data.height);
 
-			glm::mat4 transform = GetTransform({ glyph_x, glyph_y, 0.0f }, { G.width, G.height }, 0.0f);
-			TexCoords texcoords = { glm::vec2(G.u0, G.v0), glm::vec2(G.u1, G.v0), glm::vec2(G.u1, G.v1), glm::vec2(G.u0, G.v1) };
+			glm::mat4 transform = GetTransform({ glyph_x, glyph_y, 0.0f }, { data.width, data.height }, 0.0f);
+			TexCoords texcoords = { glm::vec2(data.u0, data.v0), glm::vec2(data.u1, data.v0), glm::vec2(data.u1, data.v1), glm::vec2(data.u0, data.v1) };
 
-			for (size_t i = 0; i < 4; i++)
-			{
-				m_TextPipeline.SubmitAttribute("a_Position", transform * RenderCaps::VertexPositions[i]);
-				m_TextPipeline.SubmitAttribute("a_Colour",   glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-				m_TextPipeline.SubmitAttribute("a_TexCoord", Utils::FlipTexCoordsV(texcoords)[i]);
-				m_TextPipeline.SubmitAttribute("a_TexIndex", GetTextureSlot(font->m_AtlasTexture));
-
-				m_TextPipeline.NextPoint();
-			}
-
-			m_TextPipeline.IndexCount += 6;
-			pen_x += G.advanceX;
+			DrawQuad(transform, colour, GetTextureSlot(font->m_AtlasTexture), Utils::FlipTexCoordsV(texcoords));
+			pen_x += data.advanceX;
 		}
 	}
 

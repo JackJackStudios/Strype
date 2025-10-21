@@ -32,7 +32,30 @@ namespace Strype {
 		m_Camera.UpdateMatrix();
 
 		renderer->BeginRoom(m_Camera);
-		renderer->DrawSprite({ 0.0f, 0.0f, 0.0f }, m_Size, 0.0f, { m_BackgroundColour.x, m_BackgroundColour.y, m_BackgroundColour.z, 1.0f });
+		renderer->DrawRect({ 0.0f, 0.0f, 0.0f }, m_Size, 0.0f, { m_BackgroundColour.x, m_BackgroundColour.y, m_BackgroundColour.z, 1.0f });
+
+		if (AssetHandle handle = m_MainTilemap.AtlasHandle)
+		{
+			Ref<Sprite> atlas = Project::GetAsset<Sprite>(handle);
+			int tilesPerWidth = atlas->GetFrameSize().x / m_MainTilemap.TileSize.x;
+
+			for (const auto& [position, index] : m_MainTilemap.PackedData)
+			{
+				if (index == 0)
+				{
+					m_MainTilemap.PackedData.erase(position);
+					continue;
+				}
+
+				glm::vec2 gridPosition = position * m_MainTilemap.TileSize;
+				int tileX = (index - 1) % tilesPerWidth;
+				int tileY = (index - 1) / tilesPerWidth;
+
+				renderer->DrawSprite({ gridPosition.x, gridPosition.y, 0.0f }, 
+					{ 1.0f, 1.0f }, 0.0f, { 1.0f, 1.0f, 1.0f, 1.0f }, atlas, 0, SpriteAlign(HoriAlign::Left, VertAlign::Top), 
+					Utils::BoxToTextureCoords(glm::vec2(tileX * m_MainTilemap.TileSize.x, tileY * m_MainTilemap.TileSize.y), m_MainTilemap.TileSize.x, m_MainTilemap.TileSize.y, atlas->GetFrameSize()));
+			}
+		}
 
 		for (auto& instance : m_Objects)
 		{

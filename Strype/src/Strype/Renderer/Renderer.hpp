@@ -2,8 +2,8 @@
 
 #include "Strype/Renderer/Camera.hpp"
 #include "Strype/Renderer/RenderPipeline.hpp"
-#include "Strype/Renderer/Sprite.hpp"
 #include "Strype/Renderer/Font.hpp"
+#include "Strype/Renderer/Sprite.hpp"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -29,6 +29,27 @@ namespace Strype {
 		};
 	};
 
+	enum class HoriAlign : uint16_t
+	{
+		Left = 0, Middle, Right
+	};
+
+	enum class VertAlign : uint16_t
+	{
+		Top = 0, Center, Bottom
+	};
+
+	struct SpriteAlign
+	{
+		HoriAlign Halign;
+		VertAlign Valign;
+		
+		SpriteAlign(HoriAlign halign, VertAlign valign)
+			: Halign(halign), Valign(valign)
+		{
+		}
+	};
+
 	class Renderer
 	{
 	public:
@@ -47,19 +68,20 @@ namespace Strype {
 
 		// Primitives
 		void DrawQuad(const glm::mat4& transform, const glm::vec4& colour, float slotIndex, TexCoords texcoords = RenderCaps::TextureCoords);
-		void DrawSprite(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour, Ref<Sprite> sprite = nullptr, float frame = 0);
-		void DrawText(const glm::vec3& position, const std::string& text, Ref<Font> font);
+		void DrawSprite(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour, Ref<Sprite> sprite, float frame = 0, SpriteAlign alignment = SpriteAlign(HoriAlign::Middle, VertAlign::Center), TexCoords texcoords = RenderCaps::TextureCoords);
+		void DrawText(const glm::vec3& position, const glm::vec4& colour, const std::string& text, Ref<Font> font);
+		void DrawRect(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour);
 
 		AGI::RenderContext* GetContext() const { return m_RenderContext; }
 		AGI::Window* GetWindow() const { return m_RenderContext->GetBoundWindow(); }
 		FT_Library GetFreetypeLib() const { return m_FreetypeLib; }
 
-		static constexpr glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& scale, float rotation)
+		static glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& size, float rotation, SpriteAlign alignment = SpriteAlign(HoriAlign::Middle, VertAlign::Center))
 		{
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 			if (rotation != 0) transform = transform * glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
-			transform *= glm::scale(glm::mat4(1.0f), glm::vec3(scale.x, scale.y, 0.0f));
-
+			transform *= glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 0.0f));
+			
 			return transform;
 		}
 
