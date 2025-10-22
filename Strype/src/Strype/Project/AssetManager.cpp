@@ -6,7 +6,6 @@
 #include "Strype/Core/Application.hpp"
 #include "Strype/Project/Project.hpp"
 
-#include <spdlog/fmt/bundled/color.h>
 
 namespace Strype {
 

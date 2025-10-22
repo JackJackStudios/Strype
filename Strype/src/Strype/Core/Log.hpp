@@ -5,6 +5,7 @@
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/bundled/color.h>
 
 namespace Strype {
 
@@ -39,16 +40,3 @@ namespace Strype {
 #define STY_LOG_ERROR(...) ::Strype::Log::LogMessage(spdlog::level::err, __VA_ARGS__)
 
 #define STY_VERIFY(condition, ...) { if(!(condition)) { STY_LOG_ERROR("VERIFY", __VA_ARGS__); STY_DEBUGBREAK(); } }
-
-/*
-#define STY_CORE_TRACE(...)    ::Strype::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define STY_CORE_INFO(...)     ::Strype::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define STY_CORE_WARN(...)     ::Strype::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define STY_CORE_ERROR(...)    ::Strype::Log::GetCoreLogger()->error(__VA_ARGS__)
-
-// Client log macros
-#define STY_TRACE(...)         ::Strype::Log::GetClientLogger()->trace(__VA_ARGS__)
-#define STY_INFO(...)          ::Strype::Log::GetClientLogger()->info(__VA_ARGS__)
-#define STY_WARN(...)          ::Strype::Log::GetClientLogger()->warn(__VA_ARGS__)
-#define STY_ERROR(...)         ::Strype::Log::GetClientLogger()->error(__VA_ARGS__)
-*/

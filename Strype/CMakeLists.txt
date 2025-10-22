@@ -19,7 +19,7 @@ target_link_libraries(Strype PUBLIC
     spdlog::spdlog
     yaml-cpp::yaml-cpp
     magic_enum::magic_enum
-    box2d Coral
+    Coral
 )
 
 target_compile_definitions(Strype PUBLIC
@@ -48,12 +48,12 @@ file(DOWNLOAD
     STATUS status)
 
 # Pack shader folder into a .embed
-set(EMBED_SRC "${CMAKE_CURRENT_SOURCE_DIR}/master/shaders")
+set(EMBED_SRC "${CMAKE_CURRENT_SOURCE_DIR}/master/**.glsl")
 set(EMBED_OUT "${CMAKE_CURRENT_SOURCE_DIR}/baseshaders.embed")
 
 file(WRITE "${EMBED_OUT}" "// Auto-generated shader embed file\n") 
 
-file(GLOB_RECURSE FILES "${EMBED_SRC}/*")
+file(GLOB_RECURSE FILES ${EMBED_SRC})
 
 foreach(FILE ${FILES})
     if (NOT IS_DIRECTORY "${FILE}")

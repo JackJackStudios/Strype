@@ -4,7 +4,6 @@
 #include "Strype/Core/UUID.hpp"
 #include "Strype/Renderer/Renderer.hpp"
 
-#include <box2d/box2d.h>
 #include <Coral/ManagedObject.hpp>
 
 namespace std {
@@ -40,7 +39,6 @@ namespace Strype {
 
 		glm::vec4 Colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 		std::vector<Coral::ManagedObject*> CSharpObjects;
-		b2BodyId RuntimeBody;
 	};
 
 	class Room : public Asset
@@ -104,7 +102,6 @@ namespace Strype {
 		glm::uvec2  m_Size;
 		glm::vec3   m_BackgroundColour;
 		float       m_Gravity = 10.0f;
-		b2WorldId   m_PhysicsWorld = {};
 		Camera      m_Camera;
 
 		struct Tilemap

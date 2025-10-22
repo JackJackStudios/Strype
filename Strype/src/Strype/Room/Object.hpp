@@ -1,16 +1,18 @@
 #pragma once
 
-#include <box2d/box2d.h>
-
 namespace Strype {
 
-	enum class PhysicsType
+	enum class CollisionShape
 	{
-		Static = b2_staticBody,
-		Kinematic = b2_kinematicBody,
-		Dynamic = b2_dynamicBody,
+		None = 0, Rect, Circle
 	};
 	
+	struct AABB
+	{
+		glm::vec2 Position;  // center
+		glm::vec2 HalfSize;
+	};
+
 	class Object : public Asset
 	{
 	public:
@@ -21,8 +23,10 @@ namespace Strype {
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	public:
 		AssetHandle TextureHandle = 0;
-		PhysicsType BodyType = PhysicsType::Dynamic;
 		std::vector<UUID> Scripts; // UUID = ScriptID
+
+		CollisionShape ShapeType = CollisionShape::None;
+		AABB CollisionBox;
 	};
 
 }

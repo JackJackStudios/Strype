@@ -100,16 +100,11 @@ namespace Strype {
         if (!root) return nullptr;
 
         Ref<Object> object = CreateRef<Object>();
-        auto scriptEngine = Project::GetScriptEngine();
+        Ref<AssetManager> manager = Project::GetAssetManager();
+        Ref<ScriptEngine> scriptEngine = Project::GetScriptEngine();
 
-        auto filepath = Project::GetProjectDirectory() / root["SpritePath"].as<std::filesystem::path>();
-        if (std::filesystem::exists(filepath) && filepath.has_filename())
-        {
-            Ref<AssetManager> manager = Project::GetAssetManager();
-
-            object->TextureHandle = manager->ImportAsset(filepath);
-            if (!manager->IsAssetLoaded(object->TextureHandle)) return nullptr;
-        }
+        object->TextureHandle = manager->ImportAsset(root["SpritePath"].as<std::filesystem::path>());
+        if (!manager->IsAssetLoaded(object->TextureHandle)) return nullptr;
 
         for (const auto& node : root["Scripts"])
         {
@@ -123,6 +118,13 @@ namespace Strype {
             }
 
             object->Scripts.emplace_back(script);
+        }
+
+        if (YAML::Node collision = root["Collision"])
+        {
+            object->ShapeType = magic_enum::enum_cast<CollisionShape>(collision["Shape"].as<std::string_view>()).value();
+            object->CollisionBox.HalfSize = collision["Size"].as<glm::vec2>() * 0.5f;
+            object->CollisionBox.Position = collision["Origin"].as<glm::vec2>() + object->CollisionBox.HalfSize;
         }
 
         return object;
@@ -189,6 +191,15 @@ namespace Strype {
         out << YAML::Key << "BackgroundColour" << YAML::Value << room->m_BackgroundColour;
 
         {
+            out << YAML::Key << "Tilemap" << YAML::BeginMap;
+
+            out << YAML::Key << "SpritePath" << Project::GetAssetManager()->GetFilePath(room->m_MainTilemap.AtlasHandle);
+            out << YAML::Key << "TileSize" << room->m_MainTilemap.TileSize;
+
+            out << YAML::EndMap;
+        }
+
+        {
             out << YAML::Key << "Objects" << YAML::BeginSeq;
 
             for (const auto& obj : room->m_Objects)
@@ -246,6 +257,16 @@ namespace Strype {
                 out << Project::GetScriptEngine()->GetScriptName(scriptID);
 
             out << YAML::EndSeq;
+        }
+
+        {
+            out << YAML::Key << "Collision" << YAML::BeginMap;
+
+            out << YAML::Key << "Shape" << YAML::Value << object->ShapeType;
+            out << YAML::Key << "Size" << YAML::Value << object->CollisionBox.HalfSize * 2.0f;
+            out << YAML::Key << "Origin" << YAML::Value << object->CollisionBox.Position - object->CollisionBox.HalfSize;
+
+            out << YAML::EndMap;
         }
 
         out << YAML::EndMap;

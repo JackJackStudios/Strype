@@ -70,7 +70,7 @@ namespace Strype {
 		void DrawQuad(const glm::mat4& transform, const glm::vec4& colour, float slotIndex, TexCoords texcoords = RenderCaps::TextureCoords);
 		void DrawSprite(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour, Ref<Sprite> sprite, float frame = 0, SpriteAlign alignment = SpriteAlign(HoriAlign::Middle, VertAlign::Center), TexCoords texcoords = RenderCaps::TextureCoords);
 		void DrawText(const glm::vec3& position, const glm::vec4& colour, const std::string& text, Ref<Font> font);
-		void DrawRect(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour);
+		void DrawRect(const glm::vec3& position, const glm::vec2& scale, const glm::vec4& colour);
 
 		AGI::RenderContext* GetContext() const { return m_RenderContext; }
 		AGI::Window* GetWindow() const { return m_RenderContext->GetBoundWindow(); }
@@ -78,7 +78,10 @@ namespace Strype {
 
 		static glm::mat4 GetTransform(const glm::vec3& position, const glm::vec2& size, float rotation, SpriteAlign alignment = SpriteAlign(HoriAlign::Middle, VertAlign::Center))
 		{
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
+			// TODO: Calculate rotational origin as well
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x - (((uint16_t)alignment.Halign - 1) * 0.5 * size.x), 
+				                                                    position.y - (((uint16_t)alignment.Valign - 1) * 0.5 * size.y), 0.0f });
+
 			if (rotation != 0) transform = transform * glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f });
 			transform *= glm::scale(glm::mat4(1.0f), glm::vec3(size.x, size.y, 0.0f));
 			

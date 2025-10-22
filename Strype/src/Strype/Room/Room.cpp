@@ -9,18 +9,58 @@
 
 namespace Strype {
 
+	glm::vec2 AABB_Resolve(const RoomInstance& instance1, const RoomInstance& instance2)
+	{
+		AABB a = Project::GetAsset<Object>(instance1.ObjectHandle)->CollisionBox;
+		AABB b = Project::GetAsset<Object>(instance2.ObjectHandle)->CollisionBox;
+		a.Position += instance1.Position;
+		b.Position += instance2.Position;
+
+		float dx = b.Position.x - a.Position.x;
+		float px = (b.HalfSize.x + a.HalfSize.x) - glm::abs(dx);
+
+		float dy = b.Position.y - a.Position.y;
+		float py = (b.HalfSize.y + a.HalfSize.y) - glm::abs(dy);
+
+		if (px <= 0 || py <= 0)
+			return { 0, 0 };
+
+		if (px < py) 
+			return { dx < 0 ? -px : px, 0 };
+		else
+			return { 0, dy < 0 ? -py : py };
+	}
+
 	void Room::OnUpdate(float ts)
 	{
 		if (!IsActive()) return;
-		for (auto& instance : m_Objects)
+		for (size_t i = 0; i < m_Objects.size(); ++i)
 		{
-			Ref<Sprite> sprite = Project::GetAsset<Sprite>(Project::GetAsset<Object>(instance.ObjectHandle)->TextureHandle);
+			auto& instance = m_Objects[i];
+			Ref<Object> object = Project::GetAsset<Object>(instance.ObjectHandle);
+			Ref<Sprite> sprite = Project::GetAsset<Sprite>(object->TextureHandle);
 
 			for (const auto& csharp : instance.CSharpObjects)
 				csharp->InvokeMethod("OnUpdate", ts);
 
 			instance.CurrentFrame += sprite->GetFrameDelta(ts) * instance.AnimationSpeed;
 			instance.CurrentFrame = fmod(instance.CurrentFrame, (float)sprite->GetFrameCount());
+
+			if (object->ShapeType != CollisionShape::None)
+			{
+				for (size_t j = i + 1; j < m_Objects.size(); ++j)
+				{
+					auto& compare = m_Objects[j];
+					Ref<Object> compareObject = Project::GetAsset<Object>(compare.ObjectHandle);
+
+					glm::vec2 correction = AABB_Resolve(instance, compare);
+					if (correction.x != 0 || correction.y != 0)
+					{
+						instance.Position -= correction * 0.5f;
+						compare.Position += correction * 0.5f;
+					}
+				}
+			}
 		}
 	}
 
@@ -32,7 +72,7 @@ namespace Strype {
 		m_Camera.UpdateMatrix();
 
 		renderer->BeginRoom(m_Camera);
-		renderer->DrawRect({ 0.0f, 0.0f, 0.0f }, m_Size, 0.0f, { m_BackgroundColour.x, m_BackgroundColour.y, m_BackgroundColour.z, 1.0f });
+		renderer->DrawRect({ 0.0f, 0.0f, 0.0f }, m_Size, { m_BackgroundColour.x, m_BackgroundColour.y, m_BackgroundColour.z, 1.0f });
 
 		if (AssetHandle handle = m_MainTilemap.AtlasHandle)
 		{

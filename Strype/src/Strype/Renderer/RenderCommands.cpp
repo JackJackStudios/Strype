@@ -50,9 +50,9 @@ namespace Strype {
 		DrawQuad(transform, colour, GetTextureSlot(sprite->GetTexture()), sprite->GetTexCoords(frame, texcoords));
 	}
 
-	void Renderer::DrawRect(const glm::vec3& position, const glm::vec2& scale, float rotation, const glm::vec4& colour)
+	void Renderer::DrawRect(const glm::vec3& position, const glm::vec2& scale, const glm::vec4& colour)
 	{
-		glm::mat4 transform = GetTransform(position, scale, rotation);
+		glm::mat4 transform = GetTransform(position, scale, 0.0f, SpriteAlign(HoriAlign::Left, VertAlign::Top));
 		DrawQuad(transform, colour, 0.0f, RenderCaps::TextureCoords);
 	}
 
