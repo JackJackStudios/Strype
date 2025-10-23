@@ -12,7 +12,7 @@ namespace Strype {
 
 	static void OnCSharpException(std::string_view message)
 	{
-		STY_LOG_ERROR("C# Exception: {}", message);
+		STY_LOG_ERROR("C# Exception", message);
 	}
 
 	static void OnCoralMessage(std::string_view message, Coral::MessageLevel level)

@@ -9,7 +9,7 @@
 
 #include "Strype/Core/Input.hpp"
 #include "Strype/Core/InputCodes.hpp"
-#include "Strype/Audio/Audio.hpp"
+#include "Strype/Core/AudioFile.hpp"
 
 #include "Strype/Renderer/Renderer.hpp"
 #include "Strype/Renderer/Sprite.hpp"

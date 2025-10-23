@@ -7,6 +7,7 @@
 #include "Strype/Renderer/Renderer.hpp"
 
 #include <AGI/agi.hpp>
+#include <miniaudio.h>
 #include <agi_imgui/ImGuiLayer.hpp>
 
 int main(int argc, char** argv);
@@ -23,6 +24,7 @@ namespace Strype {
 		static bool IsRunning() { return s_Instance != nullptr && s_Instance->m_IsRunning; }
 
 		AGI::Window* GetWindow() const { return s_CurrentSession->GetWindow(); }
+		ma_engine* GetAudioEngine() { return &m_AudioEngine; }
 
 		template<typename TSession, typename... Args>
 		Application& NewSession(Args&&... args)
@@ -66,6 +68,7 @@ namespace Strype {
 		friend int ::main(int argc, char** argv);
 	private:
 		bool m_IsRunning = false;
+		ma_engine m_AudioEngine = {0};
 
 		EventQueue m_GlobalQueue;
 

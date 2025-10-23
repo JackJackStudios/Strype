@@ -1,18 +1,22 @@
 # Strype [![CMake build](https://github.com/JackJackStudios/Strype/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/JackJackStudios/Strype/actions/workflows/cmake-multi-platform.yml)
+
 **Strype** is a modern, early-stage 2D game engine built for **pixel art**, **super-fast rendering**, and **rapid iteration**.  
 Currently tested on **Windows x64** and **Ubuntu ARM64**.
 
 ## Features
+
 - Super quick rendering optimized for pixel art
 - Robust agnostic renderer (OpenGL - Vulkan comming soon!)
 - Intergrates with C# (with .NET / MSBuild)
 - Multi-threaded windowing with ImGui
 
 ## Using Strype
-* Core & Runtime - **Windows or Linux**
-* Editor - **Windows only** (DotNet/MSbuild)
+
+- Core & Runtime - **Windows or Linux**
+- Editor - **Windows only** (DotNet/MSbuild)
 
 To build the entire repository:
+
 ```bash
 git clone https://github.com/JackJackStudios/Strype
 cd Strype
@@ -20,7 +24,9 @@ mkdir build && cd build
 cmake ..
 cmake --build . -j4
 ```
+
 To create a simple app in Strype:
+
 ```cpp
 #include <Strype.hpp>
 
@@ -44,21 +50,27 @@ int main(int argc, char** argv)
 }
 ```
 
+`Session`s are essentially containers for an OS window and Strype's `Renderer` class. Consider `Application` as a class responsible for the **Event System** and any global system required by other `Session`s. `Session`'s constructor is called on `Application::NewSession<Strype::Session>(Args&&...)` and should be used for configuration. All sessions are created and run exclusively on their own thread, if you want a startup function called on the actual thread use `Session::OnAttach()`.
+
 ## Roadmap
+
 Strype’s goal is to create a developer and artist-friendly engine that integrates smoothly with professional tools, making game creation simpler compared to commercial engines.
 
 ### Main features to come:
-- 2D rendering expansion (text, video, particles)
-- More rendering API support (DirectX, Vulkan)
-- Integration with tools like [Aseprite](https://www.aseprite.org/), [FMOD](https://www.fmod.com/), and [Steamworks](https://partner.steamgames.com/)
-- Flexbox-style UI system
-- Templates and packages
-- Hot reloading
-- Animation system
-- Proper audio support
-- Export finished games
+
+- [x] 2D rendering expansion (text, video, particles)
+- [x] Physics intergation and AABB collision
+- [ ] More rendering API support (DirectX, Vulkan)
+- [ ] Integration with tools like [Aseprite](https://www.aseprite.org/), [FMOD](https://www.fmod.com/), and [Steamworks](https://partner.steamgames.com/)
+- [ ] Flexbox-style UI system
+- [ ] Templates and packages
+- [ ] Hot reloading
+- [ ] Animation system
+- [ ] Proper audio support
+- [ ] Export finished games
 
 ## Project Structure
+
 - **.github/workflows/** → Config file for automated testing
 - **Strype-Editor/** → Windows-only editor
 - **Strype-Runtime/** → Cross-platform runtime
@@ -66,4 +78,5 @@ Strype’s goal is to create a developer and artist-friendly engine that integra
 - **CMakeLists.txt** → Config file for Cmake
 
 ## License
+
 Strype is licensed under the [MIT License](LICENSE).

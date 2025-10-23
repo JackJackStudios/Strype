@@ -3,7 +3,7 @@
 #include "Strype/Project/AssetManager.hpp"
 #include "Strype/Project/Project.hpp"
 
-#include "Strype/Audio/Audio.hpp"
+#include "Strype/Core/AudioFile.hpp"
 #include "Strype/Renderer/Sprite.hpp"
 #include "Strype/Renderer/Font.hpp"
 #include "Strype/Script/ScriptAsset.hpp"
@@ -74,11 +74,7 @@ namespace Strype {
 
     ASSET_IMPORTER_FUNC(AssetType::AudioFile, load_audiofile_asset)(const std::filesystem::path& path)
     {
-        ma_decoder decoder;
-        ma_result result = ma_decoder_init_file(path.string().c_str(), nullptr, &decoder);
-        if (result != MA_SUCCESS) return nullptr;
-
-        return CreateRef<AudioFile>(decoder);
+        return CreateRef<AudioFile>(path);
     }
 
     ASSET_IMPORTER_FUNC(AssetType::Script, load_script_asset)(const std::filesystem::path& path)

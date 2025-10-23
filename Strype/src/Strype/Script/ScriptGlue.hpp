@@ -53,6 +53,9 @@ namespace Strype {
 		void Camera_Move(glm::vec2* inPosition);
 		void Camera_Zoom(float* inZoomLevel);
 
+		void Audio_PlaySound(Coral::String path);
+		void Audio_PlaySoundOn(Coral::String path, glm::vec2* inPosition);
+
 		void Object_GetPosition(uint32_t id, glm::vec2* outPosition);
 		void Object_SetPosition(uint32_t id, glm::vec2* inPosition);
 		void Object_GetScale(uint32_t id, glm::vec2* outScale);

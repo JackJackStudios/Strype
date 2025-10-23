@@ -4,6 +4,7 @@
 #include "ScriptEngine.hpp"
 
 #include "Strype/Room/Room.hpp"
+#include "Strype/Core/AudioFile.hpp"
 
 #include "Strype/Core/Input.hpp"
 #include "Strype/Project/Project.hpp"
@@ -18,6 +19,9 @@ namespace Strype {
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
 		STY_ADD_INTERNAL_CALL(Camera_Move);
 		STY_ADD_INTERNAL_CALL(Camera_Zoom);
+
+		STY_ADD_INTERNAL_CALL(Audio_PlaySound);
+		STY_ADD_INTERNAL_CALL(Audio_PlaySoundOn);
 
 		STY_ADD_INTERNAL_CALL(Object_GetPosition);
 		STY_ADD_INTERNAL_CALL(Object_SetPosition);
@@ -69,6 +73,36 @@ namespace Strype {
 		{
 			auto& camera = Project::GetActiveRoom()->GetCamera();
 			camera.SetZoomLevel(*inZoomLevel);
+		}
+
+		void Audio_PlaySound(Coral::String path)
+		{
+			std::string cxxpath = path;
+			Ref<AssetManager> manager = Project::GetAssetManager();
+
+			if (!manager->IsAssetLoaded(cxxpath))
+			{
+				STY_LOG_WARN("Script", "Invalid path for AudioFile: \"{}\" ", cxxpath);
+				return;
+			}
+
+
+			Project::GetAsset<AudioFile>(manager->GetHandle(cxxpath))->Play();
+		}
+
+		void Audio_PlaySoundOn(Coral::String path, glm::vec2* inPosition)
+		{
+			std::string cxxpath = path;
+			Ref<AssetManager> manager = Project::GetAssetManager();
+
+			if (!manager->IsAssetLoaded(cxxpath))
+			{
+				STY_LOG_WARN("Script", "Invalid path for AudioFile: \"{}\" ", cxxpath);
+				return;
+			}
+
+
+			Project::GetAsset<AudioFile>(manager->GetHandle(cxxpath))->PlayOn(*inPosition);
 		}
 
 		void Object_GetPosition(uint32_t id, glm::vec2* outPosition)

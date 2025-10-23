@@ -8,24 +8,19 @@
 
 namespace Strype {
 
-	class Audio
-	{
-	public:
-		static bool Init();
-		static void Shutdown();
-
-		static ma_engine* GetAudioEngine();
-	};
-
 	class AudioFile : public Asset
 	{
 	public:
-		AudioFile(ma_decoder& decoder);
+		AudioFile(const std::filesystem::path& filepath);
 		~AudioFile();
+
+		void Play();
+		void PlayOn(const glm::vec2& position);
 
 		static AssetType GetStaticType() { return AssetType::AudioFile; }
 		virtual AssetType GetType() const override { return GetStaticType(); }
 	private:
+		ma_decoder m_Decoder;
 		ma_sound m_EngineID;
 	};
 

@@ -13,9 +13,15 @@ namespace Strype {
 		{ ".bmp",     AssetType::Sprite },
 					  
 		{ ".wav",     AssetType::AudioFile },
+#ifdef MA_HAS_MP3
 		{ ".mp3",     AssetType::AudioFile },
+#endif
+#ifdef MA_HAS_FLAC
 		{ ".flac",    AssetType::AudioFile },
+#endif
+#ifdef MA_HAS_VORBIS
 		{ ".ogg",     AssetType::AudioFile },
+#endif 
 
 		{ ".ttf",     AssetType::Font },
 		{ ".otf",     AssetType::Font },
@@ -42,6 +48,7 @@ namespace Strype {
 
 		bool IsAssetLoaded(AssetHandle handle) const;
 		bool IsAssetLoaded(const std::filesystem::path& filepath) const;
+		bool IsAssetLoaded(const std::string& name) const;
 		bool IsAssetFile(AssetHandle handle) const;
 
 		AssetHandle ImportAsset(const std::filesystem::path& filepath);

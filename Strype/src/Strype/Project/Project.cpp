@@ -120,12 +120,15 @@ namespace Strype {
 		s_ActiveProject = project;
 		if (s_ActiveProject)
 		{
-			STY_LOG_INFO("Project", "Loading project \"{}\" ", s_ActiveProject->GetConfig().ProjectDirectory.stem());
+			Timer projectTime;
+			STY_LOG_INFO("Project", "Loading project \"{}\" ", s_ActiveProject->GetConfig().Name);
 
 			project->m_ScriptEngine = CreateRef<ScriptEngine>(project);
 			project->m_AssetManager = CreateRef<AssetManager>();
 
 			project->m_AssetManager->LoadAllAssets(project); // <- This must not happen in constructor
+
+			STY_LOG_TRACE("Project", "Loaded \"{}\" in {} seconds", s_ActiveProject->GetConfig().Name, projectTime.ElapsedSeconds());
 		}
 	}
 

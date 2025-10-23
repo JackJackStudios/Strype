@@ -97,6 +97,15 @@ namespace Strype {
         auto it = m_AssetRegistry.find(CalculateName(filepath));
         if (it == m_AssetRegistry.end()) return false;
         
+        return IsAssetLoaded(it->second.Handle) && it->second.Filepath == filepath;
+    }
+
+    bool AssetManager::IsAssetLoaded(const std::string& name) const
+    {
+        if (name.empty()) return false;
+        auto it = m_AssetRegistry.find(name);
+
+        if (it == m_AssetRegistry.end()) return false;
         return IsAssetLoaded(it->second.Handle);
     }
 

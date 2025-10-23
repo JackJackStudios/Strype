@@ -2,7 +2,6 @@
 #include "Application.hpp"
 
 #include "Strype/Core/Input.hpp"
-#include "Strype/Audio/Audio.hpp"
 #include "Strype/Renderer/Renderer.hpp"
 
 #include "Strype/Utils/PlatformUtils.hpp"
@@ -24,6 +23,17 @@ namespace Strype {
 		}
 	}
 
+	static void AudioCallback(void* pUserData, ma_uint32 level, const char* pMessage)
+	{
+		switch (level)
+		{
+		//case MA_LOG_LEVEL_DEBUG:   STY_LOG_TRACE("Audio", std::string_view(pMessage)); break;
+		//case MA_LOG_LEVEL_INFO:    STY_LOG_INFO("Audio", std::string_view(pMessage)); break;
+		case MA_LOG_LEVEL_WARNING: STY_LOG_WARN("Audio", std::string_view(pMessage)); break;
+		case MA_LOG_LEVEL_ERROR:   STY_LOG_ERROR("Audio", std::string_view(pMessage)); break;
+		}
+	}
+
 	Application::Application(int argc, char** argv)
 	{
 		STY_VERIFY(!s_Instance, "Application already exists!");
@@ -31,8 +41,20 @@ namespace Strype {
 
 		Log::Init();
 
-		bool result = Audio::Init();
-		STY_VERIFY(result == true, "Failed to initialize audio");
+		ma_log logger;
+		ma_log_init(NULL, &logger);
+		ma_log_register_callback(&logger, (ma_log_callback)AudioCallback);
+
+		ma_engine_config config = ma_engine_config_init();
+		config.pLog = &logger;
+
+		ma_result result = ma_engine_init(&config, &m_AudioEngine);
+		STY_VERIFY(result == MA_SUCCESS, "Failed to initialize audio");
+
+		STY_LOG_INFO("Audio",  "Using audio device: {}", ma_engine_get_device(&m_AudioEngine)->playback.name);
+		STY_LOG_TRACE("Audio", "  Format: {}", ma_get_format_name(ma_engine_get_device(&m_AudioEngine)->playback.format));
+		STY_LOG_TRACE("Audio", "  Channels: {}", ma_engine_get_device(&m_AudioEngine)->playback.channels);
+		STY_LOG_TRACE("Audio", "  Sample Rate: {}", ma_engine_get_device(&m_AudioEngine)->sampleRate);
 	}
 
 	Application::~Application()
@@ -40,7 +62,7 @@ namespace Strype {
 		for (auto& thread : m_ActiveThreads)
 			thread.join();
 
-		Audio::Shutdown();
+		ma_engine_uninit(&m_AudioEngine);
 	}
 
 	void Application::OnEvent(Event& e)
