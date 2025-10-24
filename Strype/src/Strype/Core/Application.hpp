@@ -39,11 +39,9 @@ namespace Strype {
 		Application& DispatchEvent(Args&&... args)
 		{
 			static_assert(std::is_base_of<Event, TEvent>::value, "T must inherit from Event");
-
 			Event* e = new TEvent(std::forward<Args>(args)...);
-			e->Dispatched = true;
 
-			if (e->IsGlobal())
+			if (e->IsGlobal() && m_ActiveSessions.size() > 1)
 			{
 				m_GlobalQueue.push_back(e);
 			}

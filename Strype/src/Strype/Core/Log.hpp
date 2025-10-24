@@ -19,6 +19,7 @@ namespace Strype {
 
 		static void LogMessage(spdlog::level::level_enum logLevel, std::string_view tag, std::string_view msg)
 		{
+			if (!s_CoreLogger) Init();
 			s_CoreLogger->log(logLevel, "[{}] {}", tag, msg);
 		}
 
@@ -28,8 +29,8 @@ namespace Strype {
 			LogMessage(logLevel, tag, fmt::format(fmt, std::forward<Args>(args)...));
 		}
 	private:
-		inline static std::shared_ptr<spdlog::logger> s_CoreLogger;
-		inline static std::shared_ptr<spdlog::logger> s_ClientLogger;
+		inline static std::shared_ptr<spdlog::logger> s_CoreLogger = nullptr;
+		inline static std::shared_ptr<spdlog::logger> s_ClientLogger = nullptr;
 	};
 
 }

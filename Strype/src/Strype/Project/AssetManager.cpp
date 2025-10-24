@@ -117,7 +117,7 @@ namespace Strype {
     Ref<Asset> AssetManager::GetAsset(AssetHandle handle)
     {
         auto it = m_LoadedAssets.find(handle);
-        if (m_LoadedAssets.end() == it)
+        if (it == m_LoadedAssets.end())
         {
             STY_LOG_WARN("Asset", "Cannot find Asset for AssetHandle: {}", handle);
             return nullptr;

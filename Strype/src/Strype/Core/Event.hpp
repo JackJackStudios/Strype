@@ -6,7 +6,7 @@
 
 namespace Strype {
 
-	enum class EventType
+	enum class EventType : uint32_t
 	{
 		None = 0,
 		ApplicationQuit,
@@ -16,7 +16,10 @@ namespace Strype {
 		// Just a agnostic way of reprensting any input (doesnt involve Project)
 		BindingPressed, BindingReleased,
 
-		AssetImported, AssetRemoved, AssetMoved
+		AssetImported, AssetRemoved, AssetMoved,
+		RoomTransition, ProjectChanged,
+
+		UserEvent, LastUserEvent = UINT32_MAX 
 	};
 
 	enum EventCategory
@@ -26,7 +29,7 @@ namespace Strype {
 		EventCategoryWindow = BIT(1),
 		EventCategoryInput = BIT(2),
 		EventCategoryMouse = BIT(3),
-		EventCategoryAsset = BIT(4)
+		EventCategoryProject = BIT(4)
 	};
 
 #define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
@@ -50,10 +53,6 @@ namespace Strype {
 		{
 			return GetCategoryFlags() & category;
 		}
-	private:
-		bool Dispatched = false;
-		
-		friend class Application;
 	};
 
 	using EventQueue = std::deque<Event*>;
@@ -107,7 +106,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(AssetImported)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryProject)
 		EVENT_CLASS_GLOBAL(true)
 	private:
 		uint64_t m_Handle;
@@ -129,7 +128,7 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(AssetRemoved)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryProject)
 		EVENT_CLASS_GLOBAL(true)
 	private:
 		uint64_t m_Handle;
@@ -152,11 +151,72 @@ namespace Strype {
 		}
 
 		EVENT_CLASS_TYPE(AssetMoved)
-		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryAsset)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryProject)
 		EVENT_CLASS_GLOBAL(true)
 	private:
 		uint64_t m_Handle;
 		std::filesystem::path m_NewPath;
+	};
+
+	class RoomTransitionEvent : public Event
+	{
+	public:
+		RoomTransitionEvent(uint64_t handle)
+			: m_Handle(handle)
+		{
+		}
+
+		uint64_t GetHandle() const { return m_Handle; }
+
+		std::string ToString() const override
+		{
+			return fmt::format("RoomTransitionEvent: {}", m_Handle);
+		}
+
+		EVENT_CLASS_TYPE(RoomTransition)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryProject)
+		EVENT_CLASS_GLOBAL(true)
+	private:
+		uint64_t m_Handle;
+	};
+
+	class UserEvent : public Event
+	{
+	public:
+		UserEvent(uint32_t type /* TODO: Pass C# variables through here */)
+			: m_UserType(type)
+		{
+		}
+
+		std::string ToString() const override
+		{
+			return fmt::format("User{}Event", m_UserType);
+		}
+
+		EVENT_CLASS_TYPE(UserEvent)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryProject)
+		EVENT_CLASS_GLOBAL(true)
+	private:
+		uint32_t m_UserType;
+	};
+
+	class Project;
+
+	class ProjectChangedEvent : public Event
+	{
+	public:
+		ProjectChangedEvent(Ref<Project> newProject)
+			: m_Project(newProject)
+		{
+		}
+
+		Ref<Project> GetProject() const { return m_Project; }
+
+		EVENT_CLASS_TYPE(ProjectChanged)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryProject)
+		EVENT_CLASS_GLOBAL(true)
+	private:
+		Ref<Project> m_Project;
 	};
 
 	class WindowResizeEvent : public Event

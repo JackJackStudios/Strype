@@ -19,9 +19,21 @@ namespace Strype {
 			WindowProps.Title = m_Project->GetConfig().Name;
 		}
 
-		void OnAttach() override;
+		void OnAttach()
+		{
+			m_Project = (Project::GetActive() ? Project::GetActive() : m_Project);
+			Project::SetActive(m_Project);
+
+			InitRoom(Project::GetAssetManager()->GetHandle(m_Project->GetConfig().StartRoom));
+		}
+
+		void InitRoom(AssetHandle handle);
+
 		void OnDetach() override;
 		void OnUpdate(float ts) override;
+
+		void OnEvent(Event& e) override;
+		void OnRoomTransition(RoomTransitionEvent& e);
 	private:
 		Ref<Room> m_Room;
 		Ref<Project> m_Project;

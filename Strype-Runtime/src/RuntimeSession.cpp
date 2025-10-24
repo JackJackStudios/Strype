@@ -4,12 +4,9 @@
 
 namespace Strype {
 
-	void RuntimeSession::OnAttach()
+	void RuntimeSession::InitRoom(AssetHandle handle)
 	{
-		m_Project = (Project::GetActive() ? Project::GetActive() : m_Project);
-		Project::SetActive(m_Project);
-
-		m_Room = Project::GetAsset<Room>(Project::GetAssetManager()->GetHandle(m_Project->GetConfig().StartRoom));
+		m_Room = Project::GetAsset<Room>(handle);
 		m_Room->OnResize(m_Project->GetConfig().ViewportSize);
 		m_Room->ToggleRuntime(true);
 	}
@@ -24,6 +21,20 @@ namespace Strype {
 	{
 		m_Room->OnUpdate(ts);
 		m_Room->OnRender(Renderer::GetCurrent());
+	}
+
+	void RuntimeSession::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<RoomTransitionEvent>(STY_BIND_EVENT_FN(RuntimeSession::OnRoomTransition));
+	}
+
+	void RuntimeSession::OnRoomTransition(RoomTransitionEvent& e)
+	{
+		if (!Project::GetAssetManager()->IsAssetLoaded(e.GetHandle())) return;
+		m_Room->ToggleRuntime(false);
+
+		InitRoom(e.GetHandle());
 	}
 
 }

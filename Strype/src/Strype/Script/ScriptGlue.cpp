@@ -4,10 +4,11 @@
 #include "ScriptEngine.hpp"
 
 #include "Strype/Room/Room.hpp"
-#include "Strype/Core/AudioFile.hpp"
-
-#include "Strype/Core/Input.hpp"
 #include "Strype/Project/Project.hpp"
+
+#include "Strype/Core/AudioFile.hpp"
+#include "Strype/Core/Application.hpp"
+#include "Strype/Core/Input.hpp"
 
 #define STY_ADD_INTERNAL_CALL(icall) s_CoreAssembly->AddInternalCall("Strype.InternalCalls", #icall, (void*)InternalCalls::icall)
 
@@ -17,6 +18,7 @@ namespace Strype {
 	{
 		STY_ADD_INTERNAL_CALL(Room_CreateObject);
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
+		STY_ADD_INTERNAL_CALL(Room_TransitionRoom);
 		STY_ADD_INTERNAL_CALL(Camera_Move);
 		STY_ADD_INTERNAL_CALL(Camera_Zoom);
 
@@ -63,6 +65,20 @@ namespace Strype {
 			Project::GetActiveRoom()->DestroyInstance(id);
 		}
 
+		void Room_TransitionRoom(Coral::String name)
+		{
+			std::string cxxname = name;
+			AssetHandle handle = Project::GetAssetManager()->GetHandle(cxxname);
+
+			if (handle == 0)
+			{
+				STY_LOG_WARN("Script", "Invalid path for Room: \"{}\" ", cxxname);
+				return;
+			}
+
+			Application::Get().DispatchEvent<RoomTransitionEvent>(handle);
+		}
+
 		void Camera_Move(glm::vec2* inPosition)
 		{
 			auto& camera = Project::GetActiveRoom()->GetCamera();
@@ -78,16 +94,15 @@ namespace Strype {
 		void Audio_PlaySound(Coral::String path)
 		{
 			std::string cxxpath = path;
-			Ref<AssetManager> manager = Project::GetAssetManager();
 
-			if (!manager->IsAssetLoaded(cxxpath))
+			Ref<AudioFile> asset = Project::GetAsset<AudioFile>(Project::GetAssetManager()->GetHandle(cxxpath));
+			if (asset == nullptr)
 			{
 				STY_LOG_WARN("Script", "Invalid path for AudioFile: \"{}\" ", cxxpath);
 				return;
 			}
 
-
-			Project::GetAsset<AudioFile>(manager->GetHandle(cxxpath))->Play();
+			asset->Play();
 		}
 
 		void Audio_PlaySoundOn(Coral::String path, glm::vec2* inPosition)

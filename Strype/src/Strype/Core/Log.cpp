@@ -6,8 +6,6 @@
 
 namespace Strype {
 
-	static bool s_InitLogging = (Log::Init(), true);
-
 	void Log::Init()
 	{
 #ifdef STY_DEBUG

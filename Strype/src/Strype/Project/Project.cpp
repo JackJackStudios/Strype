@@ -3,6 +3,7 @@
 
 #include "Strype/Utils/PlatformUtils.hpp"
 #include "Strype/Script/ScriptEngine.hpp"
+#include "Strype/Core/Application.hpp"
 
 #ifdef STY_WINDOWS
 #	include <ShlObj.h>
@@ -129,6 +130,8 @@ namespace Strype {
 
 			STY_LOG_TRACE("Project", "Loaded \"{}\" in {} seconds", s_ActiveProject->GetConfig().Name, projectTime.ElapsedSeconds());
 		}
+
+		Application::Get().DispatchEvent<ProjectChangedEvent>(s_ActiveProject);
 	}
 
 }

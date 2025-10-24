@@ -127,9 +127,11 @@ namespace Strype {
         room->m_Gravity = data["Gravity"].as<float>();
         room->m_BackgroundColour = data["BackgroundColour"].as<glm::vec3>();
 
-        YAML::Node tilemap = data["Tilemap"];
-        room->m_MainTilemap.AtlasHandle = Project::GetAssetManager()->ImportAsset(tilemap["SpritePath"].as<std::filesystem::path>());
-        room->m_MainTilemap.TileSize = tilemap["TileSize"].as<glm::vec2>();
+        if (YAML::Node tilemap = data["Tilemap"])
+        {
+            room->m_MainTilemap.AtlasHandle = Project::GetAssetManager()->ImportAsset(tilemap["SpritePath"].as<std::filesystem::path>());
+            room->m_MainTilemap.TileSize = tilemap["TileSize"].as<glm::vec2>();
+        }
 
         YAML::Node objects = data["Objects"];
         for (auto obj : objects)
