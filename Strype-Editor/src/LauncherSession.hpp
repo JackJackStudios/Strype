@@ -1,30 +1,13 @@
 #pragma once
 
 #include <Strype.hpp>
-#include <stb_image.h>
+#include <yaml-cpp/yaml.h>
+
+#include "Strype/Utils/YamlHelpers.hpp"
 
 namespace Strype {
 
-	static AGI::Texture LoadTexture(const std::filesystem::path& path)
-	{
-		int width, height, channels;
-
-		stbi_set_flip_vertically_on_load(0);
-		stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
-
-		STY_VERIFY(data, "Failed to load texture \"{}\" ", path);
-
-		AGI::TextureSpecification textureSpec;
-		textureSpec.Size = { width, height };
-		textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
-		textureSpec.LinearFiltering = true;
-
-		AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
-		texture->SetData(data, width * height * channels);
-
-		stbi_image_free(data);
-		return texture;
-	}
+	const std::filesystem::path LAUNCHER_CONFIG = "assets/Launcher.yaml";
 
 	class LauncherSession : public Session
 	{
@@ -36,29 +19,54 @@ namespace Strype {
 			WindowProps.Resizable = false;
 
 			ImGuiEnabled = true;
-            DockspaceEnabled = false;
-		}
-
-		~LauncherSession()
-		{
-			SaveConfig("assets/launcher.yaml");
+			DockspaceEnabled = false;
 		}
 
 		void OnAttach() override
 		{
-			m_ProjectIcon = LoadTexture("assets/icons/ProjectIcon.png");
-			LoadConfig("assets/launcher.yaml");
+			m_ProjectIcon = Utils::LoadTexture("assets/icons/ProjectIcon.png");
+
+			if (!std::filesystem::exists(LAUNCHER_CONFIG)) return;
+			YAML::Node root = YAML::LoadFile(LAUNCHER_CONFIG.string())["Launcher"];
+
+			for (const auto& project : root["Recent Projects"])
+			{
+				std::filesystem::path filepath = project.as<std::filesystem::path>();
+				if (!std::filesystem::exists(filepath))
+				{
+					STY_LOG_ERROR("Launcher", "File not found: {}", filepath);
+					continue;
+				}
+
+				m_LoadedProjects.push_back(Project::LoadFile(filepath));
+			}
 		}
 
-		bool LoadConfig(const std::filesystem::path& filepath);
-		void SaveConfig(const std::filesystem::path& filepath);
+		void OnDetach() override
+		{
+			YAML::Emitter out;
+			out << YAML::BeginMap;
+			out << YAML::Key << "Launcher" << YAML::Value << YAML::BeginMap;
+			{
+				out << YAML::Key << "Recent Projects" << YAML::BeginSeq;
+				for (const auto& project : m_LoadedProjects)
+				{
+					out << (project->GetConfig().ProjectDirectory / (project->GetConfig().Name + ".sproj")).string();
+				}
 
-		void ProjectWidget(Ref<Project> project, float iconSize);
+				out << YAML::EndSeq;
+			}
+			out << YAML::EndMap;
+			out << YAML::EndMap;
+
+			Utils::WriteFile(LAUNCHER_CONFIG, out.c_str());
+		}
 
 		void OnImGuiRender() override;
+
 	private:
 		std::vector<Ref<Project>> m_LoadedProjects;
 		AGI::Texture m_ProjectIcon;
 	};
 
-}
+};

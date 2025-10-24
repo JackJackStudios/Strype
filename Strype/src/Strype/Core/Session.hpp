@@ -13,9 +13,9 @@ namespace Strype {
 	class Session
 	{
 	public:
-		virtual ~Session() {}
-
 		virtual void OnAttach() {}
+		virtual void OnDetach() {}
+
 		virtual void OnUpdate(float ts) {}
 		virtual void OnImGuiRender() {}
 		virtual void OnEvent(Event& event) {}

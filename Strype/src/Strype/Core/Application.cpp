@@ -8,8 +8,6 @@
 #include "Strype/Utils/ScopedDockspace.hpp"
 #include "Strype/Script/ScriptEngine.hpp"
 
-#include <ImGuizmo.h>
-
 namespace Strype {
 
 	static void OnAGIMessage(std::string_view message, AGI::LogLevel level)
@@ -38,8 +36,6 @@ namespace Strype {
 	{
 		STY_VERIFY(!s_Instance, "Application already exists!");
 		s_Instance = this;
-
-		Log::Init();
 
 		ma_log logger;
 		ma_log_init(NULL, &logger);
@@ -177,10 +173,7 @@ namespace Strype {
 
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-			io.IniFilename = "assets/imgui.ini";
-
-			io.Fonts->AddFontFromFileTTF("assets/Roboto-Regular.ttf", 16);
+			if (session->DockspaceEnabled) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		}
 
 		auto* window = session->GetWindow();
@@ -198,7 +191,6 @@ namespace Strype {
 			if (session->m_ImGuiLayer)
 			{
 				session->m_ImGuiLayer->BeginFrame();
-				ImGuizmo::BeginFrame();
 
 				{
 					ScopedDockspace dockspace(session->DockspaceEnabled);
@@ -228,6 +220,8 @@ namespace Strype {
 				OnEvent(*event);
 			}
 		}
+
+		session->OnDetach();
 
 		session->m_ImGuiLayer.reset();
 		session->Render.reset();

@@ -6,6 +6,7 @@ namespace Strype {
 
 	void RuntimeSession::OnAttach()
 	{
+		m_Project = (Project::GetActive() ? Project::GetActive() : m_Project);
 		Project::SetActive(m_Project);
 
 		m_Room = Project::GetAsset<Room>(Project::GetAssetManager()->GetHandle(m_Project->GetConfig().StartRoom));
@@ -13,7 +14,7 @@ namespace Strype {
 		m_Room->ToggleRuntime(true);
 	}
 
-	RuntimeSession::~RuntimeSession()
+	void RuntimeSession::OnDetach()
 	{
 		m_Room->ToggleRuntime(false);
 		Project::SetActive(nullptr);

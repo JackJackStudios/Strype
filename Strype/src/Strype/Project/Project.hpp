@@ -29,19 +29,18 @@ namespace Strype {
 		inline static const std::filesystem::path EmptyProject = "assets/EmptyProject/EmptyProject.sproj";
 		inline static const std::filesystem::path HiddenFolder = "strype";
 
-		const ProjectConfig& GetConfig() const { return m_Config; }
-
-		static Ref<AssetManager> GetAssetManager() { return GetActive()->m_AssetManager; }
-		static Ref<ScriptEngine> GetScriptEngine() { return GetActive()->m_ScriptEngine; }
-		static Room* GetActiveRoom() { return GetActive()->m_ActiveRoom; }
-
-		static void SetActiveRoom(Room* room) { GetActive()->m_ActiveRoom = room; }
-
 		static Ref<Project> GetActive() { return s_ActiveProject; }
 		static void SetActive(Ref<Project> project);
 
-		static void BuildCSharp(Ref<Project> project, bool restore = true);
-		static void RestoreCSharp(Ref<Project> project);
+		static Ref<AssetManager> GetAssetManager() { return GetActive()->m_AssetManager; }
+		static Ref<ScriptEngine> GetScriptEngine() { return GetActive()->m_ScriptEngine; }
+
+		static void SetActiveRoom(Room* room) { GetActive()->m_ActiveRoom = room; }
+		static Room* GetActiveRoom() { return GetActive()->m_ActiveRoom; }
+
+		const ProjectConfig& GetConfig() const { return m_Config; }
+		void RestoreCSharp();
+		void BuildCSharp(bool restore = true);
 
 		static Ref<Project> LoadFile(const std::filesystem::path& filepath);
 		static void SaveAll(Ref<Project> project, const std::filesystem::path& filepath = std::filesystem::path());
@@ -74,8 +73,6 @@ namespace Strype {
 			return m_Bindings[str];
 		}
 	private:
-		std::string GetMSbuildCommand(std::vector<const char*> commands);
-	private:
 		inline static Ref<Project> s_ActiveProject = nullptr;
 
 		ProjectConfig m_Config;
@@ -84,9 +81,6 @@ namespace Strype {
 		Ref<AssetManager> m_AssetManager;
 		Ref<ScriptEngine> m_ScriptEngine;
 		Room* m_ActiveRoom = nullptr;
-		 
-		friend class ProjectSerializer;
-		friend class ProjectSettingsPanel;
 	};
 
 }

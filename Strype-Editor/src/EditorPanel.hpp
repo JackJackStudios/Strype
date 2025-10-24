@@ -4,27 +4,25 @@
 
 namespace Strype {
 
-	class InspectorPanel;
-
 	class EditorPanel
 	{
 	public:
-		std::string Title;
-		bool Closing = false;
-		ImGuiWindowFlags Flags = 0;
-
 		virtual ~EditorPanel() = default;
 
 		virtual void OnUpdate(float ts) {}
 		virtual void OnImGuiRender() {}
+
 		virtual void OnEvent(Event& event) {}
-		virtual void OnProjectChanged() {};
+	public:
+		std::string Title;
+		bool Closing = false;
+		ImGuiWindowFlags Flags = 0;
 	protected:
-		Ref<Room> m_CurrentRoom;
-		Ref<InspectorPanel> m_Inspector;
+		// Pointer to var in EditorSession
+		Ref<Room>* m_CurrentRoom;
 		bool m_IsOpen = true;
 
-		friend class PanelManager;
+		friend class EditorSession;
 	};
 
-}
+};

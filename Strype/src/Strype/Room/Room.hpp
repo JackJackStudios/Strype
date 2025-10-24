@@ -54,6 +54,14 @@ namespace Strype {
 
 		void ToggleRuntime(bool toggle);
 
+		void OnUpdate(float ts, const glm::vec2& camPosition)
+		{
+			if (m_RoomState != RoomState::Runtime && !m_IsPaused)
+				m_Camera.Position = camPosition;
+
+			OnUpdate(ts);
+		}
+
 		InstanceID CreateInstance(const RoomInstance& instance)
 		{
 			uint32_t handle = (uint32_t)m_Indices.size();
@@ -107,7 +115,7 @@ namespace Strype {
 		struct Tilemap
 		{
 			std::unordered_map<glm::ivec2, int> PackedData;
-			AssetHandle AtlasHandle;
+			AssetHandle AtlasHandle = 0;
 			glm::ivec2 TileSize;
 		};
 		Tilemap m_MainTilemap;

@@ -49,18 +49,9 @@ namespace Strype {
     ASSET_IMPORTER_FUNC(AssetType::Sprite, load_sprite_asset)(const std::filesystem::path& filepath)
 	{
         int frameCount = 1;
-        int width, height, channels;
 
-        stbi_set_flip_vertically_on_load(false);
-        stbi_uc* data = stbi_load(filepath.string().c_str(), &width, &height, &channels, 0);
-        if (!data) return nullptr;
-
-        AGI::TextureSpecification textureSpec;
-        textureSpec.Size = { width, height };
-        textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
-
-        AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
-        texture->SetData(data, width * height * channels);
+        AGI::Texture texture = Utils::LoadTexture(filepath);
+        if (!texture) return nullptr;
 
         std::regex pattern(".strip(\\d+)");
         std::smatch match;

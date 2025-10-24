@@ -51,7 +51,6 @@ namespace Strype {
 				for (size_t j = i + 1; j < m_Objects.size(); ++j)
 				{
 					auto& compare = m_Objects[j];
-					Ref<Object> compareObject = Project::GetAsset<Object>(compare.ObjectHandle);
 
 					glm::vec2 correction = AABB_Resolve(instance, compare);
 					if (correction.x != 0 || correction.y != 0)

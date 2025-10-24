@@ -7,6 +7,12 @@
 
 namespace Strype {
 
+	namespace Utils {
+
+		AGI::Texture LoadTexture(const std::filesystem::path& path, bool linearFilter = false);
+
+	};
+
 	class Sprite : public Asset
 	{
 	public:

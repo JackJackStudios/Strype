@@ -1,63 +1,50 @@
 #pragma once
 
-#include "FileWatch.hpp"
-#include "Panels/PanelManager.hpp"
-#include "Panels/ContentBrowserPanel.hpp"
-#include "Panels/ProjectSettingsPanel.hpp"
-#include "Panels/RoomPanel.hpp"
+#include "EditorPanel.hpp"
 
-#include <glm/gtc/type_ptr.hpp>
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/matrix_decompose.hpp>
+#include <Strype.hpp>
 
 namespace Strype {
-
-	static std::string ToLower(const std::string& s)
-	{
-		std::string result = s;
-
-		std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
-		return result;
-	}
 
 	class EditorSession : public Session
 	{
 	public:
-		~EditorSession();
 		EditorSession(Ref<Project> project)
 			: m_Project(project)
 		{
 			WindowProps.Title = "Strype-Editor";
 			WindowProps.Mode = AGI::WindowMode::Maximized;
-			
+
 			ImGuiEnabled = true;
-			DockspaceEnabled = true;
+			DockspaceEnabled = false;
 		}
 
 		void OnAttach() override;
+		void OnDetach() override;
+
 		void OnUpdate(float ts) override;
 		void OnImGuiRender() override;
-
 		void OnEvent(Event& e) override;
 
-		void OpenRoom(AssetHandle handle);
+		template<typename TPanel, typename... TArgs>
+		Ref<TPanel> AddPanel(TArgs&&... args)
+		{
+			static_assert(std::is_base_of<EditorPanel, TPanel>::value, "T must inherit from EditorPanel");
+			Ref<TPanel> temp = m_EditorPanels.emplace_back(CreateRef<TPanel>(std::forward<TArgs>(args)...));
 
-		void NewProject(const std::filesystem::path& path = std::filesystem::path());
-		void SaveProject();
+			temp->m_CurrentRoom = &m_ActiveRoom;
+			return temp;
+		}
 
-		void OpenProject(const std::filesystem::path& path = std::filesystem::path());
-		void OpenProject(Ref<Project> project);
+		template<typename TPanel>
+		void RemovePanel(Ref<TPanel> panel)
+		{
+			m_EditorPanels.erase(std::remove(m_EditorPanels.begin(), m_EditorPanels.end(), panel), m_EditorPanels.end());
+		}
+
 	private:
-		void OnWindowDrop(WindowDropEvent& e);
-
-		void UI_RoomPanel();
-		void OnFilewatcher(const std::filesystem::path& filepath, const filewatch::Event event);
-	private:
-		Ref<filewatch::FileWatch<std::string>> m_FileWatcher;
-
-		PanelManager m_PanelManager;
-		Ref<ContentBrowserPanel> m_ContentBrowserPanel;
+		std::vector<Scope<EditorPanel>> m_EditorPanels;
+		Ref<Room> m_ActiveRoom;
 
 		Ref<Project> m_Project;
 	};

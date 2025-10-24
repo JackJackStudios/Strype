@@ -72,7 +72,7 @@ namespace Strype {
 		std::filesystem::path filepath = m_ActiveProject->GetProjectDirectory() / Project::HiddenFolder / "bin/net8.0" / (m_ActiveProject->GetProjectName() + ".dll");
 		if (!std::filesystem::exists(filepath))
 		{
-			Project::BuildCSharp(m_ActiveProject, true);
+			m_ActiveProject->BuildCSharp();
 		}
 
 		m_AppAssembly = std::make_unique<Coral::ManagedAssembly>(std::move(s_LoadContext->LoadAssembly(filepath.string())));

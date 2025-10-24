@@ -41,76 +41,75 @@ namespace Strype {
 			}
 		}
 
-	}
-
-	std::string Project::GetMSbuildCommand(std::vector<const char*> commands)
-	{
-#ifdef STY_WINDOWS
-		auto& path = m_Config.ProjectDirectory;
-
-		TCHAR programFilesFilePath[MAX_PATH];
-		SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
-		std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
-		std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" /nologo /clp:ErrorsOnly;WarningsOnly /m /nr:true /verbosity:minimal /p:Configuration={} -t:", path.string(), msBuildPath.string(), Project::HiddenFolder / path.filename(), STY_BUILD_CONFIG_NAME);
-		
-		for (int i = 0; i < commands.size(); ++i)
+		std::string GetMSbuildCommand(Project* project, std::vector<const char*> commands)
 		{
-			command.append(commands[i]);
+#ifdef STY_WINDOWS
+			auto& path = project->GetConfig().ProjectDirectory;
 
-			if (i != commands.size() - 1)
-				command.append(",");
-		}
-		
-		return command;
+			TCHAR programFilesFilePath[MAX_PATH];
+			SHGetSpecialFolderPath(0, programFilesFilePath, CSIDL_PROGRAM_FILES, FALSE);
+			std::filesystem::path msBuildPath = std::filesystem::path(programFilesFilePath) / "Microsoft Visual Studio" / "2022" / "Community" / "Msbuild" / "Current" / "Bin" / "MSBuild.exe";
+			std::string command = fmt::format("cd \"{}\" && \"{}\" \"{}.sln\" /nologo /clp:ErrorsOnly;WarningsOnly /m /nr:true /verbosity:minimal /p:Configuration={} -t:", path.string(), msBuildPath.string(), Project::HiddenFolder / path.filename(), STY_BUILD_CONFIG_NAME);
+
+			for (int i = 0; i < commands.size(); ++i)
+			{
+				command.append(commands[i]);
+
+				if (i != commands.size() - 1)
+					command.append(",");
+			}
+
+			return command;
 #endif
-		return "";
+			return "";
+		}
+
 	}
 
-	void Project::BuildCSharp(Ref<Project> project, bool restore)
+	void Project::BuildCSharp(bool restore)
 	{
-		STY_LOG_TRACE("Project", "Building C# project '{}'", project->GetConfig().ProjectDirectory);
+		STY_LOG_TRACE("Project", "Building C# project '{}'", m_Config.ProjectDirectory);
+		if (restore) RestoreCSharp();
 
-		if (restore) RestoreCSharp(project);
-		std::filesystem::remove_all(project->GetConfig().ProjectDirectory / Project::HiddenFolder / "bin");
-
-		std::string command = project->GetMSbuildCommand({ "build" });
-		system(command.c_str());
+#ifdef STY_WINDOWS
+		std::filesystem::remove_all(m_Config.ProjectDirectory / Project::HiddenFolder / "bin");
+		system(Utils::GetMSbuildCommand(this, { "build" }).c_str());
+#endif
 	}
 
-	void Project::RestoreCSharp(Ref<Project> project)
+	void Project::RestoreCSharp()
 	{
-		auto& path = project->GetConfig().ProjectDirectory;
-
 		std::string content = Utils::ReadFile("assets/premake5.lua");
+
+		auto& path = m_Config.ProjectDirectory;
 		Utils::ReplaceKeyWord(content, Project::EmptyProject.stem().string(), path.stem().string());
 
 		Utils::WriteFile(path / Project::HiddenFolder / "premake5.lua", content);
 
 #ifdef STY_WINDOWS
 		system(fmt::format("cd \"{}\" && %STRYPE_DIR%/Strype/master/premake5.exe --verbose vs2022 > nul 2>&1", (path / Project::HiddenFolder).string()).c_str());
-		system(project->GetMSbuildCommand({ "restore" }).c_str());
+		system(Utils::GetMSbuildCommand(this, { "restore" }).c_str());
 #endif
 	}
 
 	Ref<Project> Project::GenerateNew(const std::filesystem::path& path)
 	{
-		// Create nessacry folders
 		std::filesystem::create_directories(path / Project::HiddenFolder);
-
-		// Copy empty project
 		Utils::CopyDirectory(Project::EmptyProject.parent_path(), path);
+		
+		std::filesystem::path newProject = path / (path.filename().string() + ".sproj");
 
-		//Change empty project to fit new project name
-		std::filesystem::rename(path / Project::EmptyProject.filename(), path / (path.filename().string() + ".sproj"));
+		std::filesystem::rename(path / Project::EmptyProject.filename(), newProject);
+		Ref<Project> project = Project::LoadFile(newProject);
 
-		Ref<Project> project = Project::LoadFile(path / (path.filename().string() + ".sproj"));
-		Project::BuildCSharp(project);
-
+		project->BuildCSharp();
 		return project;
 	}
 
 	void Project::SetActive(Ref<Project> project)
 	{
+		if (project == s_ActiveProject) return;
+
 		if (s_ActiveProject)
 		{
 			s_ActiveProject->m_ActiveRoom = nullptr;

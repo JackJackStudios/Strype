@@ -40,4 +40,25 @@ namespace Strype {
 		return Utils::BoxToTextureCoords(atlasPos, atlasSize.x, atlasSize.y, GetSpecs().Size);
 	}
 
+
+	AGI::Texture Utils::LoadTexture(const std::filesystem::path& filepath, bool linearFilter) 
+	{
+		int width, height, channels;
+
+		stbi_set_flip_vertically_on_load(false);
+		stbi_uc* data = stbi_load(filepath.string().c_str(), &width, &height, &channels, 0);
+		if (!data) return nullptr;
+
+		AGI::TextureSpecification textureSpec;
+		textureSpec.Size = { width, height };
+		textureSpec.Format = AGI::Utils::ChannelsToImageFormat(channels);
+		textureSpec.LinearFiltering = linearFilter;
+
+		AGI::Texture texture = Renderer::GetCurrent()->GetContext()->CreateTexture(textureSpec);
+		texture->SetData(data, width * height * channels);
+
+		stbi_image_free(data);
+		return texture;
+	}
+
 }
