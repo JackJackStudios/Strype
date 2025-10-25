@@ -6,9 +6,11 @@ namespace Strype {
 
 	void RuntimeSession::InitRoom(AssetHandle handle)
 	{
+		Ref<Room> oldroom = m_Room;
+
 		m_Room = Project::GetAsset<Room>(handle);
 		m_Room->OnResize(m_Project->GetConfig().ViewportSize);
-		m_Room->ToggleRuntime(true);
+		m_Room->ToggleRuntime(true, oldroom);
 	}
 
 	void RuntimeSession::OnDetach()

@@ -201,4 +201,16 @@ namespace Strype {
 		return scriptID != 0 && m_ScriptMetadata.contains(scriptID);
 	}
 
+	void ScriptEngine::GetAllChildren(const std::string& baseType, std::function<void(Coral::Type*)> function)
+	{
+		auto& types = m_AppAssembly->GetTypes();
+		auto& objectType = m_AppAssembly->GetType(baseType);
+
+		for (auto& type : types)
+		{
+			if (type->IsSubclassOf(objectType))
+				function(type);
+		}
+	}
+
 }

@@ -3,7 +3,6 @@
 
 #include "Strype/Project/Project.hpp"
 #include "Strype/Room/Object.hpp"
-#include "Strype/Script/ScriptEngine.hpp"
 
 #include <glm/glm.hpp>
 
@@ -34,6 +33,12 @@ namespace Strype {
 	void Room::OnUpdate(float ts)
 	{
 		if (!IsActive()) return;
+
+		for (auto& [name, manager] : m_Managers)
+		{
+			manager.InvokeMethod("OnUpdate", ts);
+		}
+
 		for (size_t i = 0; i < m_Objects.size(); ++i)
 		{
 			auto& instance = m_Objects[i];
@@ -110,7 +115,7 @@ namespace Strype {
 		renderer->EndRoom();
 	}
 
-	void Room::ToggleRuntime(bool toggle)
+	void Room::ToggleRuntime(bool toggle, Ref<Room> oldState)
 	{
 		RoomState newstate = (toggle ? RoomState::Runtime : RoomState::Editor);
 		if (m_RoomState == newstate) return;
@@ -122,6 +127,25 @@ namespace Strype {
 			m_Camera.SetZoomLevel(1.0f);
 
 			Ref<ScriptEngine> scriptEngine = Project::GetScriptEngine();
+
+			if (oldState == nullptr)
+			{
+				scriptEngine->GetAllChildren("Strype.Manager", [&](Coral::Type* child)
+				{
+					std::string name = (std::string)child->GetFullName();
+					Coral::ManagedObject instance = child->CreateInstance();
+
+					instance.InvokeMethod("OnCreate");
+					m_Managers[child->GetFullName()] = instance;
+
+					STY_LOG_TRACE("Room", "Detected manager class: \"{}\" ", name);
+				});
+			}
+			else
+			{
+				m_Managers = oldState->m_Managers;
+			}
+
 			for (auto& handle : m_Reverse)
 			{
 				RoomInstance& instance = GetInstance(handle);

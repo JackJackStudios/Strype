@@ -3,6 +3,7 @@
 #include "Strype/Project/Asset.hpp"
 #include "Strype/Core/UUID.hpp"
 #include "Strype/Renderer/Renderer.hpp"
+#include "Strype/Script/ScriptEngine.hpp"
 
 #include <Coral/ManagedObject.hpp>
 
@@ -25,6 +26,13 @@ namespace Strype {
 	{
 		Editor,
 		Runtime,
+	};
+
+	struct Tilemap
+	{
+		std::unordered_map<glm::ivec2, int> PackedData;
+		AssetHandle AtlasHandle = 0;
+		glm::ivec2 TileSize;
 	};
 
 	struct RoomInstance
@@ -52,7 +60,7 @@ namespace Strype {
 		void OnResize(const glm::vec2& size) { m_Camera.SetProjection(size); }
 		void TogglePause(bool toggle) { m_IsPaused = toggle; }
 
-		void ToggleRuntime(bool toggle);
+		void ToggleRuntime(bool toggle, Ref<Room> oldState = nullptr);
 
 		void OnUpdate(float ts, const glm::vec2& camPosition)
 		{
@@ -90,6 +98,11 @@ namespace Strype {
 			return m_Objects[m_Indices[handle]];
 		}
 
+		Coral::ManagedObject* GetManager(std::string name)
+		{
+			return &m_Managers[name];
+		}
+
 		bool InstanceExists(InstanceID handle)
 		{
 			return handle < m_Indices.size();
@@ -110,15 +123,10 @@ namespace Strype {
 		glm::uvec2  m_Size;
 		glm::vec3   m_BackgroundColour;
 		float       m_Gravity = 10.0f;
+		Tilemap     m_MainTilemap;
 		Camera      m_Camera;
 
-		struct Tilemap
-		{
-			std::unordered_map<glm::ivec2, int> PackedData;
-			AssetHandle AtlasHandle = 0;
-			glm::ivec2 TileSize;
-		};
-		Tilemap m_MainTilemap;
+		std::map<std::string, Coral::ManagedObject> m_Managers;
 
 		std::vector<RoomInstance> m_Objects;
 		std::vector<uint32_t> m_Indices;

@@ -93,6 +93,7 @@ namespace Strype {
 		const std::string& GetScriptName(ScriptID scriptID) const { return GetScriptMetadata(scriptID).FullName; }
 		const Coral::Type* GetTypeByName(const std::string& name) const { return m_ScriptMetadata.at(Hash::GenerateFNVHash(name)).Type; }
 		const ScriptID GetIDByName(const std::string& name) const { return Hash::GenerateFNVHash(name); }
+		void GetAllChildren(const std::string& baseType, std::function<void(Coral::Type*)> function);
 
 		template<typename... TArgs>
 		Coral::ManagedObject* CreateInstance(ScriptID scriptID, TArgs&&... args)

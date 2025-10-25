@@ -18,6 +18,7 @@ namespace Strype {
 	{
 		STY_ADD_INTERNAL_CALL(Room_CreateObject);
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
+		STY_ADD_INTERNAL_CALL(Room_GetManager);
 		STY_ADD_INTERNAL_CALL(Room_TransitionRoom);
 		STY_ADD_INTERNAL_CALL(Camera_Move);
 		STY_ADD_INTERNAL_CALL(Camera_Zoom);
@@ -63,6 +64,11 @@ namespace Strype {
 		void Room_DestroyObject(uint32_t id)
 		{
 			Project::GetActiveRoom()->DestroyInstance(id);
+		}
+
+		void* Room_GetManager(Coral::String name)
+		{
+			return Project::GetActiveRoom()->GetManager((std::string)name)->GetGCHandle();
 		}
 
 		void Room_TransitionRoom(Coral::String name)

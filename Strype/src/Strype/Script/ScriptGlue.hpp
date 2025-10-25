@@ -50,6 +50,7 @@ namespace Strype {
 
 		uint32_t Room_CreateObject(float x, float y, uint64_t object);
 		void Room_DestroyObject(uint32_t id);
+		void* Room_GetManager(Coral::String name);
 		void Room_TransitionRoom(Coral::String name);
 		void Camera_Move(glm::vec2* inPosition);
 		void Camera_Zoom(float* inZoomLevel);

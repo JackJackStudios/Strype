@@ -35,7 +35,7 @@ namespace Strype {
 		void OnEvent(Event& e) override;
 		void OnRoomTransition(RoomTransitionEvent& e);
 	private:
-		Ref<Room> m_Room;
+		Ref<Room> m_Room = nullptr;
 		Ref<Project> m_Project;
 	};
 
