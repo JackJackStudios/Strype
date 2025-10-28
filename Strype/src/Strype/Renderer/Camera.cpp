@@ -8,12 +8,14 @@ namespace Strype {
 	void Camera::SetZoomLevel(float zoom)
 	{
 		m_ZoomLevel = zoom;
-		SetProjection(m_Size);
+		SetProjection(m_Size, true);
 	}
 
-	void Camera::SetProjection(const glm::vec2& size)
+	void Camera::SetProjection(const glm::vec2& size, bool force)
 	{
+		if (m_Size == size && !force) return;
 		m_Size = size;
+
 		float halfWidth = (size.x * 0.5f) / m_ZoomLevel;
 		float halfHeight = (size.y * 0.5f) / m_ZoomLevel;
 

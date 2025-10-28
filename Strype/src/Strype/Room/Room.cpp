@@ -115,6 +115,11 @@ namespace Strype {
 		renderer->EndRoom();
 	}
 
+	void Room::OnEvent(Event& e)
+	{
+
+	}
+
 	void Room::ToggleRuntime(bool toggle, Ref<Room> oldState)
 	{
 		RoomState newstate = (toggle ? RoomState::Runtime : RoomState::Editor);
@@ -135,10 +140,10 @@ namespace Strype {
 					std::string name = (std::string)child->GetFullName();
 					Coral::ManagedObject instance = child->CreateInstance();
 
-					instance.InvokeMethod("OnCreate");
-					m_Managers[child->GetFullName()] = instance;
-
 					STY_LOG_TRACE("Room", "Detected manager class: \"{}\" ", name);
+					m_Managers[name] = instance;
+
+					instance.InvokeMethod("OnCreate");
 				});
 			}
 			else

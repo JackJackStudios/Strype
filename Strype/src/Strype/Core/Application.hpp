@@ -23,6 +23,7 @@ namespace Strype {
 		static Application& Get() { return *s_Instance; }
 		static bool IsRunning() { return s_Instance != nullptr && s_Instance->m_IsRunning; }
 
+		Session* GetCurrentSession() const { return s_CurrentSession; }
 		AGI::Window* GetWindow() const { return s_CurrentSession->GetWindow(); }
 		ma_engine* GetAudioEngine() { return &m_AudioEngine; }
 

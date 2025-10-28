@@ -1,8 +1,9 @@
 #pragma once
 
 #include "stypch.hpp"
-
 #include "Strype/Core/Input.hpp"
+
+#include <Coral/ManagedObject.hpp>
 
 namespace Strype {
 
@@ -19,7 +20,7 @@ namespace Strype {
 		AssetImported, AssetRemoved, AssetMoved,
 		RoomTransition, ProjectChanged,
 
-		UserEvent, LastUserEvent = UINT32_MAX 
+		CSharpEvent,
 	};
 
 	enum EventCategory
@@ -180,24 +181,22 @@ namespace Strype {
 		uint64_t m_Handle;
 	};
 
-	class UserEvent : public Event
+	class Room;
+
+	class CSharpEvent : public Event
 	{
 	public:
-		UserEvent(uint32_t type /* TODO: Pass C# variables through here */)
-			: m_UserType(type)
+		CSharpEvent(Room* room, Coral::ManagedObject instance)
+			: m_OwnerRoom(room), m_ScriptEvent(instance)
 		{
 		}
 
-		std::string ToString() const override
-		{
-			return fmt::format("User{}Event", m_UserType);
-		}
-
-		EVENT_CLASS_TYPE(UserEvent)
+		EVENT_CLASS_TYPE(CSharpEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication | EventCategoryProject)
 		EVENT_CLASS_GLOBAL(true)
 	private:
-		uint32_t m_UserType;
+		Room* m_OwnerRoom = nullptr;
+		Coral::ManagedObject m_ScriptEvent;
 	};
 
 	class Project;

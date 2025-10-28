@@ -18,6 +18,7 @@ namespace Strype {
 	{
 		STY_ADD_INTERNAL_CALL(Room_CreateObject);
 		STY_ADD_INTERNAL_CALL(Room_DestroyObject);
+		STY_ADD_INTERNAL_CALL(Room_DispatchEvent);
 		STY_ADD_INTERNAL_CALL(Room_GetManager);
 		STY_ADD_INTERNAL_CALL(Room_TransitionRoom);
 		STY_ADD_INTERNAL_CALL(Camera_Move);
@@ -66,6 +67,18 @@ namespace Strype {
 			Project::GetActiveRoom()->DestroyInstance(id);
 		}
 
+		void Room_DispatchEvent(Coral::String name)
+		{
+			std::string cxxname = name;
+			Ref<ScriptEngine> scriptEngine = Project::GetScriptEngine();
+
+			scriptEngine->GetAllChildren("Strype.Event", [&](Coral::Type* child)
+			{
+				if (name == child->GetFullName())
+					Application::Get().DispatchEvent<CSharpEvent>(Project::GetActiveRoom(), child->CreateInstance());
+			});
+		}
+		
 		void* Room_GetManager(Coral::String name)
 		{
 			return Project::GetActiveRoom()->GetManager((std::string)name)->GetGCHandle();

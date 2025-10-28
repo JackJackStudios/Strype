@@ -28,6 +28,13 @@ namespace Strype {
 		{
 			LogMessage(logLevel, tag, fmt::format(fmt, std::forward<Args>(args)...));
 		}
+
+		template <typename T>
+		static void LogMessage(spdlog::level::level_enum logLevel, std::string_view tag, T&& arg)
+			requires (!std::is_convertible_v<T, spdlog::string_view_t>)
+		{
+			LogMessage(logLevel, tag, fmt::to_string(std::forward<T>(arg)));
+		}
 	private:
 		inline static std::shared_ptr<spdlog::logger> s_CoreLogger = nullptr;
 		inline static std::shared_ptr<spdlog::logger> s_ClientLogger = nullptr;

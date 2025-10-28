@@ -2,6 +2,7 @@
 
 #include "Strype/Project/Asset.hpp"
 #include "Strype/Core/UUID.hpp"
+#include "Strype/Core/Event.hpp"
 #include "Strype/Renderer/Renderer.hpp"
 #include "Strype/Script/ScriptEngine.hpp"
 
@@ -56,6 +57,7 @@ namespace Strype {
 
 		void OnUpdate(float ts);
 		void OnRender(Renderer* renderer);
+		void OnEvent(Event& e);
 
 		void OnResize(const glm::vec2& size) { m_Camera.SetProjection(size); }
 		void TogglePause(bool toggle) { m_IsPaused = toggle; }

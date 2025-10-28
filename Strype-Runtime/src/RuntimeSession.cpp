@@ -29,6 +29,8 @@ namespace Strype {
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<RoomTransitionEvent>(STY_BIND_EVENT_FN(RuntimeSession::OnRoomTransition));
+
+		m_Room->OnEvent(e);
 	}
 
 	void RuntimeSession::OnRoomTransition(RoomTransitionEvent& e)

@@ -173,7 +173,7 @@ namespace Strype {
 
 			ImGuiIO& io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-			if (session->DockspaceEnabled) io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		}
 
 		auto* window = session->GetWindow();

@@ -179,6 +179,7 @@ namespace Strype {
         out << YAML::Key << "Gravity" << YAML::Value << room->m_Gravity;
         out << YAML::Key << "BackgroundColour" << YAML::Value << room->m_BackgroundColour;
 
+        if (room->m_MainTilemap.AtlasHandle)
         {
             out << YAML::Key << "Tilemap" << YAML::BeginMap;
 
