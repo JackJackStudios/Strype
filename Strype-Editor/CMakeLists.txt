@@ -2,7 +2,7 @@ file(GLOB_RECURSE SOURCE_DIR "src/**.cpp")
 add_executable(Strype-Editor ${SOURCE_DIR})
 
 target_link_libraries(Strype-Editor PRIVATE Strype)
-target_include_directories(Strype-Editor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(Strype-Editor PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 add_custom_command(TARGET Strype-Editor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

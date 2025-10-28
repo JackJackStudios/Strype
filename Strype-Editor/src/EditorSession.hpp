@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EditorPanel.hpp"
+#include "Panels/EditorPanel.hpp"
 
 #include <Strype.hpp>
 
@@ -26,13 +26,20 @@ namespace Strype {
 		void OnImGuiRender() override;
 		void OnEvent(Event& e) override;
 
+		static EditorSession* Get()
+		{
+			return (EditorSession*)Application::Get().GetCurrentSession();
+		}
+
 		template<typename TPanel, typename... TArgs>
 		Ref<TPanel> AddPanel(TArgs&&... args)
 		{
 			static_assert(std::is_base_of<EditorPanel, TPanel>::value, "T must inherit from EditorPanel");
-			Ref<TPanel> temp = m_EditorPanels.emplace_back(CreateRef<TPanel>(std::forward<TArgs>(args)...));
 
-			temp->m_CurrentRoom = &m_ActiveRoom;
+			Ref<TPanel> temp = CreateRef<TPanel>(std::forward<TArgs>(args)...);
+			m_EditorPanels.push_back(temp);
+
+			temp->m_CurrentRoom = m_ActiveRoom;
 			return temp;
 		}
 
@@ -43,7 +50,7 @@ namespace Strype {
 		}
 
 	private:
-		std::vector<Scope<EditorPanel>> m_EditorPanels;
+		std::vector<Ref<EditorPanel>> m_EditorPanels;
 		Ref<Room> m_ActiveRoom;
 
 		Ref<Project> m_Project;
