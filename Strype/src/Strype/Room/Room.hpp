@@ -119,6 +119,8 @@ namespace Strype {
 		std::vector<InstanceID>::iterator begin() { return m_Reverse.begin(); }
 		std::vector<InstanceID>::iterator end() { return m_Reverse.end(); }
 	private:
+		void OnCSharpEvent(CSharpEvent& e);
+	private:
 		RoomState   m_RoomState = RoomState::Editor;
 		bool        m_IsPaused = false;
 

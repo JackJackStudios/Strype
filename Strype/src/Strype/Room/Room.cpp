@@ -117,7 +117,21 @@ namespace Strype {
 
 	void Room::OnEvent(Event& e)
 	{
+		// TODO: Send other engine events to C#
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<CSharpEvent>(STY_BIND_EVENT_FN(Room::OnCSharpEvent));
+	}
 
+	void Room::OnCSharpEvent(CSharpEvent& e)
+	{
+		if (e.m_OwnerRoom != this) return;
+		for (auto& instance : m_Objects)
+		{
+			for (const auto& csharp : instance.CSharpObjects)
+				csharp->InvokeMethod("InternalOnEvent", e.m_ScriptEvent.GetGCHandle());
+		}
+
+		e.m_ScriptEvent.Destroy();
 	}
 
 	void Room::ToggleRuntime(bool toggle, Ref<Room> oldState)

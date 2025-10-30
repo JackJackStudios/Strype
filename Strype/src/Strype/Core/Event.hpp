@@ -197,6 +197,9 @@ namespace Strype {
 	private:
 		Room* m_OwnerRoom = nullptr;
 		Coral::ManagedObject m_ScriptEvent;
+
+		// TODO: Remove this!
+		friend class Room;
 	};
 
 	class Project;
